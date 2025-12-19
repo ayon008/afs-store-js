@@ -28,7 +28,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
 
   // Hover Id [First Nav];
-  const [hoverId, setHoverId] = useState('foil');
+  const [hoverId, setHoverId] = useState(null);
   // Show Secondary white div and add Clicked Item Name [2nd Nav]
   const [detailsDiv, setDetailsDiv] = useState(null);
   // Mobile On Off State
@@ -95,7 +95,7 @@ const Navbar = ({ NAV_LINKS }) => {
     <>
       <nav className='sticky left-0 right-0 top-0 z-[99] text-white w-full'>
         {/* Logo and Search Part */}
-        <div className='py-4 bg-black global-padding border-b border-gray-600 w-full flex items-center justify-between' onMouseEnter={() => handleShow(null)}>
+        <div className='py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between' onMouseEnter={() => handleShow(null)}>
 
           <div className='flex items-center gap-2'>
             {/* Menu */}
@@ -121,7 +121,7 @@ const Navbar = ({ NAV_LINKS }) => {
             <div className='relative mr-4 hidden md:block'>
               <input
                 onClick={() => setIsSearchOpen(true)}
-                className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 px-3 placeholder:text-white placeholder:text-sm placeholder:pl-6 placeholder:font-semibold"
+                className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 px-3 placeholder:text-white placeholder:text-sm placeholder:pl-8 placeholder:font-semibold"
                 placeholder='Rechercher...'
               />
               <Search className="w-6 h-6 mr-2 text-white opacity-90 absolute -translate-y-1/2 left-3 top-1/2" />
@@ -177,7 +177,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
         {/* NAV LINKS  Desktop*/}
         <div className="max-[1280px]:hidden flex flex-col relative">
-          <div className="flex justify-center items-center whitespace-nowrap px-4 h-full bg-black">
+          <div className="flex justify-center items-center whitespace-nowrap px-4 h-full bg-[#000000]">
             {NAV_LINKS?.map((link, idx) => (
               <div
                 key={idx}
@@ -249,7 +249,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                 <div className='mt-[22px] max-w-[380px] w-full min-h-[100px]'>
                                   {
                                     hoverImageLink &&
-                                    <img src={hoverImageLink} className='max-w-[380px] h-auto object-cover' alt='' />
+                                    <img src={hoverImageLink} className='max-w-[380px] max-h-[380px] aspect-[1] object-cover' alt='' />
                                   }
                                 </div>
                               </div>
