@@ -233,7 +233,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                         return (
                                           <div key={i} className='max-w-[270px] w-fit'>
                                             <Link href={`${product.url}`}>
-                                              <h5 onMouseEnter={() => setHoverImageLink(product.image)} className="text-lg leading-[130%] font-semibold cursor-pointer hover:text-[#1D98FF] hover:underline">
+                                              <h5 onMouseEnter={() => setHoverImageLink(product.image)} className="text-lg leading-[130%] text-black font-semibold cursor-pointer hover:text-[#1D98FF] hover:underline">
                                                 {product.name}
                                               </h5>
                                             </Link>
@@ -249,7 +249,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                 <div className='mt-[22px] max-w-[380px] w-full min-h-[100px]'>
                                   {
                                     hoverImageLink &&
-                                    <img src={hoverImageLink} className='max-w-[380px] h-full object-cover' alt='' />
+                                    <img src={hoverImageLink} className='max-w-[380px] h-auto object-cover' alt='' />
                                   }
                                 </div>
                               </div>
