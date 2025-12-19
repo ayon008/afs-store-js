@@ -6,21 +6,28 @@ import Link from 'next/link';
 
 // Helper Component for a single News Card
 const NewsCard = ({ article }) => {
+    console.log(article);
+    const categories = article.categories[0];
+    console.log(categories);
+
+
     return (
         <article className='py-5 border-t-[#00000026] border-b-[#00000026] border-t-2 border-b-2 space-y-10'>
-            <span className='text-blue font-bold text-sm leading-[100%] uppercase px-[5px] py-[3px] border-blue border rounded-[20px] block w-fit'>Blog</span>
+            <span className='text-blue font-bold text-sm leading-[100%] uppercase px-[5px] py-[3px] border-blue border rounded-[20px] block w-fit'>{categories.name}</span>
             <div className=''>
-                <Link href={'/'} className='space-y-4'>
-                    <h4 className='text-lg text-[#111] leading-[110%] font-semibold'>Ayon</h4>
-                    <p className="line-clamp-3 self-stretch overflow-hidden text-ellipsis text-base text-[#111111b2] font-normal leading-[120%]">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita vel ipsam iste itaque. Asperiores totam facere debitis animi in ipsa magnam impedit id fuga laudantium quae qui at assumenda veniam corporis esse, aut harum eos et perspiciatis? Provident maxime aspernatur laboriosam aliquam voluptatem ullam, voluptatibus quae eaque, obcaecati vel autem
-                    </p>
+                <Link href={`/blogs/${article.slug}`} className='space-y-4'>
+                    <h4 className='text-lg text-[#111] leading-[110%] font-semibold' dangerouslySetInnerHTML={{
+                        __html: article.title
+                    }} />
+                    <p className="line-clamp-3 self-stretch overflow-hidden text-ellipsis text-base text-[#111111b2] font-normal leading-[120%]" dangerouslySetInnerHTML={{ __html: article.description }} />
                 </Link>
             </div>
             <div className='flex items-center justify-between gap-[10px] flex-wrap'>
-                <p className='text-[#11111166] text-sm leading-[100%] font-semibold uppercase'>Date</p>
+                <p className='text-[#11111166] text-sm leading-[100%] font-semibold uppercase' dangerouslySetInnerHTML={{ __html: article.date }} />
                 <button className="uppercase flex items-center gap-1 text-sm font-semibold text-blue leading-[100%] cursor-pointer">
-                    <span className=''>See More</span>
+                    <Link href={`/blogs/${article.slug}`}>
+                        <span className=''>See More</span>
+                    </Link>
                     <ArrowUpRight className='w-4 h-4' strokeWidth={2} />
                 </button>
             </div>
@@ -49,7 +56,6 @@ const News = async () => {
         blogs = [];
     }
 
-    console.log(blogs);
 
 
     return (
@@ -64,6 +70,11 @@ const News = async () => {
                     </div>
                 )
             }
+            <Link href={'/blogs'} className=''>
+                <button className="uppercase flex items-center gap-1 text-sm font-semibold text-[#111111b2] leading-[100%] cursor-pointer w-fit mx-auto mt-8">
+                    See More <ArrowUpRight className='w-4 h-4' strokeWidth={2} />
+                </button>
+            </Link>
         </div>
     );
 };
