@@ -43,14 +43,13 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const NAV_LINKS = await getMenuItems();
-  
   return (
     <html lang="en">
       <body
         className={`${alliance.className} antialiased`}
       >
         <div className="min-h-[200vh]">
-          <Navbar />
+          <Navbar NAV_LINKS={NAV_LINKS} />
           {children}
         </div>
       </body>

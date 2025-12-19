@@ -18,6 +18,7 @@ export const getMenuItems = async () => {
                         ? item.children.map((child) => ({
                             name: child?.title ?? "",
                             id: child?.id ?? null,
+                            url: child?.url ?? "#",
                             button_one: child?.button_one ?? null,
                             button_two: child?.button_two ?? null,
                             products: child?.menu_products ?? []
