@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --black: #111;
+  --brand: #111;
   --blue: #1D98FF;
   --white-second: #E6E6E6;
   --silver: #808080;
@@ -15,7 +15,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-black: var(--black);
+  --color-brand: var(--brand);
   --color-blue: var(--blue);
   --color-white-second: var(--white-second);
   --color-silver: var(--silver);
@@ -466,3 +466,55 @@ animation: fadeIn 0.25s ease;
   backdrop-filter: blur(10px);
   display: none;
 } */
+
+
+
+
+.team-text:after {
+  content: "";
+  transform-origin: 0 0;
+  background-color: white;
+  width: 100%;
+  height: .5px;
+  position: absolute;
+  bottom: -.1rem;
+  left: 0;
+  height: 4px;
+  bottom: -.6rem;
+  transform: scaleX(0);
+  transition: transform 0.8s ease, opacity .4s ease;
+  opacity: 0;
+}
+
+.team-box:hover .team-text:after {
+  transform: scaleX(100%);
+  opacity: 1;
+}
+
+@media only screen and (max-width: 1024px) {
+
+.team-text:after {
+  transform: scaleX(100%);
+   opacity: 1;
+}
+}
+
+
+.afs_anim_btn {
+  transform: translate(-50%, 20px) ;
+  opacity: 0;
+}
+
+.team-box:hover .afs_anim_btn {
+  transform: translate(-50%, 0px) ;
+  opacity: 1;
+}
+
+
+@media only screen and (max-width: 1024px) {
+.afs_anim_btn {
+  transform: translate(-50%, 0px);
+  opacity: 1;
+}
+
+}
