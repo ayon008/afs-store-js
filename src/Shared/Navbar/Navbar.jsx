@@ -198,7 +198,7 @@ const Navbar = ({ NAV_LINKS }) => {
             ))}
           </div>
           {/* Show the White Part of the  NavLink */}
-          <div className='absolute top-full left-0 right-0 w-full '>
+          <div className='absolute top-full left-0 right-0 w-full bg-transparent'>
             {
               hoverId !== 'Service' ?
                 <div className='' onMouseLeave={() => handleShow(null)}>
