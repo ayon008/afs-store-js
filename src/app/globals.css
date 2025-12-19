@@ -3,11 +3,26 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --black: #111;
+  --blue: #1D98FF;
+  --white-second: #E6E6E6;
+  --silver: #808080;
+  --silver-main: #ccc;
+  --silver-second: #999;
+  --silver-third: #666;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-black: var(--black);
+  --color-blue: var(--blue);
+  --color-white-second: var(--white-second);
+  --color-silver: var(--silver);
+  --color-silver-main: var(--silver-main);
+  --color-silver-second: var(--silver-second);
+  --color-silver-third: var(--silver-third);
+  /* These will be injected by Next.js localFont */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,11 +31,62 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    /* Add dark mode variants for better contrast */
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Dashed border top */
+.global-b-top {
+  border-top: 2px dashed var(--silver);
+  border-image: repeating-linear-gradient(to right,
+      var(--silver) 0,
+      var(--silver) 10px,
+      transparent 10px,
+      transparent 20px) 100%;
+  border-image-slice: 1;
+  border-width: 2px 0 0 0;
+}
+
+/* Dashed border bottom */
+.global-b-bottom {
+  border-bottom: 2px solid;
+  border-image: repeating-linear-gradient(to right,
+      var(--black) 0,
+      var(--black) 10px,
+      transparent 10px,
+      transparent 20px) 100%;
+  border-image-slice: 1;
+  border-width: 0 0 2px 0;
+}
+
+/* Typography */
+.global-h1 {
+  @apply font-bold text-[42px] md:text-[clamp(2.625rem,1.1328rem+3.1128vw,3.125rem)] lg:text-[clamp(3.125rem,0.9028rem+3.4722vw,4.375rem)] leading-[100%] md:leading-[120%] lg:leading-[110%] tracking-[-0.01em];
+}
+
+.global-h2 {
+  @apply font-bold text-[36px] md:text-[clamp(2.25rem,1.5078rem+1.5504vw,2.5rem)] lg:text-[clamp(2.5rem,1.3889rem+1.7361vw,3.125rem)] leading-[110%] tracking-[-0.01em];
+}
+
+.prose h2 {
+  @apply font-bold text-[36px] md:text-[clamp(2.25rem,1.5078rem+1.5504vw,2.5rem)] lg:text-[clamp(2.5rem,1.3889rem+1.7361vw,3.125rem)] leading-[110%] tracking-[-0.01em] mb-10;
+}
+
+/* Spacing utilities */
+.global-padding {
+  @apply px-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)];
+}
+
+.global-margin {
+  @apply mb-[80px] lg:mb-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
+}
+
+.global-padding-top {
+  @apply pt-[80px] lg:pt-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
 }
