@@ -31,6 +31,7 @@ export default async function BestSellers() {
         getBestSellers("planche-blackbird"),
         getBestSellers("d-lite"),
     ]);
+    
 
     return (
         <section className="global-padding global-margin">
@@ -44,8 +45,9 @@ export default async function BestSellers() {
                     {products.map((product) => {
                         const { images } = product;
                         const bestseller = product?.acf?.bestseller;
+                        const hoverImage = product?.acf?.img?.url;
                         return (
-                            <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={images[1]?.src} image={images[0]?.src} key={product?.id} slug={product?.slug} />
+                            <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={images[0]?.src} key={product?.id} slug={product?.slug} />
                         )
                     }
                     )}

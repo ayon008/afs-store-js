@@ -77,6 +77,21 @@ body {
   border-width: 0 0 2px 0;
 }
 
+
+.global-b-bottom-d {
+  border-bottom: 2px solid;
+  border-image: repeating-linear-gradient(
+      to right,
+      #999 0,
+      #999 10px,
+      transparent 10px,
+      transparent 20px
+    )
+    100%;
+  border-image-slice: 1;
+  border-width: 0 0 2px 0;
+}
+
 /* Typography */
 .global-h1 {
   @apply font-bold text-[42px] md:text-[clamp(2.625rem,1.1328rem+3.1128vw,3.125rem)] lg:text-[clamp(3.125rem,0.9028rem+3.4722vw,4.375rem)] leading-[100%] md:leading-[120%] lg:leading-[110%] tracking-[-0.01em];
@@ -97,6 +112,9 @@ body {
 
 .global-margin {
   @apply mb-[80px] lg:mb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
+}
+.global-padding-bottom {
+  @apply pb-[80px] lg:pb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
 }
 
 .global-padding-top {

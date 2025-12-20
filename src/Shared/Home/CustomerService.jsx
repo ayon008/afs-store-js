@@ -45,7 +45,7 @@ const AmbassadorsCard = ({ data }) => {
   const { title, description, url } = data;
 
   return (
-    <div className="bg-[#F7F7F7] md:max-w-[340px] lg:max-w-[430px] lg:h-[320px] h-auto flex lg:flex-row flex-col-reverse lg:items-stretch items-start rounded-[4px] overflow-hidden group relative">
+    <div className="bg-[#F7F7F7] md:max-w-[340px] h-auto lg:max-w-[430px] lg:h-[320px] max-w-full w-full flex lg:flex-row flex-col-reverse  lg:items-stretch items-start rounded-[4px] overflow-hidden group relative">
       {/* Text */}
       <div className="lg:w-1/2 w-full flex flex-col p-5 gap-4">
         <p className="text-lg font-bold uppercase leading-[24px] break-words">
@@ -112,7 +112,7 @@ export default function CustomerService() {
         slidesPerView="auto"
         spaceBetween={40}
         breakpoints={{
-          320: { spaceBetween: 20 },
+          320: { spaceBetween: 20, slidesPerView: 1 },
           768: { spaceBetween: 24 },
           1024: { spaceBetween: 40 },
         }}
@@ -129,10 +129,10 @@ export default function CustomerService() {
           setIsBeginning(swiper.isBeginning);
           setIsEnd(swiper.isEnd);
         }}
-        className="w-full"
+        className="w-full items-stretch!"
       >
         {CustomerServiceData.map((item) => (
-          <SwiperSlide key={item.title} className="!w-fit flex">
+          <SwiperSlide key={item.title} className="w-fit!">
             <AmbassadorsCard data={item} />
           </SwiperSlide>
         ))}
@@ -141,17 +141,15 @@ export default function CustomerService() {
       <div className="flex items-center justify-center gap-4 mt-10">
         <button
           id="customPrev"
-          className={`p-2 rounded-full bg-[#E6E6E6] cursor-pointer transition-opacity duration-300 ${
-            isBeginning ? "opacity-50" : "opacity-100"
-          }`}
+          className={`p-2 rounded-full bg-[#E6E6E6] cursor-pointer transition-opacity duration-300 ${isBeginning ? "opacity-50" : "opacity-100"
+            }`}
         >
           <ArrowLeft className="w-7 h-7 text-[#00000080]" strokeWidth={3} />
         </button>
         <button
           id="customNext"
-          className={`p-2 rounded-full bg-[#E6E6E6] cursor-pointer transition-opacity duration-300 ${
-            isEnd ? "opacity-50" : "opacity-100"
-          }`}
+          className={`p-2 rounded-full bg-[#E6E6E6] cursor-pointer transition-opacity duration-300 ${isEnd ? "opacity-50" : "opacity-100"
+            }`}
         >
           <ArrowRight className="w-7 h-7 text-[#00000080]" strokeWidth={3} />
         </button>

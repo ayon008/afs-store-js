@@ -96,7 +96,7 @@ export default function ProductCard({
                         alt={alt || name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className={` object-contain absolute inset-0
+                        className={` object-contain absolute inset-0 pt-5
       opacity-100 ${hoverImage && "group-hover:opacity-0"}
       transition-opacity duration-300
       ease-[cubic-bezier(.19,1,.22,1)]`}

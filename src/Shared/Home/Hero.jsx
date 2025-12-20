@@ -24,7 +24,7 @@ export default function Hero() {
     }, []);
 
     return (
-        <div className="relative w-full h-[calc(100vh-139px)] min-h-[calc(100vh-139px)] max-h-[calc(100vh-139px)] overflow-hidden">
+        <div className="relative w-full h-[calc(100vh-139px)] min-h-[calc(100vh-139px)] max-h-[calc(100vh-139px)] overflow-hidden lg:block hidden">
             <video
                 ref={videoRef}
                 loop

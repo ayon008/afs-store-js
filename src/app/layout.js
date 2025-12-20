@@ -2,6 +2,7 @@ import Navbar from "@/Shared/Navbar/Navbar";
 import "./globals.css";
 import { alliance } from "@/fonts/Alliance";
 import { getMenuItems } from "@/actions/WC/getMenuData";
+import AuthProvider from "@/Shared/Provider/AuthProvider";
 
 export const metadata = {
   title: "The foiling spirit since 2009 - AFS",
@@ -51,10 +52,15 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${alliance.className} antialiased`}>
-        <div>
-          <Navbar NAV_LINKS={NAV_LINKS} />
-          {children}
-        </div>
+        <AuthProvider>
+          <div>
+            <Navbar NAV_LINKS={NAV_LINKS} />
+            {children}
+            <div className="h-[400px] bg-red-400 w-full">
+
+            </div>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

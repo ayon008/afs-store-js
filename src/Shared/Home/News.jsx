@@ -35,7 +35,7 @@ const NewsCard = ({ article }) => {
         />
 
         <Link
-          href={`/blogs/${article.slug}`}
+          href={`/blog/${article.slug}`}
           className="flex items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-blue"
         >
           <span>See More</span>
