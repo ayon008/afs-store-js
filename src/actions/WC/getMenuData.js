@@ -20,7 +20,8 @@ export const getMenuItems = async () => {
                             id: child?.id ?? null,
                             button_one: child?.button_one ?? null,
                             button_two: child?.button_two ?? null,
-                            products: child?.menu_products ?? []
+                            products: child?.menu_products ?? [],
+                            url: child?.url ?? null,
                         }))
                         : [],
                 }

@@ -1,14 +1,4 @@
-<<<<<<< HEAD
-"use client"
-import { ArrowLeft, Search } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-// import SearchOverlay from "../../components/search";
-import React, { useEffect, useRef, useState } from 'react';
-import "flag-icons/css/flag-icons.min.css";
-// import Menu from '../../icons/Menu';
-import gsap from 'gsap';
-=======
+
 "use client";
 import { ArrowLeft, Search } from "lucide-react";
 import Image from "next/image";
@@ -18,15 +8,11 @@ import React, { useEffect, useRef, useState } from "react";
 import "flag-icons/css/flag-icons.min.css";
 // import Menu from '../../icons/Menu';
 import gsap from "gsap";
->>>>>>> origin/main
+
 // import useCart from '../../hooks/useCart';
 // import SideCart from '../siteCart/SideCart';
 
 const Navbar = ({ NAV_LINKS }) => {
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -36,17 +22,8 @@ const Navbar = ({ NAV_LINKS }) => {
 
   const totalQty = 0;
 
-<<<<<<< HEAD
-
   console.log(NAV_LINKS);
 
-
-
-
-=======
-  console.log(NAV_LINKS);
-
->>>>>>> origin/main
   // Hover Id [First Nav];
   const [hoverId, setHoverId] = useState(null);
   // Show Secondary white div and add Clicked Item Name [2nd Nav]
@@ -60,20 +37,11 @@ const Navbar = ({ NAV_LINKS }) => {
   // 3rd ref
   const thirdRef = useRef(null);
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
   // Show the white hover Items
   const handleShow = (name) => {
     setHoverId(name);
     setDetailsDiv(null);
-<<<<<<< HEAD
   }
-
-=======
-  };
->>>>>>> origin/main
 
   // GSAP animation for navbar (slide from right)
   useEffect(() => {
@@ -86,10 +54,6 @@ const Navbar = ({ NAV_LINKS }) => {
     });
   }, [isOpen]);
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
   useEffect(() => {
     if (!secondRef.current && !hoverId) return;
     gsap.to(secondRef.current, {
@@ -108,19 +72,10 @@ const Navbar = ({ NAV_LINKS }) => {
       duration: 0.45,
       ease: "power2.inOut",
     });
-<<<<<<< HEAD
-  })
-
-  const subLinks = NAV_LINKS?.find((Nav) => Nav?.name == hoverId);
-  const allProducts = subLinks?.sublinks?.find((sub) => sub.name === detailsDiv);
-=======
   });
 
   const subLinks = NAV_LINKS?.find((Nav) => Nav?.name == hoverId);
-  const allProducts = subLinks?.sublinks?.find(
-    (sub) => sub.name === detailsDiv
-  );
->>>>>>> origin/main
+  const allProducts = subLinks?.sublinks?.find((sub) => sub.name === detailsDiv);
   console.log(allProducts);
 
   const productList = allProducts?.products;
@@ -129,16 +84,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // Show the white hover Items
 
-<<<<<<< HEAD
 
-  return (
-    <>
-      <nav className='sticky left-0 right-0 top-0 z-[99] text-white w-full'>
-        {/* Logo and Search Part */}
-        <div className='py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between' onMouseEnter={() => handleShow(null)}>
-
-          <div className='flex items-center gap-2'>
-=======
   return (
     <>
       <nav className="sticky left-0 right-0 top-0 z-[99] text-white w-full">
@@ -148,7 +94,6 @@ const Navbar = ({ NAV_LINKS }) => {
           onMouseEnter={() => handleShow(null)}
         >
           <div className="flex items-center gap-2">
->>>>>>> origin/main
             {/* Menu */}
             {/* <Menu isOpen={isOpen} setIsOpen={setIsOpen} /> */}
 

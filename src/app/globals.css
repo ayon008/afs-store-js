@@ -4,13 +4,8 @@
   --background: #ffffff;
   --foreground: #171717;
   --brand: #111;
-<<<<<<< HEAD
-  --blue: #1D98FF;
-  --white-second: #E6E6E6;
-=======
   --blue: #1d98ff;
   --white-second: #e6e6e6;
->>>>>>> origin/main
   --silver: #808080;
   --silver-main: #ccc;
   --silver-second: #999;
@@ -34,25 +29,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-<<<<<<< HEAD
-    --background: #0a0a0a;
-    --foreground: #ededed;
-=======
     --background: #fff;
     --foreground: #111;
->>>>>>> origin/main
     /* Add dark mode variants for better contrast */
   }
 }
 
-<<<<<<< HEAD
-=======
 html {
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 200px; /* space from top when scrolling to an anchor */
 }
->>>>>>> origin/main
 body {
   background: var(--background);
   color: var(--foreground);
@@ -63,13 +50,6 @@ body {
 /* Dashed border top */
 .global-b-top {
   border-top: 2px dashed var(--silver);
-<<<<<<< HEAD
-  border-image: repeating-linear-gradient(to right,
-      var(--silver) 0,
-      var(--silver) 10px,
-      transparent 10px,
-      transparent 20px) 100%;
-=======
   border-image: repeating-linear-gradient(
       to right,
       var(--silver) 0,
@@ -78,7 +58,6 @@ body {
       transparent 20px
     )
     100%;
->>>>>>> origin/main
   border-image-slice: 1;
   border-width: 2px 0 0 0;
 }
@@ -86,13 +65,6 @@ body {
 /* Dashed border bottom */
 .global-b-bottom {
   border-bottom: 2px solid;
-<<<<<<< HEAD
-  border-image: repeating-linear-gradient(to right,
-      var(--black) 0,
-      var(--black) 10px,
-      transparent 10px,
-      transparent 20px) 100%;
-=======
   border-image: repeating-linear-gradient(
       to right,
       var(--black) 0,
@@ -101,7 +73,6 @@ body {
       transparent 20px
     )
     100%;
->>>>>>> origin/main
   border-image-slice: 1;
   border-width: 0 0 2px 0;
 }
@@ -125,21 +96,13 @@ body {
 }
 
 .global-margin {
-<<<<<<< HEAD
-  @apply mb-[80px] lg:mb-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
-=======
   @apply mb-[80px] lg:mb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
->>>>>>> origin/main
 }
 
 .global-padding-top {
   @apply pt-[80px] lg:pt-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 /* Hide vertical scrollbar while keeping scrolling functionality */
 .hide-scrollbar-y {
   -ms-overflow-style: none;
@@ -148,26 +111,14 @@ body {
   /* Firefox */
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 .hide-scrollbar-y::-webkit-scrollbar {
   width: 0px;
   /* Safari and Chrome - hides vertical scrollbar */
 }
 
-<<<<<<< HEAD
-
-
-.popup-scroll-bar::-webkit-scrollbar {
-  width: 2px;       /* vertical scrollbar width */
-  height: 50px;    /* horizontal scrollbar height */
-=======
 .popup-scroll-bar::-webkit-scrollbar {
   width: 2px; /* vertical scrollbar width */
   height: 50px; /* horizontal scrollbar height */
->>>>>>> origin/main
 }
 
 .popup-scroll-bar::-webkit-scrollbar-thumb {
@@ -179,13 +130,8 @@ body {
 }
 
 .popup-scroll-bar-1::-webkit-scrollbar {
-<<<<<<< HEAD
-  width: 4px;       /* vertical scrollbar width */
-  height: 50px;    /* horizontal scrollbar height */
-=======
   width: 4px; /* vertical scrollbar width */
   height: 50px; /* horizontal scrollbar height */
->>>>>>> origin/main
 }
 
 .popup-scroll-bar-1::-webkit-scrollbar-thumb {
@@ -196,10 +142,6 @@ body {
   background-color: transparent; /* default track */
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 [role="dialog"] {
   background: transparent !important;
   box-shadow: none !important;
@@ -219,19 +161,11 @@ body {
   display: none !important;
 }
 
-<<<<<<< HEAD
-.gm-style-iw-tc{
-  display: none !important;
-}
-
-.gm-style-iw-d{
-=======
 .gm-style-iw-tc {
   display: none !important;
 }
 
 .gm-style-iw-d {
->>>>>>> origin/main
   overflow: hidden !important;
   /* border-radius: 4px !important; */
 }
@@ -256,55 +190,6 @@ body {
   min-width: 100%;
 }
 
-<<<<<<< HEAD
-
-
-.compatibilite th {
-
-text-align: left;
-color: #111;
-font-family: "Alliance No.2";
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 120%;
-text-align: left;
-
-}
-
-
-.compatibilite td {
-
-text-align: left;
-font-family: "Alliance No.2";
-font-size: 16px;
-font-style: normal;
-font-weight: 500;
-line-height: 130% !important; 
-color: #111 !important;
-
-
-}
-
-
-.compatibilite tr{
-  border-bottom: 1px solid var(--div-div_sec, #333);
-  
-}
-
-
-
-
-.compatibilite table tbody>tr:nth-child(odd)>td, table tbody>tr:nth-child(odd)>th {
-  background-color: white ;
-}
-
-
-
-
-
-.compatibilite table td, table th {
-=======
 .compatibilite th {
   text-align: left;
   color: #111;
@@ -337,27 +222,11 @@ table tbody > tr:nth-child(odd) > th {
 
 .compatibilite table td,
 table th {
->>>>>>> origin/main
   vertical-align: bottom;
   border: 0 !important;
   padding: 10px 20px 10px 0;
 }
 
-<<<<<<< HEAD
-
-.compatibilite  td{
-  text-align: left;
-}
-
-
-.compatibilite th, td {
-          text-align: left;
-          white-space: nowrap;
-
-}
-
-
-=======
 .compatibilite td {
   text-align: left;
 }
@@ -368,7 +237,6 @@ td {
   white-space: nowrap;
 }
 
->>>>>>> origin/main
 .compatibilite {
   overflow-y: auto;
   cursor: grab;
@@ -380,61 +248,6 @@ td {
   cursor: grabbing;
 }
 
-<<<<<<< HEAD
-
-
-.compatibilite:not(:last-of-type) {
-  margin-bottom: 20px
-}
-
-
-
-/* For Faq Table */
-
-
-.faq th {
-
-text-align: left;
-color: #111;
-font-family: "Alliance No.2";
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 120%;
-text-align: left;
-
-}
-
-
-.faq td {
-
-text-align: left;
-font-family: 15px;
-font-style: normal;
-font-weight: 500;
-line-height: 130% !important; 
-color: #111 !important;
-white-space: nowrap;
-
-
-}
-
-
-.faq tr{
-  border-bottom: 1px solid var(--div-div_sec, #333);
-  
-}
-
-.faq table tbody>tr:nth-child(odd)>td, table tbody>tr:nth-child(odd)>th {
-  background-color: white ;
-}
-
-.faq table {
-width: 100% !important;
-} 
-
-.faq table td, table th {
-=======
 .compatibilite:not(:last-of-type) {
   margin-bottom: 20px;
 }
@@ -477,21 +290,11 @@ table tbody > tr:nth-child(odd) > th {
 
 .faq table td,
 table th {
->>>>>>> origin/main
   vertical-align: bottom;
   border: 0 !important;
   padding: 10px 20px 10px 0;
 }
 
-<<<<<<< HEAD
-.faq td{
-  text-align: left;
-}
-
-.faq th, td {
-text-align: left;
-white-space: nowrap;
-=======
 .faq td {
   text-align: left;
 }
@@ -500,7 +303,6 @@ white-space: nowrap;
 td {
   text-align: left;
   white-space: nowrap;
->>>>>>> origin/main
 }
 
 .table-container {
@@ -515,51 +317,6 @@ td {
 }
 
 .table-container:not(:last-of-type) {
-<<<<<<< HEAD
-  margin-bottom: 20px
-}
-
-.mobile-banner .swiper-pagination-bullet {
-width: 40px !important;
-height: 4px !important;
-background-color: #ffffff !important;
-border-radius: 0px !important;
-opacity: 0.3  !important;
-}
-
-.mobile-banner .swiper-pagination-bullet-active{
-background-color: white !important;
-opacity: 0.8  !important;
-}
-
-iframe {
-  max-width: 1024px !important;
-  aspect-ratio: 16 / 9 !important;
-  height: fit-content !important;
-}
-
-.aside-nav li:hover svg{
-stroke: #111 !important;
-}
-
-.profile-p {
-@apply text-lg leading-[130%] text-[#111] font-semibold
-}
-
-.mobile-banner .swiper-pagination {
-@apply px-5! pb-5!
-}
-
-@media only screen and (max-width: 767px) {
-
-.table-container:not(:last-of-type) {
-  margin-bottom: 20px
-}
-}
-
-.faq a{
-  color: #1D98FF;
-=======
   margin-bottom: 20px;
 }
 
@@ -596,17 +353,12 @@ stroke: #111 !important;
 
 .faq a {
   color: #1d98ff;
->>>>>>> origin/main
 }
 
 .faq tr:hover {
   background: transparent !important;
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 /* Cart Page Steps [Empty Cart] */
 
 /* .step-2{
@@ -614,39 +366,6 @@ position: relative;
 } */
 
 .step-2::before {
-<<<<<<< HEAD
-content: "";
-position: absolute;
-top: 47.5%;
-transform: translateY(-50%);
-left: 15px;
-width: calc(50% - 40px) !important;
-height: 2px;
-border-bottom: 2px solid #111;
-}
-
-.step-3::before {
-content: "";
-position: absolute;
-top: 47.5%;
-transform: translateY(-50%);
-left: 50%;
-width: calc(50% - 40px) !important;
-height: 2px;
-border-bottom: 2px solid #ccc;
-}
-
-
-@media only screen and (max-width: 767px) {
-
-.table-container:not(:last-of-type) {
-  margin-bottom: 20px
-}
-}
-
-.compatibilite a{
-  color: #1D98FF;
-=======
   content: "";
   position: absolute;
   top: 47.5%;
@@ -676,7 +395,6 @@ border-bottom: 2px solid #ccc;
 
 .compatibilite a {
   color: #1d98ff;
->>>>>>> origin/main
 }
 
 .compatibilite tr:hover {
@@ -684,14 +402,6 @@ border-bottom: 2px solid #ccc;
 }
 
 @keyframes fadeIn {
-<<<<<<< HEAD
-from { opacity: 0; transform: translateY(-4px); }
-to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadeIn {
-animation: fadeIn 0.25s ease;
-=======
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -704,7 +414,6 @@ animation: fadeIn 0.25s ease;
 
 .animate-fadeIn {
   animation: fadeIn 0.25s ease;
->>>>>>> origin/main
 }
 
 .compatibilite table {
@@ -718,10 +427,6 @@ animation: fadeIn 0.25s ease;
   user-select: none;
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 /* body::before {
   content: "";
   width: 100vw;
@@ -734,58 +439,3 @@ animation: fadeIn 0.25s ease;
   backdrop-filter: blur(10px);
   display: none;
 } */
-<<<<<<< HEAD
-
-
-
-
-.team-text:after {
-  content: "";
-  transform-origin: 0 0;
-  background-color: white;
-  width: 100%;
-  height: .5px;
-  position: absolute;
-  bottom: -.1rem;
-  left: 0;
-  height: 4px;
-  bottom: -.6rem;
-  transform: scaleX(0);
-  transition: transform 0.8s ease, opacity .4s ease;
-  opacity: 0;
-}
-
-.team-box:hover .team-text:after {
-  transform: scaleX(100%);
-  opacity: 1;
-}
-
-@media only screen and (max-width: 1024px) {
-
-.team-text:after {
-  transform: scaleX(100%);
-   opacity: 1;
-}
-}
-
-
-.afs_anim_btn {
-  transform: translate(-50%, 20px) ;
-  opacity: 0;
-}
-
-.team-box:hover .afs_anim_btn {
-  transform: translate(-50%, 0px) ;
-  opacity: 1;
-}
-
-
-@media only screen and (max-width: 1024px) {
-.afs_anim_btn {
-  transform: translate(-50%, 0px);
-  opacity: 1;
-}
-
-}
-=======
->>>>>>> origin/main
