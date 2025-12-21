@@ -209,7 +209,7 @@ const BlogContent = ({ blog }) => {
                 </div>
 
                 {/* Main Blog */}
-                <div className='flex-1'>
+                <div className='flex-1 max-w-[790px]'>
                     <article ref={contentRef}>
                         <div
                             className='prose lg:text-[22px] text-[19px] font-semibold leading-[120%] prose-h1:text-4xl prose-headings:scroll-mt-2 prose-img:my-8 

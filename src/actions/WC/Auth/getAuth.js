@@ -1,4 +1,5 @@
 "use server"
+import { getCart, updateBillingAndCart, updateShippingAndCart } from "@/actions/Woo-Coommerce/Shop/Cart/cart";
 // app/actions/auth.ts
 import { cookies } from "next/headers";
 // import { getWooCommerceCookies } from "./StoreApi/cookie-handler";
@@ -50,8 +51,6 @@ export const getAuthenticatedUser = async () => {
         }
 
         const wcCustomer = await wcRes.json();
-
-        console.log(wcCustomer, 'wcCustomer');
 
 
         /* 3️⃣ Merge & return */
@@ -230,6 +229,125 @@ export async function updateProfile(data) {
 
     } catch (error) {
         console.error("Error updating profile:", error);
+        throw new Error(error.message);
+    }
+}
+
+
+// update billing info in WooCommerce and Cart as well
+export const updateBillingInfo = async (billingData) => {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) {
+        throw new Error("Not authenticated");
+    }
+
+    try {
+
+        const updateCart = await updateBillingAndCart(billingData);
+        console.log(updateCart, 'updateCart');
+
+        if (!updateCart.success) {
+            throw new Error(updateCart.error);
+        }
+
+        const wpUser = await getAuthenticatedUser();
+        const originalBilling = wpUser.billing;
+
+        // 2️⃣ Update WooCommerce billing info
+        const wcRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Basic ${authHeader}`,
+            },
+            body: JSON.stringify({
+                billing: {
+                    first_name: billingData.billing_first_name || "",
+                    last_name: billingData.billing_last_name || "",
+                    company: billingData.billing_company || "",
+                    address_1: billingData.billing_address_1 || "",
+                    address_2: billingData.billing_address_2 || "", // optional
+                    postcode: billingData.billing_postcode || "",
+                    city: billingData.billing_city || "",
+                    phone: billingData.billing_phone || "",
+                    email: billingData.billing_email || "",
+                    country: billingData.country || "",
+                },
+            }),
+            cache: "no-store",
+        });
+
+        const wcResult = await wcRes.json();
+
+        if (!wcRes.ok) {
+            console.error("WC update error:", wcResult);
+            const updateCart = await updateBillingAndCart(originalBilling);
+            throw new Error(wcResult.message || "Failed to update WooCommerce billing info");
+        }
+        return { success: true, wcUser: wcResult };
+    } catch (error) {
+        console.error("Error updating billing info:", error);
+        throw new Error(error.message);
+    }
+}
+
+// update shipping info in WooCommerce and Cart as well
+
+export const updateShippingInfo = async (shippingData) => {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) {
+        throw new Error("Not authenticated");
+    }
+    try {
+        const updateCart = await updateShippingAndCart(shippingData);
+        console.log(updateCart, 'updateCart');
+
+        if (!updateCart.success) {
+            throw new Error(updateCart.error);
+        }
+
+        const wpUser = await getAuthenticatedUser();
+        const originalShipping = wpUser.shipping;
+
+
+        // 2️⃣ Update WooCommerce shipping info
+        const wcRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Basic ${authHeader}`,
+            },
+            body: JSON.stringify({
+                shipping: {
+                    first_name: shippingData.shipping_first_name || "",
+                    last_name: shippingData.shipping_last_name || "",
+                    company: shippingData.entreprise || "",
+                    address_1: shippingData.adresse || "",
+                    address_2: shippingData.shipping_address_2 || "", // optional
+                    postcode: shippingData.postal || "",
+                    city: shippingData.ville || "",
+                    phone: shippingData.shipping_phone || "",
+                    email: shippingData.shipping_email || "",
+                    country: shippingData.country || "FR",
+                },
+            }),
+            cache: "no-store",
+        });
+
+        const wcResult = await wcRes.json();
+
+        if (!wcRes.ok) {
+            console.error("WC update error:", wcResult);
+            const updateCart = await updateShippingAndCart(originalShipping);
+            throw new Error(wcResult.message || "Failed to update WooCommerce Shipping info");
+        }
+        return { success: true, wcUser: wcResult };
+    } catch (error) {
+        console.error("Error updating Shipping info:", error);
         throw new Error(error.message);
     }
 }

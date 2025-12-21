@@ -52,7 +52,7 @@ export default async function RootLayout({ children }) {
         <html lang="en" className={alliance.className}>
             <body className="font-alliance">
                 <AuthProvider>
-                    <main className='global-padding pt-4 global-margin'>
+                    <main className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
                         <div className=''>
                             <div className='pb-10 global-b-bottom'>
                                 <h1 className='global-h1'>Bonjour, {user?.last_name}</h1>

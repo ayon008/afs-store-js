@@ -51,7 +51,7 @@ const FirstForm = ({ setMessage }) => {
 
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
-            <div className="flex items-center justify-between pb-1 global-b-bottom">
+            <div className="flex items-center justify-between pb-1 global-b-bottom-d">
                 <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">Full name</h3>
                 <button
                     className="flex items-center gap-1 cursor-pointer"

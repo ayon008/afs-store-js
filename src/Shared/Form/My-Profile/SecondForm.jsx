@@ -68,7 +68,7 @@ const SecondForm = ({ setMessage }) => {
 
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
-            <div className="flex items-center justify-between pb-1 global-b-bottom">
+            <div className="flex items-center justify-between pb-1 global-b-bottom-d">
                 <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">Contact info</h3>
                 <button
                     className="flex items-center gap-1 cursor-pointer"
@@ -76,7 +76,7 @@ const SecondForm = ({ setMessage }) => {
                     type="button"
                 >
                     <Pen className="w-3 h-3" />
-                    <span className="text-sm uppercase leading-[100%]">{show ? "Annuler" : "Modifier"}</span>
+                    <span className="text-sm uppercase leading-[100%]">{show ? "Cancel" : "Edit"}</span>
                 </button>
             </div>
 
@@ -84,7 +84,7 @@ const SecondForm = ({ setMessage }) => {
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-5 2xl:grid-cols-3">
                     <div>
                         <Input
-                            label="Adresse e-mail"
+                            label="Email"
                             type="email"
                             id="email"
                             register={register("email")}
@@ -96,7 +96,7 @@ const SecondForm = ({ setMessage }) => {
                     </div>
                     <div>
                         <Input
-                            label="Numéro de téléphone"
+                            label="Phone"
                             type="tel"
                             id="billing_phone"
                             register={register("billing_phone")}
@@ -110,7 +110,7 @@ const SecondForm = ({ setMessage }) => {
 
                 {show && (
                     <div className="mt-5">
-                        <FormButton type="submit" label="ENREGISTRER LES MODIFICATIONS" />
+                        <FormButton type="submit" label="Save Changes" />
                     </div>
                 )}
             </form>

@@ -1,6 +1,8 @@
 "use client";
 import FirstForm from '@/Shared/Form/My-Profile/FirstForm';
+import ForthForm from '@/Shared/Form/My-Profile/ForthForm';
 import SecondForm from '@/Shared/Form/My-Profile/SecondForm';
+import ThirdForm from '@/Shared/Form/My-Profile/ThirdForm';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -42,9 +44,9 @@ const Page = () => {
                     {/* 2nd form */}
                     <SecondForm setMessage={setMessage} />
                     {/* 3rd form */}
-                    {/* <ThirdForm /> */}
+                    <ThirdForm setMessage={setMessage} />
                     {/* 4th Form */}
-                    {/* <ForthForm /> */}
+                    <ForthForm setMessage={setMessage} />
                 </div>
             </div>
         </div>
