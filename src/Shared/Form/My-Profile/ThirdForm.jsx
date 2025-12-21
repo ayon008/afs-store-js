@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '@/Shared/Hooks/useAuth';
 import { countriesList } from '@/lib/countriesList';
-import { updateBillingInfo } from '@/actions/WC/Auth/getAuth';
+import { updateBillingInfo } from '@/app/actions/WC/Auth/getAuth';
 import CountrySelect from '@/Shared/Input/DropDown';
 
 const ThirdForm = ({ setMessage }) => {

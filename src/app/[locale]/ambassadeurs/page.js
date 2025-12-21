@@ -2,8 +2,8 @@ import Link from 'next/link';
 import React from 'react';
 
 import Ambassedor from '@/Shared/Ambessadurs/Ambessadurs';
-import getAmbessedor from '@/actions/WC/getAmbessadurs';
-import getCountries from '@/actions/WC/getCountries';
+import getAmbessedor from '@/app/actions/WC/getAmbessadurs';
+import getCountries from '@/app/actions/WC/getCountries';
 
 const BreadCums = () => {
     return (

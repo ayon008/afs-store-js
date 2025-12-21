@@ -2,6 +2,7 @@
 
 import { ArrowDown } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function Hero() {
     const videoRef = useRef(null);
@@ -23,6 +24,8 @@ export default function Hero() {
         playVideo();
     }, []);
 
+    const t = useTranslations("home");
+
     return (
         <div className="relative w-full h-[calc(100vh-139px)] min-h-[calc(100vh-139px)] max-h-[calc(100vh-139px)] overflow-hidden lg:block hidden">
             <video
@@ -41,7 +44,7 @@ export default function Hero() {
             </video>
             <div className='flex items-center gap-2 global-padding left-0 bottom-10 absolute'>
                 <ArrowDown className='w-4 h-4 text-white mix-blend-difference' strokeWidth={2} /> <span className='mix-blend-difference text-white text-base leading-[100%] font-semibold uppercase'>
-                    Scroll for the full visit
+                    {t('scrollText')}
                 </span>
             </div>
         </div>

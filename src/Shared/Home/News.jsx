@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { getPosts } from "@/actions/getBlogs";
+import { getPosts } from "@/app/actions/getBlogs";
 
 /* ----------------------------- News Card ----------------------------- */
 const NewsCard = ({ article }) => {

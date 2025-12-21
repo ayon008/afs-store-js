@@ -2,7 +2,8 @@ import AuthProvider from '@/Shared/Provider/AuthProvider';
 import '../globals.css';
 import { alliance } from '@/fonts/Alliance';
 import NavItems from './Navitem';
-import { getAuthenticatedUser } from '@/actions/WC/Auth/getAuth';
+import { getAuthenticatedUser } from '../../actions/WC/Auth/getAuth';
+
 
 export const metadata = {
     title: 'Mon profil - AFS',

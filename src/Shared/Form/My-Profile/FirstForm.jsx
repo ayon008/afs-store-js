@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import useAuth from "@/Shared/Hooks/useAuth";
 import Input from "@/Shared/Input/Input";
 import FormButton from "@/Shared/Button/FormButton";
-import { updateProfile } from "@/actions/WC/Auth/getAuth";
+import { updateProfile } from "@/app/actions/WC/Auth/getAuth";
 
 const FirstForm = ({ setMessage }) => {
     const [first, setFirst] = useState(false);

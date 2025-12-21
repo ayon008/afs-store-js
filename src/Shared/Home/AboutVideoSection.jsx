@@ -5,6 +5,7 @@ import { Play, X } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import PopUp from "../PopUp/PopUp";
+import { useTranslations } from "next-intl";
 
 export default function AboutVideoSection() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,12 +20,14 @@ export default function AboutVideoSection() {
     return () => document.body.classList.remove("overflow-hidden");
   }, [isOpen]);
 
+  const t = useTranslations("home");
+
   return (
     <section className="bg-black global-padding global-margin flex lg:flex-row flex-col justify-between gap-5">
       <div className="max-w-[1920px] mx-auto space-y-5 flex lg:gap-20 gap-10 lg:flex-row flex-col justify-between items-end py-10">
         <div className="lg:max-w-1/2 max-w-full w-full space-y-5">
           <h2 className="global-h2 text-white">
-            The foiling spirit since 2009
+            {t("homeTitle")}
           </h2>
           <p className="text-white/80 leading-[120%] text-[clamp(0.875rem,0.6448rem+0.4802vw,1.125rem)] font-semibold max-w-[520px]">
             AFS’s mission is to offer the best-performing foils, boards and

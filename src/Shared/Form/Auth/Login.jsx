@@ -7,7 +7,7 @@ import { AlertCircle } from "lucide-react";
 import Input from '@/Shared/Input/Input';
 import Password from '@/Shared/Input/Password';
 import FormButton from '@/Shared/Button/FormButton';
-import { loginUser } from '@/actions/WC/Auth/getAuth';
+import { loginUser } from '@/app/actions/WC/Auth/getAuth';
 import useAuth from '@/Shared/Hooks/useAuth';
 
 const Login = () => {

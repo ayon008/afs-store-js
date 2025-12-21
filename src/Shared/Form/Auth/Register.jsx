@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { registerStoreUser } from "@/actions/WC/Auth/getAuth";
+import { registerStoreUser } from "@/app/actions/WC/Auth/getAuth";
 import Input from "@/Shared/Input/Input";
 import Password from "@/Shared/Input/Password";
 import FormButton from "@/Shared/Button/FormButton";

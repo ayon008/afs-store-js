@@ -1,5 +1,5 @@
 "use client"
-import { getDealerType } from '@/actions/WC/getDealers';
+import { getDealerType } from '@/app/actions/WC/getDealers';
 import { ChevronDown } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 

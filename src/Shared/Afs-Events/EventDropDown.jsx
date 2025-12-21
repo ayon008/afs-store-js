@@ -1,7 +1,7 @@
 "use client"
 
 
-import { getEventsDestinations } from '@/actions/WC/getAllEvents';
+import { getEventsDestinations } from '@/app/actions/WC/getAllEvents';
 import { ChevronDown } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 

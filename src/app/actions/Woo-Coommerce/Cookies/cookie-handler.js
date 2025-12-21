@@ -1,5 +1,4 @@
 'use server';
-
 import { cookies } from 'next/headers';
 
 // Get WooCommerce cookies from Next.js cookie store
@@ -7,7 +6,7 @@ export async function getWooCommerceCookies() {
     try {
         const cookieStore = await cookies();
         const allCookies = cookieStore.getAll();
-        
+
         // Filter WooCommerce/WP specific cookies
         const wooCookies = allCookies
             .filter(cookie =>

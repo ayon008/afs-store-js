@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import Image from 'next/image';
-import { getDealers } from '@/actions/WC/getDealers';
+import { getDealers } from '@/app/actions/WC/getDealers';
 import DropDown from '@/Shared/DropDown/DropDown';
 
 const Dealers = () => {

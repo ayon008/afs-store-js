@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Pen } from "lucide-react";
-import { updateShippingInfo } from "@/actions/WC/Auth/getAuth";
+import { updateShippingInfo } from "@/app/actions/WC/Auth/getAuth";
 import useAuth from "@/Shared/Hooks/useAuth";
 import { countriesList } from "@/lib/countriesList";
 import CountrySelect from "@/Shared/Input/DropDown";

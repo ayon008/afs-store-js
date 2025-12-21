@@ -4,7 +4,7 @@ import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import EventDropDown from './EventDropDown';
-import { getAllEvents } from '@/actions/WC/getAllEvents';
+import { getAllEvents } from '@/app/actions/WC/getAllEvents';
 
 const Events = () => {
 

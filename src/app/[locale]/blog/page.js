@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getPosts } from "@/actions/getBlogs";
+import { getPosts } from "@/app/actions/getBlogs";
 import BlogCard from "@/Shared/Card/BlogCard";
 
 export const metadata = {

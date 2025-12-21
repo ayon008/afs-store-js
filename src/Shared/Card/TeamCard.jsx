@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import default_image from "../../../public/assets/images/Team/Group-1-3.png.webp"
+const default_image = "/assets/images/Team/Group-1-3.png.webp"
 import Image from 'next/image';
 
 import moment from "moment";

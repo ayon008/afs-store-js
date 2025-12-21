@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import teamImage from "../../../public/assets/images/Team/1A4A82C8-D73A-4826-B627-E39C082F1173.jpg.webp"
-import image1 from "../../../public/assets/images/Team/Rectangle-4-32.png";
-import image2 from "../../../public/assets/images/Team/Rectangle-6.png"
+const teamImage = "/assets/images/Team/1A4A82C8-D73A-4826-B627-E39C082F1173.jpg.webp"
+const image1 = "/assets/images/Team/Rectangle-4-32.png";
+const image2 = "/assets/images/Team/Rectangle-6.png"
 import FeatureBar from '@/Shared/Afs-Events/FeatureBar';
 import Team from '@/Shared/Afs-Team/Team';
-import { getTeamMember } from '@/actions/WC/getTeamMembers';
+import { getTeamMember } from '@/app/actions/WC/getTeamMembers';
 
 export const metadata = {
     title: 'AFS L’équipe - AFS Foiling',

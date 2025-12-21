@@ -1,5 +1,5 @@
 "use server"
-import { getCart, updateBillingAndCart, updateShippingAndCart } from "@/actions/Woo-Coommerce/Shop/Cart/cart";
+import { getCart, updateBillingAndCart, updateShippingAndCart } from "../../Woo-Coommerce/Shop/Cart/cart";
 // app/actions/auth.ts
 import { cookies } from "next/headers";
 // import { getWooCommerceCookies } from "./StoreApi/cookie-handler";
@@ -11,6 +11,8 @@ const consumerSecret = process.env.WC_CONSUMER_SECRET
 const authHeader = Buffer
     .from(`${consumerKey}:${consumerSecret}`)
     .toString("base64");
+
+
 
 // Get User
 export const getAuthenticatedUser = async () => {

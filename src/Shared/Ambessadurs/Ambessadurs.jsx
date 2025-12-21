@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import Sec1 from './Sec1';
 import Map from './Map';
-import { allAmbassadors } from '@/actions/WC/getAllAmbessador';
+import { allAmbassadors } from '@/app/actions/WC/getAllAmbessador';
 import AmbassadorsCard from '../Card/AmbassedurCard';
 
 const Ambassedor = ({ categories, countries }) => {

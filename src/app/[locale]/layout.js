@@ -1,8 +1,14 @@
+
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { routing } from "@/i18n/routing";
+import { notFound } from "next/navigation";
+import AuthProvider from "@/Shared/Provider/AuthProvider";
 import Navbar from "@/Shared/Navbar/Navbar";
 import "./globals.css";
 import { alliance } from "@/fonts/Alliance";
-import { getMenuItems } from "@/actions/WC/getMenuData";
-import AuthProvider from "@/Shared/Provider/AuthProvider";
+import { getMenuItems } from "../actions/WC/getMenuData";
+import { getMessages } from "next-intl/server";
+
 
 export const metadata = {
   title: "The foiling spirit since 2009 - AFS",
@@ -47,20 +53,31 @@ export const metadata = {
   },
 };
 
-export default async function RootLayout({ children }) {
-  const NAV_LINKS = await getMenuItems();
-  return (
-    <html lang="en">
-      <body className={`${alliance.className} antialiased`}>
-        <AuthProvider>
-          <div>
-            <Navbar NAV_LINKS={NAV_LINKS} />
-            {children}
-            <div className="h-[400px] bg-red-400 w-full">
 
+export default async function RootLayout({ children, params }) {
+  const NAV_LINKS = await getMenuItems();
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale}>
+      <body className={`${alliance.className} antialiased`}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            <div>
+              <Navbar NAV_LINKS={NAV_LINKS} />
+              {children}
+              <div className="h-[400px] bg-red-400 w-full">
+
+              </div>
             </div>
-          </div>
-        </AuthProvider>
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

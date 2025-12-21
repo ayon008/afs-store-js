@@ -5,7 +5,7 @@ import { Pen } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '@/Shared/Hooks/useAuth';
-import { updateProfile } from '@/actions/WC/Auth/getAuth';
+import { updateProfile } from '@/app/actions/WC/Auth/getAuth';
 
 const SecondForm = ({ setMessage }) => {
     const [show, setShow] = useState(false);

@@ -8,7 +8,7 @@ const authHeader = Buffer
     .toString("base64");
 
 const getBestSellers = async (slug) => {
-    const url = `https://staging.afs-foiling.com/wp-json/wc/v3/products?slug=${slug}&_fields=id,name,acf,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=fr`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&_fields=id,name,acf,images,slug,categories,price,regular_price,sale_price,price_html,type`;
     try {
         const response = await fetch(url, {
             headers: {
@@ -31,7 +31,7 @@ export default async function BestSellers() {
         getBestSellers("planche-blackbird"),
         getBestSellers("d-lite"),
     ]);
-    
+
 
     return (
         <section className="global-padding global-margin">
@@ -42,15 +42,18 @@ export default async function BestSellers() {
 
                 {/* Adjust grid gaps and ensure proper alignment */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-8">
-                    {products.map((product) => {
-                        const { images } = product;
-                        const bestseller = product?.acf?.bestseller;
-                        const hoverImage = product?.acf?.img?.url;
-                        return (
-                            <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={images[0]?.src} key={product?.id} slug={product?.slug} />
+                    {
+                        products?.length > 0 && products.map((product) => {
+                            const images = product?.images;
+                            const bestseller = product?.acf?.bestseller;
+                            const hoverImage = product?.acf?.img?.url;
+                            const src = Array.isArray(images) && images.length > 0 ? images[0]?.src : null;
+                            return (
+                                <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={src || ""} key={product?.id} slug={product?.slug} />
+                            )
+                        }
                         )
                     }
-                    )}
                 </div>
             </div>
         </section>

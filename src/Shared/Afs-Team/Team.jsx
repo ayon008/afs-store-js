@@ -1,17 +1,17 @@
 "use client"
 import TeamImage from "./TeamImage";
-import image from "../../../public/assets/images/Team/Rectangle-10.jpg";
-import hoverImage from "../../../public/assets/images/Team/Rectangle-11-1.jpg.webp";
-import image2 from "../../../public/assets/images/Team/Image-de-OneDrive-1_11zon-scaled.jpg";
-import hoverImage2 from "../../../public/assets/images/Team/Photo-DSC-9853-from-OneDrive_11zon-1-1_11zon-scaled.jpg.webp";
-import image3 from "../../../public/assets/images/Team/DSC1470-2_11zon-scaled.jpg";
-import hoverImage3 from "../../../public/assets/images/Team/DSC1481-2_11zon-scaled.jpg.webp";
-import image4 from "../../../public/assets/images/Team/Rectangle-15.jpg";
-import hoverImage4 from "../../../public/assets/images/Team/Rectangle-14.jpg.webp";
-import image5 from "../../../public/assets/images/Team/DSC9878-scaled.jpg";
-import hoverImage5 from "../../../public/assets/images/Team/Rectangle-16.jpg.webp";
-import image6 from "../../../public/assets/images/Team/Rectangle-17.jpg";
-import hoverImage6 from "../../../public/assets/images/Team/Rectangle-18.jpg.webp";
+const image = "/assets/images/Team/Rectangle-10.jpg";
+const hoverImage = "/assets/images/Team/Rectangle-11-1.jpg.webp";
+const image2 = "/assets/images/Team/Image-de-OneDrive-1_11zon-scaled.jpg";
+const hoverImage2 = "/assets/images/Team/Photo-DSC-9853-from-OneDrive_11zon-1-1_11zon-scaled.jpg.webp";
+const image3 = "/assets/images/Team/DSC1470-2_11zon-scaled.jpg";
+const hoverImage3 = "/assets/images/Team/DSC1481-2_11zon-scaled.jpg.webp";
+const image4 = "/assets/images/Team/Rectangle-15.jpg";
+const hoverImage4 = "/assets/images/Team/Rectangle-14.jpg.webp";
+const image5 = "/assets/images/Team/DSC9878-scaled.jpg";
+const hoverImage5 = "/assets/images/Team/Rectangle-16.jpg.webp";
+const image6 = "/assets/images/Team/Rectangle-17.jpg";
+const hoverImage6 = "/assets/images/Team/Rectangle-18.jpg.webp";
 
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';

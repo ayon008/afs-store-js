@@ -1,5 +1,5 @@
 "use client";
-import { getAuthenticatedUser } from '@/actions/WC/Auth/getAuth';
+import { getAuthenticatedUser } from '@/app/actions/WC/Auth/getAuth';
 import React from 'react';
 import { createContext, useEffect, useState } from 'react';
 
