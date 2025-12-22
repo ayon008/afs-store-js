@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getWooCommerceCookies, setCookiesFromResponse } from "../../Cookies/cookie-handler";
 
 
+
 const WP_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
 const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
@@ -12,23 +13,10 @@ const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 // Get cart
 export async function getCart() {
     try {
-        const cookieHeader = await getWooCommerceCookies();
-
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
-            method: 'GET',
-            headers: {
-                'Cookie': cookieHeader,
-                'Accept': 'application/json',
-            },
-            cache: 'no-store',
-        });
-
-        await setCookiesFromResponse(response);
-
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`);
         if (!response.ok) {
             throw new Error(`Failed to get cart: ${response.status}`);
         }
-
         const cartData = await response.json();
         return { success: true, data: cartData };
 

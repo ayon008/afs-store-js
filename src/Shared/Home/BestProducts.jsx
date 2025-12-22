@@ -1,5 +1,6 @@
 import React from "react";
 import ProductCard from "../Card/ProductCard";
+import { getTranslations } from "next-intl/server";
 
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
@@ -24,7 +25,9 @@ const getBestSellers = async (slug) => {
     }
 }
 
-export default async function BestSellers() {
+
+
+export default async function BestSellers({ locale }) {
     const products = await Promise.all([
         getBestSellers("foil-complet-evo"),
         getBestSellers("foil-complet-enduro"),
@@ -32,12 +35,15 @@ export default async function BestSellers() {
         getBestSellers("d-lite"),
     ]);
 
+    const t = await getTranslations("home", locale);
+
+
 
     return (
         <section className="global-padding global-margin">
             <div className="max-w-[1920px] mx-auto">
                 <h2 className="global-h2">
-                    Best Sellers
+                    {t("featuredTitle")}
                 </h2>
 
                 {/* Adjust grid gaps and ensure proper alignment */}

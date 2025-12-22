@@ -17,6 +17,7 @@ const page = async ({ params, searchParams }) => {
 
     // Category Image
     const image = category?.image?.src || default_image;
+    // const productData = await getProductsByCategoryId(category?.id);
     const productData = await getProductsByCategoryId(category?.id);
 
     // console.log("productData", productData.length);
@@ -69,7 +70,7 @@ const page = async ({ params, searchParams }) => {
                 </div>
             </div>
             <div>
-                {/* <Products maxPrice={maxPrice} minPrice={minPrice} childCategories={childCategories} min={min} max={max} id={category?.id} /> */}
+                <Products maxPrice={maxPrice} minPrice={minPrice} childCategories={childCategories} min={min} max={max} id={category?.id} allProducts={productData} />
             </div>
         </div>
     );

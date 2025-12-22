@@ -1,6 +1,9 @@
 {
   "home": {
+    "featuredTitle": "Meilleures ventes",
     "homeTitle": "L'esprit du fleuret depuis 2009",
-    "scrollText": "Lire la suite de la visite"
+    "playVideo": "LIRE LA VIDÉO",
+    "scrollText": "Lire la suite de la visite",
+    "subText": "La mission d'AFS est de proposer les foils, planches et ailes les plus performants, tout en garantissant une accessibilité et une stabilité de premier ordre. Pour que tous les riders puissent pratiquer leur sport en toute sécurité, quelles que soient les conditions et quel que soit leur style de glisse (freeride, carving, downwind, surf foil, etc.). Ces produits sont conçus et fabriqués en Bretagne par Foil And Co. Une fabrication française utilisant les techniques les plus avancées pour vous offrir la meilleure qualité !"
   }
 }

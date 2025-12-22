@@ -1,6 +1,6 @@
 
 "use client";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // import SearchOverlay from "../../components/search";
@@ -10,11 +10,14 @@ import "flag-icons/css/flag-icons.min.css";
 import gsap from "gsap";
 import Menu from "./Menu";
 import { useGSAP } from "@gsap/react";
+import PopUp from "../PopUp/PopUp";
 
 // import useCart from '../../hooks/useCart';
 // import SideCart from '../siteCart/SideCart';
 
 const Navbar = ({ NAV_LINKS }) => {
+  console.log(NAV_LINKS);
+  
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -83,6 +86,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
   const [hoverImageLink, setHoverImageLink] = useState(`https://staging.afs-foiling.com/wp-content/uploads/2024/06/Ultra750UHM75_0006.png`);
 
+  const [showPopUp, setPopUp] = useState(false);
 
   return (
     <>
@@ -181,7 +185,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </button>
 
             {/* Language */}
-            <button className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
+            <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
               <span className="fi fi-fr fis mr-2 scale-125"></span>
               <span className="text-white text-[0.95rem] font-extrabold tracking-wide">
                 FR
@@ -776,6 +780,86 @@ const Navbar = ({ NAV_LINKS }) => {
           onMouseEnter={() => handleShow(null)}
         ></div>
       )}
+
+
+      <PopUp isOpen={showPopUp}>
+        {/* Parent Div */}
+        <div className="flex flex-col rounded-sm overflow-hidden bg-[#f0f0f0] max-w-[540px] w-full">
+          {/* 1st div */}
+          <div className="py-4 lg:px-10 px-5 shadow-[0_6px_8px_rgba(91,104,113,0.1)]">
+            <div className="flex items-center gap-5">
+              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">Choose your location and language</h2>
+              <div className="w-fit p-[5px] rounded-full border border-[#111]">
+                <X onClick={() => setPopUp(!showPopUp)} className="cursor-pointer" />
+              </div>
+            </div>
+          </div>
+          {/* 2nd div */}
+          <div className="py-4 lg:px-10 px-5 max-h-[calc(100vh-140px)] overflow-y-scroll popup-scroll-bar">
+            <div className="flex flex-col gap-[30px]">
+              <div className="flex flex-col gap-4 mb-[30px]">
+                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">Your current language and currency</p>
+                <ul className="flex flex-col gap-3">
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      English
+                    </span>
+                    <span className="font-bold">English</span>
+                  </li>
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      Euro
+                    </span>
+                    <span className="font-bold">EUR</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <form className="space-y-[30px]">
+              {/* Language Switcher */}
+              <div className="flex flex-col items-stretch gap-4">
+                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Languages</h4>
+                <ul className="flex flex-col gap-3">
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      English
+                    </span>
+                    <span className="font-bold">English</span>
+                  </li>
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      Euro
+                    </span>
+                    <span className="font-bold">EUR</span>
+                  </li>
+                </ul>
+              </div>
+              {/* Currency Switcher */}
+              <div className="flex flex-col items-stretch gap-4">
+                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Languages</h4>
+                <ul className="flex flex-col gap-3">
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      English
+                    </span>
+                    <span className="font-bold">English</span>
+                  </li>
+                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      Euro
+                    </span>
+                    <span className="font-bold">EUR</span>
+                  </li>
+                </ul>
+              </div>
+              {/* Submit Button */}
+              <button className="bg-[#000] text-white font-semibold rounded-[10px] py-[10px] px-2 w-full cursor-pointer">Change</button>
+            </form>
+          </div>
+        </div>
+      </PopUp>
+
+
     </>
   );
 };

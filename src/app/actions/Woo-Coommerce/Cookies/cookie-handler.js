@@ -24,7 +24,6 @@ export async function getWooCommerceCookies() {
         return '';
     }
 }
-
 // Set cookies from WooCommerce response
 export async function setCookiesFromResponse(response) {
     try {

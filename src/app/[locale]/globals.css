@@ -121,6 +121,74 @@ body {
   @apply pt-[80px] lg:pt-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
 }
 
+
+.my-dashed-slider {
+  position: relative;      /* needed for the ::before dashed line */
+  box-sizing: border-box;
+}
+.range-slider{
+  background: transparent !important;
+}
+
+/* draw a single dashed line across the container */
+.my-dashed-slider::before {
+  content: "";
+  position: absolute;
+left: 8px;             /* leave room for thumb radius */
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    #222,
+    #222 6px,
+    rgba(0,0,0,0) 6px,
+    rgba(0,0,0,0) 12px
+  );
+  pointer-events: none;    /* don't block interaction */
+  z-index: 1;
+}
+
+/* hide any default solid rails the library draws */
+.my-dashed-slider .range-slider__track,
+.my-dashed-slider .range-slider__range,
+.my-dashed-slider .range-slider__bar,
+.my-dashed-slider .range-slider__rail {
+  background: none !important;
+  height: 0 !important;
+  border: none !important;
+}
+
+/* Thumb styling (solid circle) */
+.my-dashed-slider .range-slider__thumb,
+.my-dashed-slider .range-slider__handle {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: #000 !important;
+  box-shadow: none !important;
+  position: relative;      /* so it paints above ::before */
+  z-index: 2;
+  /* center the thumb exactly on the 1px line */
+  transform: translateY(-50%) !important;
+  top: 50% !important;
+}
+
+/* Some versions use input[type="range"] wrappers - ensure thumbs stay visible */
+.my-dashed-slider input[type="range"] {
+  background: transparent !important;
+}
+
+/* If the library shows a tiny rail element, ensure it's transparent */
+.my-dashed-slider .range-slider__bar--active,
+.my-dashed-slider .range-slider__bar--inactive {
+  background: transparent !important;
+  height: 0 !important;
+}
+
+
+
 /* Hide vertical scrollbar while keeping scrolling functionality */
 .hide-scrollbar-y {
   -ms-overflow-style: none;

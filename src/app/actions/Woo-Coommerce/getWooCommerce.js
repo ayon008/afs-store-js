@@ -1,5 +1,6 @@
 'use server';
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
+import { getWooCommerceCookies } from "./Cookies/cookie-handler";
 import { getCart } from "./Shop/Cart/cart";
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
@@ -14,8 +15,9 @@ const authHeader = Buffer
 export const calculatePriceWithTax = async (basePrice, tax_class = "standard", country = null) => {
     try {
         // Get user country from shipping/billing address, default to France
+        const cookieHeader = await getWooCommerceCookies();
         let userCountry = country;
-        const cart = await getCart();
+        const cart = await getCart(cookieHeader);
         const defaultCountry = cart?.data?.shipping_address?.country || cart?.data?.billing_address?.country || "FR";
 
         if (!userCountry) {
@@ -116,7 +118,7 @@ export const getProductsByCategoryId = async (ids, max, min) => {
                 },
                 cache: "force-cache",
                 next: { revalidate: 3600 }
-            });
+            });            
 
             if (!response.ok) break;
 
@@ -130,7 +132,6 @@ export const getProductsByCategoryId = async (ids, max, min) => {
                     return { ...product, price_with_tax: priceWithTax };
                 })
             );
-
             allProducts.push(...dataWithTax);
 
             if (data.length < per_page) break;
