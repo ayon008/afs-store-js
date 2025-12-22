@@ -306,8 +306,6 @@ export const updateShippingInfo = async (shippingData) => {
     }
     try {
         const updateCart = await updateShippingAndCart(shippingData);
-        console.log(updateCart, 'updateCart');
-
         if (!updateCart.success) {
             throw new Error(updateCart.error);
         }

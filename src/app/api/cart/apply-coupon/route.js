@@ -1,10 +1,10 @@
-// app/api/cart/route.js
+// app/api/cart/apply-coupon/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
 
-// Helper to parse set-cookie headers
+// Helper to parse set-cookie headers (same as before)
 function parseSetCookieHeader(header) {
     if (!header) return [];
 
@@ -23,7 +23,7 @@ function parseSetCookieHeader(header) {
         .filter(cookie => cookie.name && cookie.value);
 }
 
-// Get WooCommerce cookies from the browser
+// Get WooCommerce cookies from the browser (same as before)
 async function getWooCommerceCookies() {
     try {
         const cookieStore = await cookies();
@@ -48,7 +48,7 @@ async function getWooCommerceCookies() {
     }
 }
 
-export async function GET(request) {
+export async function POST(request) {
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -61,13 +61,27 @@ export async function GET(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Make request to WooCommerce
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
-            method: "GET",
+        // Get the coupon code from request body
+        const { code: couponCode } = await request.json();
+
+        if (!couponCode || couponCode.trim() === '') {
+            return NextResponse.json({
+                success: false,
+                error: "Please enter a coupon code"
+            }, { status: 400 });
+        }
+
+        // Make request to WooCommerce to apply coupon
+        const response = await fetch(`${WC_STORE_URL}/cart/apply-coupon`, {
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 ...(allCookies ? { "Cookie": allCookies } : {}),
             },
+            body: JSON.stringify({
+                code: couponCode.trim()
+            }),
             cache: "no-store",
         });
 
@@ -75,7 +89,7 @@ export async function GET(request) {
         const setCookieHeader = response.headers.get("set-cookie");
         if (setCookieHeader) {
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            const cookieStore = cookies();
+            const cookieStore = await cookies();
 
             for (const c of parsedCookies) {
                 const cookieOpts = {
@@ -127,20 +141,23 @@ export async function GET(request) {
         }
 
         if (!response.ok) {
-            throw new Error(`Failed to get cart: ${response.status}`);
+            throw new Error(`Failed to apply coupon: ${response.status}`);
         }
 
-        const cartData = await response.json();
-        return NextResponse.json(cartData)
+        const data = await response.json();
+        return NextResponse.json({
+            success: true,
+            message: "Coupon applied successfully",
+            data: data,
+            // For debugging
+            cookiesReceived: allCookies ? true : false
+        });
 
     } catch (error) {
-        console.error("Get cart error:", error);
+        console.error("Apply coupon error:", error);
         return NextResponse.json({
             success: false,
             error: error.message
         }, { status: 500 });
     }
 }
-
-
-

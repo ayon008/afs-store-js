@@ -60,7 +60,6 @@ export default function ProductCard({
         .trim();
 
 
-
     // Helper function to update price in WooCommerce HTML
     const updatePriceInHtml = (priceHtml, newPrice) => {
         if (!priceHtml || !newPrice) return priceHtml;
@@ -77,6 +76,7 @@ export default function ProductCard({
 
         return updatedHtml;
     };
+
 
     // Update the price HTML with calculated tax price
     const changePrice = useMemo(() => {

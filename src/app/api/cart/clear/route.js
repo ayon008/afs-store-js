@@ -1,10 +1,10 @@
-// app/api/cart/route.js
+// app/api/cart/clear/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
 
-// Helper to parse set-cookie headers
+// Helper to parse set-cookie headers (same as before)
 function parseSetCookieHeader(header) {
     if (!header) return [];
 
@@ -23,7 +23,7 @@ function parseSetCookieHeader(header) {
         .filter(cookie => cookie.name && cookie.value);
 }
 
-// Get WooCommerce cookies from the browser
+// Get WooCommerce cookies from the browser (same as before)
 async function getWooCommerceCookies() {
     try {
         const cookieStore = await cookies();
@@ -48,7 +48,7 @@ async function getWooCommerceCookies() {
     }
 }
 
-export async function GET(request) {
+export async function DELETE(request) {
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -61,9 +61,9 @@ export async function GET(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Make request to WooCommerce
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
-            method: "GET",
+        // Make request to WooCommerce to clear cart
+        const response = await fetch(`${WC_STORE_URL}/cart/items`, {
+            method: "DELETE",
             headers: {
                 "Accept": "application/json",
                 ...(allCookies ? { "Cookie": allCookies } : {}),
@@ -75,7 +75,7 @@ export async function GET(request) {
         const setCookieHeader = response.headers.get("set-cookie");
         if (setCookieHeader) {
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            const cookieStore = cookies();
+            const cookieStore = await cookies();
 
             for (const c of parsedCookies) {
                 const cookieOpts = {
@@ -127,20 +127,23 @@ export async function GET(request) {
         }
 
         if (!response.ok) {
-            throw new Error(`Failed to get cart: ${response.status}`);
+            throw new Error(`Failed to clear cart: ${response.status}`);
         }
 
-        const cartData = await response.json();
-        return NextResponse.json(cartData)
+        const data = await response.json();
+        return NextResponse.json({
+            success: true,
+            message: "Cart cleared successfully",
+            data: data,
+            // For debugging
+            cookiesReceived: allCookies ? true : false
+        });
 
     } catch (error) {
-        console.error("Get cart error:", error);
+        console.error("Clear cart error:", error);
         return NextResponse.json({
             success: false,
             error: error.message
         }, { status: 500 });
     }
 }
-
-
-

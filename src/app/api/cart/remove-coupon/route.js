@@ -1,4 +1,4 @@
-// app/api/cart/route.js
+// app/api/cart/remove-coupon/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -48,7 +48,7 @@ async function getWooCommerceCookies() {
     }
 }
 
-export async function GET(request) {
+export async function POST(request) {
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -61,13 +61,27 @@ export async function GET(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Make request to WooCommerce
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
-            method: "GET",
+        // Get the coupon code from request body
+        const { code: couponCode } = await request.json();
+
+        if (!couponCode || couponCode.trim() === '') {
+            return NextResponse.json({
+                success: false,
+                error: "Invalid coupon code"
+            }, { status: 400 });
+        }
+
+        // Make request to WooCommerce to remove coupon
+        const response = await fetch(`${WC_STORE_URL}/cart/remove-coupon`, {
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 ...(allCookies ? { "Cookie": allCookies } : {}),
             },
+            body: JSON.stringify({
+                code: couponCode.trim()
+            }),
             cache: "no-store",
         });
 
@@ -75,7 +89,7 @@ export async function GET(request) {
         const setCookieHeader = response.headers.get("set-cookie");
         if (setCookieHeader) {
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            const cookieStore = cookies();
+            const cookieStore = await cookies();
 
             for (const c of parsedCookies) {
                 const cookieOpts = {
@@ -127,20 +141,23 @@ export async function GET(request) {
         }
 
         if (!response.ok) {
-            throw new Error(`Failed to get cart: ${response.status}`);
+            throw new Error(`Failed to remove coupon: ${response.status}`);
         }
 
-        const cartData = await response.json();
-        return NextResponse.json(cartData)
+        const data = await response.json();
+        return NextResponse.json({
+            success: true,
+            message: "Coupon removed successfully",
+            data: data,
+            // For debugging
+            cookiesReceived: allCookies ? true : false
+        });
 
     } catch (error) {
-        console.error("Get cart error:", error);
+        console.error("Remove coupon error:", error);
         return NextResponse.json({
             success: false,
             error: error.message
         }, { status: 500 });
     }
 }
-
-
-

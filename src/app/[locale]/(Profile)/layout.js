@@ -1,4 +1,3 @@
-import AuthProvider from '@/Shared/Provider/AuthProvider';
 import '../globals.css';
 import { alliance } from '@/fonts/Alliance';
 import NavItems from './Navitem';
@@ -52,26 +51,24 @@ export default async function RootLayout({ children }) {
     return (
         <html lang="en" className={alliance.className}>
             <body className="font-alliance">
-                <AuthProvider>
-                    <main className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
-                        <div className=''>
-                            <div className='pb-10 global-b-bottom'>
-                                <h1 className='global-h1'>Bonjour, {user?.last_name}</h1>
-                            </div>
+                <main className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
+                    <div className=''>
+                        <div className='pb-10 global-b-bottom'>
+                            <h1 className='global-h1'>Bonjour, {user?.last_name}</h1>
                         </div>
-                        <div className='flex items-start justify-between xl:flex-row flex-col gap-10 mt-10'>
-                            {/* Side Bar */}
-                            <aside className='block xl:max-w-[320px] xl:min-w-[250px] w-full xl:basis-[30%_0_0] aside-nav'>
-                                <h3 className='uppercase leading-[100%] bg-[#1F1F1F] p-[6px] text-white text-xl font-bold'>Your Profile</h3>
-                                <NavItems />
-                            </aside>
-                            {/* Content */}
-                            <div className='flex-1 p-[clamp(1.25rem,0.099rem+2.401vw,2.5rem)] bg-[#F0F0F0]'>
-                                {children}
-                            </div>
+                    </div>
+                    <div className='flex items-start justify-between xl:flex-row flex-col gap-10 mt-10'>
+                        {/* Side Bar */}
+                        <aside className='block xl:max-w-[320px] xl:min-w-[250px] w-full xl:basis-[30%_0_0] aside-nav'>
+                            <h3 className='uppercase leading-[100%] bg-[#1F1F1F] p-[6px] text-white text-xl font-bold'>Your Profile</h3>
+                            <NavItems />
+                        </aside>
+                        {/* Content */}
+                        <div className='flex-1 p-[clamp(1.25rem,0.099rem+2.401vw,2.5rem)] bg-[#F0F0F0]'>
+                            {children}
                         </div>
-                    </main>
-                </AuthProvider>
+                    </div>
+                </main>
             </body>
         </html>
     );

@@ -6,27 +6,21 @@ import Link from "next/link";
 // import SearchOverlay from "../../components/search";
 import React, { useEffect, useRef, useState } from "react";
 import "flag-icons/css/flag-icons.min.css";
-// import Menu from '../../icons/Menu';
 import gsap from "gsap";
 import Menu from "./Menu";
 import { useGSAP } from "@gsap/react";
 import PopUp from "../PopUp/PopUp";
-
-// import useCart from '../../hooks/useCart';
-// import SideCart from '../siteCart/SideCart';
+import useCart from "../Hooks/useCart";
+import SideCart from "../Cart/SideCart";
 
 const Navbar = ({ NAV_LINKS }) => {
-  console.log(NAV_LINKS);
-  
+
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // const { cart, sideCartOpen, openSideCart, closeSideCart } = useCart();
+  const { cart, sideCartOpen, openSideCart, closeSideCart } = useCart();
 
-  // const totalQty = cart?.items_count;
-
-  const totalQty = 0;
-
+  const totalQty = cart?.items_count;
 
 
   // Hover Id [First Nav];
@@ -147,7 +141,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </Link>
             {/* Cart */}
             <button
-              // onClick={openSideCart}
+              onClick={openSideCart}
               className="flex items-center justify-center relative p-1 md:p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
             >
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none">
@@ -772,7 +766,8 @@ const Navbar = ({ NAV_LINKS }) => {
             )}
         </div>
       )}
-      {/* <SideCart isOpen={sideCartOpen} onClose={closeSideCart} /> */}
+      {/* show sideCart */}
+      <SideCart isOpen={sideCartOpen} onClose={closeSideCart} />
 
       {hoverId && (
         <div

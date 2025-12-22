@@ -83,7 +83,7 @@ const Products = ({ minPrice, maxPrice, childCategories, min = null, max = null,
             setLoader(false)
         }
         load();
-    }, [ids, min, max])
+    }, [ids, min, max]);
 
     const [isOpen, setOpen] = useState(false);
 

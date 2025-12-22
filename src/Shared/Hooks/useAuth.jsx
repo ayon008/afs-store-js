@@ -6,7 +6,8 @@ import { AuthContext } from "../Provider/AuthProvider";
 const useAuth = () => {
     const context = useContext(AuthContext);
 
-    if (!context) {
+    // Check if we're inside the provider by checking the _isInsideProvider flag
+    if (!context || context._isInsideProvider === false) {
         throw new Error("useAuth must be used within an AuthProvider");
     }
 

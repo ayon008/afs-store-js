@@ -8,6 +8,7 @@ import "./globals.css";
 import { alliance } from "@/fonts/Alliance";
 import { getMenuItems } from "../actions/WC/getMenuData";
 import { getMessages } from "next-intl/server";
+import { CartProvider } from "@/Shared/Hooks/useCart";
 
 
 export const metadata = {
@@ -69,13 +70,15 @@ export default async function RootLayout({ children, params }) {
       <body className={`${alliance.className} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <div>
-              <Navbar NAV_LINKS={NAV_LINKS} />
-              {children}
-              <div className="h-[400px] bg-red-400 w-full">
+            <CartProvider>
+              <div>
+                <Navbar NAV_LINKS={NAV_LINKS} />
+                {children}
+                <div className="h-[400px] bg-red-400 w-full">
 
+                </div>
               </div>
-            </div>
+            </CartProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
