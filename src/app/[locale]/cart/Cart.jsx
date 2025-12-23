@@ -1,10 +1,11 @@
 "use client"
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag, Package } from 'lucide-react';
 import useCart from '@/Shared/Hooks/useCart';
 import FormButton from '@/Shared/Button/FormButton';
 import CartList from './CartList';
+import ShippingMethodCard from '@/Shared/Shipping/ShippingMethodCard';
 import { selectShippingRate } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';
 
 const Cart = () => {
@@ -181,27 +182,41 @@ const Cart = () => {
 
 
     return (
-        <div>
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+            {/* Success Notification */}
             {
                 couponSuccess && (
-                    <div className='py-4 px-5 flex items-center gap-4 bg-[#2A7029]/30 border-2 my-8 border-[#2A7029] rounded-sm'>
-                        <CheckCircle className='w-4 h-4 text-[#2A7029]' />
-                        <span className='text-[#2A7029] text-lg leading-[100%] font-semibold'>Coupon applied successfully.</span>
+                    <div className='py-4 px-6 flex items-center gap-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-md my-8 mx-auto max-w-7xl animate-slideDown'>
+                        <CheckCircle className='w-5 h-5 text-green-600' />
+                        <span className='text-green-800 text-lg font-medium'>Coupon applied successfully!</span>
                     </div>
                 )
             }
-            <div className='flex items-start gap-5 justify-between global-margin'>
-                {/* left Side */}
-                <div className='flex-[60%_0_0]'>
-                    <div className='border border-[#111]'>
-                        <div>
-                            <div className='items-center justify-between gap-[10px] hidden md:flex px-6 py-3 global-b-bottom'>
-                                <span className='flex-[1_0_0]'></span>
-                                <span className='flex-2'>Product</span>
-                                <span className='flex-[1_0_0]'>Price</span>
-                                <span className='flex-[1_0_0]'>Quantity</span>
-                                <span className='flex-[1_0_0]'>Sub total</span>
+
+            {/* Main Cart Container */}
+            <div className='flex flex-col lg:flex-row items-start gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                {/* Cart Items Section */}
+                <div className='w-full lg:flex-[2] space-y-6'>
+                    {/* Cart Header */}
+                    <div className='bg-white rounded-2xl shadow-sm overflow-hidden'>
+                        <div className='bg-gradient-to-r from-blue-600 to-blue-700 p-5'>
+                            <div className='flex items-center gap-3'>
+                                <ShoppingCart className='w-6 h-6 text-white' />
+                                <h2 className='text-2xl font-bold text-white'>Your Cart ({cartItems.length} items)</h2>
                             </div>
+                        </div>
+
+                        {/* Table Header - Desktop Only */}
+                        <div className='hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b font-medium text-gray-700 text-sm'>
+                            <span className='col-span-1'></span>
+                            <span className='col-span-5'>Product</span>
+                            <span className='col-span-2 text-center'>Price</span>
+                            <span className='col-span-2 text-center'>Quantity</span>
+                            <span className='col-span-2 text-right'>Subtotal</span>
+                        </div>
+
+                        {/* Cart Items */}
+                        <div className='divide-y divide-gray-100'>
                             {
                                 [...cartItems].reverse().map((item, i) => {
                                     return <CartList key={i} item={item} />
@@ -209,131 +224,179 @@ const Cart = () => {
                             }
                         </div>
                     </div>
-                    <div className='lg:mt-10 mt-5 p-5 border rounded-sm space-y-4'>
-                        <form onSubmit={handleCouponSubmit} className='flex items-stretch gap-5 flex-wrap'>
+
+                    {/* Coupon Section */}
+                    <div className='bg-white rounded-2xl shadow-sm p-6 space-y-4'>
+                        <div className='flex items-center gap-2 mb-4'>
+                            <Tag className='w-5 h-5 text-blue-600' />
+                            <h3 className='text-lg font-semibold text-gray-800'>Have a coupon?</h3>
+                        </div>
+
+                        <form onSubmit={handleCouponSubmit} className='flex flex-col sm:flex-row gap-3'>
                             <input
                                 type="text"
                                 name='coupon-code'
                                 placeholder='Enter coupon code'
                                 value={couponCode}
                                 onChange={(e) => setCouponCode(e.target.value)}
-                                className='px-[15px] py-3 border border-[#ccc] text-sm flex-[2_0_0]'
+                                className='flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
                                 disabled={couponLoading}
                             />
-                            <FormButton
-                                label={couponLoading ? 'Loading...' : 'Apply coupon'}
+                            <button
                                 type='submit'
                                 disabled={couponLoading || !couponCode.trim()}
-                            />
+                                className='px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md'
+                            >
+                                {couponLoading ? 'Applying...' : 'Apply Coupon'}
+                            </button>
                         </form>
 
                         {couponError && (
-                            <p className='text-red-500 text-sm'>{couponError}</p>
-                        )}
-                        {couponSuccess && (
-                            <p className='text-green-500 text-sm'>{couponSuccess}</p>
+                            <div className='flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2 rounded-lg'>
+                                <X className='w-4 h-4' />
+                                <p className='text-sm'>{couponError}</p>
+                            </div>
                         )}
 
                         {appliedCoupons.length > 0 && (
-                            <div className='flex flex-wrap gap-2'>
-                                <span className='text-sm font-semibold'>Coupons applied :</span>
-                                {appliedCoupons.map((coupon, index) => (
-                                    <div
-                                        key={index}
-                                        className='flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm'
-                                    >
-                                        <span>{coupon.code}</span>
-                                        <span className='font-semibold'>
-                                            (-{(coupon.totals?.total_discount / 100 || 0).toFixed(2)}€)
-                                        </span>
-                                        <button
-                                            type='button'
-                                            onClick={() => handleRemoveCouponClick(coupon.code)}
-                                            disabled={couponLoading}
-                                            className='hover:text-red-500 disabled:opacity-50'
+                            <div className='bg-green-50 rounded-lg p-4'>
+                                <p className='text-sm font-medium text-gray-700 mb-2'>Applied coupons:</p>
+                                <div className='flex flex-wrap gap-2'>
+                                    {appliedCoupons.map((coupon, index) => (
+                                        <div
+                                            key={index}
+                                            className='inline-flex items-center gap-2 bg-white border border-green-300 text-green-800 px-3 py-1.5 rounded-full text-sm'
                                         >
-                                            <X className='w-4 h-4' />
-                                        </button>
-                                    </div>
-                                ))}
+                                            <Tag className='w-3 h-3' />
+                                            <span className='font-medium'>{coupon.code}</span>
+                                            <span className='text-green-600 font-bold'>
+                                                -{(coupon.totals?.total_discount / 100 || 0).toFixed(2)}€
+                                            </span>
+                                            <button
+                                                type='button'
+                                                onClick={() => handleRemoveCouponClick(coupon.code)}
+                                                disabled={couponLoading}
+                                                className='ml-1 hover:bg-red-100 rounded-full p-0.5 transition-colors disabled:opacity-50'
+                                            >
+                                                <X className='w-3.5 h-3.5 text-red-500' />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
-                {/* Right Side */}
-                <div className='flex-1 border border-[#111] py-10 px-5'>
-                    <h2 className='global-h2 text-[28px]! pb-5 global-b-bottom uppercase mb-5'>Cart totals</h2>
-                    <table className='w-full'>
-                        <tbody className='flex flex-col gap-[10px] w-full'>
-                            <tr className='flex w-full gap-5 items-center justify-between flex-wrap'>
-                                <th className='text-base text-[#111] font-semibold leading-[100%]'>Sub total</th>
-                                <td className='text-base text-[#111] font-semibold leading-[100%]'>{sub_total}{currencySymbol}</td>
-                            </tr>
-                            {parseFloat(discountTotal) > 0 && (
-                                <tr className='flex w-full gap-5 items-center justify-between flex-wrap'>
-                                    <th className='text-base text-[#111] font-semibold leading-[100%]'>Discount</th>
-                                    <td className='text-base text-green-600 font-semibold leading-[100%]'>-{discountTotal}{currencySymbol}</td>
-                                </tr>
-                            )}
+                {/* Right Side - Cart Totals */}
+                <div className='hidden lg:block flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 lg:p-8 sticky top-24'>
+                    <h2 className='text-2xl font-bold text-[#111] pb-5 border-b border-gray-200 mb-6'>
+                        Cart totals
+                    </h2>
 
-                            <tr className='flex flex-col gap-[10px] flex-wrap'>
-                                <th className='text-base text-[#111] font-semibold leading-[100%] text-left uppercase'>Méthodes de livraison</th>
-                                <td className='flex flex-col gap-[10px]'>
-                                    {allShippingRates && allShippingRates.length > 0 ? (
-                                        <form action="">
-                                            <ul className={`flex flex-col gap-[10px] ${shippingLoading ? 'opacity-50' : 'opacity-100'}`}>
-                                                {allShippingRates.map((rate, i) => {
-                                                    const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                    return (
-                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
-                                                            <div className='flex items-center gap-3 flex-1 min-w-0'>
-                                                                <input
-                                                                    checked={selectedRateId === rate.rate_id}
-                                                                    value={`${rate.package_id}:${rate.rate_id}`}
-                                                                    onChange={(e) => handleSelectRate(e.target.value)}
-                                                                    type="radio"
-                                                                    name="shipping_method"
-                                                                    id={`cart_shipping_rate_${rate.rate_id}`}
-                                                                    disabled={shippingLoading}
-                                                                    className="cursor-pointer"
-                                                                />
-                                                                <label htmlFor={`cart_shipping_rate_${rate.rate_id}`} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
-                                                            </div>
-                                                            <div className='text-base text-[#111] font-semibold leading-[100%]'>
-                                                                {
-                                                                    totalPrice === 0 ? <span className='text-green-600'>Gratuit</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || currencySymbol}`
-                                                                }
-                                                            </div>
-                                                        </li>
-                                                    )
-                                                })}
-                                            </ul>
-                                        </form>
-                                    ) : (
-                                        <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
-                                            Aucune méthode de livraison disponible. Veuillez vérifier votre adresse de livraison.
-                                        </p>
-                                    )}
-                                </td>
-                            </tr>
-                            <tr className='flex w-full gap-5 items-center justify-between flex-wrap bg-[#F9F9F9] p-4'>
-                                <th className='!bg-[#F9F9F9]'>
-                                    Total
-                                </th>
-                                <td className='flex flex-col gap-[10px] text-right'>
-                                    <strong className='text-right text-3xl text-[#111] font-bold'>{total || 0}{currencySymbol}</strong>
-                                    {parseFloat(total_tax) > 0 && (
-                                        <small>(dont <strong>{total_tax || 0}{currencySymbol}</strong> TVA)</small>
-                                    )}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <Link href="/checkout" className='p-[15px] cursor-pointer bg-[#1D98FF] text-white text-center text-base font-semibold uppercase w-full rounded-sm mt-5 block'>
+                    <div className='space-y-4'>
+                        {/* Subtotal */}
+                        <div className='flex items-center justify-between'>
+                            <span className='text-base text-gray-600'>Sub total</span>
+                            <span className='text-base text-[#111] font-semibold'>{sub_total}{currencySymbol}</span>
+                        </div>
+
+                        {/* Discount */}
+                        {parseFloat(discountTotal) > 0 && (
+                            <div className='flex items-center justify-between'>
+                                <span className='text-base text-gray-600'>Discount</span>
+                                <span className='text-base text-green-600 font-semibold'>-{discountTotal}{currencySymbol}</span>
+                            </div>
+                        )}
+
+                        {/* Shipping Methods */}
+                        <div className='pt-4 border-t border-gray-100'>
+                            <div className='flex items-center gap-2 mb-4'>
+                                <Truck className='w-5 h-5 text-[#1D98FF]' />
+                                <h3 className='text-base font-semibold text-[#111]'>Méthodes de livraison</h3>
+                            </div>
+
+                            {allShippingRates && allShippingRates.length > 0 ? (
+                                <div className='space-y-3'>
+                                    {allShippingRates.map((rate, i) => (
+                                        <ShippingMethodCard
+                                            key={`shipping-rate-${rate.rate_id}-${i}`}
+                                            rate={rate}
+                                            selected={selectedRateId === rate.rate_id}
+                                            onSelect={(r) => handleSelectRate(`${r.package_id}:${r.rate_id}`)}
+                                            disabled={shippingLoading}
+                                            freeLabel="Gratuit"
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className='p-4 bg-gray-50 rounded-xl text-sm text-gray-500 italic'>
+                                    Aucune méthode de livraison disponible. Veuillez vérifier votre adresse de livraison.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Total */}
+                        <div className='flex items-center justify-between pt-4 mt-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 -mx-6 lg:-mx-8 px-6 lg:px-8 py-5 rounded-b-2xl'>
+                            <span className='text-lg font-bold text-[#111]'>Total</span>
+                            <div className='text-right'>
+                                <strong className='text-2xl lg:text-3xl text-[#111] font-bold block'>
+                                    {total || 0}{currencySymbol}
+                                </strong>
+                                {parseFloat(total_tax) > 0 && (
+                                    <small className='text-gray-500 text-sm'>
+                                        (dont <strong>{total_tax || 0}{currencySymbol}</strong> TVA)
+                                    </small>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Checkout Button */}
+                    <Link
+                        href="/checkout"
+                        className='
+                            p-4 cursor-pointer bg-[#1D98FF] text-white text-center text-base
+                            font-semibold uppercase w-full rounded-xl mt-6 block
+                            hover:bg-[#1585e0] active:scale-[0.98]
+                            shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                            transition-all duration-200
+                            flex items-center justify-center gap-2
+                        '
+                    >
+                        <CreditCard className="w-5 h-5" />
                         Continue to checkout
                     </Link>
                 </div>
+
+                {/* Mobile Sticky Cart Summary */}
+                <div className='lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50 animate-slideUp'>
+                    <div className='flex items-center justify-between mb-3'>
+                        <div>
+                            <span className='text-sm text-gray-500'>Total</span>
+                            {parseFloat(total_tax) > 0 && (
+                                <span className='text-xs text-gray-400 ml-2'>
+                                    (TVA: {total_tax}{currencySymbol})
+                                </span>
+                            )}
+                        </div>
+                        <span className='text-xl font-bold text-[#111]'>{total || 0}{currencySymbol}</span>
+                    </div>
+                    <Link
+                        href="/checkout"
+                        className='
+                            w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-xl
+                            flex items-center justify-center gap-2
+                            shadow-lg shadow-blue-500/25
+                            active:scale-[0.98] transition-all duration-200
+                        '
+                    >
+                        <CreditCard className='w-5 h-5' />
+                        Checkout
+                    </Link>
+                </div>
             </div>
+            {/* Spacer for mobile sticky */}
+            <div className='lg:hidden h-28' />
         </div>
     )
 }

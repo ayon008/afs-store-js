@@ -16,6 +16,7 @@
     "product": "Product",
     "subtotal": "Subtotal",
     "shippingMethods": "Shipping methods",
+    "paymentMethod": "Payment Method",
     "free": "Free",
     "noShippingMethods": "No shipping methods available. Please check your shipping address.",
     "total": "Total",

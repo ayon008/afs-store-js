@@ -16,6 +16,7 @@
     "product": "Produit",
     "subtotal": "Sous-total",
     "shippingMethods": "Méthodes de livraison",
+    "paymentMethod": "Mode de paiement",
     "free": "Gratuit",
     "noShippingMethods": "Aucune méthode de livraison disponible. Veuillez vérifier votre adresse de livraison.",
     "total": "Total",

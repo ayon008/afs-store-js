@@ -566,3 +566,150 @@ position: relative;
   backdrop-filter: blur(10px);
   display: none;
 } */
+
+/* ============================================
+   CART & CHECKOUT UI MODERNIZATION
+   ============================================ */
+
+/* Animation Keyframes */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes stepPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(29, 152, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(29, 152, 255, 0);
+  }
+}
+
+/* Animation Utilities */
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
+
+.animate-stepPulse {
+  animation: stepPulse 2s ease-in-out infinite;
+}
+
+/* Button Quantity */
+.btn-quantity {
+  @apply w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100
+         hover:bg-gray-200 active:scale-95 transition-all duration-150
+         disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+/* Card Modern */
+.card-modern {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+  transition: box-shadow 0.3s ease;
+}
+
+.card-modern:hover {
+  @apply shadow-md;
+}
+
+/* Shipping Option */
+.shipping-option {
+  @apply p-4 border border-gray-200 rounded-xl cursor-pointer transition-all duration-200;
+}
+
+.shipping-option:hover {
+  @apply border-[#1D98FF] shadow-sm;
+}
+
+.shipping-option-selected {
+  @apply border-[#1D98FF] bg-blue-50/50;
+}
+
+/* Payment Card */
+.payment-card {
+  @apply relative p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200;
+}
+
+.payment-card:hover {
+  @apply border-gray-300 bg-gray-50;
+}
+
+.payment-card-selected {
+  @apply border-[#1D98FF] bg-blue-50/30;
+}
+
+/* Input Validation States */
+.input-modern-error {
+  @apply border-red-500 focus:ring-red-500/20;
+}
+
+.input-modern-success {
+  @apply border-green-500;
+}
+
+/* Stepper Styles */
+.stepper-circle {
+  @apply w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300;
+}
+
+.stepper-circle-completed {
+  @apply bg-[#1D98FF] text-white;
+}
+
+.stepper-circle-active {
+  @apply bg-[#1D98FF] text-white;
+  animation: stepPulse 2s ease-in-out infinite;
+}
+
+.stepper-circle-pending {
+  @apply bg-white border-2 border-gray-300 text-gray-400;
+}

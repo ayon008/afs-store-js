@@ -16,6 +16,9 @@ import { useForm } from "react-hook-form";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
+import ProgressStepper from "@/Shared/Stepper/ProgressStepper";
+import PaymentMethodCard from "@/Shared/Payment/PaymentMethodCard";
+import { User, MapPin, CreditCard, Package } from "lucide-react";
 
 const Page = () => {
     const t = useTranslations("checkout");
@@ -466,25 +469,30 @@ const Page = () => {
     }, [cart]);
 
     // Clear cart if locale changes (user navigated to different language checkout)
-    // Use a ref to track if we've already cleared the cart for this locale change
-    const clearedForLocaleRef = React.useRef(null);
+    // Use a ref to track the previous locale to detect actual changes
+    const previousLocaleRef = React.useRef(null);
+    const isInitialMount = React.useRef(true);
     
     useEffect(() => {
-        const checkLocaleChange = async () => {
-            // Get locale from pathname (e.g., /fr/checkout or /en/checkout)
-            const pathSegments = pathname?.split('/').filter(Boolean) || [];
-            const pathLocale = pathSegments[0] || locale;
-            
-            // Check if we've already cleared for this locale combination
-            const localeKey = `${locale}-${pathLocale}`;
-            if (clearedForLocaleRef.current === localeKey) {
-                return; // Already cleared for this locale change
-            }
-            
-            // If locale in pathname doesn't match current locale and cart has items, clear cart
-            if (pathLocale !== locale && cart && cart.items && cart.items.length > 0) {
+        // Skip on initial mount - just store the current locale
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            previousLocaleRef.current = locale;
+            return;
+        }
+        
+        // Only proceed if we have all required values
+        if (!locale || !cart) {
+            return;
+        }
+        
+        // Check if locale has actually changed from the previous value
+        const localeChanged = previousLocaleRef.current !== null && previousLocaleRef.current !== locale;
+        
+        // Only clear cart if locale actually changed and cart has items
+        if (localeChanged && cart.items && cart.items.length > 0) {
+            const clearCartForLocaleChange = async () => {
                 try {
-                    clearedForLocaleRef.current = localeKey; // Mark as cleared
                     const result = await handleClearCart();
                     if (result && result.success) {
                         // Show notification
@@ -496,13 +504,14 @@ const Page = () => {
                     console.error('Error clearing cart on locale change:', error);
                     setNotification(tCommon("cartClearedLanguage")); // Show notification anyway
                 }
-            }
-        };
-        
-        if (pathname && locale && cart) {
-            checkLocaleChange();
+            };
+            
+            clearCartForLocaleChange();
         }
-    }, [pathname, locale, cart, handleClearCart, tCommon]);
+        
+        // Update previous locale after checking
+        previousLocaleRef.current = locale;
+    }, [locale, cart, handleClearCart, tCommon, loadCart]);
 
     // Clear saved form data from localStorage
     const clearSavedFormData = () => {
@@ -653,27 +662,11 @@ const Page = () => {
                 />
             )}
             
-            {/* Steps */}
-            <div className='flex items-center justify-between max-w-[1080px] mx-auto relative py-[80px] lg:py-[100px]'>
-                <div className='flex flex-col items-center justify-center step-1'>
-                    <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold  rounded-full text-center text-white z-10! bg-[#1D98FF]'>1</span>
-                    <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        {t("basket")}
-                    </span>
-                </div>
-                <div className='flex flex-col items-center justify-center step-2'>
-                    <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold  rounded-full text-center text-white z-10! bg-[#1D98FF]'>2</span>
-                    <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        {t("securePayment")}
-                    </span>
-                </div>
-                <div className='flex flex-col items-center justify-center step-3'>
-                    <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] border border-[#111] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold text-[#111] rounded-full text-center bg-white z-10!'>3</span>
-                    <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        {t("summary")}
-                    </span>
-                </div>
-            </div>
+            {/* Progress Stepper */}
+            <ProgressStepper
+                currentStep={2}
+                steps={[t("basket"), t("securePayment"), t("summary")]}
+            />
             {/*  */}
             <div className='global-padding global-margin'>
                 {/* checkout forms */}
@@ -682,8 +675,13 @@ const Page = () => {
                     {/* 1st section */}
                     <div className='grid grid-cols-1 gap-10 lg:grid-cols-2'>
                         {/* Billing address */}
-                        <div className='flex flex-col lg:gap-8 gap-6'>
-                            <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>{t("billingDetails")}</h3>
+                        <div className='card-modern p-6 lg:p-8'>
+                            <div className='flex items-center gap-3 mb-6'>
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <User className='w-5 h-5 text-[#1D98FF]' />
+                                </div>
+                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("billingDetails")}</h3>
+                            </div>
                             <div className='grid grid-cols-1 gap-5'>
                                 <div className='grid grid-cols-2 gap-5'>
                                     <Input
@@ -826,10 +824,21 @@ const Page = () => {
                             </div>
                         </div>
                         {/* Shipping address */}
-                        <div className='flex flex-col lg:gap-8 gap-6'>
-                            <div className='flex items-center gap-1 flex-wrap'>
-                                <input onChange={handleShow} type="checkbox" id='shipping_address' checked={shippingAddress} />
-                                <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>{t("shippingDetails")}</h3>
+                        <div className='card-modern p-6 lg:p-8'>
+                            <div className='flex items-center gap-3 mb-6'>
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <MapPin className='w-5 h-5 text-[#1D98FF]' />
+                                </div>
+                                <label htmlFor='shipping_address' className='flex items-center gap-3 cursor-pointer'>
+                                    <input
+                                        onChange={handleShow}
+                                        type="checkbox"
+                                        id='shipping_address'
+                                        checked={shippingAddress}
+                                        className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
+                                    />
+                                    <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("shippingDetails")}</h3>
+                                </label>
                             </div>
                             {
                                 shippingAddress && (
@@ -1015,142 +1024,159 @@ const Page = () => {
                         </table>
                     </div>
 
-                    {/* 3rd section */}
-                    <div className='bg-[#F7F7F7]'>
-                            <ul className='flex flex-col gap-2 p-4 border-b border-[#DDD8E3]'>
-                                {filteredPaymentMethods?.map((method, i) => {
-                                    const isSelected = watchFields.payment_method === method.id;
-                                    const isMonetico = method.id?.toLowerCase().includes('monetico') ||
-                                        method.title?.toLowerCase().includes('carte bancaire');
-
-                                    return (
-                                        <li key={method.id || i} className='flex flex-col gap-3'>
-                                            <div className='flex items-center gap-1'>
-                                                <input
-                                                    {...register("payment_method", { required: true })}
-                                                    type="radio"
-                                                    value={method.id}
-                                                    id={`payment_method_${method.id}`}
-                                                    checked={isSelected}
-                                                />
-                                                <label htmlFor={`payment_method_${method.id}`} className='cursor-pointer'>
-                                                    {method.title}
-                                                </label>
-                                            </div>
-
-                                            {isSelected && PAYMENT_INSTRUCTIONS[method.id] && (
-                                                <div className='bg-[#EBF5FF] border-l-4 border-[#1D98FF] rounded-sm p-4 text-sm ml-6'>
-                                                    <p>{PAYMENT_INSTRUCTIONS[method.id]}</p>
-                                                </div>
-                                            )}
-
-                                            {isSelected && (method.id === 'paypal' || method.id === 'ppcp-gateway') && (
-                                                <div className="mt-2 ml-6">
-                                                    <CheckoutPayPal
-                                                        cartData={{
-                                                            totals: cart.totals,
-                                                            lineItems: items.map(item => ({
-                                                                product_id: item.id,
-                                                                quantity: item.quantity,
-                                                                variation_id: item.variation_id || 0
-                                                            })),
-                                                            shippingLines: cart.shipping_rates?.[0]?.shipping_rates
-                                                                ?.filter(rate => rate.selected)
-                                                                .map(rate => ({
-                                                                    method_id: rate.method_id,
-                                                                    method_title: rate.name,
-                                                                    total: (rate.price / 100).toString()
-                                                                })) || []
-                                                        }}
-                                                        customerData={{
-                                                            ...watchFields,
-                                                            billing: {
-                                                                first_name: watchFields.billing_first_name,
-                                                                last_name: watchFields.billing_last_name,
-                                                                email: watchFields.billing_email,
-                                                                phone: watchFields.billing_phone || ''
-                                                            }
-                                                        }}
-                                                        disabled={isPayPalDisabled}
-                                                        onSuccess={(details) => {
-                                                            clearSavedFormData();
-                                                            clearCart();
-                                                            router.push(`/order-success?order_id=${details.orderId}`);
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {isSelected && (isMonetico || method.id?.toLowerCase().includes('monetico')) && (
-                                                <div className="mt-2 ml-6">
-                                                    <CheckoutMonetico
-                                                        cartData={{
-                                                            totals: cart.totals,
-                                                            lineItems: items.map(item => ({
-                                                                product_id: item.id,
-                                                                quantity: item.quantity,
-                                                                variation_id: item.variation_id || 0
-                                                            })),
-                                                            shippingLines: cart.shipping_rates?.[0]?.shipping_rates
-                                                                ?.filter(rate => rate.selected)
-                                                                .map(rate => ({
-                                                                    method_id: rate.method_id,
-                                                                    method_title: rate.name,
-                                                                    total: (rate.price / 100).toString()
-                                                                })) || []
-                                                        }}
-                                                        customerData={{
-                                                            ...watchFields,
-                                                            billing: {
-                                                                ...watchFields,
-                                                                first_name: watchFields.billing_first_name,
-                                                                last_name: watchFields.billing_last_name,
-                                                                email: watchFields.billing_email,
-                                                            }
-                                                        }}
-                                                        disabled={!watchFields.terms}
-                                                        onSuccess={(details) => {
-                                                            clearSavedFormData();
-                                                            clearCart();
-                                                            router.push(`/order-success?order_id=${details.orderId}`);
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-
-                            <div className='flex flex-col gap-2 p-4'>
-                                <p>Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our
-                                    <Link href="/privacy-policy" className='inline'>privacy policy</Link>
-                                </p>
-                                <div className='flex flex-col gap-1'>
-                                    <div className='flex items-center gap-1'>
-                                        <input {...register("terms", {
-                                            required: t("termsRequired")
-                                        })} type="checkbox" id="terms" />
-                                        <label htmlFor="terms">{t("terms")}</label>
-                                    </div>
-                                    {errors.terms && (
-                                        <p className="text-red-500 text-xs mt-1 ml-6">{errors.terms.message}</p>
-                                    )}
+                    {/* 3rd section - Payment Methods */}
+                    <div className='card-modern overflow-hidden'>
+                        <div className='p-6 border-b border-gray-100'>
+                            <div className='flex items-center gap-3'>
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <CreditCard className='w-5 h-5 text-[#1D98FF]' />
                                 </div>
-
-                                {!watchFields.payment_method?.toLowerCase().includes('monetico') &&
-                                    watchFields.payment_method !== 'paypal' &&
-                                    watchFields.payment_method !== 'ppcp-gateway' ? (
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting || !watchFields.terms}
-                                        className='w-fit ml-auto text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
-                                    >
-                                        {isSubmitting ? t("processing") : watchFields.payment_method === 'bacs' ? t("placeOrder") : t("continue")}
-                                    </button>
-                                ) : null}
+                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("paymentMethod") || "Mode de paiement"}</h3>
                             </div>
                         </div>
+
+                        <div className='p-6 space-y-4'>
+                            {filteredPaymentMethods?.map((method, i) => {
+                                const isSelected = watchFields.payment_method === method.id;
+                                const isMonetico = method.id?.toLowerCase().includes('monetico') ||
+                                    method.title?.toLowerCase().includes('carte bancaire');
+                                const isPayPal = method.id === 'paypal' || method.id === 'ppcp-gateway';
+
+                                return (
+                                    <PaymentMethodCard
+                                        key={method.id || i}
+                                        method={method}
+                                        selected={isSelected}
+                                        onSelect={() => setValue('payment_method', method.id)}
+                                    >
+                                        {/* Payment Instructions */}
+                                        {PAYMENT_INSTRUCTIONS[method.id] && (
+                                            <div className='bg-blue-50 border-l-4 border-[#1D98FF] rounded-lg p-4 text-sm text-gray-700 mb-4'>
+                                                <p>{PAYMENT_INSTRUCTIONS[method.id]}</p>
+                                            </div>
+                                        )}
+
+                                        {/* PayPal Component */}
+                                        {isPayPal && (
+                                            <div className="mt-2">
+                                                <CheckoutPayPal
+                                                    cartData={{
+                                                        totals: cart.totals,
+                                                        lineItems: items.map(item => ({
+                                                            product_id: item.id,
+                                                            quantity: item.quantity,
+                                                            variation_id: item.variation_id || 0
+                                                        })),
+                                                        shippingLines: cart.shipping_rates?.[0]?.shipping_rates
+                                                            ?.filter(rate => rate.selected)
+                                                            .map(rate => ({
+                                                                method_id: rate.method_id,
+                                                                method_title: rate.name,
+                                                                total: (rate.price / 100).toString()
+                                                            })) || []
+                                                    }}
+                                                    customerData={{
+                                                        ...watchFields,
+                                                        billing: {
+                                                            first_name: watchFields.billing_first_name,
+                                                            last_name: watchFields.billing_last_name,
+                                                            email: watchFields.billing_email,
+                                                            phone: watchFields.billing_phone || ''
+                                                        }
+                                                    }}
+                                                    disabled={isPayPalDisabled}
+                                                    onSuccess={(details) => {
+                                                        clearSavedFormData();
+                                                        clearCart();
+                                                        router.push(`/order-success?order_id=${details.orderId}`);
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Monetico Component */}
+                                        {isMonetico && (
+                                            <div className="mt-2">
+                                                <CheckoutMonetico
+                                                    cartData={{
+                                                        totals: cart.totals,
+                                                        lineItems: items.map(item => ({
+                                                            product_id: item.id,
+                                                            quantity: item.quantity,
+                                                            variation_id: item.variation_id || 0
+                                                        })),
+                                                        shippingLines: cart.shipping_rates?.[0]?.shipping_rates
+                                                            ?.filter(rate => rate.selected)
+                                                            .map(rate => ({
+                                                                method_id: rate.method_id,
+                                                                method_title: rate.name,
+                                                                total: (rate.price / 100).toString()
+                                                            })) || []
+                                                    }}
+                                                    customerData={{
+                                                        ...watchFields,
+                                                        billing: {
+                                                            ...watchFields,
+                                                            first_name: watchFields.billing_first_name,
+                                                            last_name: watchFields.billing_last_name,
+                                                            email: watchFields.billing_email,
+                                                        }
+                                                    }}
+                                                    disabled={!watchFields.terms}
+                                                    onSuccess={(details) => {
+                                                        clearSavedFormData();
+                                                        clearCart();
+                                                        router.push(`/order-success?order_id=${details.orderId}`);
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </PaymentMethodCard>
+                                )
+                            })}
+                        </div>
+
+                        {/* Terms and Submit */}
+                        <div className='bg-gray-50 p-6 space-y-4'>
+                            <p className='text-sm text-gray-600'>
+                                Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our{' '}
+                                <Link href="/privacy-policy" className='text-[#1D98FF] hover:underline'>privacy policy</Link>
+                            </p>
+
+                            <label className='flex items-center gap-3 cursor-pointer'>
+                                <input
+                                    {...register("terms", { required: t("termsRequired") })}
+                                    type="checkbox"
+                                    id="terms"
+                                    className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
+                                />
+                                <span className='text-sm text-gray-700'>{t("terms")}</span>
+                            </label>
+                            {errors.terms && (
+                                <p className="text-red-500 text-xs animate-slideDown">{errors.terms.message}</p>
+                            )}
+
+                            {!watchFields.payment_method?.toLowerCase().includes('monetico') &&
+                                watchFields.payment_method !== 'paypal' &&
+                                watchFields.payment_method !== 'ppcp-gateway' ? (
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting || !watchFields.terms}
+                                    className='
+                                        w-full lg:w-auto lg:ml-auto text-white bg-[#1D98FF] rounded-xl
+                                        px-8 py-4 uppercase font-semibold
+                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                        hover:bg-[#1585e0] active:scale-[0.98]
+                                        shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                                        transition-all duration-200
+                                        flex items-center justify-center gap-2
+                                    '
+                                >
+                                    {isSubmitting ? t("processing") : watchFields.payment_method === 'bacs' ? t("placeOrder") : t("continue")}
+                                </button>
+                            ) : null}
+                        </div>
+                    </div>
 
                 </form>
             </div>

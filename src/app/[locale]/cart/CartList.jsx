@@ -1,6 +1,6 @@
 "use client"
 import useCart from '@/Shared/Hooks/useCart';
-import { Minus, Plus, Trash2Icon } from 'lucide-react';
+import { Minus, Plus, Trash2Icon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react'
@@ -75,15 +75,105 @@ const CartList = ({ item }) => {
 
     return (
         <div>
+            {/* Mobile Card View */}
+            <div
+                className={`
+                    md:hidden p-4 bg-white rounded-xl shadow-sm border border-gray-100 mb-3
+                    ${updating ? 'opacity-50 pointer-events-none' : ''}
+                    animate-slideUp
+                `}
+            >
+                <div className='flex gap-4'>
+                    {/* Product Image with Delete Button */}
+                    <div className='relative flex-shrink-0'>
+                        <Image
+                            src={image}
+                            alt={name}
+                            width={80}
+                            height={80}
+                            className='rounded-lg object-cover'
+                        />
+                        <button
+                            onClick={handleRemoveItem}
+                            className='absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
+                                       flex items-center justify-center hover:bg-red-600 transition-colors
+                                       shadow-sm'
+                        >
+                            <X className='w-3 h-3' />
+                        </button>
+                    </div>
+
+                    {/* Product Info */}
+                    <div className='flex-1 min-w-0'>
+                        <Link
+                            href={`/product/${slug}`}
+                            className='font-semibold text-[#1D98FF] text-sm line-clamp-2 hover:underline'
+                        >
+                            {name}
+                        </Link>
+
+                        {/* Variations */}
+                        {variations?.length > 0 && (
+                            <div className='mt-1 space-y-0.5'>
+                                {variations.map((v, i) => (
+                                    <p key={i} className='text-xs text-gray-500'>
+                                        {v.attribute}: {v.value}
+                                    </p>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Unit Price */}
+                        <p className='text-sm font-bold text-[#111] mt-2'>
+                            {formatPrice(basePriceWithTax)} {currency_symbol}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Quantity Controls & Subtotal */}
+                <div className='flex items-center justify-between mt-4 pt-4 border-t border-gray-100'>
+                    <div className='flex items-center gap-1'>
+                        <button
+                            onClick={handleDecrement}
+                            disabled={quantity <= 1 || updating || !isInStock}
+                            className='btn-quantity'
+                        >
+                            <Minus className='w-4 h-4' />
+                        </button>
+                        <span className={`w-10 text-center font-semibold ${updating ? 'animate-pulse-soft' : ''}`}>
+                            {quantity}
+                        </span>
+                        <button
+                            onClick={handleIncrement}
+                            disabled={updating || !isInStock || isMaxReached}
+                            className='btn-quantity'
+                        >
+                            <Plus className='w-4 h-4' />
+                        </button>
+                    </div>
+
+                    <div className='text-right'>
+                        <span className='text-xs text-gray-500'>Sous-total</span>
+                        <p className='font-bold text-[#111]'>
+                            {formatPrice(sub_total)} {total_Currency_Symbol}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop View */}
             <div className={`items-center justify-between gap-[10px] hidden md:flex px-6 py-3 ${updating ? 'opacity-50 pointer-events-none' : ''}`}>
-                <span className='flex items-center gap-1 flex-[1_0_0]'>
-                    <button onClick={handleRemoveItem} className='cursor-pointer hover:text-red-500 transition-colors'>
+                <span className='flex items-center gap-2 flex-[1_0_0]'>
+                    <button
+                        onClick={handleRemoveItem}
+                        className='cursor-pointer text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-lg'
+                    >
                         <Trash2Icon className='w-4 h-4' />
                     </button>
-                    <Image src={image} alt={name} width={60} height={60} />
+                    <Image src={image} alt={name} width={60} height={60} className='rounded-lg' />
                 </span>
                 <span className='flex-2 text-[15px] font-bold leading-[100%] text-[#1D98FF] flex-col flex gap-2'>
-                    <Link href={`/product/${slug}`}>{name}</Link>
+                    <Link href={`/product/${slug}`} className='hover:underline'>{name}</Link>
                     {
                         variations?.map((variation, i) => {
                             return (
@@ -104,19 +194,21 @@ const CartList = ({ item }) => {
                 <span className='flex-[1_0_0] text-sm text-[#111] leading-[100%] font-medium'>
                     {`${formatPrice(basePriceWithTax)} ${currency_symbol}`}
                 </span>
-                <span className='flex-[1_0_0] flex items-center gap-2'>
+                <span className='flex-[1_0_0] flex items-center gap-1'>
                     <button
                         onClick={handleDecrement}
                         disabled={quantity <= 1 || updating || !isInStock}
-                        className='cursor-pointer hover:bg-gray-100 rounded p-1 disabled:opacity-30 disabled:cursor-not-allowed'
+                        className='btn-quantity'
                     >
                         <Minus className='w-4 h-4' />
                     </button>
-                    <span className='min-w-[20px] text-center'>{quantity}</span>
+                    <span className={`min-w-[32px] text-center font-semibold text-sm ${updating ? 'animate-pulse-soft' : ''}`}>
+                        {quantity}
+                    </span>
                     <button
                         onClick={handleIncrement}
                         disabled={updating || !isInStock || isMaxReached}
-                        className='cursor-pointer hover:bg-gray-100 rounded p-1 disabled:opacity-30 disabled:cursor-not-allowed'
+                        className='btn-quantity'
                     >
                         <Plus className='w-4 h-4' />
                     </button>
