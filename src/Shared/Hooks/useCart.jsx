@@ -198,7 +198,27 @@ export const CartProvider = ({ children }) => {
     const handleRemoveCartItem = async (itemKey) => {
         try {
             setError(null);
-            const result = await removeCartItem(itemKey);
+            setLoading(true);
+
+            // Use API route for better cookie synchronization on client side
+            const response = await fetch('/api/cart/remove-item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Important: include cookies
+                body: JSON.stringify({
+                    key: itemKey
+                }),
+                cache: 'no-store',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Failed to remove item: ${response.status}`);
+            }
+
+            const result = await response.json();
 
             if (result.success) {
                 // Small delay to ensure cookies are synchronized
@@ -218,7 +238,7 @@ export const CartProvider = ({ children }) => {
                     };
                 });
 
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
+                // Then refresh full cart data
                 await loadCart();
             } else {
                 setError(result.error);
@@ -230,6 +250,8 @@ export const CartProvider = ({ children }) => {
             setError(err.message);
             console.error('Remove from cart error:', err);
             return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
         }
     };
 

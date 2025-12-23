@@ -4,7 +4,7 @@ import useCart from "@/Shared/Hooks/useCart";
 import CountrySelect from "@/Shared/Input/DropDown";
 import Input from "@/Shared/Input/Input";
 import Select from "@/Shared/Input/Select";
-import { clearCart } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 import CheckoutMonetico from "@/lib/CheckoutMonitico";
 import CheckoutPayPal from "@/lib/CheckoutPaypal";
 import { countriesList } from "@/lib/countriesList";

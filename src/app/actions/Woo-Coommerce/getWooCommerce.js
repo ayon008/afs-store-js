@@ -588,18 +588,31 @@ export async function searchProducts(query) {
 
 export async function removeCartItem(itemKey) {
     const localeValue = await getLocaleValue();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
-        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/remove-item`, {
+        const cookieHeader = await getWooCommerceCookies();
+
+        const response = await fetch(`${WC_STORE_URL}/cart/remove-item`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Cookie': cookieHeader,
                 'Accept': 'application/json',
             },
             body: JSON.stringify({ key: itemKey }),
+            cache: 'no-store',
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to remove item: ${response.status}`);
+            const errorText = await response.text();
+            let errorMessage = `Failed to remove item: ${response.status}`;
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } catch {
+                errorMessage = errorText || errorMessage;
+            }
+            throw new Error(errorMessage);
         }
 
         const result = await response.json();
@@ -608,7 +621,7 @@ export async function removeCartItem(itemKey) {
         revalidatePath('/cart');
         revalidatePath('/');
 
-        return result;
+        return { success: true, ...result };
 
     } catch (error) {
         console.error('Remove from cart error:', error);
