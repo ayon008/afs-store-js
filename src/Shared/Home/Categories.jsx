@@ -66,7 +66,7 @@ const categories = [
   },
 ].map((c) => ({
   ...c,
-  path: `/category-product/${c.slug}`,
+  path: `/product-category/${c.slug}`,
 }));
 
 export default function CategorySection() {

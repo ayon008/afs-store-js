@@ -400,102 +400,104 @@ const Navbar = ({ NAV_LINKS }) => {
             ) : (
               <div onMouseLeave={() => handleShow(null)}>
                 {/* Service Section */}
-                <div className="bg-white w-full h-fit md:block hidden">
-                  <div className="grid grid-cols-6 gap-6 text-black/75 global-padding pt-[22px]">
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Choisir
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Configurateur foil</li>
-                        <li className="cursor-pointer">Best match stab</li>
-                        <li className="cursor-pointer">
-                          Comparateur 3 stabs / aile avant
-                        </li>
-                        <li className="cursor-pointer">Comparatif mât</li>
-                        <li className="cursor-pointer">Construction planche</li>
-                        <li className="cursor-pointer">Reprise matériel</li>
-                        <li className="cursor-pointer">
-                          Caractéristiques des foils
-                        </li>
-                        <li className="cursor-pointer">Taille des vis</li>
-                      </ul>
+                <div onMouseLeave={() => handleShow(null)}>
+                  {/* Service Section */}
+                  <div className="bg-white w-full h-fit md:block hidden">
+                    <div className="grid grid-cols-6 gap-6 text-black/75 global-padding pt-[22px]">
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Choose
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer"><Link href="/">Foil configurator</Link></li>
+                          <li className="cursor-pointer"><Link href="/">Best match stabilizer</Link></li>
+                          <li className="cursor-pointer">
+                            <Link href="/">3 stabilizers / front wing comparator</Link>
+                          </li>
+                          <li className="cursor-pointer"><Link href="/">Mast comparison</Link></li>
+                          <li className="cursor-pointer"><Link href="/">Board construction</Link></li>
+                          <li className="cursor-pointer"><Link href="/">Equipment buyback</Link></li>
+                          <li className="cursor-pointer">
+                            <Link href="/">Foil characteristics</Link>
+                          </li>
+                          <li className="cursor-pointer"><Link href="/">Screw sizes</Link></li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Pay
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer">Payment options</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Shipping & Delivery
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer">Order tracking</li>
+                          <li className="cursor-pointer">Shipping & delivery</li>
+                          <li className="cursor-pointer">Returns</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Repair & Maintenance
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer">Support</li>
+                          <li className="cursor-pointer">After-sales service request</li>
+                          <li className="cursor-pointer">Warranty</li>
+                          <li className="cursor-pointer">User manual</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Contact
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer">Email</li>
+                          <li className="cursor-pointer">WhatsApp</li>
+                          <li className="cursor-pointer">
+                            Book a call with an AFS expert
+                          </li>
+                          <li className="cursor-pointer">
+                            Come visit us
+                          </li>
+                          <li className="cursor-pointer">Events</li>
+                          <li className="cursor-pointer">Blog</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-semibold tracking-wide">
+                          Team
+                        </p>
+                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                          <li className="cursor-pointer">Work team</li>
+                          <li className="cursor-pointer">Ambassadors</li>
+                          <li className="cursor-pointer">Dealer map</li>
+                        </ul>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Payer
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Options paiement</li>
-                      </ul>
+                    <div className="flex flex-row-reverse items-center justify-center gap-2 text-black/75 py-4 border-t mt-6">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M19 5L5 19M19 5H6.4M19 5V17.6"
+                          stroke="black"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      <span className="text-[#111] font-semibold cursor-pointer">
+                        Factory tour
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Expédition et livraison
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Suivi de commande</li>
-                        <li className="cursor-pointer">Envoi et livraison</li>
-                        <li className="cursor-pointer">Retours</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Réparation et maintenance
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Support</li>
-                        <li className="cursor-pointer">Demande de SAV</li>
-                        <li className="cursor-pointer">Garantie</li>
-                        <li className="cursor-pointer">Notice d&apos;utilisation</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Contact
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Mail</li>
-                        <li className="cursor-pointer">Whatsapp</li>
-                        <li className="cursor-pointer">
-                          Réserver un appel avec un expert AFS
-                        </li>
-                        <li className="cursor-pointer">
-                          Venir nous rendre visite
-                        </li>
-                        <li className="cursor-pointer">Evenements</li>
-                        <li className="cursor-pointer">Blog</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-[16px] font-semibold tracking-wide">
-                        Equipe
-                      </p>
-                      <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                        <li className="cursor-pointer">Equipe de travail</li>
-                        <li className="cursor-pointer">Ambassadeurs</li>
-                        <li className="cursor-pointer">Map revendeurs</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex flex-row-reverse items-center justify-center gap-2 text-black/75 py-4 border-t mt-6">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M19 5L5 19M19 5H6.4M19 5V17.6"
-                        stroke="black"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                    <span className="text-[#111] font-semibold cursor-pointer">
-                      {" "}
-                      Visite de l’usine
-                    </span>
                   </div>
                 </div>
               </div>
