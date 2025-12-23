@@ -73,6 +73,7 @@ export async function POST(request) {
         }
 
         // Make request to WooCommerce to update billing address
+        // Also update shipping address with billing address by default (WooCommerce uses shipping address for shipping rates calculation)
         const response = await fetch(`${WC_STORE_URL}/cart/update-customer`, {
             method: "POST",
             headers: {
@@ -81,7 +82,9 @@ export async function POST(request) {
                 ...(allCookies ? { "Cookie": allCookies } : {}),
             },
             body: JSON.stringify({
-                billing_address: billing_address
+                billing_address: billing_address,
+                // Set shipping address to billing address by default (user can override if they check the shipping address checkbox)
+                shipping_address: billing_address
             }),
             cache: "no-store",
         });
@@ -108,9 +111,19 @@ export async function POST(request) {
             }
 
             const data = await response.json();
+            console.log('WooCommerce cart update response:', JSON.stringify(data, null, 2));
+            console.log('Shipping rates in response:', data?.shipping_rates);
+            
+            // Check if shipping rates are available in the response
+            const hasShippingRates = data?.shipping_rates?.some(
+                pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
+            );
+            console.log('Has shipping rates in response:', hasShippingRates);
+            
             return NextResponse.json({
                 success: true,
-                data: data
+                data: data,
+                hasShippingRates: hasShippingRates
             }, {
                 headers: responseHeaders
             });
@@ -125,9 +138,19 @@ export async function POST(request) {
         }
 
         const data = await response.json();
+        console.log('WooCommerce cart update response (no set-cookie):', JSON.stringify(data, null, 2));
+        console.log('Shipping rates in response:', data?.shipping_rates);
+        
+        // Check if shipping rates are available in the response
+        const hasShippingRates = data?.shipping_rates?.some(
+            pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
+        );
+        console.log('Has shipping rates in response:', hasShippingRates);
+        
         return NextResponse.json({
             success: true,
-            data: data
+            data: data,
+            hasShippingRates: hasShippingRates
         });
 
     } catch (error) {

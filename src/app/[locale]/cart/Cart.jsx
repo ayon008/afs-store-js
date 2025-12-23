@@ -57,7 +57,10 @@ const Cart = () => {
 
 
     const handleSelectRate = async (value) => {
-        const [packageId, rateId] = value.split(':');
+        // Handle values like "0:free_shipping:42" or "0:local_pickup:34"
+        const firstColonIndex = value.indexOf(':');
+        const packageId = firstColonIndex !== -1 ? value.substring(0, firstColonIndex) : '0';
+        const rateId = firstColonIndex !== -1 ? value.substring(firstColonIndex + 1) : value;
         console.log('handleSelectRate called:', { packageId, rateId, currentSelected: selectedRateId });
         
         if (rateId === selectedRateId) {

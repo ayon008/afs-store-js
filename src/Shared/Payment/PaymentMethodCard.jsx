@@ -18,14 +18,16 @@ const PayPalIcon = ({ className }) => (
  * @param {boolean} selected - Whether this option is selected
  * @param {function} onSelect - Callback when selected
  * @param {node} children - Expandable content when selected (PayPal button, etc.)
- * @param {string} description - Optional description text
+ * @param {string} description - Optional description text from translations
+ * @param {string} translatedTitle - Optional translated title text
  */
 const PaymentMethodCard = ({
   method,
   selected = false,
   onSelect,
   children,
-  description
+  description,
+  translatedTitle
 }) => {
   const isPayPal = method.id === 'paypal' || method.id === 'ppcp-gateway';
   const isMonetico = method.id?.toLowerCase().includes('monetico') ||
@@ -44,13 +46,6 @@ const PaymentMethodCard = ({
       return <Building2 className={`w-6 h-6 ${selected ? 'text-white' : 'text-gray-600'}`} />;
     }
     return <CreditCard className={`w-6 h-6 ${selected ? 'text-white' : 'text-gray-600'}`} />;
-  };
-
-  const getDefaultDescription = () => {
-    if (isPayPal) return 'Paiement rapide et sécurisé';
-    if (isMonetico) return 'Carte bancaire sécurisée';
-    if (isBacs) return 'Virement bancaire direct';
-    return '';
   };
 
   return (
@@ -84,11 +79,13 @@ const PaymentMethodCard = ({
         {/* Payment Info */}
         <div className='flex-1 min-w-0'>
           <p className='font-semibold text-[#111] text-sm lg:text-base'>
-            {method.title}
+            {translatedTitle || method.title}
           </p>
-          <p className='text-xs lg:text-sm text-gray-500 mt-0.5'>
-            {description || getDefaultDescription()}
-          </p>
+          {description && (
+            <p className='text-xs lg:text-sm text-gray-500 mt-0.5'>
+              {description}
+            </p>
+          )}
         </div>
 
         {/* Selection Indicator */}

@@ -59,7 +59,27 @@
       "direct": "Lien direct (j'ai tapé l'adresse du site)",
       "display": "Publicité Display/Bannière",
       "other": "Autre (veuillez préciser)"
-    }
+    },
+    "paymentMethods": {
+      "paypal": "PayPal",
+      "paypalDescription": "Paiement rapide et sécurisé",
+      "monetico": "Carte bancaire",
+      "cardDescription": "Carte bancaire sécurisée",
+      "bacs": "Virement bancaire",
+      "bankTransferDescription": "Virement bancaire direct",
+      "bacsInstructions": "Effectuez le paiement directement depuis votre compte bancaire. Veuillez utiliser l'ID de votre commande comme référence du paiement. Votre commande ne sera pas expédiée tant que les fonds ne seront pas reçus."
+    },
+    "orderConfirmed": "Commande confirmée !",
+    "orderConfirmedMessage": "Merci pour votre commande. Vous recevrez bientôt un email de confirmation avec les détails de votre commande.",
+    "orderNumber": "Numéro de commande",
+    "backToHome": "Retour à l'accueil",
+    "viewOrders": "Voir mes commandes",
+    "emailConfirmation": "Email de confirmation",
+    "emailConfirmationMessage": "Un email récapitulatif vous a été envoyé avec tous les détails de votre commande.",
+    "deliveryInfo": "Livraison",
+    "deliveryInfoMessage": "Vous recevrez un email avec le suivi de votre colis dès son expédition.",
+    "privacyPolicyText": "Vos données personnelles seront utilisées pour traiter votre commande, vous assister lors de votre visite sur le site, et pour d'autres raisons décrites dans notre",
+    "privacyPolicy": "politique de confidentialité"
   },
   "common": {
     "cartClearedLanguage": "Votre panier a été vidé car vous avez changé de langue. Les produits doivent être ajoutés à nouveau dans la nouvelle langue.",

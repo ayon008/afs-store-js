@@ -20,7 +20,8 @@ import ProgressStepper from "@/Shared/Stepper/ProgressStepper";
 import PaymentMethodCard from "@/Shared/Payment/PaymentMethodCard";
 import { User, MapPin, CreditCard, Package } from "lucide-react";
 
-const Page = () => {
+// Wrapper component to ensure NextIntl context is available
+const CheckoutPageContent = () => {
     const t = useTranslations("checkout");
     const tCommon = useTranslations("common");
     const locale = useLocale();
@@ -29,7 +30,20 @@ const Page = () => {
     const [shippingAddress, setShippingAddress] = useState(false);
 
     const handleShow = event => {
-        setShippingAddress(event.target.checked);
+        const isChecked = event.target.checked;
+        setShippingAddress(isChecked);
+        
+        // If unchecking, reset shipping fields to billing values
+        if (!isChecked) {
+            setValue('shipping_first_name', watchFields.billing_first_name || '');
+            setValue('shipping_last_name', watchFields.billing_last_name || '');
+            setValue('shipping_company', watchFields.billing_company || '');
+            setValue('shipping_country', watchFields.billing_country || '');
+            setValue('shipping_address_1', watchFields.billing_address_1 || '');
+            setValue('shipping_city', watchFields.billing_city || '');
+            setValue('shipping_state', watchFields.billing_state || '');
+            setValue('shipping_postcode', watchFields.billing_postcode || '');
+        }
     }
 
     // Cart
@@ -37,10 +51,6 @@ const Page = () => {
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
-    console.log(cartBillingAddress, 'cartBillingAddress');
-    
-
-    console.log(cartShippingAddress);
 
 
     const items = cart?.items;
@@ -105,16 +115,17 @@ const Page = () => {
             formValues.billing_email = cartBillingAddress.email || '';
         }
         
-        // Add shipping address if available (this will be the default for 2nd form)
-        if (cartShippingAddress) {
-            formValues.shipping_first_name = cartShippingAddress.first_name || '';
-            formValues.shipping_last_name = cartShippingAddress.last_name || '';
-            formValues.shipping_company = cartShippingAddress.company || '';
-            formValues.shipping_country = cartShippingAddress.country || '';
-            formValues.shipping_address_1 = cartShippingAddress.address_1 || '';
-            formValues.shipping_city = cartShippingAddress.city || '';
-            formValues.shipping_state = cartShippingAddress.state || '';
-            formValues.shipping_postcode = cartShippingAddress.postcode || '';
+        // Initialize shipping address with billing address by default
+        // Only use cart shipping address if it's different from billing
+        if (cartBillingAddress) {
+            formValues.shipping_first_name = cartShippingAddress?.first_name || cartBillingAddress.first_name || '';
+            formValues.shipping_last_name = cartShippingAddress?.last_name || cartBillingAddress.last_name || '';
+            formValues.shipping_company = cartShippingAddress?.company || cartBillingAddress.company || '';
+            formValues.shipping_country = cartShippingAddress?.country || cartBillingAddress.country || '';
+            formValues.shipping_address_1 = cartShippingAddress?.address_1 || cartBillingAddress.address_1 || '';
+            formValues.shipping_city = cartShippingAddress?.city || cartBillingAddress.city || '';
+            formValues.shipping_state = cartShippingAddress?.state || cartBillingAddress.state || '';
+            formValues.shipping_postcode = cartShippingAddress?.postcode || cartBillingAddress.postcode || '';
         }
         
         // Only reset if we have at least one address
@@ -192,14 +203,49 @@ const Page = () => {
 
     const filteredPaymentMethods = filterPaymentMethods(paymentMethods);
 
-    // Payment instructions
-    const PAYMENT_INSTRUCTIONS = {
-        'bacs': 'Effectuez le paiement directement depuis votre compte bancaire. Veuillez utiliser l\'ID de votre commande comme référence du paiement. Votre commande ne sera pas expédiée tant que les fonds ne seront pas reçus.',
-        'paypal': 'Payer avec PayPal',
-        'ppcp-gateway': 'Payer avec PayPal'
+    // Function to get translated payment method title and description
+    const getPaymentMethodTranslation = (method) => {
+        const methodId = method.id?.toLowerCase() || '';
+        const methodTitle = method.title?.toLowerCase() || '';
+        
+        // Check for PayPal
+        if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
+            return {
+                title: t("paymentMethods.paypal"),
+                description: t("paymentMethods.paypalDescription")
+            };
+        }
+        
+        // Check for Monetico/Carte Bancaire
+        if (methodId.includes('monetico') || methodTitle.includes('carte bancaire')) {
+            return {
+                title: t("paymentMethods.monetico"),
+                description: t("paymentMethods.cardDescription")
+            };
+        }
+        
+        // Check for Bank Transfer
+        if (methodId === 'bacs' || methodTitle.includes('virement bancaire') || methodTitle.includes('virement')) {
+            return {
+                title: t("paymentMethods.bacs"),
+                description: t("paymentMethods.bankTransferDescription")
+            };
+        }
+        
+        // Default fallback
+        return {
+            title: method.title,
+            description: t("paymentMethods.cardDescription")
+        };
     };
 
-    console.log(cartShippingAddress, 'cartShippingAddress');
+    // Payment instructions (translated)
+    const PAYMENT_INSTRUCTIONS = {
+        'bacs': t("paymentMethods.bacsInstructions"),
+        'paypal': t("paymentMethods.paypalDescription"),
+        'ppcp-gateway': t("paymentMethods.paypalDescription")
+    };
+
 
 
 
@@ -229,6 +275,9 @@ const Page = () => {
         fetchPaymentMethods();
     }, []);
 
+    // State for shipping country details
+    const [shippingCountryDetails, setShippingCountryDetails] = useState(null);
+
     useEffect(() => {
         if (watchFields.billing_country) {
             const fetchCountryDetails = async () => {
@@ -237,15 +286,40 @@ const Page = () => {
             };
             fetchCountryDetails();
         }
-    }, [watchFields.billing_country, setCountryDetails])
+    }, [watchFields.billing_country, setCountryDetails]);
+
+    // Fetch shipping country details when shipping country changes
+    useEffect(() => {
+        const shippingCountry = watchFields.shipping_country || watchFields.billing_country;
+        if (shippingCountry) {
+            const fetchShippingCountryDetails = async () => {
+                const data = await getCountryDetails(shippingCountry);
+                setShippingCountryDetails(data);
+            };
+            fetchShippingCountryDetails();
+        }
+    }, [watchFields.shipping_country, watchFields.billing_country]);
+
+    // Ref to track last update to prevent infinite loops
+    const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '' });
+    const isUpdatingRef = React.useRef(false);
 
     // Update billing address in cart when billing fields change (to calculate shipping methods)
     const updateBillingAddress = useCallback(async (billingData) => {
-        // Only update if we have minimum required fields
-        if (billingData.billing_country && billingData.billing_postcode && 
-            billingData.billing_city && billingData.billing_address_1) {
+        // Update if we have at least the country (minimum requirement for shipping calculation)
+        // WooCommerce can sometimes calculate shipping with just country, but ideally we need more fields
+        if (billingData.billing_country) {
+            // Check if we're already updating or if nothing has changed
+            const currentKey = `${billingData.billing_country}-${billingData.billing_postcode}-${billingData.billing_city}-${billingData.billing_address_1}`;
+            if (isUpdatingRef.current || lastUpdateRef.current.key === currentKey) {
+                return;
+            }
+
             try {
+                isUpdatingRef.current = true;
+                lastUpdateRef.current.key = currentKey;
                 setUpdatingShipping(true);
+                
                 // Use API route for guest users, or server action for authenticated users
                 const response = await fetch('/api/cart/update-billing', {
                     method: 'POST',
@@ -271,22 +345,51 @@ const Page = () => {
                 });
                 
                 if (response.ok) {
-                    await loadCart();
+                    const result = await response.json();
+                    
+                    // Check if shipping rates are already in the response
+                    const hasShippingRatesInResponse = result.data?.shipping_rates?.some(
+                        pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
+                    );
+                    
+                    // Only reload cart once, with a single delay if needed
+                    if (hasShippingRatesInResponse || result.hasShippingRates) {
+                        await loadCart();
+                    } else {
+                        // Wait for WooCommerce to calculate shipping rates (single wait)
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        await loadCart();
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Failed to update billing address:', errorText);
                 }
             } catch (error) {
                 console.error('Error updating billing address:', error);
             } finally {
                 setUpdatingShipping(false);
+                isUpdatingRef.current = false;
             }
         }
     }, [loadCart]);
 
-    // Debounced update of billing address
+    // Debounced update of billing address - trigger on country change or when address is complete
     useEffect(() => {
+        // Skip if already updating
+        if (isUpdatingRef.current) {
+            return;
+        }
+
         const timer = setTimeout(() => {
-            if (watchFields.billing_country && watchFields.billing_postcode && 
-                watchFields.billing_city && watchFields.billing_address_1) {
-                updateBillingAddress(watchFields);
+            // Update if country is set (minimum requirement)
+            // This allows WooCommerce to at least try to calculate shipping rates
+            if (watchFields.billing_country) {
+                const currentKey = `${watchFields.billing_country}-${watchFields.billing_postcode}-${watchFields.billing_city}-${watchFields.billing_address_1}`;
+                
+                // Only update if something actually changed
+                if (lastUpdateRef.current.key !== currentKey) {
+                    updateBillingAddress(watchFields);
+                }
             }
         }, 1000); // Wait 1 second after user stops typing
 
@@ -318,22 +421,94 @@ const Page = () => {
     const [selectedRateId, setSelectedRateId] = useState(null);
     const [notification, setNotification] = useState(null);
 
-    const allShippingRates = cart?.shipping_rates?.flatMap(pkg =>
-        pkg.shipping_rates?.map(rate => ({
-            ...rate,
-            package_id: pkg.package_id
-        })) || []
-    ) || [];
+    // Extract shipping rates from cart - optimized, no logs
+    const allShippingRates = React.useMemo(() => {
+        if (!cart?.shipping_rates) {
+            return [];
+        }
+        
+        // Handle array of packages
+        if (Array.isArray(cart.shipping_rates)) {
+            return cart.shipping_rates.flatMap((pkg, pkgIndex) => {
+                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map(rate => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex
+                    }));
+                }
+                if (Array.isArray(pkg) && pkg.length > 0) {
+                    return pkg.map(rate => ({
+                        ...rate,
+                        package_id: pkgIndex
+                    }));
+                }
+                return [];
+            });
+        }
+        
+        // Handle object structure
+        if (typeof cart.shipping_rates === 'object') {
+            return Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
+                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map(rate => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex
+                    }));
+                }
+                return [];
+            });
+        }
+        
+        return [];
+    }, [cart?.shipping_rates]);
+
+    // Ref to track user's manual selection (local state takes priority)
+    const userSelectedRateRef = React.useRef(null);
+    // Ref to store pending sync info (rateId and packageId to sync)
+    const pendingSyncRef = React.useRef(null);
+    // Ref to store debounce timer
+    const syncTimerRef = React.useRef(null);
 
     useEffect(() => {
-        const selected = allShippingRates.find(rate => rate.selected);
-
-        if (selected) {
-            setSelectedRateId(selected.rate_id);
-        } else {
-            setSelectedRateId(null);
+        // If user has manually selected a rate, prioritize that over cart state
+        if (userSelectedRateRef.current) {
+            const userSelected = allShippingRates.find(rate => rate.rate_id === userSelectedRateRef.current);
+            if (userSelected) {
+                // User selection exists in available rates, keep it
+                if (selectedRateId !== userSelectedRateRef.current) {
+                    setSelectedRateId(userSelectedRateRef.current);
+                    setValue('shipping_method', userSelectedRateRef.current);
+                }
+                return;
+            } else {
+                // User selection no longer available, clear it
+                userSelectedRateRef.current = null;
+            }
         }
-    }, [allShippingRates]);
+
+        // Only auto-update from cart if no user selection
+        const selected = allShippingRates.find(rate => rate.selected);
+        if (selected && selected.rate_id !== selectedRateId) {
+            setSelectedRateId(selected.rate_id);
+            setValue('shipping_method', selected.rate_id);
+        } else if (!selected && allShippingRates.length > 0 && !selectedRateId && !userSelectedRateRef.current) {
+            // Auto-select first rate if none selected (only on initial load)
+            const firstRate = allShippingRates[0];
+            if (firstRate) {
+                setSelectedRateId(firstRate.rate_id);
+                setValue('shipping_method', firstRate.rate_id);
+            }
+        }
+    }, [allShippingRates, selectedRateId, setValue]);
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (syncTimerRef.current) {
+                clearTimeout(syncTimerRef.current);
+            }
+        };
+    }, []);
 
     // Check if PayPal button should be disabled
     const isPayPalDisabled = useMemo(() => {
@@ -346,7 +521,6 @@ const Page = () => {
 
         // Check if terms are not accepted
         if (!watchFields.terms) {
-            console.log('PayPal disabled: terms not accepted');
             return true;
         }
 
@@ -437,23 +611,58 @@ const Page = () => {
         selectedRateId
     ]);
 
-    const handleSelectRate = async (value) => {
-        const [packageId, rateId] = value.split(':');
-        if (rateId === selectedRateId) return;
-        setShippingLoading(true);
+    // Ref to prevent multiple simultaneous syncs
+    const isSyncingShippingRef = React.useRef(false);
+    
+    // Function to sync shipping rate with server (silent, no loading state)
+    const syncShippingRateToServer = async (rateId, packageId, showLoading = false) => {
+        if (!rateId || !packageId) return;
+        
+        // Prevent multiple simultaneous syncs
+        if (isSyncingShippingRef.current) {
+            return;
+        }
+        
+        isSyncingShippingRef.current = true;
+        
+        if (showLoading) {
+            setShippingLoading(true);
+        }
+        
         try {
             const result = await selectShippingRate(rateId, packageId);
             if (result.success) {
-                setSelectedRateId(rateId);
-                setValue('shipping_method', rateId);
+                // Reload cart once (no setTimeout, direct call)
                 await loadCart();
-            } else {
-                console.error('Failed to select shipping rate:', result.error);
             }
         } catch (error) {
-            console.error('Error selecting shipping rate:', error);
+            console.error('Error syncing shipping rate:', error);
         } finally {
-            setShippingLoading(false);
+            if (showLoading) {
+                setShippingLoading(false);
+            }
+            isSyncingShippingRef.current = false;
+        }
+    };
+
+    const handleSelectRate = (value) => {
+        const [packageId, rateId] = value.split(':');
+        if (rateId === selectedRateId) {
+            return;
+        }
+        
+        // Update local state immediately (purely local - no server call, no loading state)
+        userSelectedRateRef.current = rateId;
+        setSelectedRateId(rateId);
+        setValue('shipping_method', rateId);
+        
+        // Store pending sync info for later (only sync before form submission)
+        pendingSyncRef.current = { rateId, packageId };
+        
+        // Clear any existing timer (no automatic sync)
+        if (syncTimerRef.current) {
+            clearTimeout(syncTimerRef.current);
+            syncTimerRef.current = null;
         }
     };
 
@@ -542,6 +751,31 @@ const Page = () => {
             return;
         }
 
+        // Sync shipping method to server before submission if there's a pending sync
+        if (pendingSyncRef.current || (selectedRateId && userSelectedRateRef.current === selectedRateId)) {
+            // Clear any pending timer
+            if (syncTimerRef.current) {
+                clearTimeout(syncTimerRef.current);
+                syncTimerRef.current = null;
+            }
+            
+            // Find packageId for the selected rate
+            const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
+            if (selectedRate && selectedRate.package_id) {
+                // Sync immediately before submission (with loading state only here)
+                await syncShippingRateToServer(selectedRateId, selectedRate.package_id, true);
+                pendingSyncRef.current = null;
+            } else if (pendingSyncRef.current) {
+                // Use pending sync info if available
+                await syncShippingRateToServer(
+                    pendingSyncRef.current.rateId,
+                    pendingSyncRef.current.packageId,
+                    true
+                );
+                pendingSyncRef.current = null;
+            }
+        }
+
         // PayPal is handled directly by the CheckoutPayPal component
         // No need to handle it in onSubmit
 
@@ -563,6 +797,7 @@ const Page = () => {
                         email: data.billing_email,
                         phone: data.billing_phone || ''
                     },
+                    // Use shipping address only if checkbox is checked, otherwise use billing address
                     shipping: shippingAddress ? {
                         first_name: data.shipping_first_name,
                         last_name: data.shipping_last_name,
@@ -572,8 +807,19 @@ const Page = () => {
                         city: data.shipping_city,
                         state: data.shipping_state || '',
                         postcode: data.shipping_postcode,
-                        country: data.shipping_country
-                    } : null
+                        country: data.shipping_country || data.billing_country
+                    } : {
+                        // Use billing address as shipping address by default
+                        first_name: data.billing_first_name,
+                        last_name: data.billing_last_name,
+                        company: data.billing_company || '',
+                        address_1: data.billing_address_1,
+                        address_2: '',
+                        city: data.billing_city,
+                        state: data.billing_state || '',
+                        postcode: data.billing_postcode,
+                        country: data.billing_country
+                    }
                 };
 
                 const response = await fetch('/api/orders', {
@@ -847,78 +1093,91 @@ const Page = () => {
                                             {/*  */}
                                             <Input
                                                 checkout={true}
-                                                label='First Name'
+                                                label={t("firstName")}
                                                 type='text'
                                                 id='shipping_first_name'
-                                                register={register("shipping_first_name", { required: "Ce champ est requis" })}
+                                                register={register("shipping_first_name", { required: t("required") })}
                                                 error={getFieldError("shipping_first_name")}
                                                 value={watchFields.shipping_first_name}
                                             />
 
                                             <Input
                                                 checkout={true}
-                                                label='Last Name'
+                                                label={t("lastName")}
                                                 type='text'
                                                 id='shipping_last_name'
-                                                register={register("shipping_last_name", { required: "Ce champ est requis" })}
+                                                register={register("shipping_last_name", { required: t("required") })}
                                                 error={getFieldError("shipping_last_name")}
                                                 value={watchFields.shipping_last_name}
                                             />
                                         </div>
                                         <Input
                                             checkout={true}
-                                            label='Company (Optional)'
+                                            label={t("company")}
                                             type='text'
                                             id='shipping_company'
                                             register={register("shipping_company", { required: false })}
                                             error={getFieldError("shipping_company")}
                                             value={watchFields.shipping_company}
                                         />
+                                        <CountrySelect
+                                            label={t("country")}
+                                            id="shipping_country"
+                                            defaultValue={watchFields.shipping_country || watchFields.billing_country || ''}
+                                            register={register("shipping_country", { 
+                                                required: t("required"),
+                                                onChange: (e) => {
+                                                    // If shipping country is empty, use billing country
+                                                    if (!e.target.value && watchFields.billing_country) {
+                                                        setValue('shipping_country', watchFields.billing_country);
+                                                    }
+                                                }
+                                            })}
+                                            checkout={true}
+                                            countries={countriesList}
+                                        />
+                                        {getFieldError("shipping_country") && (
+                                            <p className="text-red-500 text-xs mt-1">{getFieldError("shipping_country")}</p>
+                                        )}
                                         <Input
                                             checkout={true}
-                                            label='Country'
+                                            label={t("address")}
                                             type='text'
-                                            id='shipping_country'
-                                            register={register("shipping_country", { required: "Ce champ est requis" })}
-                                            error={getFieldError("shipping_country")}
-                                            value={watchFields.shipping_country}
+                                            id='shipping_address_1'
+                                            register={register("shipping_address_1", { required: t("required") })}
+                                            error={getFieldError("shipping_address_1")}
+                                            value={watchFields.shipping_address_1}
                                         />
                                         <Input
                                             checkout={true}
-                                            label='Post Code'
+                                            label={t("city")}
                                             type='text'
-                                            id='zip'
-                                            register={register("shipping_postcode", { required: "Ce champ est requis" })}
-                                            error={getFieldError("shipping_postcode")}
-                                            value={watchFields.shipping_postcode}
-                                        />
-                                        <Input
-                                            checkout={true}
-                                            label='State'
-                                            type='text'
-                                            id='state'
-                                            register={register("shipping_state", { required: "Ce champ est requis" })}
-                                            error={getFieldError("shipping_state")}
-                                            value={watchFields.shipping_state}
-                                        />
-
-                                        <Input
-                                            checkout={true}
-                                            label='City'
-                                            type='text'
-                                            id='city'
-                                            register={register("shipping_city", { required: "Ce champ est requis" })}
+                                            id='shipping_city'
+                                            register={register("shipping_city", { required: t("required") })}
                                             error={getFieldError("shipping_city")}
                                             value={watchFields.shipping_city}
                                         />
-
+                                        {
+                                            (shippingCountryDetails?.states || countryDetails?.states) && (shippingCountryDetails?.states || countryDetails?.states).length > 0 && (
+                                                <Select
+                                                    label={t("state")}
+                                                    id="shipping_state"
+                                                    register={register("shipping_state", { required: t("required") })}
+                                                    error={getFieldError("shipping_state")}
+                                                    value={watchFields.shipping_state}
+                                                    checkout={true}
+                                                    options={[...((shippingCountryDetails?.states || countryDetails?.states).map((state) => ({ value: state.code, label: state.name })))]}
+                                                />
+                                            )
+                                        }
                                         <Input
                                             checkout={true}
-                                            label='Street number and name'
-                                            type='text' id='street_number_and_name'
-                                            register={register("shipping_address_1", { required: "Ce champ est requis" })}
-                                            error={getFieldError("shipping_address_1")}
-                                            value={watchFields.shipping_address_1}
+                                            label={t("postcode")}
+                                            type='text'
+                                            id='shipping_postcode'
+                                            register={register("shipping_postcode", { required: t("required") })}
+                                            error={getFieldError("shipping_postcode")}
+                                            value={watchFields.shipping_postcode}
                                         />
 
                                     </div>
@@ -972,41 +1231,132 @@ const Page = () => {
                                 <tr className='border-b border-[#111]'>
                                     <th className='!px-3 py-2 text-left'>{t("shippingMethods")}</th>
                                     <td className={`!px-3 py-2 !border-l text-left border-[#111]`}>
-                                        {allShippingRates && allShippingRates.length > 0 ? (
-                                            <div>
-                                                <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
-                                                    {allShippingRates.map((rate, i) => {
-                                                        const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                        return (
-                                                            <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
-                                                                <div className='flex items-center gap-3 flex-1 min-w-0'>
-                                                                    <input
-                                                                        checked={selectedRateId === rate.rate_id}
-                                                                        value={`${rate.package_id}:${rate.rate_id}`}
-                                                                        onChange={(e) => handleSelectRate(e.target.value)}
-                                                                        type="radio"
-                                                                        name="shipping_method"
-                                                                        id={`shipping_rate_${rate.rate_id}`}
-                                                                        disabled={shippingLoading || updatingShipping}
-                                                                        className="cursor-pointer"
-                                                                    />
-                                                                    <label htmlFor={`shipping_rate_${rate.rate_id}`} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
-                                                                </div>
-                                                                <div className='text-base text-[#111] font-semibold leading-[100%]'>
-                                                                    {
-                                                                        totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
-                                                                    }
-                                                                </div>
-                                                            </li>
-                                                        )
-                                                    })}
-                                                </ul>
-                                            </div>
-                                        ) : (
-                                            <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
-                                                {t("noShippingMethods")}
-                                            </p>
-                                        )}
+                                        {(() => {
+                                            // Check if we have at least the country (minimum requirement)
+                                            const hasCountry = !!watchFields.billing_country;
+                                            
+                                            // Check if address is more complete (for better shipping calculation)
+                                            const hasCompleteAddress = watchFields.billing_country && 
+                                                                      watchFields.billing_postcode && 
+                                                                      watchFields.billing_city && 
+                                                                      watchFields.billing_address_1;
+                                            
+                                            // Debug: Log shipping rates availability
+                                            // If updating shipping, show loading state
+                                            if (updatingShipping || shippingLoading) {
+                                                return (
+                                                    <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                                        {t("processing")}
+                                                    </p>
+                                                );
+                                            }
+                                            
+                                            // If no country selected, show message
+                                            if (!hasCountry) {
+                                                return (
+                                                    <p className='text-sm text-gray-400 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                                        {t("shippingMethods")}
+                                                    </p>
+                                                );
+                                            }
+                                            
+                                            // If address is not complete, show a message but still try to show rates if available
+                                            if (!hasCompleteAddress) {
+                                                // Still try to show rates if they exist (WooCommerce might have calculated with just country)
+                                                if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
+                                                    // Don't show warning message if rates are available - just show the rates
+                                                    return (
+                                                        <div>
+                                                            <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
+                                                                {allShippingRates.map((rate, i) => {
+                                                                    const totalPrice = (rate.price / 100 + rate.taxes / 100);
+                                                                    const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                                                                    return (
+                                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                            <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                                                                <input
+                                                                                    checked={selectedRateId === rate.rate_id}
+                                                                                    value={`${rate.package_id}:${rate.rate_id}`}
+                                                                                    onChange={(e) => handleSelectRate(e.target.value)}
+                                                                                    type="radio"
+                                                                                    name="shipping_method"
+                                                                                    id={safeId}
+                                                                                    disabled={shippingLoading || updatingShipping}
+                                                                                    className="cursor-pointer"
+                                                                                />
+                                                                                <label htmlFor={safeId} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
+                                                                            </div>
+                                                                            <div className='text-base text-[#111] font-semibold leading-[100%]'>
+                                                                                {
+                                                                                    totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
+                                                                                }
+                                                                            </div>
+                                                                        </li>
+                                                                    )
+                                                                })}
+                                                            </ul>
+                                                        </div>
+                                                    );
+                                                }
+                                                // No rates and incomplete address
+                                                const missingFields = [];
+                                                if (!watchFields.billing_address_1) missingFields.push(t("address"));
+                                                if (!watchFields.billing_city) missingFields.push(t("city"));
+                                                if (!watchFields.billing_postcode) missingFields.push(t("postcode"));
+                                                
+                                                return (
+                                                    <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                                        {missingFields.length > 0 
+                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${locale === 'fr' ? "pour calculer les méthodes de livraison" : "to calculate shipping methods"}`
+                                                            : t("noShippingMethods")
+                                                        }
+                                                    </p>
+                                                );
+                                            }
+                                            
+                                            // If address is complete and shipping methods are available
+                                            if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
+                                                return (
+                                                    <div>
+                                                        <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
+                                                            {allShippingRates.map((rate, i) => {
+                                                                const totalPrice = (rate.price / 100 + rate.taxes / 100);
+                                                                const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                                                                return (
+                                                                    <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                        <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                                                            <input
+                                                                                checked={selectedRateId === rate.rate_id}
+                                                                                value={`${rate.package_id}:${rate.rate_id}`}
+                                                                                onChange={(e) => handleSelectRate(e.target.value)}
+                                                                                type="radio"
+                                                                                name="shipping_method"
+                                                                                id={safeId}
+                                                                                disabled={shippingLoading || updatingShipping}
+                                                                                className="cursor-pointer"
+                                                                            />
+                                                                            <label htmlFor={safeId} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
+                                                                        </div>
+                                                                        <div className='text-base text-[#111] font-semibold leading-[100%]'>
+                                                                            {
+                                                                                totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
+                                                                            }
+                                                                        </div>
+                                                                    </li>
+                                                                )
+                                                            })}
+                                                        </ul>
+                                                    </div>
+                                                );
+                                            }
+                                            
+                                            // Address is complete but no shipping methods found
+                                            return (
+                                                <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                                    {t("noShippingMethods")}
+                                                </p>
+                                            );
+                                        })()}
                                     </td>
                                 </tr>
                                 <tr>
@@ -1041,6 +1391,9 @@ const Page = () => {
                                 const isMonetico = method.id?.toLowerCase().includes('monetico') ||
                                     method.title?.toLowerCase().includes('carte bancaire');
                                 const isPayPal = method.id === 'paypal' || method.id === 'ppcp-gateway';
+                                
+                                // Get translated title and description
+                                const paymentTranslation = getPaymentMethodTranslation(method);
 
                                 return (
                                     <PaymentMethodCard
@@ -1048,6 +1401,8 @@ const Page = () => {
                                         method={method}
                                         selected={isSelected}
                                         onSelect={() => setValue('payment_method', method.id)}
+                                        translatedTitle={paymentTranslation.title}
+                                        description={paymentTranslation.description}
                                     >
                                         {/* Payment Instructions */}
                                         {PAYMENT_INSTRUCTIONS[method.id] && (
@@ -1182,6 +1537,22 @@ const Page = () => {
             </div>
         </div>
     )
+}
+
+// Main page component with client-side only rendering
+const Page = () => {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Only render the content after component is mounted (client-side)
+    if (!isMounted) {
+        return null; // or a loading spinner
+    }
+
+    return <CheckoutPageContent />;
 }
 
 export default Page;

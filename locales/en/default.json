@@ -59,7 +59,27 @@
       "direct": "Direct link (I typed the site address)",
       "display": "Display/Banner advertising",
       "other": "Other (please specify)"
-    }
+    },
+    "paymentMethods": {
+      "paypal": "PayPal",
+      "paypalDescription": "Fast & secure checkout",
+      "monetico": "Credit Card",
+      "cardDescription": "Secure credit card payment",
+      "bacs": "Bank Transfer",
+      "bankTransferDescription": "Direct bank transfer",
+      "bacsInstructions": "Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account."
+    },
+    "orderConfirmed": "Order Confirmed!",
+    "orderConfirmedMessage": "Thank you for your order. You will soon receive a confirmation email with your order details.",
+    "orderNumber": "Order number",
+    "backToHome": "Back to home",
+    "viewOrders": "View my orders",
+    "emailConfirmation": "Email confirmation",
+    "emailConfirmationMessage": "A summary email has been sent to you with all the details of your order.",
+    "deliveryInfo": "Delivery",
+    "deliveryInfoMessage": "You will receive an email with tracking information once your package has been shipped.",
+    "privacyPolicyText": "Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our",
+    "privacyPolicy": "privacy policy"
   },
   "common": {
     "cartClearedLanguage": "Your cart has been cleared because you changed the language. Products must be added again in the new language.",

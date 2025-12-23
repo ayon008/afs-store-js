@@ -38,7 +38,6 @@ export const CartProvider = ({ children }) => {
             try {
                 // Use API route instead of Server Action for better cookie synchronization
                 const data = await getCartAction();
-                console.log(data, 'data');
                 // const data = await response.json();
                 setCart(data.data);
                 setLoading(false);
@@ -76,7 +75,6 @@ export const CartProvider = ({ children }) => {
                 throw new Error(result.error || 'Failed to load cart');
             }
 
-            console.log(result.data, 'resultFromLoadCart');
             setCart(result.data);
         } catch (err) {
             setError(err.message);

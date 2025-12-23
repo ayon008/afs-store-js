@@ -19,9 +19,12 @@ const ShippingMethodCard = ({
 }) => {
   const totalPrice = (rate.price / 100) + (rate.taxes / 100);
   const currencySymbol = rate.currency_symbol || '€';
+  const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+  const inputValue = rate.package_id !== undefined ? `${rate.package_id}:${rate.rate_id}` : rate.rate_id;
 
   return (
     <label
+      htmlFor={safeId}
       className={`
         shipping-option group
         ${selected ? 'shipping-option-selected' : ''}
@@ -31,7 +34,8 @@ const ShippingMethodCard = ({
       <input
         type="radio"
         name="shipping_rate"
-        value={rate.rate_id}
+        id={safeId}
+        value={inputValue}
         checked={selected}
         onChange={() => onSelect?.(rate)}
         disabled={disabled}

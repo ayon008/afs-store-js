@@ -181,7 +181,7 @@ const Navbar = ({ NAV_LINKS }) => {
         />
       )}
       
-      <nav className={`sticky left-0 right-0 top-0 z-[99] text-white w-full ${notification ? 'mt-[73px]' : ''}`}>
+      <nav className={notification ? 'sticky left-0 right-0 top-0 z-[99] text-white w-full mt-[73px]' : 'sticky left-0 right-0 top-0 z-[99] text-white w-full'}>
         {/* Logo and Search Part */}
         <div
           className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between"
