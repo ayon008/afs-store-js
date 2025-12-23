@@ -7,15 +7,15 @@ const BreadCums = () => {
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Accueil
+          Home
         </Link>
-        / <span className="text-black">demande-sav</span>
+        / <span className="text-black">service request</span>
       </div>
     </div>
   );
 };
 
-export default function Clinique() {
+export default function service() {
   return (
     <>
       {/* HERO */}
@@ -24,12 +24,14 @@ export default function Clinique() {
         <div className="global-padding flex flex-1 flex-col justify-between gap-[40px] pt-[20px]">
           <div className="flex flex-col gap-[20px]">
             <BreadCums />
-
+            <h1 className="text-center global-h1 py-10 uppercase">
+              Service request
+            </h1>
             <iframe
               src="https://n8n.foilandco.com/form/e9b3a3d4-4b77-47af-b9cb-b7bfa436f8b8"
               className="w-[100%] h-[2420px]"
               allowFullScreen
-              title="Formulaire de demande SAV"
+              title="After-Sales Service Request Form"
             ></iframe>
 
             <style jsx global>{`

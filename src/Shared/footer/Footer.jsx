@@ -3,7 +3,7 @@ import { useGSAP } from '@gsap/react';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import gsap from "gsap"
 
 const Footer = () => {
@@ -16,10 +16,55 @@ const Footer = () => {
     const contentRef3 = useRef(null);
     const contentRef4 = useRef(null);
 
+    // Initialize accordions: closed on mobile, open on desktop
+    useEffect(() => {
+        const handleResize = () => {
+            if (typeof window !== 'undefined') {
+                if (window.innerWidth >= 1024) {
+                    // On desktop, reset all states and ensure content is visible
+                    setFirst(false);
+                    setSecond(false);
+                    setThird(false);
+                    setFourth(false);
+
+                    // Ensure content is visible on desktop
+                    if (contentRef.current) contentRef.current.style.height = 'auto';
+                    if (contentRef2.current) contentRef2.current.style.height = 'auto';
+                    if (contentRef3.current) contentRef3.current.style.height = 'auto';
+                    if (contentRef4.current) contentRef4.current.style.height = 'auto';
+                } else {
+                    // On mobile, ensure all accordions are closed (height: 0)
+                    if (contentRef.current) contentRef.current.style.height = '0px';
+                    if (contentRef2.current) contentRef2.current.style.height = '0px';
+                    if (contentRef3.current) contentRef3.current.style.height = '0px';
+                    if (contentRef4.current) contentRef4.current.style.height = '0px';
+                }
+            }
+        };
+
+        // Check on mount
+        handleResize();
+
+        // Listen for resize events
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Helper function to check if mobile
+    const isMobile = () => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth < 1024; // lg breakpoint
+    };
+
     useGSAP(() => {
-        if (!contentRef.current) return;
+        if (!contentRef.current || !isMobile()) return;
         const ctx = gsap.context(() => {
             const element = contentRef.current;
+            // On mobile, start with height 0 if closed
+            if (!first && element.style.height !== '0px') {
+                element.style.height = '0px';
+                return;
+            }
             const targetHeight = first ? element.scrollHeight : 0;
 
             gsap.to(element, {
@@ -30,7 +75,8 @@ const Footer = () => {
                     // Set to auto after opening so content can grow if needed
                     if (first) {
                         element.style.height = "auto";
-                        // element.style.paddingTop = "20px"
+                    } else {
+                        element.style.height = "0px";
                     }
                 }
             });
@@ -40,9 +86,14 @@ const Footer = () => {
     }, { dependencies: [first] });
 
     useGSAP(() => {
-        if (!contentRef2.current) return;
+        if (!contentRef2.current || !isMobile()) return;
         const ctx = gsap.context(() => {
             const element = contentRef2.current;
+            // On mobile, start with height 0 if closed
+            if (!second && element.style.height !== '0px') {
+                element.style.height = '0px';
+                return;
+            }
             const targetHeight = second ? element.scrollHeight : 0;
 
             gsap.to(element, {
@@ -52,6 +103,8 @@ const Footer = () => {
                 onComplete: () => {
                     if (second) {
                         element.style.height = "auto";
+                    } else {
+                        element.style.height = "0px";
                     }
                 }
             });
@@ -61,9 +114,14 @@ const Footer = () => {
     }, { dependencies: [second] });
 
     useGSAP(() => {
-        if (!contentRef3.current) return;
+        if (!contentRef3.current || !isMobile()) return;
         const ctx = gsap.context(() => {
             const element = contentRef3.current;
+            // On mobile, start with height 0 if closed
+            if (!third && element.style.height !== '0px') {
+                element.style.height = '0px';
+                return;
+            }
             const targetHeight = third ? element.scrollHeight : 0;
 
             gsap.to(element, {
@@ -73,6 +131,8 @@ const Footer = () => {
                 onComplete: () => {
                     if (third) {
                         element.style.height = "auto";
+                    } else {
+                        element.style.height = "0px";
                     }
                 }
             });
@@ -82,9 +142,14 @@ const Footer = () => {
     }, { dependencies: [third] });
 
     useGSAP(() => {
-        if (!contentRef4.current) return;
+        if (!contentRef4.current || !isMobile()) return;
         const ctx = gsap.context(() => {
             const element = contentRef4.current;
+            // On mobile, start with height 0 if closed
+            if (!fourth && element.style.height !== '0px') {
+                element.style.height = '0px';
+                return;
+            }
             const targetHeight = fourth ? element.scrollHeight : 0;
 
             gsap.to(element, {
@@ -94,6 +159,8 @@ const Footer = () => {
                 onComplete: () => {
                     if (fourth) {
                         element.style.height = "auto";
+                    } else {
+                        element.style.height = "0px";
                     }
                 }
             });
@@ -271,11 +338,10 @@ const Footer = () => {
                 </div>
                 <div className='lg:flex-1 w-full grid lg:grid-cols-4 grid-cols-1 lg:gap-5 lg:border-none border rounded-sm overflow-hidden'>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => setFirst(!first)} className='flex items-center cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Universe
-
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFirst(!first); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Universe
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${first ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 h-0 overflow-hidden'>
+                        <ul ref={contentRef} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
                             <li className='pt-5'>
                                 <Link href={''} className=''>Wingfoil</Link>
                             </li>
@@ -309,10 +375,10 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => setSecond(!second)} className='flex items-center cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Service Client
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setSecond(!second); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Service Client
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${second ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef2} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 h-0 overflow-hidden'>
+                        <ul ref={contentRef2} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
                             <li className='pt-5'>
                                 <Link href={''} className=''>Foil Configurator</Link>
                             </li>
@@ -343,10 +409,10 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => setThird(!third)} className='flex items-center cursor-pointer font-bold text-base text-[#111] leading-[100%]'>About Us
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setThird(!third); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>About Us
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${third ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef3} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 h-0 overflow-hidden'>
+                        <ul ref={contentRef3} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
                             <li className='pt-5'>
                                 <Link href={''} className=''>Afs advance</Link>
                             </li>
@@ -374,10 +440,10 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4'>
-                        <h3 onClick={() => setFourth(!fourth)} className='flex items-center cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Purchasing tools
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFourth(!fourth); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Purchasing tools
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${fourth ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef4} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 h-0 overflow-hidden'>
+                        <ul ref={contentRef4} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
                             <li className='pt-5'>
                                 <Link href={''} className=''>Afs advance</Link>
                             </li>

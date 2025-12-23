@@ -9,20 +9,20 @@ const BreadCums = () => {
         <Link className="inline" href="/">
           Accueil
         </Link>
-        / <span className="text-black">formulaire</span>
+        / <span className="text-black">Form</span>
       </div>
     </div>
   );
 };
 
-export default function Clinique() {
+export default function form() {
   return (
     <>
       {/* HERO */}
       <div className="global-padding pt-[20px] global-margin max-w-[1920px] mx-auto">
         <div>
           <BreadCums />
-          <h1 className="global-h2 text-center py-[80px]">Formulaire</h1>
+          <h1 className="global-h2 text-center py-[80px]">Form</h1>
         </div>
         <div>
           {" "}

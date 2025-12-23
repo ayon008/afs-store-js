@@ -84,7 +84,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Réparer mon produit
+                    Repair my product
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -134,7 +134,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Notice d’utilisation
+                    User manual
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -198,7 +198,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Pièces détachées
+                    Spare parts
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -248,7 +248,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Reprise materiel
+                    Equipment trade-in
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -348,7 +348,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Demande SAV
+                    Service request
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -377,14 +377,13 @@ export default function AfsSupport() {
         className="flex flex-col gap-[80px] justify-center items-center global-margin global-padding"
       >
         <div className="flex flex-col gap-[20px] max-w-[680px]">
-          <h2 className="global-h2 text-center">Réparer mon produit</h2>
+          <h2 className="global-h2 text-center">Repair my product</h2>
           <p className="global-p text-center">
-            Ici, vous trouverez toutes les informations nécessaires sur les
-            possibilités de réparation de votre produit. Sélectionnez la
-            catégorie qui vous intéresse pour découvrir les options de
-            réparation disponibles.{" "}
+            Here you will find all the information you need about repair options
+            for your product. Select the category you are interested in to find
+            out about the repair options available.{" "}
             <strong>
-              Ces services ne concernent que les produits AFS, AHD, Sealion.
+              These services only apply to AFS, AHD, and Sealion products.
             </strong>
           </p>
         </div>
@@ -425,7 +424,7 @@ export default function AfsSupport() {
               </svg>
               <h2 className="global-h2">Wing</h2>
               <p className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)]">
-                Contactez un réparateur AFS agréé :
+                Contact an authorized AFS repairer:
               </p>
               <ul>
                 <li>
@@ -435,7 +434,7 @@ export default function AfsSupport() {
                     rel="noopener noreferrer"
                     className="global-blue font-semibold"
                   >
-                    J'ai cassé ma voile
+                    I broke my sail
                   </a>
                 </li>
                 <li>
@@ -505,15 +504,14 @@ export default function AfsSupport() {
                   stroke-linejoin="round"
                 ></path>
               </svg>
-              <h2 className="global-h2">Foil et planches </h2>
+              <h2 className="global-h2">Foil and boards</h2>
               <p className="max-w-[520px] text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] text-[#FFFFFFCC]">
-                Nos experts en réparation savent comment restaurer votre
-                matériel AFS.
+                Our repair experts know how to restore your AFS equipment.
               </p>
               <ul>
                 <li>
                   <a href="/demande-sav/" className="global-blue font-semibold">
-                    Nous contacter pour un devis.
+                    Contact us for a quote.
                   </a>
                 </li>
               </ul>
@@ -521,8 +519,8 @@ export default function AfsSupport() {
           </div>
         </div>
         <p className="text-center max-w-[680px] font-semibold">
-          De plus, nous avons préparé des articles tutoriels pour vous guider
-          dans la résolution des problèmes les plus courants par vous-même.
+          In addition, we have prepared tutorial articles to guide you in
+          resolving the most common issues on your own.
         </p>
       </div>
 
@@ -530,7 +528,7 @@ export default function AfsSupport() {
         id="Notice"
         className="flex flex-col gap-[40px] justify-center items-center global-margin global-padding"
       >
-        <h2 className="global-h2">Notice utilisation</h2>
+        <h2 className="global-h2">User manual</h2>
         <div className="flex flex-wrap gap-x-[40px] gap-y-[40px] justify-between w-[1080px] max-w-[100%]">
           <div className="group w-[calc(50%-20px)] md:w-[250px]">
             <a
@@ -548,12 +546,12 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Foil — manuel d'utilisation
+                Foil — user manual
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
-                  Tout lire
+                  Read all
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -588,12 +586,12 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Planche — manuel d'utilisation
+                Board — user manual
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
-                  Tout lire
+                  Read all
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -627,12 +625,12 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Wing — manuel d'utilisation
+                Wing — user manual
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
-                  Tout lire
+                  Read all
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -657,7 +655,7 @@ export default function AfsSupport() {
         id="Pieces"
         className="flex flex-col gap-[40px] justify-center items-center global-margin global-padding max-w-[1920px] mx-auto"
       >
-        <h2 className="global-h2">Pièces détachées</h2>
+        <h2 className="global-h2">Spare parts</h2>
         <div
           id="Reprise"
           className="flex gap-[10px] h-[auto] md:h-[clamp(37.5rem,18.3649rem+25.9459vw,49.5rem)] bg-[#dbdbdb] rounded w-full justify-between items-center flex-col md:flex-row"
@@ -685,17 +683,17 @@ export default function AfsSupport() {
                 stroke-linejoin="round"
               ></path>
             </svg>
-            <h2 className="global-h2">Reprise matériel</h2>
+            <h2 className="global-h2">Equipment recovery</h2>
             <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-              Nous reprenons votre ancien foil AFS pour tout achat d’un nouveau
-              foil AFS !
+              We will take back your old AFS foil when you purchase a new one.
+              AFS foil!
             </p>
             <a
               className="flex gap-[4px] justify-center items-center"
               href="https://afs-foiling.com/fr/fr/reprise-materiel/"
             >
               <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
-                Demander une reprise
+                Request a return
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -758,17 +756,16 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-40 font-semibold text-[#404040]">
               <p class="py-[16px]">
-                Consultez
+                Consult this{" "}
                 <a
                   className="global-blue"
                   href="https://afs-foiling.com/fr/fr/votre-foil-fait-du-bruit-cela-en-devient-genant-il-existe-une-solution/"
                 >
-                  {" "}
-                  cet article pour résoudre
+                  article
                 </a>{" "}
-                facilement et rapidement le problème,{" "}
+                to quickly and easily resolve the issue,{" "}
                 <a className="global-blue" href="https://youtu.be/T0l2ZrmIXok">
-                  ou consultez cette vidéo.
+                  or watch this video.
                 </a>
               </p>
             </div>
@@ -777,7 +774,7 @@ export default function AfsSupport() {
 
         <div class="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
           <h3 className="text-[clamp(1.5rem,1.4274rem+0.3226vw,1.75rem)] font-bold">
-            Planche
+            Board
           </h3>
           <div class="relative">
             <input type="checkbox" id="acc2" class="hidden peer" />
@@ -785,8 +782,8 @@ export default function AfsSupport() {
               for="acc2"
               class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
-              J’ai besoin de faire une réparation sur ma planche, est-il
-              possible de connaitre la couleur ou le ral ?
+              I need to repair my board, is it possible to know the color or RAL
+              code?
               <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -806,53 +803,53 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
               <p class="py-4">
-                Attention, il peut y avoir de légères différences entre le code
-                couleur et le rendu réel de la planche en fonction des
-                techniques utilisées en atelier ou en usine. Les codes donnés
-                sont ceux qui se rapprochent le plus du résultat final.
+                Please note, there may be slight differences between the color
+                code and the actual appearance of the board depending on the
+                techniques used in the workshop or factory. The codes provided
+                are those that come closest to the final result.
               </p>
 
               <p class="py-2">
-                Le bleu AHD de nos planches (Thunderbolt, Topaz, Compact) est le
+                The AHD blue on our boards (Thunderbolt, Topaz, Compact) is
                 RAL5012.
               </p>
 
-              <p class="py-2">Les couleurs pour AFS Fire et Fly :</p>
+              <p class="py-2">Colors for AFS Fire and Fly:</p>
               <ul class="py-2">
-                <li>Rouge : RAL 3020s</li>
-                <li>Blanc : RAL 9010</li>
-                <li>Gris : RAL 7012</li>
-                <li>Bleu : RAL 5019</li>
+                <li>Red: RAL 3020s</li>
+                <li>White: RAL 9010</li>
+                <li>Gray: RAL 7012</li>
+                <li>Blue: RAL 5019</li>
               </ul>
 
-              <p class="py-2">Les couleurs pour la Sealion Strapped :</p>
+              <p class="py-2">Colors for the Sealion Strapped:</p>
               <ul class="py-2">
-                <li>Bleu marine rails : RAL 5013</li>
+                <li>Navy blue rails: RAL 5013</li>
               </ul>
 
-              <p class="py-2">Les couleurs pour la Sealion Rasta :</p>
+              <p class="py-2">Colors for the Sealion Rasta:</p>
               <ul class="py-2">
                 <li>
-                  Rouge : <span>NCS S 0570-Y90R</span>
+                  Red: <span>NCS S 0570-Y90R</span>
                 </li>
                 <li>
-                  Vert : <span>NCS S 0565-G50Y</span>
+                  Green: <span>NCS S 0565-G50Y</span>
                 </li>
                 <li>
-                  Pads : <span>Amarillo-7 / Verde-6 / Rojo-22 / Blanco</span>
+                  Pads: <span>Amarillo-7 / Verde-6 / Rojo-22 / Blanco</span>
                 </li>
               </ul>
 
-              <p class="py-2">Les couleurs pour AHD SL-S :</p>
+              <p class="py-2">Colors for AHD SL-S:</p>
               <ul class="py-2">
-                <li>Noir : Hexa #292B2C</li>
-                <li>Bleu : Hexa #1B8AB2</li>
+                <li>Black: Hexa #292B2C</li>
+                <li>Blue: Hexa #1B8AB2</li>
               </ul>
 
-              <p> class="py-4"Les couleurs pour AHD Fury :</p>
+              <p> class="py-4"Colors for AHD Fury:</p>
               <ul class="py-2">
-                <li>Dégradé bleu : Hexa #1B8AB2 → #292B2C</li>
-                <li>Rouge : Hexa #FE5558</li>
+                <li>Blue gradient: Hexa #1B8AB2 → #292B2C</li>
+                <li>Red: Hexa #FE5558</li>
               </ul>
             </div>
           </div>
@@ -868,8 +865,8 @@ export default function AfsSupport() {
               for="acc3"
               class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
-              Je souhaite changer le boudin ou latte centrale de ma wing,
-              comment reconnaitre ma génération de wing ?
+              I want to change the strut or center strut of my wing, how can I
+              identify my wing generation?
               <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -889,9 +886,9 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
               <p class="py-4">
-                WILF → 3 versions possibles :
+                WILF → 3 possible versions:
                 <ul class="py-2">
-                  <li>V1 → bouchon noir</li>
+                  <li>V1 → black cap</li>
                 </ul>
                 <Image
                   class="py-2"
@@ -899,30 +896,32 @@ export default function AfsSupport() {
                   alt="resize-169627230787765529Capetoile"
                   width={1920}
                   height={120}
+                  className="max-w-[520px]"
                 />
                 <ul class="py-2">
                   <li>
-                    V2 → bouchon rouge sans valve de dégonflage sur la latte
-                    centrale
+                    V2 → red cap without deflation valve on the center strut
                   </li>
                 </ul>
                 <Image
                   class="py-2"
                   src="https://afs-foiling.com/fr/wp-content/uploads/2023/10/Cap-rouge-e1696272591756.jpeg"
-                  alt="Cap rouge"
+                  alt="Red cap"
                   width={1920}
                   height={120}
+                  className="max-w-[520px]"
                 />
                 <ul class="py-2">
                   <li>
-                    V3 → bouchon rouge et valve de dégonflage sur la latte
-                    centrale - tube jonction entre BA et latte : coudé sur le BA
-                    et droit sur latte centrale / tube jonction entre BA et
-                    latte : droit sur le BA et coudé sur latte centrale
+                    V3 → red cap and deflation valve on the center strut -
+                    connection tube between strut and center strut: angled on
+                    the strut and straight on center strut / connection tube
+                    between strut and center strut: straight on the strut and
+                    angled on center strut
                   </li>
                 </ul>
-                WILD → une seule version possible DIAMOND → une seule version
-                possible
+                WILD → only one possible version DIAMOND → only one possible
+                version
               </p>
             </div>
           </div>

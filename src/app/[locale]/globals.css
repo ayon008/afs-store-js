@@ -167,6 +167,10 @@ body {
   background: transparent !important;
 }
 
+/* Blur overlay is now handled inline in the component */
+
+
+
 /* draw a single dashed line across the container */
 .my-dashed-slider::before {
   content: "";

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 const BreadCums = () => {
@@ -7,15 +5,15 @@ const BreadCums = () => {
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Accueil
+          Home
         </Link>
-        / <span className="text-black">Gliss Up</span>
+        / <span className="text-black">Direct Sailing</span>
       </div>
     </div>
   );
 };
 
-export default function Clinique() {
+export default function direct() {
   return (
     <>
       {/* HERO */}
@@ -27,13 +25,14 @@ export default function Clinique() {
 
             <div className="flex flex-col gap-[20px]">
               <h1 className="global-h1">
-                Les produits AFS sont disponibles dans le magasin{" "}
-                <span className="text-[#1e98ff]">Gliss Up</span>
+                AFS products are available at the
+                <span className="text-[#1e98ff]"> Direct Sailing</span> store
               </h1>
 
               <p className="max-w-[360px] text-[18px] font-semibold text-[#111111B2] max-[1024px]:text-[16px]">
-                Gliss Up propose un large choix de matériel technique de toutes
-                marques, dont AFS depuis 2016.
+                A wide range of products ranging from catamarans, dinghies, and
+                kayaks to SUPs, windsurf boards, and sailboats for private
+                individuals. AFS distributor for several years.
               </p>
             </div>
           </div>
@@ -41,14 +40,14 @@ export default function Clinique() {
           {/* HERO FOOTER */}
           <div className="flex flex-col gap-[20px] border-b border-black/40 pb-[20px] leading-[1.2] md:flex-row md:flex-wrap md:justify-between">
             <div className="flex flex-col gap-[4px]">
-              <h4 className="font-bold text-[#111111]">Magasin</h4>
+              <h4 className="font-bold text-[#111111]">Store</h4>
               <a
-                href="https://www.glissup.fr/"
+                href="https://labaule.direct-sailing.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-[4px] font-semibold text-[#111111B2]"
               >
-                glissup.fr
+                labaule.direct-sailing.com
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="12"
@@ -66,14 +65,15 @@ export default function Clinique() {
             </div>
 
             <div className="flex flex-col gap-[4px]">
-              <h4 className="font-bold text-[#111111]">Expert AFS</h4>
-              <p className="font-semibold text-[#111111B2]">Jean-Louis</p>
+              <h4 className="font-bold text-[#111111]">AFS Expert</h4>
+              <p className="font-semibold text-[#111111B2]">Lucas</p>
             </div>
 
             <div className="flex flex-col gap-[4px] md:basis-[210px] md:shrink-0">
-              <h4 className="font-bold text-[#111111]">Adresse</h4>
+              <h4 className="font-bold text-[#111111]">Address</h4>
               <p className="font-semibold text-[#111111B2]">
-                101 Rue François de Sourdis, 33000 Bordeaux, France
+                ZA Pornichet Atlantique Chemin de la Monnerie 44380 Pornichet,
+                France
               </p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function Clinique() {
         {/* RIGHT MAP */}
         <div className="relative min-h-[400px] w-full flex-1 overflow-hidden">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1497546.1944009948!2d0.5966271!3d42.8539521!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12b05e67bf958611%3A0x662967bf94a72e09!2sSurfone%20Shop%20Port%20Leucate!5e0!3m2!1sen!2sbd!4v1766126563869!5m2!1sen!2sbd"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2707.8224677829844!2d-2.3041085232169696!3d47.25917471190378!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48056812b2ae1dc3%3A0x92f17054b549c85c!2sDIRECT%20SAILING!5e0!3m2!1sen!2sbd!4v1766124495062!5m2!1sen!2sbd"
             className="h-full min-h-[400px] w-full border-0"
             allowFullScreen
             loading="lazy"
@@ -90,12 +90,12 @@ export default function Clinique() {
           />
 
           <a
-            href="https://maps.app.goo.gl/b1eB4P5n7rKjZgFQ8"
+            href="https://maps.app.goo.gl/Ab9vXGnzzgCytxTJA"
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-[20px] left-[20px] z-[2] flex items-center justify-center gap-[4px] rounded-[4px] bg-[#1f1f1f] p-[12px] text-[14px] font-bold uppercase text-white"
           >
-            Plan d’accès à la boutique
+            Store access map
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="12"
@@ -115,41 +115,43 @@ export default function Clinique() {
 
       {/* HISTOIRE */}
       <div className="global-margin global-padding flex flex-col gap-[40px] max-w-[1920px] mx-auto">
-        <h2 className="global-h2">Histoire</h2>
+        <h2 className="global-h2">History</h2>
 
         <div className="flex flex-col gap-[40px] md:flex-row">
           <div className="flex basis-[25%] flex-col space-y-[12px] pt-[120px] max-[1024px]:pt-0">
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-1.png"
+              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-4.png"
               className="w-full"
             />
-            <span>Boutique à Bordeaux</span>
+            <span className="uppercase text-[#111111B2] text-4 leading-[1.3] font-semibold">
+              Store in Pornichet
+            </span>
           </div>
 
           <div className="flex-1">
-            <p className="max-w-[1024px] pb-[40px] text-[18px] font-semibold leading-[130%] text-[#111]/75">
-              A l’origine, ce magasin était spécialisé en windsurf, mais
-              l’équipe a su suivre les tendances pour se diversifier et proposer
-              des produits répondant aux pratiques de chacun.Du surf, au foil en
-              passant par le VTT électrique, il y en a pour tous les goûts!
+            <p className="pb-[40px] text-[18px] font-semibold leading-[130%] text-[#111]/75 max-w-[790px]">
+              The Direct Sailing store has been in existence for over 20 years.
+              Originally, the shop offered Hobie Cat catamarans, dinghies, and
+              kayaks to equip clubs. Over time, they have followed the evolution
+              of water sports and expanded their product ranges with SUP,
+              windsurfing, land sailing, and wing, thus targeting private
+              individuals.
             </p>
-
-            <h2 className="mb-[40px] text-[32px] font-semibold uppercase leading-[105%] text-[#111]/70">
-              <span className="text-[#1D98FF]">"</span>Chacun à sa propre
-              discipline mais nous essayons de pratiquer le plus de sports
-              possibles afin de conseiller au mieux les clients, en pratiquant
-              chaque weekend tel ou tel sport selon les conditions.
-              <span className="text-[#1D98FF]">"</span>
-            </h2>
 
             <div className="flex flex-col gap-[20px] max-[1024px]:flex-col lg:flex-row lg:justify-between">
               <div className="max-w-[385px] space-y-[40px] pb-[20px] text-[18px] font-medium leading-[130%] text-[#111]/75">
-                <p>
-                  Une équipe jeune et dynamique de pratiquants multisports. Deux
-                  gérants et leurs collaborateurs, tous sportifs pour vous
-                  conseiller au mieux dans vos choix d’équipement en magasin.
+                <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
+                  As an AFS retailer for several years, Pascal (store manager)
+                  initially chose the brand to promote Made in France in his
+                  store.
+                </p>
+                <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
+                  "Local and quality products" highlighted by his friend Thierry
+                  Pen (co-founder Foil&Co and former sales director), all of
+                  which gave rise to a commercial relationship between the brand
+                  and the store.
                 </p>
               </div>
 
@@ -157,10 +159,12 @@ export default function Clinique() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-5.png"
+                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-8.png"
                   className="w-full"
                 />
-                <span>Equipe Gliss Up</span>
+                <span className="uppercase text-[#111111B2] text-4 leading-[1.3] font-semibold">
+                  Direct Sailing Team
+                </span>
               </div>
             </div>
           </div>

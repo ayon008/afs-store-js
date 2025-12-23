@@ -7,15 +7,15 @@ const BreadCums = () => {
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Accueil
+          Home
         </Link>
-        / <span className="text-black">Direct Sailing</span>
+        / <span className="text-black">Gliss Attitude</span>
       </div>
     </div>
   );
 };
 
-export default function Clinique() {
+export default function Gliss() {
   return (
     <>
       {/* HERO */}
@@ -27,14 +27,14 @@ export default function Clinique() {
 
             <div className="flex flex-col gap-[20px]">
               <h1 className="global-h1">
-                Les produits AFS sont disponibles dans le magasin
-                <span className="text-[#1e98ff]"> Direct Sailing</span>
+                AFS products are available at the
+                <span className="text-[#1e98ff]"> Gliss Attitude</span>
+                store
               </h1>
 
               <p className="max-w-[360px] text-[18px] font-semibold text-[#111111B2] max-[1024px]:text-[16px]">
-                Une large gamme de produits allant des catamarans, dériveurs et
-                kayaks aux SUP, planches à voile et voiliers pour les
-                particuliers. Distributeur AFS depuis plusieurs années.
+                One of France's oldest marine equipment stores with AFS
+                equipment
               </p>
             </div>
           </div>
@@ -44,12 +44,12 @@ export default function Clinique() {
             <div className="flex flex-col gap-[4px]">
               <h4 className="font-bold text-[#111111]">Magasin</h4>
               <a
-                href="https://labaule.direct-sailing.com/"
+                href="https://www.glissattitude.com/en"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-[4px] font-semibold text-[#111111B2]"
               >
-                labaule.direct-sailing.com
+                glissattitude.com
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="12"
@@ -68,14 +68,13 @@ export default function Clinique() {
 
             <div className="flex flex-col gap-[4px]">
               <h4 className="font-bold text-[#111111]">Expert AFS</h4>
-              <p className="font-semibold text-[#111111B2]">Lucas</p>
+              <p className="font-semibold text-[#111111B2]">Eric</p>
             </div>
 
             <div className="flex flex-col gap-[4px] md:basis-[210px] md:shrink-0">
               <h4 className="font-bold text-[#111111]">Adresse</h4>
               <p className="font-semibold text-[#111111B2]">
-                ZA Pornichet Atlantique Chemin de la Monnerie 44380 Pornichet,
-                France
+                17 Mnt Commandant de Robien, 13011 Marseille, France
               </p>
             </div>
           </div>
@@ -84,15 +83,14 @@ export default function Clinique() {
         {/* RIGHT MAP */}
         <div className="relative min-h-[400px] w-full flex-1 overflow-hidden">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2707.8224677829844!2d-2.3041085232169696!3d47.25917471190378!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48056812b2ae1dc3%3A0x92f17054b549c85c!2sDIRECT%20SAILING!5e0!3m2!1sen!2sbd!4v1766124495062!5m2!1sen!2sbd"
+            src="https://www.google.com/maps?q=Gliss%20Attitude%20Marseille&output=embed"
             className="h-full min-h-[400px] w-full border-0"
             allowFullScreen
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
           />
 
           <a
-            href="https://maps.app.goo.gl/Ab9vXGnzzgCytxTJA"
+            href="https://maps.app.goo.gl/qu6SbUChxxkQ6Kem6"
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-[20px] left-[20px] z-[2] flex items-center justify-center gap-[4px] rounded-[4px] bg-[#1f1f1f] p-[12px] text-[14px] font-bold uppercase text-white"
@@ -124,45 +122,76 @@ export default function Clinique() {
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-4.png"
+              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-5.png"
               className="w-full"
             />
-            <span className="uppercase">Boutique à Pornichet</span>
+            <span>Boutique à Marseille</span>
           </div>
 
           <div className="flex-1">
-            <p className="pb-[40px] text-[18px] font-semibold leading-[130%] text-[#111]/75 max-w-[790px]">
-              Le magasin Direct Sailing existe depuis plus de 20 ans. À
-              l’origine, le shop proposait des catamarans Hobie Cat, des
-              dériveurs et des kayaks pour équiper les clubs. Au fur et à
-              mesure, ils ont suivi l’évolution des sports nautiques et élargi
-              leurs gammes de produits avec du SUP, de la planche à voile, du
-              char à voile et de la wing, s’adressant ainsi aux particuliers.
+            <p className="pb-[20px] text-[18px] font-semibold leading-[130%] text-[#111]/75 max-w-[720px]">
+              GlissAttitude has two stores steeped in history. One is located in
+              Marseille city center and the other is in La Fos-Sur-Mer, on the
+              beachfront. Run by enthusiasts, the company is a benchmark in
+              terms of advice and water sports equipment.
             </p>
 
-            <div className="flex flex-col gap-[20px] max-[1024px]:flex-col lg:flex-row lg:justify-between">
-              <div className="max-w-[385px] space-y-[40px] pb-[20px] text-[18px] font-medium leading-[130%] text-[#111]/75">
-                <p>
-                  Revendeurs AFS depuis plusieurs années, Pascal (gérant du
-                  magasin) a d’abord choisi la marque pour mettre en avant le
-                  Made in France dans son magasin.
-                </p>
-                <p>
-                  Des « produits locaux et de qualité » mis en avant par son ami
-                  Thierry Pen (co-fondateur Foil&Co et ancien directeur
-                  commercial), le tout donnant naissance à une relation
-                  commerciale entre la marque et le magasin.
-                </p>
-              </div>
+            <h2 className="mb-[40px] text-[32px] font-semibold uppercase leading-[105%] text-[#111]/70">
+              <span className="text-[#1D98FF]">"</span>Always searching To
+              guarantee the best for our customers, we do not hesitate to test
+              our equipment in the water and on test benches. We record our
+              comments on the equipment in our blog.
+              <span className="text-[#1D98FF]">"</span>
+            </h2>
 
+            <div className="flex flex-col gap-[20px] max-[1024px]:flex-col lg:flex-row lg:justify-end items-start">
+              <img
+                loading="lazy"
+                decoding="async"
+                src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-2-10.png"
+                className="w-[220px]"
+              />
               <div className="flex basis-[50%] flex-col space-y-[12px]">
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-8.png"
+                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-9.png"
                   className="w-full"
                 />
-                <span className="uppercase">Equipe Direct Sailing</span>
+                <span>Gliss Attitude Team</span>
+              </div>
+            </div>
+            <div className="mt-[40px] flex flex-col gap-[24px]">
+              <p className="max-w-[520px] text-[18px] font-semibold leading-[130%] text-[#111]/75">
+                At GlissAttitude, our passionate and experienced staff will be
+                delighted to welcome you and offer advice.
+              </p>
+              <div className="text-[18px] font-semibold leading-[130%] text-[#111]/75 flex flex-wrap gap-[30px]">
+                <span className="space-y-[12px] flex-[250px_0_0]">
+                  <h3 className="font-bold">Eric</h3>
+                  <p>manager, windfoiler, and engineer by training</p>
+                </span>
+                <span className="space-y-[12px] flex-[250px_0_0]">
+                  <h3 className="font-bold">Bastien</h3>
+                  <p>
+                    manager in Marseille - surfer originally from the Île de Ré.
+                  </p>
+                </span>
+                <span className="space-y-[12px] flex-[250px_0_0]">
+                  <h3 className="font-bold">Paul</h3>
+                  <p>advisor - snowboarder</p>
+                </span>
+                <span className="space-y-[12px] flex-[250px_0_0]">
+                  <h3 className="font-bold">Christopher</h3>
+                  <p>manager in La Fos-Sur-Mer</p>
+                </span>
+
+                <span className="space-y-[12px] flex-[250px_0_0]">
+                  <h3 className="font-bold">Baptist</h3>
+                  <p>
+                    advisor - experienced snowboarder and very good slalom skier
+                  </p>
+                </span>
               </div>
             </div>
           </div>

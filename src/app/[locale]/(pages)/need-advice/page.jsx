@@ -1,4 +1,4 @@
-
+"use client";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -7,7 +7,7 @@ export default function TicketsPage() {
     <>
       <div className="bg-black">
         <Head>
-          <title>Besoin de conseils</title>
+          <title>Need advice</title>
         </Head>
 
         <div
@@ -20,12 +20,12 @@ export default function TicketsPage() {
           <div className="flex flex-col items-end justify-center min-h-[calc(100vh-150px)] gap-[20px] max-w-[1440px]">
             <h1 className="global-h1 text-white">
               <span className="text-[#bfbfbf]">AFS Support. </span>
-              Vous souhaitez nous contacter — écrivez-nous, nous vous aiderons.
+              You want to contact us — write to us, we will help you.
             </h1>
 
             <p className="text-[#BFBFBF] max-w-[520px] global-p font-bold">
-              Pour cela, nous avons plusieurs moyens pour nous parler,
-              choisissez celui qui vous convient.
+              For this, we have several ways to talk to each other, choose the
+              one that suits you.
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export default function TicketsPage() {
               fontWeight: 400,
             }}
           >
-            Formulaire de contact
+            Contact form
           </Link>
 
           <Link
@@ -50,7 +50,7 @@ export default function TicketsPage() {
               fontWeight: 400,
             }}
           >
-            Demande SAV
+            After-sales service request
           </Link>
 
           <Link
@@ -62,7 +62,7 @@ export default function TicketsPage() {
             }}
           >
             <span className="block max-w-[1440px]">
-              Réserver un appel avec un conseiller
+              Book a call with an advisor
             </span>
           </Link>
 
@@ -75,7 +75,7 @@ export default function TicketsPage() {
             }}
           >
             <span className="block max-w-[1440px]">
-              Réserver un créneau pour récupérer votre commande ecommerce
+              Book a time slot to pick up your e-commerce order
             </span>
           </Link>
 
@@ -88,7 +88,7 @@ export default function TicketsPage() {
             }}
           >
             <span className="block max-w-[1440px]">
-              Chatter en ligne avec un conseiller
+              Chat online with an advisor
             </span>
           </Link>
 
@@ -100,16 +100,14 @@ export default function TicketsPage() {
               fontWeight: 400,
             }}
           >
-            <span className="block max-w-[1440px]">
-              Retrouver nous sur un événement
-            </span>
+            <span className="block max-w-[1440px]">Meet us at an event</span>
           </Link>
         </div>
         <div className=" global-padding flex flex-col items-center justify-center gap-[20px] text-[clamp(1rem,_0.8548rem_+_0.6452vw,_1.5rem)]">
           <p className="font-semibold text-[#BFBFBF] text-center">
             While you wait for our reply, feel free to read our various guides:
           </p>
-          <ul className="text-white flex gap-[20px] flex-wrap justify-center">
+          <ul className="text-white flex gap-[20px] flex-wrap justify-center global-margin">
             <li>
               <a
                 className="hover:underline"
