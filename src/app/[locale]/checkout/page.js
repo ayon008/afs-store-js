@@ -5,15 +5,18 @@ import CountrySelect from "@/Shared/Input/DropDown";
 import Input from "@/Shared/Input/Input";
 import Select from "@/Shared/Input/Select";
 import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { selectShippingRate, updateBillingAndCart } from "@/app/actions/Woo-Coommerce/Shop/Cart/cart";
 import CheckoutMonetico from "@/lib/CheckoutMonitico";
 import CheckoutPayPal from "@/lib/CheckoutPaypal";
 import { countriesList } from "@/lib/countriesList";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
+    const t = useTranslations("checkout");
 
     const [shippingAddress, setShippingAddress] = useState(false);
 
@@ -73,21 +76,8 @@ const Page = () => {
         }
     });
 
-    // Check if shipping address exists and show form by default
-    useEffect(() => {
-        if (cartShippingAddress) {
-            // Check if shipping address has meaningful data
-            const hasShippingData = cartShippingAddress.first_name || 
-                                   cartShippingAddress.last_name || 
-                                   cartShippingAddress.address_1 || 
-                                   cartShippingAddress.city || 
-                                   cartShippingAddress.country;
-            
-            if (hasShippingData) {
-                setShippingAddress(true);
-            }
-        }
-    }, [cartShippingAddress]);
+    // Don't check shipping address by default - user must explicitly check it
+    // Removed the useEffect that auto-checks shipping address
 
     useEffect(() => {
         // Build form values object, merging both billing and shipping addresses
@@ -135,16 +125,34 @@ const Page = () => {
     };
 
     const [countryDetails, setCountryDetails] = useState(null);
-    const [paymentMethods, setPaymentMethods] = useState(null);
+    const [paymentMethods, setPaymentMethods] = useState([]);
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
 
     // Filter payment methods to show only allowed ones
     const filterPaymentMethods = (methods) => {
+        // Ensure methods is an array
         if (!methods) return [];
+        if (!Array.isArray(methods)) {
+            // If methods is an object, try to convert it to an array
+            if (typeof methods === 'object') {
+                // Check if it's an object with payment methods as values
+                const methodsArray = Object.values(methods);
+                if (Array.isArray(methodsArray) && methodsArray.length > 0) {
+                    methods = methodsArray;
+                } else {
+                    return [];
+                }
+            } else {
+                return [];
+            }
+        }
 
         return methods.filter(method => {
+            // Ensure method is an object
+            if (!method || typeof method !== 'object') return false;
+            
             const methodId = method.id?.toLowerCase() || '';
             const methodTitle = method.title?.toLowerCase() || '';
 
@@ -189,8 +197,26 @@ const Page = () => {
 
     useEffect(() => {
         const fetchPaymentMethods = async () => {
-            const data = await getPaymentMethods();
-            setPaymentMethods(data);
+            try {
+                const data = await getPaymentMethods();
+                // Ensure data is an array
+                if (Array.isArray(data)) {
+                    setPaymentMethods(data);
+                } else if (data && typeof data === 'object') {
+                    // If it's an object, try to convert to array
+                    const methodsArray = Object.values(data);
+                    if (Array.isArray(methodsArray)) {
+                        setPaymentMethods(methodsArray);
+                    } else {
+                        setPaymentMethods([]);
+                    }
+                } else {
+                    setPaymentMethods([]);
+                }
+            } catch (error) {
+                console.error('Error fetching payment methods:', error);
+                setPaymentMethods([]);
+            }
         };
         fetchPaymentMethods();
     }, []);
@@ -204,6 +230,69 @@ const Page = () => {
             fetchCountryDetails();
         }
     }, [watchFields.billing_country, setCountryDetails])
+
+    // Update billing address in cart when billing fields change (to calculate shipping methods)
+    const updateBillingAddress = useCallback(async (billingData) => {
+        // Only update if we have minimum required fields
+        if (billingData.billing_country && billingData.billing_postcode && 
+            billingData.billing_city && billingData.billing_address_1) {
+            try {
+                setUpdatingShipping(true);
+                // Use API route for guest users, or server action for authenticated users
+                const response = await fetch('/api/cart/update-billing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        billing_address: {
+                            first_name: billingData.billing_first_name || '',
+                            last_name: billingData.billing_last_name || '',
+                            company: billingData.billing_company || '',
+                            address_1: billingData.billing_address_1 || '',
+                            address_2: '',
+                            city: billingData.billing_city || '',
+                            state: billingData.billing_state || '',
+                            postcode: billingData.billing_postcode || '',
+                            country: billingData.billing_country || '',
+                            email: billingData.billing_email || '',
+                            phone: billingData.billing_phone || '',
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    await loadCart();
+                }
+            } catch (error) {
+                console.error('Error updating billing address:', error);
+            } finally {
+                setUpdatingShipping(false);
+            }
+        }
+    }, [loadCart]);
+
+    // Debounced update of billing address
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (watchFields.billing_country && watchFields.billing_postcode && 
+                watchFields.billing_city && watchFields.billing_address_1) {
+                updateBillingAddress(watchFields);
+            }
+        }, 1000); // Wait 1 second after user stops typing
+
+        return () => clearTimeout(timer);
+    }, [
+        watchFields.billing_country,
+        watchFields.billing_postcode,
+        watchFields.billing_city,
+        watchFields.billing_address_1,
+        watchFields.billing_first_name,
+        watchFields.billing_last_name,
+        watchFields.billing_email,
+        updateBillingAddress
+    ]);
 
     const states = countryDetails?.states || [];
 
@@ -361,7 +450,9 @@ const Page = () => {
 
     // Check if cart is empty
     useEffect(() => {
-        if (cart && (!cart.items || cart.items.length === 0)) {
+        if (!cart) {
+            setIsCartEmpty(true);
+        } else if (!cart.items || cart.items.length === 0) {
             setIsCartEmpty(true);
         } else {
             setIsCartEmpty(false);
@@ -381,19 +472,19 @@ const Page = () => {
 
         // Prevent submission if cart is empty
         if (isCartEmpty) {
-            alert("Votre panier est vide. Veuillez ajouter des produits avant de passer une commande.");
+            alert(t("emptyCartMessage"));
             return;
         }
 
         // Validate terms acceptance
         if (!data.terms) {
-            alert("Vous devez accepter les conditions générales pour continuer.");
+            alert(t("termsRequired"));
             return;
         }
 
         // Validate shipping method selection
         if (!selectedRateId && allShippingRates.length > 0) {
-            alert("Veuillez sélectionner une méthode d'expédition.");
+            alert(t("selectShippingMethod"));
             return;
         }
 
@@ -475,6 +566,26 @@ const Page = () => {
 
 
 
+    // Show empty cart message if cart is empty or loading
+    if (isCartEmpty || !cart || !cart.items || cart.items.length === 0) {
+        return (
+            <div className='global-padding global-margin'>
+                <div className='max-w-[800px] mx-auto py-[80px] lg:py-[100px]'>
+                    <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
+                        <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
+                        <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
+                        <Link 
+                            href="/" 
+                            className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
+                        >
+                            {t("backToShop")}
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div>
             {/* Steps */}
@@ -482,19 +593,19 @@ const Page = () => {
                 <div className='flex flex-col items-center justify-center step-1'>
                     <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold  rounded-full text-center text-white z-10! bg-[#1D98FF]'>1</span>
                     <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        Basket
+                        {t("basket")}
                     </span>
                 </div>
                 <div className='flex flex-col items-center justify-center step-2'>
                     <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold  rounded-full text-center text-white z-10! bg-[#1D98FF]'>2</span>
                     <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        Secure payment and delivery
+                        {t("securePayment")}
                     </span>
                 </div>
                 <div className='flex flex-col items-center justify-center step-3'>
                     <span className='w-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] h-[clamp(1.75rem,1.0594rem+1.4406vw,2.5rem)] border border-[#111] text-[clamp(0.9375rem,0.362rem+1.2005vw,1.5625rem)] font-bold text-[#111] rounded-full text-center bg-white z-10!'>3</span>
                     <span className='text-base text-[clamp(0.875rem,0.7599rem+0.2401vw,1rem)] text-center leading-[120%]'>
-                        Summary
+                        {t("summary")}
                     </span>
                 </div>
             </div>
@@ -507,30 +618,30 @@ const Page = () => {
                     <div className='grid grid-cols-1 gap-10 lg:grid-cols-2'>
                         {/* Billing address */}
                         <div className='flex flex-col lg:gap-8 gap-6'>
-                            <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>Détails de facturation</h3>
+                            <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>{t("billingDetails")}</h3>
                             <div className='grid grid-cols-1 gap-5'>
                                 <div className='grid grid-cols-2 gap-5'>
                                     <Input
-                                        label="First Name"
+                                        label={t("firstName")}
                                         type="text"
                                         id="billing_first_name"
-                                        register={register("billing_first_name", { required: "Ce champ est requis" })}
+                                        register={register("billing_first_name", { required: t("required") })}
                                         error={getFieldError("billing_first_name")}
                                         value={watchFields.billing_first_name}
                                         checkout={true}
                                     />
                                     <Input
-                                        label="Last Name"
+                                        label={t("lastName")}
                                         type="text"
                                         id="billing_last_name"
-                                        register={register("billing_last_name", { required: "Ce champ est requis" })}
+                                        register={register("billing_last_name", { required: t("required") })}
                                         error={getFieldError("billing_last_name")}
                                         value={watchFields.billing_last_name}
                                         checkout={true}
                                     />
                                 </div>
                                 <Input
-                                    label="Company (Optional)"
+                                    label={t("company")}
                                     type="text"
                                     id="billing_company"
                                     register={register("billing_company", { required: false })}
@@ -539,10 +650,10 @@ const Page = () => {
                                     checkout={true}
                                 />
                                 <CountrySelect
-                                    label="Country"
+                                    label={t("country")}
                                     id="country"
                                     defaultValue={watchFields.billing_country}
-                                    register={register("billing_country", { required: "Ce champ est requis" })}
+                                    register={register("billing_country", { required: t("required") })}
                                     checkout={true}
                                     countries={countriesList}
                                 />
@@ -550,19 +661,19 @@ const Page = () => {
                                     <p className="text-red-500 text-xs mt-1">{getFieldError("billing_country")}</p>
                                 )}
                                 <Input
-                                    label="Street number and name"
+                                    label={t("address")}
                                     type="text"
                                     id="billing_address_1"
-                                    register={register("billing_address_1", { required: "Ce champ est requis" })}
+                                    register={register("billing_address_1", { required: t("required") })}
                                     error={getFieldError("billing_address_1")}
                                     value={watchFields.billing_address_1}
                                     checkout={true}
                                 />
                                 <Input
-                                    label="Ville"
+                                    label={t("city")}
                                     type="text"
                                     id="billing_city"
-                                    register={register("billing_city", { required: "Ce champ est requis" })}
+                                    register={register("billing_city", { required: t("required") })}
                                     error={getFieldError("billing_city")}
                                     value={watchFields.billing_city}
                                     checkout={true}
@@ -570,9 +681,9 @@ const Page = () => {
                                 {
                                     states.length > 0 && (
                                         <Select
-                                            label="State"
+                                            label={t("state")}
                                             id="billing_state"
-                                            register={register("billing_state", { required: "Ce champ est requis" })}
+                                            register={register("billing_state", { required: t("required") })}
                                             error={getFieldError("billing_state")}
                                             value={watchFields.billing_state}
                                             checkout={true}
@@ -581,23 +692,23 @@ const Page = () => {
                                     )
                                 }
                                 <Input
-                                    label="Code Postal"
+                                    label={t("postcode")}
                                     type="text"
                                     id="billing_postcode"
-                                    register={register("billing_postcode", { required: "Ce champ est requis" })}
+                                    register={register("billing_postcode", { required: t("required") })}
                                     error={getFieldError("billing_postcode")}
                                     value={watchFields.billing_postcode}
                                     checkout={true}
                                 />
                                 <Input
-                                    label="Email"
+                                    label={t("email")}
                                     type="email"
                                     id="billing_email"
                                     register={register("billing_email", {
-                                        required: "Ce champ est requis",
+                                        required: t("required"),
                                         pattern: {
                                             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: "Adresse email invalide"
+                                            message: t("invalidEmail")
                                         }
                                     })}
                                     error={getFieldError("billing_email")}
@@ -605,7 +716,7 @@ const Page = () => {
                                     checkout={true}
                                 />
                                 <Input
-                                    label="Téléphone"
+                                    label={t("phone")}
                                     type="tel"
                                     id="billing_phone"
                                     register={register("billing_phone", { required: false })}
@@ -615,32 +726,32 @@ const Page = () => {
                                 />
                                 <Select
                                     checkout={true}
-                                    label='Comment avez-vous entendu parlé de la marque ?'
+                                    label={t("survey")}
                                     id='survey'
-                                    register={register("survey", { required: "Ce champ est requis" })}
+                                    register={register("survey", { required: t("required") })}
                                     error={getFieldError("survey")}
                                     value={watchFields.survey}
                                     options={[
-                                        { value: 'Recherche Google/Bing', label: 'Recherche Google/Bing' },
-                                        { value: 'facebook', label: 'Facebook' },
-                                        { value: 'instagram', label: 'Instagram' },
-                                        { value: 'youtube', label: 'YouTube' },
-                                        { value: 'Publicité Google (Google Ads)', label: 'Publicité Google (Google Ads)' },
-                                        { value: "Recommandation d'un ami ou d'un membre de la famille", label: "Recommandation d'un ami ou d'un membre de la famille" },
-                                        { value: "Article de blog ou revue en ligne", label: "Article de blog ou revue en ligne" },
-                                        { value: "Lien direct (j'ai tapé l'adresse du site)", label: "Lien direct (j'ai tapé l'adresse du site)" },
-                                        { value: "Publicité Display/Bannière", label: "Publicité Display/Bannière" },
-                                        { value: "Autre (veuillez préciser)", label: "Autre (veuillez préciser)" },
+                                        { value: 'Recherche Google/Bing', label: t("surveyOptions.google") },
+                                        { value: 'facebook', label: t("surveyOptions.facebook") },
+                                        { value: 'instagram', label: t("surveyOptions.instagram") },
+                                        { value: 'youtube', label: t("surveyOptions.youtube") },
+                                        { value: 'Publicité Google (Google Ads)', label: t("surveyOptions.googleAds") },
+                                        { value: "Recommandation d'un ami ou d'un membre de la famille", label: t("surveyOptions.recommendation") },
+                                        { value: "Article de blog ou revue en ligne", label: t("surveyOptions.blog") },
+                                        { value: "Lien direct (j'ai tapé l'adresse du site)", label: t("surveyOptions.direct") },
+                                        { value: "Publicité Display/Bannière", label: t("surveyOptions.display") },
+                                        { value: "Autre (veuillez préciser)", label: t("surveyOptions.other") },
                                     ]}
-                                    placeholder="Veuillez sélectionner..."
+                                    placeholder={t("surveyPlaceholder")}
                                 />
                                 {watchFields.survey === "Autre (veuillez préciser)" && (
                                     <Input
-                                        label="Précisez"
+                                        label={t("pleaseSpecify")}
                                         type="text"
                                         id="survey_other"
                                         register={register("survey_other", {
-                                            required: "Veuillez préciser"
+                                            required: t("pleaseSpecify")
                                         })}
                                         error={getFieldError("survey_other")}
                                         value={watchFields.survey_other}
@@ -653,7 +764,7 @@ const Page = () => {
                         <div className='flex flex-col lg:gap-8 gap-6'>
                             <div className='flex items-center gap-1 flex-wrap'>
                                 <input onChange={handleShow} type="checkbox" id='shipping_address' checked={shippingAddress} />
-                                <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>Détails de livraison</h3>
+                                <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111]'>{t("shippingDetails")}</h3>
                             </div>
                             {
                                 shippingAddress && (
@@ -744,13 +855,13 @@ const Page = () => {
                                     htmlFor='comments'
                                     className='bg-white absolute left-3 font-semibold -top-[14px] text-[#666] text-sm leading-[28px] uppercase'
                                 >
-                                    Notes de commande (facultatif)
+                                    {t("orderNotes")}
                                 </label>
                                 <textarea
                                     {...register("order_comments")}
                                     id='comments'
                                     className='border border-[#BFBFBF] rounded-[4px] w-full py-3 px-3 focus:outline-none text-lg leading-[23px] text-black font-semibold min-h-[120px] resize-y'
-                                    placeholder='Commentaires concernant votre commande, ex. : consignes de livraison.'
+                                    placeholder={t("orderNotesPlaceholder")}
                                 />
                             </div>
                         </div>
@@ -758,12 +869,12 @@ const Page = () => {
 
                     {/* 2nd section */}
                     <div className=''>
-                        <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111] block mb-6'>Votre commande</h3>
+                        <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111] block mb-6'>{t("yourOrder")}</h3>
                         <table className='w-full border border-[#111]'>
                             <thead>
                                 <tr className='border-b border-[#111]'>
-                                    <th className='!px-3 py-2 text-left'>Produit</th>
-                                    <th className='!px-3 py-2 !border-l text-left border-[#111]'>Sous-total</th>
+                                    <th className='!px-3 py-2 text-left'>{t("product")}</th>
+                                    <th className='!px-3 py-2 !border-l text-left border-[#111]'>{t("subtotal")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -781,50 +892,57 @@ const Page = () => {
                             </tbody>
                             <tfoot>
                                 <tr className='border-b border-[#111]'>
-                                    <th className='!px-3 py-2 text-left'>Sous-total</th>
+                                    <th className='!px-3 py-2 text-left'>{t("subtotal")}</th>
                                     <td className='!px-3 py-2 !border-l text-left border-[#111]'>{sousTotal} {cart?.totals?.currency_symbol} (TTC)</td>
                                 </tr>
                                 <tr className='border-b border-[#111]'>
-                                    <th className='!px-3 py-2 text-left'>Shipping</th>
+                                    <th className='!px-3 py-2 text-left'>{t("shippingMethods")}</th>
                                     <td className={`!px-3 py-2 !border-l text-left border-[#111]`}>
-                                        <div>
-                                            <ul className={`space-y-2 ${shippingLoading ? 'opacity-50' : 'opacity-100'}`}>
-                                                {allShippingRates?.map((rate, i) => {
-                                                    return (
-                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
-                                                            <div className='flex items-center gap-3 flex-1 min-w-0'>
-                                                                <input
-                                                                    checked={selectedRateId === rate.rate_id}
-                                                                    value={`${rate.package_id}:${rate.rate_id}`}
-                                                                    onChange={(e) => handleSelectRate(e.target.value)}
-                                                                    type="radio"
-                                                                    name="shipping_method"
-                                                                    id={`shipping_rate_${rate.rate_id}`}
-                                                                    disabled={shippingLoading || updatingShipping}
-                                                                    className="cursor-pointer"
-                                                                />
-                                                                <label htmlFor={`shipping_rate_${rate.rate_id}`} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
-                                                            </div>
-                                                            <div className='text-base text-[#111] font-semibold leading-[100%]'>
-                                                                {
-                                                                    (rate.price / 100 + rate.taxes / 100) === 0 ? <span className='text-green-600'>Gratuit</span> : `${(rate.price / 100 + rate.taxes / 100).toFixed(2)}${rate.currency_symbol}`
-                                                                }
-                                                            </div>
-                                                        </li>
-                                                    )
-                                                })}
-                                            </ul>
-                                        </div>
+                                        {allShippingRates && allShippingRates.length > 0 ? (
+                                            <div>
+                                                <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
+                                                    {allShippingRates.map((rate, i) => {
+                                                        const totalPrice = (rate.price / 100 + rate.taxes / 100);
+                                                        return (
+                                                            <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                                                    <input
+                                                                        checked={selectedRateId === rate.rate_id}
+                                                                        value={`${rate.package_id}:${rate.rate_id}`}
+                                                                        onChange={(e) => handleSelectRate(e.target.value)}
+                                                                        type="radio"
+                                                                        name="shipping_method"
+                                                                        id={`shipping_rate_${rate.rate_id}`}
+                                                                        disabled={shippingLoading || updatingShipping}
+                                                                        className="cursor-pointer"
+                                                                    />
+                                                                    <label htmlFor={`shipping_rate_${rate.rate_id}`} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
+                                                                </div>
+                                                                <div className='text-base text-[#111] font-semibold leading-[100%]'>
+                                                                    {
+                                                                        totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
+                                                                    }
+                                                                </div>
+                                                            </li>
+                                                        )
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        ) : (
+                                            <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                                {t("noShippingMethods")}
+                                            </p>
+                                        )}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th className='!px-3 py-2 text-left'>Total</th>
+                                    <th className='!px-3 py-2 text-left'>{t("total")}</th>
                                     <td className='!px-3 py-2 !border-l text-left border-[#111] flex items-center gap-1'>
                                         <span>
                                             <strong>{cartTotal}{cart?.totals?.currency_symbol}</strong>
                                         </span>
                                         <span>
-                                            (dont <strong>{Number(cart?.totals?.total_tax).toFixed(2) / 100} {cart?.totals?.currency_symbol}</strong> TVA)
+                                            ({t("includingVAT")} <strong>{Number(cart?.totals?.total_tax).toFixed(2) / 100} {cart?.totals?.currency_symbol}</strong> {t("VAT")})
                                         </span>
                                     </td>
                                 </tr>
@@ -833,15 +951,7 @@ const Page = () => {
                     </div>
 
                     {/* 3rd section */}
-                    {isCartEmpty ? (
-                        <div className='bg-[#F7F7F7] p-8 text-center'>
-                            <p className='text-lg mb-4'>Votre panier est vide.</p>
-                            <Link href="/" className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold'>
-                                Retour à la boutique
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className='bg-[#F7F7F7]'>
+                    <div className='bg-[#F7F7F7]'>
                             <ul className='flex flex-col gap-2 p-4 border-b border-[#DDD8E3]'>
                                 {filteredPaymentMethods?.map((method, i) => {
                                     const isSelected = watchFields.payment_method === method.id;
@@ -954,9 +1064,9 @@ const Page = () => {
                                 <div className='flex flex-col gap-1'>
                                     <div className='flex items-center gap-1'>
                                         <input {...register("terms", {
-                                            required: "Vous devez accepter les conditions générales pour continuer"
+                                            required: t("termsRequired")
                                         })} type="checkbox" id="terms" />
-                                        <label htmlFor="terms">I have read and agree to the website terms and conditions </label>
+                                        <label htmlFor="terms">{t("terms")}</label>
                                     </div>
                                     {errors.terms && (
                                         <p className="text-red-500 text-xs mt-1 ml-6">{errors.terms.message}</p>
@@ -971,12 +1081,11 @@ const Page = () => {
                                         disabled={isSubmitting || !watchFields.terms}
                                         className='w-fit ml-auto text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
                                     >
-                                        {isSubmitting ? 'Traitement...' : watchFields.payment_method === 'bacs' ? 'Passer la commande' : 'Continuer'}
+                                        {isSubmitting ? t("processing") : watchFields.payment_method === 'bacs' ? t("placeOrder") : t("continue")}
                                     </button>
                                 ) : null}
                             </div>
                         </div>
-                    )}
 
                 </form>
             </div>

@@ -277,37 +277,43 @@ const Cart = () => {
                             )}
 
                             <tr className='flex flex-col gap-[10px] flex-wrap'>
-                                <th className='text-base text-[#111] font-semibold leading-[100%] text-left uppercase'>Shipping</th>
+                                <th className='text-base text-[#111] font-semibold leading-[100%] text-left uppercase'>Méthodes de livraison</th>
                                 <td className='flex flex-col gap-[10px]'>
-                                    <form action="">
-                                        <ul className={`flex flex-col gap-[10px] ${shippingLoading ? 'opacity-50' : 'opacity-100'}`}>
-                                            {allShippingRates?.map((rate, i) => {
-                                                return (
-                                                    <li key={i} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between'>
-                                                        <div className='flex items-center gap-3'>
-                                                            <input
-                                                                checked={selectedRateId === rate.rate_id}
-                                                                value={`${rate.package_id}:${rate.rate_id}`}
-                                                                onChange={(e) => handleSelectRate(e.target.value)}
-                                                                type="radio"
-                                                                name="shipping_method"
-                                                                disabled={shippingLoading}
-                                                            />
-                                                            <label htmlFor="" className="break-normal max-w-full">{rate.name}</label>
-                                                        </div>
-                                                        <div className='text-base text-[#111] font-semibold leading-[100%]'>
-                                                            {
-                                                                (rate.price / 100 + rate.taxes / 100) === 0 ? <span className='text-green-600'>Gratuit</span> : `${(rate.price / 100 + rate.taxes / 100).toFixed(2)}${rate.currency_symbol}`
-                                                            }
-                                                        </div>
-                                                    </li>
-                                                )
-                                            })}
-                                        </ul>
-                                    </form>
-                                    <p className='mt-[15px] p-4 border-l-2 border-[#1D98FF] text-sm leading-[130%] bg-[#F9F9F9]'>
-                                        <strong>Shipping Address</strong>
-                                    </p>
+                                    {allShippingRates && allShippingRates.length > 0 ? (
+                                        <form action="">
+                                            <ul className={`flex flex-col gap-[10px] ${shippingLoading ? 'opacity-50' : 'opacity-100'}`}>
+                                                {allShippingRates.map((rate, i) => {
+                                                    const totalPrice = (rate.price / 100 + rate.taxes / 100);
+                                                    return (
+                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                            <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                                                <input
+                                                                    checked={selectedRateId === rate.rate_id}
+                                                                    value={`${rate.package_id}:${rate.rate_id}`}
+                                                                    onChange={(e) => handleSelectRate(e.target.value)}
+                                                                    type="radio"
+                                                                    name="shipping_method"
+                                                                    id={`cart_shipping_rate_${rate.rate_id}`}
+                                                                    disabled={shippingLoading}
+                                                                    className="cursor-pointer"
+                                                                />
+                                                                <label htmlFor={`cart_shipping_rate_${rate.rate_id}`} className="break-normal max-w-full cursor-pointer font-medium">{rate.name}</label>
+                                                            </div>
+                                                            <div className='text-base text-[#111] font-semibold leading-[100%]'>
+                                                                {
+                                                                    totalPrice === 0 ? <span className='text-green-600'>Gratuit</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || currencySymbol}`
+                                                                }
+                                                            </div>
+                                                        </li>
+                                                    )
+                                                })}
+                                            </ul>
+                                        </form>
+                                    ) : (
+                                        <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
+                                            Aucune méthode de livraison disponible. Veuillez vérifier votre adresse de livraison.
+                                        </p>
+                                    )}
                                 </td>
                             </tr>
                             <tr className='flex w-full gap-5 items-center justify-between flex-wrap bg-[#F9F9F9] p-4'>
