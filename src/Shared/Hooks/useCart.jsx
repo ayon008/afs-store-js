@@ -69,20 +69,15 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
 
-            // Use API route instead of Server Action for better cookie synchronization
-            const response = await fetch('/api/cart', {
-                method: 'GET',
-                credentials: 'include', // Important: include cookies
-                cache: 'no-store',
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to load cart: ${response.status}`);
+            // Use Server Action for better cookie synchronization
+            const result = await getCartAction();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to load cart');
             }
 
-            const data = await response.json();
-            console.log(data, 'resultFromLoadCart');
-            setCart(data);
+            console.log(result.data, 'resultFromLoadCart');
+            setCart(result.data);
         } catch (err) {
             setError(err.message);
             console.error('Cart loading error:', err);
