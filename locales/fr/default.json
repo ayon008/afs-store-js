@@ -62,6 +62,13 @@
   },
   "common": {
     "cartClearedLanguage": "Votre panier a été vidé car vous avez changé de langue. Les produits doivent être ajoutés à nouveau dans la nouvelle langue.",
-    "cartClearedCurrency": "Votre panier a été vidé car vous avez changé de devise. Les produits doivent être ajoutés à nouveau."
+    "cartClearedCurrency": "Votre panier a été vidé car vous avez changé de devise. Les produits doivent être ajoutés à nouveau.",
+    "chooseLocationLanguage": "Choisissez votre localisation et votre langue",
+    "currentLanguageCurrency": "Votre langue et devise actuelles",
+    "change": "Changer",
+    "english": "Anglais",
+    "french": "Français",
+    "euro": "Euro",
+    "usDollar": "Dollar américain"
   }
 }

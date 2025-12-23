@@ -62,6 +62,13 @@
   },
   "common": {
     "cartClearedLanguage": "Your cart has been cleared because you changed the language. Products must be added again in the new language.",
-    "cartClearedCurrency": "Your cart has been cleared because you changed the currency. Products must be added again."
+    "cartClearedCurrency": "Your cart has been cleared because you changed the currency. Products must be added again.",
+    "chooseLocationLanguage": "Choose your location and language",
+    "currentLanguageCurrency": "Your current language and currency",
+    "change": "Change",
+    "english": "English",
+    "french": "French",
+    "euro": "Euro",
+    "usDollar": "US Dollar"
   }
 }

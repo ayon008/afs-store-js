@@ -27,7 +27,11 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
-  const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  
+  // Get current currency from cart or default to 'euro'
+  const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+  const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+  const [selectedCurrency, setSelectedCurrency] = useState(currentCurrency);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
   const [notification, setNotification] = useState(null);
@@ -273,9 +277,9 @@ const Navbar = ({ NAV_LINKS }) => {
 
             {/* Language */}
             <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
-              <span className="fi fi-fr fis mr-2 scale-125"></span>
+              <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} fis mr-2 scale-125`}></span>
               <span className="text-white text-[0rem] font-extrabold tracking-wide">
-                FR
+                {locale === 'fr' ? 'FR' : 'EN'}
               </span>
             </button>
           </div>
@@ -878,7 +882,7 @@ const Navbar = ({ NAV_LINKS }) => {
           {/* 1st div */}
           <div className="py-4 lg:px-10 px-5 shadow-[0_6px_8px_rgba(91,104,113,0.1)]">
             <div className="flex items-center gap-5">
-              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">Choose your location and language</h2>
+              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">{t("chooseLocationLanguage")}</h2>
               <div className="w-fit p-[5px] rounded-full border border-[#111]">
                 <X onClick={() => setPopUp(!showPopUp)} className="cursor-pointer" />
               </div>
@@ -888,21 +892,21 @@ const Navbar = ({ NAV_LINKS }) => {
           <div className="py-4 lg:px-10 px-5 max-h-[calc(100vh-140px)] overflow-y-scroll popup-scroll-bar">
             <div className="flex flex-col gap-[30px]">
               <div className="flex flex-col gap-4 mb-[30px]">
-                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">Your current language and currency</p>
+                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">{t("currentLanguageCurrency")}</p>
                 <ul className="flex flex-col gap-3">
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <span className="fi fi-us mr-2 scale-125"></span>
-                      English
+                      <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
+                      {locale === 'fr' ? t("french") : t("english")}
                     </span>
-                    <span className="font-bold">English</span>
+                    <span className="font-bold">{locale === 'fr' ? t("french") : t("english")}</span>
                   </li>
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <Euro className="" size={24} />
-                      Euro
+                      {currentCurrency === 'euro' ? <Euro className="" size={24} /> : <DollarSign className="" size={24} />}
+                      {currentCurrency === 'euro' ? t("euro") : t("usDollar")}
                     </span>
-                    <span className="font-bold">EUR</span>
+                    <span className="font-bold">{currentCurrency === 'euro' ? 'EUR' : 'USD'}</span>
                   </li>
                 </ul>
               </div>
@@ -928,9 +932,9 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <span className="fi fi-us mr-2 scale-125"></span>
-                        English
+                        {t("english")}
                       </span>
-                      <span className="font-bold">English</span>
+                      <span className="font-bold">{t("english")}</span>
                     </label>
                   </li>
                   <li
@@ -949,9 +953,9 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <span className="fi fi-fr mr-2 scale-125"></span>
-                        Français
+                        {t("french")}
                       </span>
-                      <span className="font-bold">French</span>
+                      <span className="font-bold">{t("french")}</span>
                     </label>
                   </li>
                 </ul>
@@ -976,7 +980,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <Euro className="" size={24} />
-                        Euro
+                        {t("euro")}
                       </span>
                       <span className="font-bold">EUR</span>
                     </label>
@@ -997,7 +1001,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <DollarSign className="" size={24} />
-                        US Dollar
+                        {t("usDollar")}
                       </span>
                       <span className="font-bold">USD</span>
                     </label>
