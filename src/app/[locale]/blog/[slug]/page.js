@@ -60,16 +60,41 @@ export async function generateMetadata({ params }) {
 
 export const revalidate = 60;
 
+// Generate static params without using getPosts (avoids calling getLocale/headers at build time)
 export async function generateStaticParams() {
-    const blogs = await getPosts({
-        fetchAll: true,
-        orderby: "date",
-        order: "desc",
-    });
+    try {
+        const baseEnv = process.env.WP_BASE_URL;
+        if (!baseEnv) {
+            console.warn('[blog/[slug]] WP_BASE_URL is not set. Skipping static params generation.');
+            return [];
+        }
 
-    return blogs.map(blog => ({
-        slug: blog.slug,
-    }));
+        const baseUrl = baseEnv.replace(/\/$/, '');
+        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=1&_fields=slug`;
+
+        const res = await fetch(apiUrl, {
+            cache: 'no-store',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!res.ok) {
+            console.error('[blog/[slug]] Failed to fetch posts for static params:', res.status, res.statusText);
+            return [];
+        }
+
+        const posts = await res.json();
+
+        if (!Array.isArray(posts)) return [];
+
+        return posts.map((post) => ({
+            slug: post.slug,
+        }));
+    } catch (error) {
+        console.error('[blog/[slug]] Error in generateStaticParams:', error);
+        return [];
+    }
 }
 
 export const getCategories = async (id = null) => {

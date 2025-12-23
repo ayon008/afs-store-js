@@ -195,3 +195,62 @@ export const updateShippingAndCart = async (shippingData) => {
         return { success: false, error: error.message };
     }
 }
+
+/**
+ * Select shipping rate - WooCommerce version
+ */
+export async function selectShippingRate(rateId, packageId = 0) {
+    const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+    
+    try {
+        if (!rateId) {
+            return { success: false, error: 'Shipping rate ID is required' };
+        }
+
+        const cookieHeader = await getWooCommerceCookies();
+
+        const payload = {
+            rate_id: rateId,
+            package_id: parseInt(packageId) || 0
+        };
+
+        const response = await fetch(`${WC_STORE_URL}/cart/select-shipping-rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieHeader,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage = `Failed to select shipping rate: ${response.status}`;
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } catch {
+                errorMessage = errorText || errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+
+        // Get updated cart
+        const updatedCart = await getCart();
+
+        return {
+            success: true,
+            cart: updatedCart
+        };
+
+    } catch (error) {
+        console.error('Select shipping rate error:', error);
+        return { success: false, error: error.message };
+    }
+}

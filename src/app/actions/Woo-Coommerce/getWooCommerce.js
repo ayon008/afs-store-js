@@ -42,6 +42,25 @@ export async function getLocaleValue() {
 
 
 
+
+
+export const getCountryDetails = async (country) => {
+    const localeValue = await getLocaleValue();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/data/countries/${country}`;
+    try {
+        const response = await fetch(url, {
+            headers: { Authorization: `Basic ${authHeader}` },
+            cache: "no-store",
+        });
+        const data = await response.json();
+        return data;
+    }
+    catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
 export const calculatePriceWithTax = async (basePrice, tax_class = "standard", country = null) => {
     const localeValue = await getLocaleValue();
     try {
@@ -510,10 +529,10 @@ export const getRecentProducts = async () => {
             .toString("base64");
 
         const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`;
-        
+
         const response = await fetch(url, {
-            headers: { 
-                Authorization: `Basic ${authHeader}` 
+            headers: {
+                Authorization: `Basic ${authHeader}`
             },
             cache: "no-store"
         });
@@ -543,8 +562,8 @@ export async function searchProducts(query) {
         const res = await fetch(
             `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`,
             {
-                headers: { 
-                    Authorization: `Basic ${authHeader}` 
+                headers: {
+                    Authorization: `Basic ${authHeader}`
                 },
                 cache: "no-store",
             }
@@ -554,7 +573,7 @@ export async function searchProducts(query) {
             console.error('Failed to search products:', res.status, res.statusText);
             return [];
         }
-        
+
         const data = await res.json();
         return Array.isArray(data) ? data : [];
     } catch (error) {
@@ -699,5 +718,48 @@ export async function removeCoupon(couponCode) {
     } catch (error) {
         console.error('Remove coupon error:', error);
         return { success: false, error: error.message };
+    }
+}
+
+
+export const getPaymentMethods = async () => {
+    const localeValue = await getLocaleValue();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/payment_gateways`;
+    try {
+        const response = await fetch(url, {
+            headers: { Authorization: `Basic ${authHeader}` },
+            cache: "no-store",
+        });
+
+        console.log(response, 'response');
+
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch payment methods: ${response.status}`);
+        }
+        const data = await response.json();
+        const enabledMethods = data.filter((method) => method.enabled);
+        return enabledMethods;
+    }
+    catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
+
+export const createOrder = async (orderData) => {
+    const localeValue = await getLocaleValue();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/orders`;
+    try {
+        const response = await fetch(url, {
+            headers: { Authorization: `Basic ${authHeader}` },
+            cache: "no-store",
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.log(error);
+        return error;
     }
 }

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { CheckCircle, X } from 'lucide-react';
 import useCart from '@/Shared/Hooks/useCart';
-import { selectShippingRate } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';
 import FormButton from '@/Shared/Button/FormButton';
 import CartList from './CartList';
+import { selectShippingRate } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';
 
 const Cart = () => {
     // const [shippingData, setShippingData] = useState([]);
