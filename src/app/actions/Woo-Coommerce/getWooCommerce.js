@@ -461,6 +461,7 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
 // update cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function updateCartItem(itemKey, quantity) {
     const localeValue = await getLocaleValue();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
 
@@ -481,7 +482,7 @@ export async function updateCartItem(itemKey, quantity) {
         console.log('Updating cart item with payload:', JSON.stringify(payload, null, 2));
 
         // Call WooCommerce API directly
-        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/update-item`, {
+        const response = await fetch(`${WC_STORE_URL}/cart/update-item`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
