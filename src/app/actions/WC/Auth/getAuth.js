@@ -1,7 +1,9 @@
+
 "use server"
 import { getCart, updateBillingAndCart, updateShippingAndCart } from "../../Woo-Coommerce/Shop/Cart/cart";
 // app/actions/auth.ts
 import { cookies } from "next/headers";
+import { getLocaleValue } from "../../Woo-Coommerce/getWooCommerce";
 // import { getWooCommerceCookies } from "./StoreApi/cookie-handler";
 // import { getCart } from "./StoreApi/cart";
 
@@ -16,6 +18,8 @@ const authHeader = Buffer
 
 // Get User
 export const getAuthenticatedUser = async () => {
+    const localeValue = await getLocaleValue();
+
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get("auth_token")?.value;
@@ -24,7 +28,7 @@ export const getAuthenticatedUser = async () => {
 
         /* 1️⃣ Get WordPress user */
         const wpRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wp/v2/users/me?context=edit`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/users/me?context=edit`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -38,7 +42,7 @@ export const getAuthenticatedUser = async () => {
 
         /* 2️⃣ Get WooCommerce customer (billing + shipping) */
         const wcRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/customers/${wpUser.id}`,
             {
                 headers: {
                     Authorization: `Basic ${authHeader}`,
@@ -74,7 +78,7 @@ export const registerStoreUser = async (userInfo) => {
     try {
         const token = btoa("upwork13:shariar5175A"); // username:password
 
-        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers`, {
+        const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/customers`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -101,9 +105,9 @@ export const registerStoreUser = async (userInfo) => {
 // Login User
 
 export const loginUser = async (userInfo) => {
-
+    const localeValue = await getLocaleValue();
     try {
-        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/jwt-auth/v1/token`, {
+        const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/jwt-auth/v1/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -156,6 +160,7 @@ export const loginUser = async (userInfo) => {
 // Update Profile in WordPress and WooCommerce
 
 export async function updateProfile(data) {
+    const localeValue = await getLocaleValue();
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
@@ -165,7 +170,7 @@ export async function updateProfile(data) {
 
     try {
         // 1️⃣ Get the WordPress user (to get the ID)
-        const wpRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wp/v2/users/me`, {
+        const wpRes = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
             cache: "no-store",
         });
@@ -178,7 +183,7 @@ export async function updateProfile(data) {
         const wpUser = await wpRes.json();
 
         // 2️⃣ Update WordPress user info (first_name, last_name, email, etc.)
-        const wpUpdateRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wp/v2/users/me`, {
+        const wpUpdateRes = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/users/me`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -238,6 +243,7 @@ export async function updateProfile(data) {
 
 // update billing info in WooCommerce and Cart as well
 export const updateBillingInfo = async (billingData) => {
+    const localeValue = await getLocaleValue();
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
@@ -258,7 +264,7 @@ export const updateBillingInfo = async (billingData) => {
         const originalBilling = wpUser.billing;
 
         // 2️⃣ Update WooCommerce billing info
-        const wcRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`, {
+        const wcRes = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/customers/${wpUser.id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -298,6 +304,7 @@ export const updateBillingInfo = async (billingData) => {
 // update shipping info in WooCommerce and Cart as well
 
 export const updateShippingInfo = async (shippingData) => {
+    const localeValue = await getLocaleValue();
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
@@ -315,7 +322,7 @@ export const updateShippingInfo = async (shippingData) => {
 
 
         // 2️⃣ Update WooCommerce shipping info
-        const wcRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`, {
+        const wcRes = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/customers/${wpUser.id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

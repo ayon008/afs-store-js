@@ -1,8 +1,8 @@
 // app/api/cart/add-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
-const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
 
 // Helper to parse set-cookie headers (same as before)
 function parseSetCookieHeader(header) {
@@ -79,6 +79,8 @@ function extractStringValue(value) {
 }
 
 export async function POST(request) {
+    const localeValue = await getLocaleValue();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();

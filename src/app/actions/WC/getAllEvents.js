@@ -1,7 +1,10 @@
 "use server";
 
+import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+
 export const getEventsDestinations = async () => {
-    const BASE = process.env.WP_BASE_URL;
+    const localeValue = await getLocaleValue();
+    const BASE = `${process.env.WP_BASE_URL}/${localeValue}`;
 
     // Check environment variable
     if (!BASE) {
@@ -11,7 +14,7 @@ export const getEventsDestinations = async () => {
 
     try {
         const res = await fetch(
-            `${BASE}/wp-json/wp/v2/destination?per_page=100`,
+            `${BASE}/${localeValue}/wp-json/wp/v2/destination?per_page=100`,
             {
                 next: { revalidate: 3600 }, // ISR cache
             }
@@ -41,7 +44,8 @@ export const getEventsDestinations = async () => {
 };
 
 export const getAllEvents = async (selectedId) => {
-    const BASE = process.env.WP_BASE_URL;
+    const localeValue = await getLocaleValue();
+    const BASE = `${process.env.WP_BASE_URL}/${localeValue}`;
 
     if (!BASE) {
         console.error("❌ WP_BASE_URL is missing!");

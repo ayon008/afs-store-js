@@ -10,7 +10,7 @@ const Input = ({ label, type, id, placeholder, register, error, registerPage = f
             <div className='relative'>
                 <label
                     htmlFor={id}
-                    className={`${checkout ? 'bg-white' : 'bg-[#F0F0F0]'} absolute left-3 font-semibold -top-[14px] text-[#666] text-sm leading-[28px]`}
+                    className={`${checkout ? 'bg-white' : 'bg-[#F0F0F0]'} px-[2px] absolute left-3 font-semibold -top-[14px] text-[#666] text-sm leading-[28px]`}
                 >
                     <span className='uppercase'>{label}</span>
                     {registerPage && (

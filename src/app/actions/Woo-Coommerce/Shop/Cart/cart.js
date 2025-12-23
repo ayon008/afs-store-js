@@ -1,20 +1,21 @@
+
 "use server"
 
 import { cookies } from "next/headers";
-import { getWooCommerceCookies, setCookiesFromResponse } from "../../Cookies/cookie-handler";
+import { getWooCommerceCookies } from "../../Cookies/cookie-handler";
+import { getLocaleValue } from "../../getWooCommerce";
 
-
-
-const WP_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
-const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
 
 
 // Get cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function getCart() {
+    const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
-        
+
         const response = await fetch(`${WC_STORE_URL}/cart`, {
             method: 'GET',
             headers: {
@@ -23,9 +24,6 @@ export async function getCart() {
             },
             cache: 'no-store',
         });
-
-        // Set cookies from response to keep them synchronized
-        await setCookiesFromResponse(response);
 
         if (!response.ok) {
             throw new Error(`Failed to get cart: ${response.status}`);
@@ -42,6 +40,9 @@ export async function getCart() {
 }
 
 export const updateBillingAndCart = async (billingData) => {
+    const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
     if (!token) {
@@ -65,7 +66,7 @@ export const updateBillingAndCart = async (billingData) => {
         console.log("Updating billing address with payload:", billingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {
@@ -79,9 +80,6 @@ export const updateBillingAndCart = async (billingData) => {
                 cache: "no-store",
             }
         );
-
-        // Set cookies from response
-        await setCookiesFromResponse(cartRes);
 
         if (!cartRes.ok) {
             const err = await cartRes.json();
@@ -107,6 +105,9 @@ export const updateBillingAndCart = async (billingData) => {
 
 
 export const updateShippingAndCart = async (shippingData) => {
+    const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
     if (!token) {
@@ -123,7 +124,7 @@ export const updateShippingAndCart = async (shippingData) => {
         if (!firstName || !lastName) {
             try {
                 const currentCartRes = await fetch(
-                    `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart`,
+                    `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart`,
                     {
                         method: 'GET',
                         headers: {
@@ -173,9 +174,6 @@ export const updateShippingAndCart = async (shippingData) => {
                 cache: "no-store",
             }
         );
-
-        // Set cookies from response
-        await setCookiesFromResponse(cartRes);
 
         if (!cartRes.ok) {
             const err = await cartRes.json();

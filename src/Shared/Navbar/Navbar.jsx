@@ -1,10 +1,10 @@
 
 "use client";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, DollarSign, Euro, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // import SearchOverlay from "../../components/search";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import "flag-icons/css/flag-icons.min.css";
 import gsap from "gsap";
 import Menu from "./Menu";
@@ -12,16 +12,51 @@ import { useGSAP } from "@gsap/react";
 import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
+import { useLocale } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
+import SearchOverlay from "./search";
 
 const Navbar = ({ NAV_LINKS }) => {
 
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
+  const locale = useLocale();
   const { cart, sideCartOpen, openSideCart, closeSideCart } = useCart();
 
-  const totalQty = cart?.items_count;
+  // États pour la langue et la devise sélectionnées
+  const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
+  const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('');
 
+  const totalQty = cart?.items_count;
+  const pathName = usePathname();
+
+  // Effet pour gérer la redirection après la soumission du formulaire
+  useEffect(() => {
+    if (shouldRedirect && redirectPath) {
+      // Utiliser window.location pour une redirection complète qui recharge l'application
+      window.location.href = redirectPath;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRedirect]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const selectedValues = {
+      language: selectedLanguage, // "en" ou "fr"
+      currency: selectedCurrency, // "usd" ou "euro"
+    };
+    if (selectedLanguage !== locale) {
+      const currentPath = pathName || '/';
+      const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
+      setRedirectPath(newPath);
+      setShouldRedirect(true);
+    } else {
+      setPopUp(false);
+    }
+    return selectedValues;
+  }
 
   // Hover Id [First Nav];
   const [hoverId, setHoverId] = useState(null);
@@ -82,6 +117,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
   const [showPopUp, setPopUp] = useState(false);
 
+
   return (
     <>
       <nav className="sticky left-0 right-0 top-0 z-[99] text-white w-full">
@@ -111,7 +147,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
           <div className="flex items-center gap-2">
             {/* Search Button */}
-            <Search className="w-6 h-6 md:hidden block" />
+            <Search onClick={() => setIsSearchOpen(true)} className="w-6 h-6 md:hidden block" />
             <div className="relative mr-4 hidden md:block">
               <input
                 onClick={() => setIsSearchOpen(true)}
@@ -132,7 +168,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M4 20.5714V17.1429C4 16.2335 4.42143 15.3615 5.17157 14.7185C5.92172 14.0755 6.93913 13.7143 8 13.7143H12H16C17.0609 13.7143 18.0783 14.0755 18.8284 14.7185C19.5786 15.3615 20 16.2335 20 17.1429V20.5714M16 6.85714C16.1205 9.14337 14.2894 11.1429 12 11.1429C9.7106 11.1429 7.87952 9.14337 8 6.85714C8.1142 4.6901 9.82995 3 12 3C14.17 3 15.8858 4.6901 16 6.85714Z"
+                  d="M4 20.5714V17.1429C4 16.2335 4.42143 15.3615 5.17157 14.7185C5.92172 14.0755 6.93913 13.7143 8 13.7143H12H16C17.0609 13.7143 18.0783 14.0755 18.8284 14.7185C19.5786 15.3615 20 16.2335 20 17.1429V20.5714M16 6.85714C16.1205 9.14337 14.2894 11.1429 12 11.1429C9.7106 11.1429 7.82 9.14337 8 6.85714C8.1142 4.6901 9.82 3 12 3C14.17 3 15.8858 4.6901 16 6.85714Z"
                   stroke="white"
                   strokeWidth="1.5"
                   strokeLinecap="square"
@@ -147,7 +183,7 @@ const Navbar = ({ NAV_LINKS }) => {
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none">
 
                 <path
-                  d="M2.88725 18.6807C1.76607 18.6807 0.857178 19.5836 0.857178 20.6975C0.857178 21.8113 1.76607 22.7143 2.88725 22.7143C4.00843 22.7143 4.91733 21.8113 4.91733 20.6975C4.91733 19.5836 4.00843 18.6807 2.88725 18.6807ZM2.88725 18.6807H14.0527M2.88725 18.6807V8.28571C2.88725 7.73343 2.43954 7.28571 1.88725 7.28571H0.857178M14.0527 18.6807C12.9315 18.6807 12.0226 19.5836 12.0226 20.6975C12.0226 21.8113 12.9315 22.7143 14.0527 22.7143C15.1738 22.7143 16.0827 21.8113 16.0827 20.6975C16.0827 19.5836 15.1738 18.6807 14.0527 18.6807ZM14.0527 18.6807H18"
+                  d="M2.88725 18.6807C1.76607 18.6807 0.857178 19.5836 0.857178 20.6975C0.857178 21.8113 1.76607 22.7143 2.88725 22.7143C4.00843 22.7143 4.91733 21.8113 4.91733 20.6975C4.91733 19.5836 4.00843 18.6807 2.88725 18.6807ZM2.88725 18.6807H14.0527M2.88725 18.6807V8.28571C2.88725 7.73343 2.44 7.28571 1.88725 7.28571H0.857178M14.0527 18.6807C12.9315 18.6807 12.0226 19.5836 12.0226 20.6975C12.0226 21.8113 12.9315 22.7143 14.0527 22.7143C15.1738 22.7143 16.0827 21.8113 16.0827 20.6975C16.0827 19.5836 15.1738 18.6807 14.0527 18.6807ZM14.0527 18.6807H18"
                   stroke="white"
                   strokeWidth="1.5"
                   strokeLinecap="square"
@@ -181,7 +217,7 @@ const Navbar = ({ NAV_LINKS }) => {
             {/* Language */}
             <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
               <span className="fi fi-fr fis mr-2 scale-125"></span>
-              <span className="text-white text-[0.95rem] font-extrabold tracking-wide">
+              <span className="text-white text-[0rem] font-extrabold tracking-wide">
                 FR
               </span>
             </button>
@@ -204,8 +240,8 @@ const Navbar = ({ NAV_LINKS }) => {
                 >
 
                   <span
-                    className={`absolute top-0 bottom-0 left-0 w-full h-full bg-white/95 opacity-0 group-hover:opacity-100 transition-all duration-200 ${hoverId === link.name &&
-                      "bg-white/95 opacity-100 text-black"
+                    className={`absolute top-0 bottom-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-100 transition-all duration-200 ${hoverId === link.name &&
+                      "bg-white opacity-100 text-black"
                       }`}
                   ></span>
                   <span
@@ -226,7 +262,7 @@ const Navbar = ({ NAV_LINKS }) => {
               <div className="" onMouseLeave={() => handleShow(null)}>
                 {subLinks?.sublinks?.length > 0 && (
                   <div className="text-black bg-transparent h-fit md:block hidden">
-                    <ul className="flex items-center justify-center bg-white/95">
+                    <ul className="flex items-center justify-center bg-white">
                       {subLinks?.sublinks?.map((children, i) => {
                         const url = children?.url ?? "#";
                         return (
@@ -411,7 +447,7 @@ const Navbar = ({ NAV_LINKS }) => {
                         <li className="cursor-pointer">Support</li>
                         <li className="cursor-pointer">Demande de SAV</li>
                         <li className="cursor-pointer">Garantie</li>
-                        <li className="cursor-pointer">Notice d'utilisation</li>
+                        <li className="cursor-pointer">Notice d&apos;utilisation</li>
                       </ul>
                     </div>
                     <div>
@@ -469,10 +505,10 @@ const Navbar = ({ NAV_LINKS }) => {
 
         {/* Nav Links Mobile */}
       </nav>
-      {/* <SearchOverlay
+      <SearchOverlay
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-      /> */}
+      />
 
       {/* 1st slide */}
 
@@ -795,14 +831,16 @@ const Navbar = ({ NAV_LINKS }) => {
               <div className="flex flex-col gap-4 mb-[30px]">
                 <p className="text-[#111111bf] text-base leading-[100%] font-semibold">Your current language and currency</p>
                 <ul className="flex flex-col gap-3">
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      <span className="fi fi-us mr-2 scale-125"></span>
                       English
                     </span>
                     <span className="font-bold">English</span>
                   </li>
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
+                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      <Euro className="" size={24} />
                       Euro
                     </span>
                     <span className="font-bold">EUR</span>
@@ -810,49 +848,109 @@ const Navbar = ({ NAV_LINKS }) => {
                 </ul>
               </div>
             </div>
-            <form className="space-y-[30px]">
+            <form onSubmit={handleSubmit} className="space-y-[30px] font-bold">
               {/* Language Switcher */}
               <div className="flex flex-col items-stretch gap-4">
                 <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Languages</h4>
                 <ul className="flex flex-col gap-3">
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      English
-                    </span>
-                    <span className="font-bold">English</span>
+                  <li
+                    onClick={() => setSelectedLanguage('en')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLanguage === 'en' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="language"
+                        value="en"
+                        className="hidden"
+                        checked={selectedLanguage === 'en'}
+                        onChange={() => setSelectedLanguage('en')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <span className="fi fi-us mr-2 scale-125"></span>
+                        English
+                      </span>
+                      <span className="font-bold">English</span>
+                    </label>
                   </li>
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      Euro
-                    </span>
-                    <span className="font-bold">EUR</span>
+                  <li
+                    onClick={() => setSelectedLanguage('fr')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLanguage === 'fr' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="language"
+                        value="fr"
+                        className="hidden"
+                        checked={selectedLanguage === 'fr'}
+                        onChange={() => setSelectedLanguage('fr')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <span className="fi fi-fr mr-2 scale-125"></span>
+                        Français
+                      </span>
+                      <span className="font-bold">French</span>
+                    </label>
                   </li>
                 </ul>
               </div>
               {/* Currency Switcher */}
               <div className="flex flex-col items-stretch gap-4">
-                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Languages</h4>
+                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Currencies</h4>
                 <ul className="flex flex-col gap-3">
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      English
-                    </span>
-                    <span className="font-bold">English</span>
+                  <li
+                    onClick={() => setSelectedCurrency('euro')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'euro' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="currency"
+                        value="euro"
+                        className="hidden"
+                        checked={selectedCurrency === 'euro'}
+                        onChange={() => setSelectedCurrency('euro')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <Euro className="" size={24} />
+                        Euro
+                      </span>
+                      <span className="font-bold">EUR</span>
+                    </label>
                   </li>
-                  <li className="min-h-[48px] px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm font-semibold uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      Euro
-                    </span>
-                    <span className="font-bold">EUR</span>
+                  <li
+                    onClick={() => setSelectedCurrency('usd')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'usd' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="currency"
+                        value="usd"
+                        className="hidden"
+                        checked={selectedCurrency === 'usd'}
+                        onChange={() => setSelectedCurrency('usd')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <DollarSign className="" size={24} />
+                        US Dollar
+                      </span>
+                      <span className="font-bold">USD</span>
+                    </label>
                   </li>
                 </ul>
               </div>
               {/* Submit Button */}
-              <button className="bg-[#000] text-white font-semibold rounded-[10px] py-[10px] px-2 w-full cursor-pointer">Change</button>
+              <button type="submit" className="bg-[#000] text-white font-semibold rounded-[10px] py-[10px] px-2 w-full cursor-pointer">Change</button>
             </form>
           </div>
-        </div>
-      </PopUp>
+        </div >
+      </PopUp >
 
 
     </>

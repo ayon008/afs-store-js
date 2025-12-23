@@ -53,7 +53,7 @@ export default async function RootLayout({ children }) {
             <body className="font-alliance">
                 <main className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
                     <div className=''>
-                        <div className='pb-10 global-b-bottom'>
+                        <div className='pb-10 global-b-bottom-d'>
                             <h1 className='global-h1'>Bonjour, {user?.last_name}</h1>
                         </div>
                     </div>

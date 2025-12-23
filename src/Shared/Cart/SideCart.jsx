@@ -126,7 +126,7 @@ const SideCart = ({ isOpen, onClose }) => {
                         <span className='text-[19px] leading-[100%] font-bold'>(incl. VAT)</span>
                     </div>
                     <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer'>
-                        <button className='py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-sm text-white'>
+                        <button disabled={cartItems?.length === 0} className={`py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-sm text-white ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             Continue to Basket
                             <ArrowUpRight className='w-4 h-4' />
                         </button>

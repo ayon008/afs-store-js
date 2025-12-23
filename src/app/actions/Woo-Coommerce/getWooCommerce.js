@@ -1,8 +1,10 @@
 'use server';
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
-import { getWooCommerceCookies, setCookiesFromResponse } from "./Cookies/cookie-handler";
+import { getWooCommerceCookies } from "./Cookies/cookie-handler";
 import { getCart } from "./Shop/Cart/cart";
+import { getLocale } from "next-intl/server";
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
 const authHeader = Buffer
@@ -13,10 +15,35 @@ const authHeader = Buffer
 const WP_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
 const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
+// Helper to parse set-cookie headers
+function parseSetCookieHeader(header) {
+    if (!header) return [];
+
+    return header
+        .split(/\s*,\s*(?=\w+=)/)
+        .map(cookieStr => {
+            const [nameValue, ...options] = cookieStr.split("; ");
+            const [name, ...valueParts] = nameValue.split("=");
+            const value = valueParts.join("=");
+            return {
+                name: name?.trim(),
+                value: value?.trim(),
+                options: options || []
+            };
+        })
+        .filter(cookie => cookie.name && cookie.value);
+}
+
+
+export async function getLocaleValue() {
+    const localeValue = await getLocale();
+    return localeValue === 'en' ? '' : localeValue;
+}
 
 
 
 export const calculatePriceWithTax = async (basePrice, tax_class = "standard", country = null) => {
+    const localeValue = await getLocaleValue();
     try {
         // Get user country from shipping/billing address, default to France
         const cookieHeader = await getWooCommerceCookies();
@@ -40,7 +67,7 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 
         while (true) {
             const response = await fetch(
-                `${process.env.WP_BASE_URL}/wp-json/wc/v3/taxes?per_page=${per_page}&page=${page}`,
+                `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/taxes?per_page=${per_page}&page=${page}`,
                 {
                     headers: {
                         Authorization: `Basic ${authHeader}`,
@@ -93,6 +120,7 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
+    const localeValue = await getLocaleValue();
     try {
         // Convert "12,40" or [12,40] or 12 → always array
         let categories = Array.isArray(ids)
@@ -107,7 +135,7 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?category=${firstCategory}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&per_page=${per_page}&page=${i}`;
+            let url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?category=${firstCategory}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&per_page=${per_page}&page=${i}`;
 
 
             if (min != null) url += `&min_price=${Number(min)}`;
@@ -154,7 +182,8 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
 
 export const getChildCategories = async (parentId) => {
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
+    const localeValue = await getLocaleValue();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
     const response = await fetch(url, {
         headers: {
@@ -180,7 +209,8 @@ export const getChildCategories = async (parentId) => {
 // Get single product by their slug
 
 export const getProductBySlug = async (slug) => {
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}`;
+    const localeValue = await getLocaleValue();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?slug=${slug}`;
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products?slug=${slug}`;
     try {
         const response = await fetch(url, {
@@ -207,8 +237,9 @@ export const getProductBySlug = async (slug) => {
 
 
 export const getPrice = async (productId, selectedVariation) => {
+    const localeValue = await getLocaleValue();
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
 
     try {
         const cart = await getCart();
@@ -283,6 +314,8 @@ export const getPrice = async (productId, selectedVariation) => {
 
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
+    const localeValue = await getLocaleValue();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
 
@@ -329,9 +362,6 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             cache: 'no-store',
         });
 
-        // Set cookies from response to keep them synchronized
-        await setCookiesFromResponse(response);
-
         if (!response.ok) {
             const errorText = await response.text();
             let errorMessage = `Failed to add to cart: ${response.status}`;
@@ -342,6 +372,54 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
                 errorMessage = errorText || errorMessage;
             }
             throw new Error(errorMessage);
+        }
+
+        // Parse and set cookies from WooCommerce response
+        const setCookieHeader = response.headers.get("set-cookie");
+        if (setCookieHeader) {
+            const cookieStore = await cookies();
+            const parsedCookies = parseSetCookieHeader(setCookieHeader);
+
+            for (const cookie of parsedCookies) {
+                try {
+                    const cookieOptions = {
+                        path: '/',
+                        sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                    };
+
+                    // Parse cookie options
+                    cookie.options.forEach(option => {
+                        const [key, value] = option.split('=');
+                        const lowerKey = key.toLowerCase().trim();
+
+                        if (lowerKey === 'max-age' || lowerKey === 'maxage') {
+                            cookieOptions.maxAge = parseInt(value) || 60 * 60 * 24 * 2; // Default 2 days
+                        } else if (lowerKey === 'expires') {
+                            // Expires is handled by maxAge
+                        } else if (lowerKey === 'secure') {
+                            cookieOptions.secure = true;
+                        } else if (lowerKey === 'httponly') {
+                            cookieOptions.httpOnly = true;
+                        } else if (lowerKey === 'samesite') {
+                            cookieOptions.sameSite = value?.toLowerCase() || 'lax';
+                        }
+                    });
+
+                    // Default maxAge if not set
+                    if (!cookieOptions.maxAge) {
+                        cookieOptions.maxAge = 60 * 60 * 24 * 2; // 2 days
+                    }
+
+                    cookieStore.set({
+                        name: cookie.name,
+                        value: cookie.value,
+                        ...cookieOptions,
+                    });
+                } catch (err) {
+                    console.error(`Error setting cookie ${cookie.name}:`, err);
+                }
+            }
         }
 
         const result = await response.json();
@@ -363,6 +441,7 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
 
 // update cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function updateCartItem(itemKey, quantity) {
+    const localeValue = await getLocaleValue();
     try {
         const cookieHeader = await getWooCommerceCookies();
 
@@ -383,7 +462,7 @@ export async function updateCartItem(itemKey, quantity) {
         console.log('Updating cart item with payload:', JSON.stringify(payload, null, 2));
 
         // Call WooCommerce API directly
-        const response = await fetch(`${WC_STORE_URL}/cart/update-item`, {
+        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/update-item`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -393,9 +472,6 @@ export async function updateCartItem(itemKey, quantity) {
             body: JSON.stringify(payload),
             cache: 'no-store',
         });
-
-        // Set cookies from response to keep them synchronized
-        await setCookiesFromResponse(response);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -425,13 +501,75 @@ export async function updateCartItem(itemKey, quantity) {
 }
 
 
+
+export const getRecentProducts = async () => {
+    try {
+        const localeValue = await getLocaleValue();
+        const authHeader = Buffer
+            .from(`${consumerKey}:${consumerSecret}`)
+            .toString("base64");
+
+        const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`;
+        
+        const response = await fetch(url, {
+            headers: { 
+                Authorization: `Basic ${authHeader}` 
+            },
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch recent products:', response.status, response.statusText);
+            return [];
+        }
+
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    }
+    catch (error) {
+        console.error('Error fetching recent products:', error);
+        return [];
+    }
+}
+export async function searchProducts(query) {
+    if (!query) return [];
+
+    try {
+        const localeValue = await getLocaleValue();
+        const authHeader = Buffer
+            .from(`${consumerKey}:${consumerSecret}`)
+            .toString("base64");
+
+        const res = await fetch(
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`,
+            {
+                headers: { 
+                    Authorization: `Basic ${authHeader}` 
+                },
+                cache: "no-store",
+            }
+        );
+
+        if (!res.ok) {
+            console.error('Failed to search products:', res.status, res.statusText);
+            return [];
+        }
+        
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Error searching products:', error);
+        return [];
+    }
+}
+
+
 // Remove item from cart
 
 export async function removeCartItem(itemKey) {
+    const localeValue = await getLocaleValue();
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-        const response = await fetch(`${baseUrl}/api/cart/remove-item`, {
+        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/remove-item`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -461,15 +599,15 @@ export async function removeCartItem(itemKey) {
 
 // apply coupon
 export async function applyCoupon(couponCode) {
+    const localeValue = await getLocaleValue();
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
         // Validation
         if (!couponCode || couponCode.trim() === '') {
             return { success: false, error: 'Please enter a coupon code' };
         }
 
-        const response = await fetch(`${baseUrl}/api/cart/apply-coupon`, {
+        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/apply-coupon`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -499,10 +637,9 @@ export async function applyCoupon(couponCode) {
 
 // Clear Cart
 export async function clearCart() {
+    const localeValue = await getLocaleValue();
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-        const response = await fetch(`${baseUrl}/api/cart/clear`, {
+        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/clear`, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json',
@@ -529,15 +666,15 @@ export async function clearCart() {
 
 
 export async function removeCoupon(couponCode) {
+    const localeValue = await getLocaleValue();
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
         // Validation
         if (!couponCode || couponCode.trim() === '') {
             return { success: false, error: 'Invalid coupon code' };
         }
 
-        const response = await fetch(`${baseUrl}/api/cart/remove-coupon`, {
+        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/remove-coupon`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -564,5 +701,3 @@ export async function removeCoupon(couponCode) {
         return { success: false, error: error.message };
     }
 }
-
-

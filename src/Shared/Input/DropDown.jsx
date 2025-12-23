@@ -7,7 +7,7 @@ const CountrySelect = ({ label, id, register, error, defaultValue, registerPage 
             <div className="relative">
                 <label
                     htmlFor={id}
-                    className={`${checkout ? 'bg-white' : 'bg-[#F0F0F0]'} absolute left-3 font-semibold -top-[14px] text-[#666] text-sm leading-[28px]`}
+                    className={`${checkout ? 'bg-white' : 'bg-[#F0F0F0]'} absolute px-[2px] left-3 font-semibold -top-[14px] text-[#666] text-sm leading-[28px]`}
                 >
                     <span className="uppercase">{label}</span>
                 </label>

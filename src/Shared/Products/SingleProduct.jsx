@@ -50,6 +50,8 @@ const SingleProduct = () => {
         load();
     }, [slug])
 
+    console.log(data, 'data');
+
     const [images, setImages] = useState([]);
     const [sliceLength, setLength] = useState(0);
     const [isOpen, setOpen] = useState(false);

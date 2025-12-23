@@ -1,14 +1,14 @@
 "use server"
-// WordPress REST API helper functions
-// Configure WP_BASE_URL in your environment variables (e.g., WP_BASE_URL=https://afs-foiling.com)
 
-const WP_BASE_URL = process.env.WP_BASE_URL;
+import { getLocale } from "next-intl/server";
 
-if (!WP_BASE_URL) {
-    console.warn('[wp] WP_BASE_URL is not set. Configure it in environment variables.');
-}
+
+
 
 export async function getPosts(options = {}) {
+    const localeValue = await getLocale();
+    let WP_BASE_URL = `${process.env.WP_BASE_URL}/${localeValue === 'en' ? '' : localeValue}`;
+
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }
@@ -102,7 +102,6 @@ export async function getPosts(options = {}) {
         }
 
         const url = `${apiUrl}?${params.toString()}`;
-        console.log(`[getPosts] Fetching: ${url}`);
 
         const response = await fetch(url, {
             cache: 'no-store',
@@ -118,7 +117,6 @@ export async function getPosts(options = {}) {
         }
 
         const posts = await response.json();
-        console.log(`[getPosts] Successfully fetched ${posts.length} posts`);
 
         return transformPosts(posts);
 

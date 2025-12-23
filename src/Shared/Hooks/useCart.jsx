@@ -35,13 +35,17 @@ export const CartProvider = ({ children }) => {
 
     useEffect(() => {
         const load = async () => {
-            const result = await getCartAction();     
-            if (result.success) {
-                setCart(result.data);
+            try {
+                // Use API route instead of Server Action for better cookie synchronization
+                const data = await getCartAction();
+                console.log(data, 'data');
+                // const data = await response.json();
+                setCart(data.data);
                 setLoading(false);
-            } else {
-                setError(result.error);
-                console.error('Failed to load cart:', result.error);
+            } catch (err) {
+                setError(err.message);
+                console.error('Failed to load cart:', err);
+                setLoading(false);
             }
         }
         load();
@@ -64,16 +68,21 @@ export const CartProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await getCartAction();
 
-            console.log(result, 'resultFromLoadCart');
+            // Use API route instead of Server Action for better cookie synchronization
+            const response = await fetch('/api/cart', {
+                method: 'GET',
+                credentials: 'include', // Important: include cookies
+                cache: 'no-store',
+            });
 
-            if (result.success) {
-                setCart(result.data);
-            } else {
-                setError(result.error);
-                console.error('Failed to load cart:', result.error);
+            if (!response.ok) {
+                throw new Error(`Failed to load cart: ${response.status}`);
             }
+
+            const data = await response.json();
+            console.log(data, 'resultFromLoadCart');
+            setCart(data);
         } catch (err) {
             setError(err.message);
             console.error('Cart loading error:', err);
@@ -94,11 +103,11 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
             const result = await addToCartAction(productId, quantity, variationId, attributes);
-            
+
             if (result.success) {
                 // Small delay to ensure cookies are synchronized
                 await new Promise(resolve => setTimeout(resolve, 100));
-                
+
                 // Update items_count immediately for better UX
                 setCart(prev => {
                     if (!prev) return prev;
@@ -170,9 +179,13 @@ export const CartProvider = ({ children }) => {
     // Remove item from cart
     const handleRemoveCartItem = async (itemKey) => {
         try {
+            setError(null);
             const result = await removeCartItem(itemKey);
 
             if (result.success) {
+                // Small delay to ensure cookies are synchronized
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 // Update local cart state immediately
                 setCart(prev => {
                     if (!prev || !prev.items) return prev;
@@ -187,11 +200,16 @@ export const CartProvider = ({ children }) => {
                     };
                 });
 
+                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
                 await loadCart();
+            } else {
+                setError(result.error);
+                console.error('Remove from cart error:', result.error);
             }
 
             return result;
         } catch (err) {
+            setError(err.message);
             console.error('Remove from cart error:', err);
             return { success: false, error: err.message };
         }
@@ -217,19 +235,27 @@ export const CartProvider = ({ children }) => {
     const handleApplyCoupon = async (couponCode) => {
         try {
             setError(null);
+            setLoading(true);
             const result = await applyCoupon(couponCode);
 
             if (result.success) {
+                // Small delay to ensure cookies are synchronized
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
                 await loadCart();
             } else {
                 setError(result.error);
+                console.error('Apply coupon error:', result.error);
             }
 
             return result;
         } catch (err) {
-            console.error('Apply coupon error:', err);
             setError(err.message);
+            console.error('Apply coupon error:', err);
             return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -237,19 +263,27 @@ export const CartProvider = ({ children }) => {
     const handleRemoveCoupon = async (couponCode) => {
         try {
             setError(null);
+            setLoading(true);
             const result = await removeCoupon(couponCode);
 
             if (result.success) {
+                // Small delay to ensure cookies are synchronized
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
                 await loadCart();
             } else {
                 setError(result.error);
+                console.error('Remove coupon error:', result.error);
             }
 
             return result;
         } catch (err) {
-            console.error('Remove coupon error:', err);
             setError(err.message);
+            console.error('Remove coupon error:', err);
             return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -361,6 +395,7 @@ export const CartProvider = ({ children }) => {
 
     const value = {
         cart,
+        setCart,
         loading,
         error,
         sideCartOpen,

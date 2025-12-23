@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@paypal/react-paypal-js": "^8.9.2",
     "@react-google-maps/api": "^2.20.8",
+    "@tanstack/react-query": "^5.90.12",
     "flag-icons": "^7.5.0",
     "lucide-react": "^0.562.0",
     "moment": "^2.30.1",

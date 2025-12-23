@@ -9,6 +9,8 @@ import { alliance } from "@/fonts/Alliance";
 import { getMenuItems } from "../actions/WC/getMenuData";
 import { getMessages } from "next-intl/server";
 import { CartProvider } from "@/Shared/Hooks/useCart";
+import Footer from "@/Shared/footer/Footer";
+import QueryProvider from "@/Shared/Provider/QueryProvider";
 
 
 export const metadata = {
@@ -69,17 +71,17 @@ export default async function RootLayout({ children, params }) {
     <html lang={locale}>
       <body className={`${alliance.className} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <AuthProvider>
-            <CartProvider>
-              <div>
-                <Navbar NAV_LINKS={NAV_LINKS} />
-                {children}
-                <div className="h-[400px] bg-red-400 w-full">
-
+          <QueryProvider>
+            <AuthProvider>
+              <CartProvider>
+                <div>
+                  <Navbar NAV_LINKS={NAV_LINKS} />
+                  {children}
+                  <Footer />
                 </div>
-              </div>
-            </CartProvider>
-          </AuthProvider>
+              </CartProvider>
+            </AuthProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

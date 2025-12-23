@@ -62,6 +62,37 @@ body {
   border-width: 2px 0 0 0;
 }
 
+.footer-box {
+  position: relative;
+}
+
+.footer-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(to right, #666 10px, transparent 10px) top,
+    linear-gradient(to right, #666 10px, transparent 10px) bottom;
+  background-size: 20px 2px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Vertical dashed lines (left & right) */
+.footer-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #666 10px, transparent 10px) left,
+    linear-gradient(to bottom, #666 10px, transparent 10px) right;
+  background-size: 2px 20px;
+  background-repeat: repeat-y;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Dashed border bottom */
 .global-b-bottom {
   border-bottom: 2px solid;
@@ -75,6 +106,12 @@ body {
     100%;
   border-image-slice: 1;
   border-width: 0 0 2px 0;
+}
+.global-border-top {
+  border-top: 2px dashed #808080;
+    border-image: repeating-linear-gradient(to right, #808080 0, #808080 10px, transparent 10px, transparent 20px) 100%;
+    border-image-slice: 1;
+    border-width: 2px 0 0 0;
 }
 
 
