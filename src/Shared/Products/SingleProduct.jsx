@@ -216,18 +216,30 @@ const SingleProduct = () => {
                                                     {
                                                         img?.video ?
                                                             <>
-                                                                <iframe
-                                                                    width="100%"
-                                                                    height="100%"
-                                                                    src={activeIndex === i ? `https://www.youtube.com/embed/${extractYouTubeID(img.link)}?autoplay=1&mute=0` : ""}
-                                                                    title="YouTube video"
-                                                                    frameBorder="0"
-                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                    allowFullScreen
-                                                                    className="rounded-[4px] mx-auto block"
-                                                                ></iframe>
+                                                                {activeIndex === i ? (
+                                                                    <iframe
+                                                                        width="100%"
+                                                                        height="100%"
+                                                                        src={`https://www.youtube.com/embed/${extractYouTubeID(img.link)}?autoplay=1&mute=0`}
+                                                                        title="YouTube video"
+                                                                        frameBorder="0"
+                                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                        allowFullScreen
+                                                                        className="rounded-[4px] mx-auto block"
+                                                                    ></iframe>
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center bg-black rounded-[4px]">
+                                                                        <Image src={img?.src || default_image} className='w-full h-full rounded-[4px] object-contain aspect-[1]' width={649} height={649} alt={img?.alt || "Video thumbnail"} />
+                                                                        <span className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                                                            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>
+                                                                                <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                                                            </svg>
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </> :
-                                                            <Image src={img?.src} className='w-full h-full rounded-[4px] object-contain aspect-[1]' width={649} height={649} alt={img?.alt} />
+                                                            <Image src={img?.src || default_image} className='w-full h-full rounded-[4px] object-contain aspect-[1]' width={649} height={649} alt={img?.alt || ""} />
                                                     }
                                                 </div>
                                             </SwiperSlide>
