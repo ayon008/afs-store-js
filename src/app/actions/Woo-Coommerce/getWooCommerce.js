@@ -671,16 +671,85 @@ export async function applyCoupon(couponCode) {
 // Clear Cart
 export async function clearCart() {
     const localeValue = await getLocaleValue();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    
     try {
-        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/clear`, {
+        // Get WooCommerce cookies
+        const cookieHeader = await getWooCommerceCookies();
+        
+        // Use /cart/items endpoint with DELETE method to clear all items
+        const response = await fetch(`${WC_STORE_URL}/cart/items`, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json',
+                'Cookie': cookieHeader || '',
             },
+            credentials: 'include',
         });
 
+        // Check content type before parsing JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const errorText = await response.text();
+            // Check if it's an HTML error page
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.error('Clear cart error: Received HTML instead of JSON');
+                return { success: false, error: "Received HTML instead of JSON" };
+            }
+            throw new Error(`Failed to clear cart: ${response.status} - ${errorText.substring(0, 100)}`);
+        }
+
         if (!response.ok) {
-            throw new Error(`Failed to clear cart: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Failed to clear cart: ${response.status} - ${errorText.substring(0, 100)}`);
+        }
+
+        // Parse and set cookies from WooCommerce response
+        const setCookieHeader = response.headers.get("set-cookie");
+        if (setCookieHeader) {
+            const cookieStore = await cookies();
+            const parsedCookies = parseSetCookieHeader(setCookieHeader);
+
+            for (const cookie of parsedCookies) {
+                try {
+                    const cookieOptions = {
+                        path: '/',
+                        sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                    };
+
+                    // Parse cookie options
+                    cookie.options.forEach(option => {
+                        const [key, value] = option.split('=');
+                        const lowerKey = key.toLowerCase().trim();
+
+                        if (lowerKey === 'max-age' || lowerKey === 'maxage') {
+                            cookieOptions.maxAge = parseInt(value) || 60 * 60 * 24 * 2; // Default 2 days
+                        } else if (lowerKey === 'expires') {
+                            // Expires is handled by maxAge
+                        } else if (lowerKey === 'secure') {
+                            cookieOptions.secure = true;
+                        } else if (lowerKey === 'httponly') {
+                            cookieOptions.httpOnly = true;
+                        } else if (lowerKey === 'samesite') {
+                            cookieOptions.sameSite = value?.toLowerCase() || 'lax';
+                        }
+                    });
+
+                    // Default maxAge if not set
+                    if (!cookieOptions.maxAge) {
+                        cookieOptions.maxAge = 60 * 60 * 24 * 2; // 2 days
+                    }
+
+                    cookieStore.set({
+                        name: cookie.name,
+                        value: cookie.value,
+                        ...cookieOptions,
+                    });
+                } catch (err) {
+                    console.error(`Error setting cookie ${cookie.name}:`, err);
+                }
+            }
         }
 
         const result = await response.json();
@@ -689,7 +758,7 @@ export async function clearCart() {
         revalidatePath('/cart');
         revalidatePath('/');
 
-        return result;
+        return { success: true, ...result };
 
     } catch (error) {
         console.error('Clear cart error:', error);

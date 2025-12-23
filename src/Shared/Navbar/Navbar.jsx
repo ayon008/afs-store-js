@@ -1,6 +1,6 @@
 
 "use client";
-import { ArrowLeft, DollarSign, Euro, Search, X } from "lucide-react";
+import { ArrowLeft, DollarSign, Euro, Search, X, Info } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // import SearchOverlay from "../../components/search";
@@ -12,22 +12,25 @@ import { useGSAP } from "@gsap/react";
 import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import SearchOverlay from "./search";
+import Notification from "../Notification/Notification";
 
 const Navbar = ({ NAV_LINKS }) => {
+  const t = useTranslations("common");
 
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const locale = useLocale();
-  const { cart, sideCartOpen, openSideCart, closeSideCart } = useCart();
+  const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart } = useCart();
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const [selectedCurrency, setSelectedCurrency] = useState('euro');
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
+  const [notification, setNotification] = useState(null);
 
   const totalQty = cart?.items_count;
   const pathName = usePathname();
@@ -41,13 +44,57 @@ const Navbar = ({ NAV_LINKS }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldRedirect]);
 
-  const handleSubmit = (e) => {
+  // Auto-hide notification after 5 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const selectedValues = {
       language: selectedLanguage, // "en" ou "fr"
       currency: selectedCurrency, // "usd" ou "euro"
     };
-    if (selectedLanguage !== locale) {
+    
+    // Clear cart if language or currency changes
+    const languageChanged = selectedLanguage !== locale;
+    
+    // Get current currency from cart or default to 'euro'
+    const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+    const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+    const currencyChanged = selectedCurrency !== currentCurrency;
+    
+    // Clear the cart if language or currency changes
+    if (languageChanged || currencyChanged) {
+      try {
+        // Check if cart has items before clearing
+        const hasItems = cart && cart.items && cart.items.length > 0;
+        
+        if (hasItems) {
+          const result = await handleClearCart();
+          
+          // Show notification if cart was cleared successfully
+          if (result && result.success) {
+            if (languageChanged) {
+              setNotification(t("cartClearedLanguage"));
+            } else if (currencyChanged) {
+              setNotification(t("cartClearedCurrency"));
+            }
+          } else {
+            console.error('Failed to clear cart:', result?.error);
+          }
+        }
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+      }
+    }
+    
+    if (languageChanged) {
       const currentPath = pathName || '/';
       const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
       setRedirectPath(newPath);
@@ -120,7 +167,17 @@ const Navbar = ({ NAV_LINKS }) => {
 
   return (
     <>
-      <nav className="sticky left-0 right-0 top-0 z-[99] text-white w-full">
+      {/* Notification Banner */}
+      {notification && (
+        <Notification
+          message={notification}
+          type="info"
+          onClose={() => setNotification(null)}
+          duration={5000}
+        />
+      )}
+      
+      <nav className={`sticky left-0 right-0 top-0 z-[99] text-white w-full ${notification ? 'mt-[73px]' : ''}`}>
         {/* Logo and Search Part */}
         <div
           className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between"

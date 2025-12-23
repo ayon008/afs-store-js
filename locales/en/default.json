@@ -59,5 +59,9 @@
       "display": "Display/Banner advertising",
       "other": "Other (please specify)"
     }
+  },
+  "common": {
+    "cartClearedLanguage": "Your cart has been cleared because you changed the language. Products must be added again in the new language.",
+    "cartClearedCurrency": "Your cart has been cleared because you changed the currency. Products must be added again."
   }
 }

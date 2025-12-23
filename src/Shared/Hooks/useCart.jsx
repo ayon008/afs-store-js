@@ -449,6 +449,7 @@ export const CartProvider = ({ children }) => {
         handleClearCart,
         handleApplyCoupon,
         handleRemoveCoupon,
+        handleClearCart,
         loadCart,
         getTotalPrice,
         getSubtotal,

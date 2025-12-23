@@ -11,12 +11,17 @@ import CheckoutPayPal from "@/lib/CheckoutPaypal";
 import { countriesList } from "@/lib/countriesList";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { usePathname } from "next/navigation";
+import Notification from "@/Shared/Notification/Notification";
 
 const Page = () => {
     const t = useTranslations("checkout");
+    const tCommon = useTranslations("common");
+    const locale = useLocale();
+    const pathname = usePathname();
 
     const [shippingAddress, setShippingAddress] = useState(false);
 
@@ -25,7 +30,7 @@ const Page = () => {
     }
 
     // Cart
-    const { cart, loadCart } = useCart();
+    const { cart, loadCart, handleClearCart } = useCart();
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
@@ -308,6 +313,7 @@ const Page = () => {
     const [shippingLoading, setShippingLoading] = useState(false);
     const [updatingShipping, setUpdatingShipping] = useState(false);
     const [selectedRateId, setSelectedRateId] = useState(null);
+    const [notification, setNotification] = useState(null);
 
     const allShippingRates = cart?.shipping_rates?.flatMap(pkg =>
         pkg.shipping_rates?.map(rate => ({
@@ -459,6 +465,45 @@ const Page = () => {
         }
     }, [cart]);
 
+    // Clear cart if locale changes (user navigated to different language checkout)
+    // Use a ref to track if we've already cleared the cart for this locale change
+    const clearedForLocaleRef = React.useRef(null);
+    
+    useEffect(() => {
+        const checkLocaleChange = async () => {
+            // Get locale from pathname (e.g., /fr/checkout or /en/checkout)
+            const pathSegments = pathname?.split('/').filter(Boolean) || [];
+            const pathLocale = pathSegments[0] || locale;
+            
+            // Check if we've already cleared for this locale combination
+            const localeKey = `${locale}-${pathLocale}`;
+            if (clearedForLocaleRef.current === localeKey) {
+                return; // Already cleared for this locale change
+            }
+            
+            // If locale in pathname doesn't match current locale and cart has items, clear cart
+            if (pathLocale !== locale && cart && cart.items && cart.items.length > 0) {
+                try {
+                    clearedForLocaleRef.current = localeKey; // Mark as cleared
+                    const result = await handleClearCart();
+                    if (result && result.success) {
+                        // Show notification
+                        setNotification(tCommon("cartClearedLanguage"));
+                        // Reload cart to update state
+                        await loadCart();
+                    }
+                } catch (error) {
+                    console.error('Error clearing cart on locale change:', error);
+                    setNotification(tCommon("cartClearedLanguage")); // Show notification anyway
+                }
+            }
+        };
+        
+        if (pathname && locale && cart) {
+            checkLocaleChange();
+        }
+    }, [pathname, locale, cart, handleClearCart, tCommon]);
+
     // Clear saved form data from localStorage
     const clearSavedFormData = () => {
         if (typeof window !== 'undefined') {
@@ -569,7 +614,16 @@ const Page = () => {
     // Show empty cart message if cart is empty or loading
     if (isCartEmpty || !cart || !cart.items || cart.items.length === 0) {
         return (
-            <div className='global-padding global-margin'>
+            <>
+                {notification && (
+                    <Notification
+                        message={notification}
+                        type="info"
+                        onClose={() => setNotification(null)}
+                        duration={5000}
+                    />
+                )}
+                <div className='global-padding global-margin'>
                 <div className='max-w-[800px] mx-auto py-[80px] lg:py-[100px]'>
                     <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
                         <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
@@ -583,11 +637,22 @@ const Page = () => {
                     </div>
                 </div>
             </div>
+            </>
         );
     }
 
     return (
         <div>
+            {/* Notification */}
+            {notification && (
+                <Notification
+                    message={notification}
+                    type="info"
+                    onClose={() => setNotification(null)}
+                    duration={5000}
+                />
+            )}
+            
             {/* Steps */}
             <div className='flex items-center justify-between max-w-[1080px] mx-auto relative py-[80px] lg:py-[100px]'>
                 <div className='flex flex-col items-center justify-center step-1'>

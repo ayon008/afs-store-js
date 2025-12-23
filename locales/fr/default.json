@@ -59,5 +59,9 @@
       "display": "Publicité Display/Bannière",
       "other": "Autre (veuillez préciser)"
     }
+  },
+  "common": {
+    "cartClearedLanguage": "Votre panier a été vidé car vous avez changé de langue. Les produits doivent être ajoutés à nouveau dans la nouvelle langue.",
+    "cartClearedCurrency": "Votre panier a été vidé car vous avez changé de devise. Les produits doivent être ajoutés à nouveau."
   }
 }
