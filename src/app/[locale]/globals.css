@@ -663,15 +663,15 @@ position: relative;
 
 /* Shipping Option */
 .shipping-option {
-  @apply p-4 border border-gray-200 rounded-xl cursor-pointer transition-all duration-200;
+  @apply p-4 border border-gray-200 rounded-xl cursor-pointer transition-all duration-200 block w-full;
 }
 
 .shipping-option:hover {
-  @apply border-[#1D98FF] shadow-sm;
+  @apply border-[#1D98FF] shadow-sm bg-blue-50/30;
 }
 
 .shipping-option-selected {
-  @apply border-[#1D98FF] bg-blue-50/50;
+  @apply border-[#1D98FF] bg-blue-50/50 shadow-sm;
 }
 
 /* Payment Card */

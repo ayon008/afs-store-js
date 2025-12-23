@@ -339,7 +339,7 @@ const Cart = () => {
                         </div>
 
                         {/* Total */}
-                        <div className='flex items-center justify-between pt-4 mt-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 -mx-6 lg:-mx-8 px-6 lg:px-8 py-5 rounded-b-2xl'>
+                        <div className='flex items-center justify-between pt-4 mt-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 -mx-6 lg:-mx-8 px-6 lg:px-8 py-5 rounded-b-2xl overflow-hidden'>
                             <span className='text-lg font-bold text-[#111]'>Total</span>
                             <div className='text-right'>
                                 <strong className='text-2xl lg:text-3xl text-[#111] font-bold block'>

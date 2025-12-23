@@ -26,7 +26,7 @@ const ShippingMethodCard = ({
     <label
       htmlFor={safeId}
       className={`
-        shipping-option group
+        shipping-option group block w-full
         ${selected ? 'shipping-option-selected' : ''}
         ${disabled ? 'opacity-50 pointer-events-none' : ''}
       `}
@@ -42,7 +42,7 @@ const ShippingMethodCard = ({
         className='sr-only'
       />
 
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-4 w-full'>
         {/* Custom Radio Indicator */}
         <div
           className={`
