@@ -8,13 +8,19 @@
     "afsHeadline": "AFS Advanced est notre façon de concentrer notre savoir-faire dans les conceptions les plus avancées, ce qui constitue l'essence et l'avenir d'AFS.",
     "title": "L'ESSENCE DE LA FEUILLE"
   },
+  "afs-event": {
+    "headline": "Découvrez tous les événements organisés par AFS pour nos marques.",
+    "nombre": "Nombre de magasins :",
+    "pays": "Choisir un pays"
+  },
   "afs-team": {
     "boards": "Production de planches",
     "bur": "Bureau d'études",
     "commerce": "Commerce",
+    "foil-co": "employés de Foil And Co.",
     "h-2": "<h>Des employés animés par une passion commune</h><p>Chez Foil And Co, notre équipe partage une passion commune pour l'innovation et l'excellence. Chacun contribue à l'avancement de notre mission avec engagement, créativité et expertise, afin de vous offrir des produits et services de qualité. Découvrez les visages de ceux qui travaillent à la fabrication de vos équipements préférés.</p>",
     "logistics": "LOGISTIQUE",
-    "number": "le nombre de <br> de salariés à Foil And Co.",
+    "number": "le nombre de",
     "p-foils": " Feuilles de production",
     "span": "<span1>Révélez votre potentiel avec nous !</span1> Nous sommes à la recherche de personnes talentueuses et passionnées voulant imposer de nouveaux standards dans le monde du foil et de l'équipement des sports nautiques. <span2>Rejoignez l'équipe aujourd'hui !</span2>",
     "span-1": "<span1>Libérez votre potentiel avec nous !</span1> Nous recherchons des personnes talentueuses et passionnées qui souhaitent établir de nouvelles normes dans le monde du foiling et des équipements de sports nautiques. <span2>Rejoignez l'équipe dès aujourd'hui !</span2>",
@@ -68,9 +74,15 @@
     "Wave/slalom": "Vague/slalom - Trifins/single",
     "With Foil becoming": "Le Foil devenant de plus en plus important, Tanguy Le Bihan et Thierry Pen créent en 2018 Foil&co et installent une usine de production en Bretagne. Tridenn et Foil&co fusionnent."
   },
+  "ambassadors": {
+    "afs": "Ambassadeurs AFS ",
+    "country": "PAYS",
+    "home-spot": "point d'attache",
+    "team": "équipe"
+  },
   "blog": {
     "blog": "Blog",
-    "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues de matériel pour les riders de tous niveaux."
+    "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues d'équipement pour les riders de tous niveaux."
   },
   "Board": {
     "Board": "Conseil d'administration"
@@ -83,6 +95,35 @@
     "Visit The Factory": "Visite de l'usine",
     "Wind Foil 2023 Guide": "Guide de la feuille de vent 2023"
   },
+  "checkout": {
+    "address": "Numéro et nom de la rue",
+    "backToShop": "Retour à la boutique",
+    "basket": "Panier",
+    "billingDetails": "Données de facturation",
+    "city": "Ville",
+    "company": "Entreprise (facultatif)",
+    "country": "Pays",
+    "emptyCart": "Votre panier est vide.",
+    "firstName": "Prénom",
+    "free": "gratuit",
+    "includingVAT": "y compris",
+    "lastName": "Nom de famille",
+    "noShippingMethods": "Aucune méthode d'expédition n'est disponible. Veuillez vérifier votre adresse de livraison.",
+    "orderNotes": "Notes de commande (facultatif)",
+    "orderNotesPlaceholder": "Commentaires sur votre commande, par exemple les instructions de livraison.",
+    "paymentMethod": "Mode de paiement",
+    "postcode": "Code postal",
+    "product": "Produit",
+    "securePayment": "Paiement et livraison sécurisés",
+    "shippingDetails": "Détails de l'expédition",
+    "shippingMethods": "Méthodes d'expédition",
+    "state": "État",
+    "subtotal": "Sous-total",
+    "summary": "Résumé",
+    "total": "Total",
+    "VAT": "TVA",
+    "yourOrder": "Votre commande"
+  },
   "clinique-de-la-planche": {
     "Backthen": "À l'époque, la \"Clinique\" était un atelier de réparation situé dans un petit jardin. Le marché étant florissant, nous avons acheté une maison pour stocker les produits, ainsi qu'un magasin situé à 200 mètres, ce qui nous a permis de lancer officiellement l'activité. Plus tard, la maison est également devenue un magasin.",
     "Equipe": "Équipe clinique du conseil d'administration",
@@ -91,6 +132,17 @@
     "Store in Caen": "Magasin à Caen",
     "sub": "L'un des plus anciens magasins d'équipement maritime de France équipé de matériel AFS",
     "The relationship": "La relation avec Foil&Co a commencé avec AHD Boards et s'est poursuivie avec AFS Foils. La clinique souhaitait proposer des produits en carbone abordables et fabriqués en France."
+  },
+  "common": {
+    "cartClearedCurrency": "Votre panier a été vidé car vous avez changé de devise. Les produits doivent être ajoutés à nouveau.",
+    "cartClearedLanguage": "Votre panier a été vidé car vous avez changé de langue. Les produits doivent être ajoutés à nouveau dans la nouvelle langue.",
+    "change": "Changer",
+    "chooseLocationLanguage": "Choisissez votre lieu et votre langue",
+    "currentLanguageCurrency": "Votre langue et votre monnaie actuelles",
+    "english": "Anglais",
+    "euro": "L'euro",
+    "french": "Français",
+    "usDollar": "Dollar américain"
   },
   "DirectSailing": {
     "Address": "Adresse",
@@ -344,6 +396,41 @@
     "play": " LIRE LA VIDÉO",
     "precission": "La précision jusque dans les moindres détails.",
     "the-production": "La production de feuilles et de planches est un véritable défi. Elle exige précision et expertise à chaque étape, de la conception à l'assemblage final. Notre usine est équipée des technologies les plus récentes pour garantir une qualité et des performances optimales."
+  },
+  "whatsnew": {
+    "aside": "<p>03 SEPTEMBRE 2025</p><h2>NEW WING - THE STREAM</h2>",
+    "aside10": "<p>8 JUILLET 2025</p><h2>Vice-champion du monde de surf freestyle chez les jeunes ! 🚀</h2>",
+    "aside11": "<p>7 juillet 2025</p><h2>SILK, notre feuille emblématique AFS ADVANCED</h2>",
+    "aside12": "<p>2 juillet 2025</p><h2>AFS ⏐ PROTIPS - EVO HA vs ENDURO : quelle est la différence ?</h2>",
+    "aside13": "<p>25 JUIN 2025</p><h2>La gamme EVO présentée par Alan</h2>",
+    "aside14": "<p>13 JUIN 2025</p><h2>Découvrez le Dock-Star</h2>",
+    "aside15": "<p>10 JUIN 2025</p><h2>Il est temps de changer</h2>",
+    "aside16": "<p>10 JUIN 2025</p><h2>Pulse - Born To Wake</h2>",
+    "aside17": "<p>7 JUIN 2025</p><h2>Défi des ailes</h2>",
+    "aside2": "<p>31 AOÛT 2025</p><h2>AFS | Pouvez-vous attraper le courant ?</h2>",
+    "aside3": "<p>27 AOÛT 2025</p><h2>AFS ⏐ DOCK-STAR : La machine Dockstart</h2>",
+    "aside4": "<p>14 AOÛT 2025</p> <h2> Enduro 1600 GLT : La glisse ultime et les performances du foil tout-terrain </h2>",
+    "aside5": "<p>13 AOÛT 2025</p><h2>RÉSULTATS GWA ⚡️</h2>",
+    "aside6": "<p>14 AOÛT 2025</p><h2> Enduro 1600 GLT : La glisse ultime et la performance du foil tout-terrain </h2>",
+    "aside7": "<p>21 JUILLET 2025</p> <h2> Comment être performant dans un dockstart ? </h2>",
+    "aside8": "<p>20 JUILLET 2025</p> <h2> Mode Rockstart activé avec Alan ! </h2>",
+    "aside9": "<p>18 JUILLET 2025</p> <h2> L'installation parfaite du dockstart présentée par Gwen Le Tutour </h2>",
+    "axelCongrats": "<h4>Félicitations à Axel, qui a brillé la semaine dernière aux Championnats du Monde GWA Youth Wingfoil en Espagne (Costa Brava). Il est monté sur la deuxième marche du podium en Surf-Freestyle après une semaine intense !</h4><h4>Allez Axel 💪🏼</h4>",
+    "content3": "<p>Voici la Dockstar : une planche ultra légère qui ne passera pas inaperçue, que ce soit à l'œil ou sous les pieds. Avec sa finition pailletée et sa silhouette élégante, elle est née pour briller et performer.</p><p>Une aile légère qui permet une glisse libre de haute performance tout en gardant le contrôle pour une fluidité structurée et un contrôle instinctif.</p><p>C'est amusant, c'est instinctif, c'est addictif !</p><p>Un mélange explosif de culture skate, de vibrations de plage et de free riding - une nouvelle scène s'ouvre sur l'eau, et tu en es la star.</p>",
+    "description": "<p>Inspiré par le mouvement des fluides. Conçue pour se fondre dans les éléments, AFS dévoile sa dernière innovation : la STREAM.</p><p>Une aile légère qui permet un vol libre de haute performance tout en gardant le contrôle pour une fluidité structurée et un contrôle instinctif.</p><p>La science du flux, la sensation du vol.</p>",
+    "detachableBoard": "<h4>Conçue pour le carving en surf foil et le wingfoil dans les vagues, elle a évolué pour vous offrir plus de liberté sans perdre son identité, avec sa version détachable. 🌊</h4><h4>Cette évolution concerne les tailles 850 et 1050, qui complètent ainsi la gamme existante. Les versions monoblocs (650, 850, 1050) restent bien sûr disponibles pour ceux qui préfèrent opter pour l'avion.</h4>",
+    "dockStarInfo": "<h4>Chez AFS, chaque planche est conçue avec la même exigence que nos foils. Entièrement fabriquée dans nos ateliers en Bretagne, la DOCK-STAR et sa construction en carbone pré-imprégné ne déroge pas à la règle.</h4><h4>Avec un poids de 1,6 kg, elle allie légèreté, rigidité et performance : la marque de notre savoir-faire haut de gamme, conçu pour un pompage intensif.</h4>",
+    "glide": "Ce que l'on cherche tous, c'est cette sensation de glisse pure, de liberté totale, de connexion. Et maintenant, elle est à votre portée. Prêt à foiler autrement ?",
+    "pulseVideo": "<h4>Découvrez la dernière vidéo sur Pulse !</h4><h4>Sentez les battements de votre cœur, laissez-vous emporter par l'émotion et laissez-vous guider par votre instinct.</h4>\n",
+    "recap": "<h4>Les riders AFS Axel et Milla viennent de terminer deux étapes du GWA Surf-Freestyle World Tour aux Canaries, avec des performances impressionnantes et des enseignements précieux pour la suite de la saison. Voici un récapitulatif...</h4><h4>🇪🇸 Fuerteventura : 28 juillet au 2 août</h4><ul><li>Milla (première épreuve du Tour) : 5e place, à 0,25 point de la finale. <em>\"Mes scores ne cessent de s'améliorer et j'ai atteint ma première demi-finale.</em></li><li>Axel : termine également à la 5ème place. <em>\"Ce n'est pas le résultat que j'espérais, mais je me rapproche du haut niveau. Je sais exactement ce que je dois travailler.\"</em></li></ul><h4>🇪🇸 Gran Canaria : du 5 au 8 août</h4><ul><li>Milla : éliminée au premier tour, mais toujours dans le top 10 provisoire pour sa première année sur le Tour. <em>\"Je suis déjà tournée vers la suite\".</em></li><li>Axel : 2e place 🥈, avec sa toute première note parfaite de 10/10 en compétition et le tout premier double front réussi en concours. <em>\"Je me sens plus fort que jamais. Il est maintenant temps de faire le dernier pas vers la victoire.\"</em></li></ul><h4>Un back-to-back canarien plein d'action, de progrès et de motivation pour les étapes à venir.</h4><h4>Félicitations à tous les deux !</h4>",
+    "Stay": "Restez au courant des dernières nouvelles sur les produits AFS",
+    "summerOffers": "<h4>L'été approche, alors nous avons rassemblé deux offres incontournables pour améliorer votre matériel ou optimiser votre configuration sans vous ruiner !</h4><h4>🔁 OFFRE DE REPRISE : JUSQU'À 1 200 € DE BONUS</h4><h4>Obtenez jusqu'à 1 200 € de remise sur l'achat d'un nouveau fleuret complet en nous envoyant votre ancien fleuret Performer (au lieu des 849 € habituels).</h4><h4>OFFRE D'ÉCHANGE : 50% DE RÉDUCTION OU GRATUIT !</h4><h4>Vous souhaitez commander une ou deux ailes des gammes EVO / EVO HA / ENDURO ?</h4><h4>➡️ Pour l'achat d'une aile : le fuselage SWITCH est à -50%.<br />➡️ Pour l'achat de 2 ailes : le fuselage SWITCH est offert !</h4><h4>📅 Offres valables jusqu'au 31 juillet</h4><h4>Ne manquez pas l'occasion de naviguer équipé cet été ! ☀️</h4><h4>A très bientôt,</h4>\n",
+    "techTalk": "<h4>Dans ce nouvel épisode de notre série Tech Talk, Richard Boudia et Gwen Le Tutour présentent les meilleurs combos foil + planche pour les départs à quai. Ils partagent leurs setups préférés, leurs astuces et ce qui fait vraiment la différence pour faciliter les départs, améliorer la glisse et progresser rapidement. </h4><h4>Vous aurez également un aperçu exclusif des dernières nouveautés d'AFS : du matériel redessiné, des designs optimisés et de nouvelles idées pour aller encore plus loin dans vos sessions de dockstart. </h4><h4>Que vous débutiez ou que vous soyez déjà accro, cette vidéo regorge de conseils pour tirer le meilleur parti de chaque pompe. </h4>",
+    "techTalk2": "<h4>Dans ce nouvel épisode de notre série Tech Talk, Richard Boudia et Gwen Le Tutour présentent les meilleurs combos foil + planche pour les départs à quai. Ils partagent leurs setups préférés, leurs astuces et ce qui fait vraiment la différence pour faciliter les départs, améliorer la glisse et progresser rapidement. </h4><h4>Vous aurez également un aperçu exclusif des dernières nouveautés d'AFS : du matériel redessiné, des designs optimisés et de nouvelles idées pour aller encore plus loin dans vos sessions de dockstart. </h4><h4>Que vous débutiez ou que vous soyez déjà accro, cette vidéo regorge de conseils pour tirer le meilleur parti de chaque pompe. </h4>",
+    "title": "Nouvelles AFS",
+    "we've": "𝘞𝘦'𝘷𝘦 𝘯𝘦𝘷𝘦𝘳 𝘧𝘦𝘭𝘵 𝘢 𝘸𝘪𝘯𝘨 𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴.",
+    "What": "Ce que nous recherchons tous, c'est cette sensation de glisse pure, de liberté totale, de connexion. Et maintenant, c'est à votre portée. Prêt à déjouer différemment ?",
+    "wingChallenge": "<h4>Défi spécial escadre : les interviews de rue ! 🎤 #Microtrottoir</h4><h4>Lors de l'After Session sur le stand AFS, Alan et Chloé ont demandé aux riders quel était leur produit préféré de la marque.... Spoiler alert : les avis divergent, mais les classiques sont bien représentés ! 🔥</h4><h4>Quel est ton produit préféré ?</h4>"
   },
   "wind-foil-2023-guide": {
     "allround_paddles_h": "Pagaies polyvalentes",

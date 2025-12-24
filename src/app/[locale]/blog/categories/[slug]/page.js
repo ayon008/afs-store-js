@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import BlogCard from '@/Shared/Card/BlogCard';
 import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
+import { getTranslations } from 'next-intl/server';
 
 
 
@@ -98,21 +99,24 @@ export async function generateStaticParams() {
 }
 
 
-const page = async ({ params }) => {
+const page = async ({ params, locale }) => {
     const { slug: id } = await params;
     const blogs = await categoryPost(id);
     const categoryData = await getCategories(id);
     const categoryName = categoryData?.name ?? 'Unknown Category';
 
-    const BreadCums = () => {
+    const BreadCums = async ({ locale }) => {
+        const t = await getTranslations("breadcum", locale);
         return (
             <div className='absolute top-6 z-20 uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>Home</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <span className='inline text-white'>{categoryName}</span>
+                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <span className='inline text-white'>{categoryName}</span>
                 </div>
             </div>
         )
     }
+
+    const t = await getTranslations("blog", locale);
 
 
     return (
@@ -132,7 +136,7 @@ const page = async ({ params }) => {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
                     <h1 className="global-h1">{categoryName}</h1>
                     <p className="mt-2 text-[18px] text-white font-semibold max-w-md px-6">
-                        Découvrez des conseils sur le foiling, des informations sur l’industrie et des revues de matériel pour les riders de tous niveaux.
+                        {t("heading")}
                     </p>
                 </div>
             </div>

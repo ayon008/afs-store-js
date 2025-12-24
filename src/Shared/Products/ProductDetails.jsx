@@ -37,6 +37,7 @@ const ProductDetails = ({ data }) => {
     const [variationCountry, setVariationCountry] = useState(null);
     const [variationId, setVariationId] = useState(null);
     const [variationInStock, setVariationInStock] = useState(true);
+    const [variationAttributes, setVariationAttributes] = useState(null);
     const productId = data?.id;
 
     // Check if product is in stock (base product)
@@ -75,12 +76,13 @@ const ProductDetails = ({ data }) => {
         if (!attributes || attributes.length === 0) return;
         if (!allVariationsSelected) {
             // Reset price when selections change
-            setVariationPrice(null);
-            setVariationTaxAmount(null);
-            setVariationCountry(null);
-            setVariationId(null);
-            setVariationInStock(true);
-            return;
+                    setVariationPrice(null);
+                    setVariationTaxAmount(null);
+                    setVariationCountry(null);
+                    setVariationId(null);
+                    setVariationInStock(true);
+                    setVariationAttributes(null);
+                    return;
         }
 
         const fetchVariationPrice = async () => {
@@ -92,6 +94,8 @@ const ProductDetails = ({ data }) => {
                     setVariationTaxAmount(matchedVariation.taxAmount);
                     setVariationCountry(matchedVariation.userCountry);
                     setVariationId(matchedVariation.id);
+                    // Store the variation attributes for cart submission
+                    setVariationAttributes(matchedVariation.attributes?.attributes || null);
                     // Check if the variation is in stock
                     const stockStatus = matchedVariation.attributes?.stock_status;
                     const variationStock = stockStatus
@@ -103,12 +107,15 @@ const ProductDetails = ({ data }) => {
                     setVariationTaxAmount(null);
                     setVariationCountry(null);
                     setVariationId(null);
+                    setVariationAttributes(null);
                 }
             } catch (error) {
                 console.error('Error fetching variation price:', error);
                 setVariationPrice(null);
                 setVariationTaxAmount(null);
                 setVariationCountry(null);
+                setVariationId(null);
+                setVariationAttributes(null);
             } finally {
                 setPriceLoading(false);
             }
@@ -125,6 +132,25 @@ const ProductDetails = ({ data }) => {
         return textarea.value;
     };
 
+    // Transform variation attributes to WooCommerce format
+    const formatVariationsForWooCommerce = () => {
+        if (!hasVariations || !variationAttributes || !Array.isArray(variationAttributes)) {
+            return {};
+        }
+
+        // variationAttributes from WooCommerce already has the correct format
+        // Each attribute has: { name: "attribute_pa_taille", option: "M" }
+        const formattedVariations = {};
+
+        variationAttributes.forEach((attr) => {
+            if (attr.name && attr.option) {
+                formattedVariations[attr.name] = attr.option;
+            }
+        });
+
+        return formattedVariations;
+    };
+
     // Handle add to cart
     const onSubmit = async (formData) => {
         // For variable products: require variationPrice and isInStock
@@ -137,7 +163,17 @@ const ProductDetails = ({ data }) => {
 
         setAddingToCart(true);
         try {
-            const result = await handleAddToCart(productId, 1, variationId || null, formData);
+            // Use variation attributes from the matched variation (already in correct WooCommerce format)
+            const formattedVariations = hasVariations 
+                ? formatVariationsForWooCommerce()
+                : {};
+
+            const result = await handleAddToCart(
+                productId, 
+                1, 
+                variationId || null, 
+                formattedVariations
+            );
             console.log(result, 'result');
 
             if (!result?.success) {

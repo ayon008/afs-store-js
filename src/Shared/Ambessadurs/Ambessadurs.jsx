@@ -5,11 +5,13 @@ import Sec1 from './Sec1';
 import Map from './Map';
 import { allAmbassadors } from '@/app/actions/WC/getAllAmbessador';
 import AmbassadorsCard from '../Card/AmbassedurCard';
+import { useTranslations } from 'next-intl';
 
 const Ambassedor = ({ categories, countries }) => {
+    const t = useTranslations("ambassadors");
     const [country, setCountry] = useState(null);
     const [data, setData] = useState([]);
-    const [countryName, setCountryName] = useState("COUNTRY");
+    const [countryName, setCountryName] = useState(t("country"));
     // Discipline
     const [activeTab, setActiveTab] = useState(null);
     const [loading, setLoading] = useState(true);

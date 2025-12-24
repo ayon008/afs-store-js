@@ -3,12 +3,14 @@
 
 import { getEventsDestinations } from '@/app/actions/WC/getAllEvents';
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
 const EventDropDown = ({ selectedId, setSelectedId }) => {
 
+    const t = useTranslations("afs-event");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [selected, setSelected] = useState("Choisir un pays");
+    const [selected, setSelected] = useState(t("pays"));
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -19,11 +21,6 @@ const EventDropDown = ({ selectedId, setSelectedId }) => {
         load();
     }, [])
 
-
-    console.log(categories, 'categories');
-    
-
-    
     return (
         <div className="relative w-full rounded-[4px] cursor-pointer"> {/* fix width to match dropdown */}
             <button

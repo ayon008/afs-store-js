@@ -177,9 +177,7 @@ const Footer = () => {
             {/* TOP ICON ROW */}
             <div className="bg-[#111] flex lg:flex-row flex-col items-start lg:items-center justify-center global-padding">
                 <div
-                    className="bg-[#111] max-w-[1920px] flex-1 py-[32px] 
-          text-[#c7c7c7] text-[clamp(0.875rem,0.6528rem+0.3472vw,1rem)] font-semibold
-          grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[20px] text-center uppercase leading-[1.1]"
+                    className="bg-[#111] max-w-[1920px] flex-1 py-[32px] text-[#c7c7c7] text-[clamp(0.875rem,0.6528rem+0.3472vw,1rem)] font-semibold grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[20px] text-center uppercase leading-[1.1]"
                 >
                     {/* ICON BOX */}
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">

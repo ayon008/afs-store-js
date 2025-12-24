@@ -119,7 +119,7 @@ export default async function middleware(req) {
     const validToken = token && !isExpired(token);
 
     const authRoutes = ["/login", "/signup"];
-    const protectedRoutes = ["/my-profile", "/checkout", "/orders"];
+    const protectedRoutes = ["/my-profile", "/orders"];
 
     const isAuthRoute = authRoutes.some(route => pathWithoutLocale.startsWith(route));
     const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
@@ -135,7 +135,7 @@ export default async function middleware(req) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // Check if checkout route and cart is empty
+    // Check if checkout route and cart is empty (checkout is accessible without login)
     if (pathWithoutLocale === '/checkout') {
         const cartEmpty = await isCartEmpty(req);
         if (cartEmpty) {

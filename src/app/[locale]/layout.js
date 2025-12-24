@@ -18,7 +18,7 @@ export const metadata = {
   description:
     "Discover AFS products for all foiling disciplines: wing foil, surf foil, sup foil, windfoil. Made In France. Full Carbon",
   icons: {
-    icon: "../../public/favicon.ico",
+    icon: "/favicon.ico",
   },
   openGraph: {
     type: "website",

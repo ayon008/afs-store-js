@@ -26,7 +26,21 @@ export async function getCart() {
         });
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => '');
+            // If error is HTML, return empty cart
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.warn('getCart() received HTML error page, returning empty cart');
+                return { success: true, data: { items: [], items_count: 0, totals: {} } };
+            }
             throw new Error(`Failed to get cart: ${response.status}`);
+        }
+
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.warn('getCart() response is not JSON, received:', text.substring(0, 100));
+            return { success: true, data: { items: [], items_count: 0, totals: {} } };
         }
 
         const data = await response.json();

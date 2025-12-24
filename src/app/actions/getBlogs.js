@@ -74,7 +74,22 @@ export async function getPosts(options = {}) {
                 if (!response.ok) {
                     const errorText = await response.text().catch(() => '');
                     console.error('[getPosts] WordPress API error', response.status, errorText);
+                    // If error is HTML, skip this page
+                    if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                        console.warn('[getPosts] Received HTML error page, stopping pagination');
+                        hasMorePages = false;
+                        break;
+                    }
                     throw new Error(`WordPress API error ${response.status}: ${errorText}`);
+                }
+
+                // Check if response is JSON before parsing
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.warn('[getPosts] Response is not JSON, stopping pagination');
+                    hasMorePages = false;
+                    break;
                 }
 
                 const posts = await response.json();
@@ -122,7 +137,20 @@ export async function getPosts(options = {}) {
         if (!response.ok) {
             const errorText = await response.text().catch(() => '');
             console.error('[getPosts] WordPress API error', response.status, errorText);
+            // If error is HTML, return empty array instead of throwing
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.warn('[getPosts] Received HTML error page, returning empty array');
+                return [];
+            }
             throw new Error(`WordPress API error ${response.status}: ${errorText}`);
+        }
+
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.warn('[getPosts] Response is not JSON, received:', text.substring(0, 100));
+            return [];
         }
 
         const posts = await response.json();

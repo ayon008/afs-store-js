@@ -4,6 +4,7 @@ const default_image = "/assets/images/Team/Group-1-3.png.webp"
 import Image from 'next/image';
 import PopUp from '../PopUp/PopUp';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 
 const AmbassadorsCard = ({ data }) => {
@@ -20,7 +21,8 @@ const AmbassadorsCard = ({ data }) => {
     const instagram = memberData?.instagram;
     const starva = memberData?.starva;
     const youtube = memberData?.youtube;
-
+    const t = useTranslations("home");
+    const a = useTranslations("ambassadors");
     return (
         <div>
             <div className='lg:h-[300px] h-auto flex lg:flex-row flex-col-reverse lg:items-stretch items-start rounded-[4px] overflow-hidden group relative shadow-[0_0_50px_10px_#0000000D]'>
@@ -29,7 +31,7 @@ const AmbassadorsCard = ({ data }) => {
                     <p className='text-base leading-[24px] text-[#00000080] font-semibold'>{country}</p>
                     <div className='flex items-center gap-1 border-white border-b-[2px] lg:hidden'>
                         <span>
-                            Voir plus
+                            {t("see-more")}
                         </span>
                         <svg width="18" height="18" className='font-bold text-[#00000080] mt-1' viewBox="0 0 24 24" fill="#00000080">
                             <path d="M19 5L5 19M19 5H6.4M19 5V17.6" stroke="#00000080" strokeWidth="2" />
@@ -45,7 +47,7 @@ const AmbassadorsCard = ({ data }) => {
                 transition-all duration-500 lg:flex hidden items-center justify-center text-white text-lg font-bold uppercase leading-[24px]">
                     <div className='flex items-center group-hover:opacity-100 opacity-0 delay-300 transition-opacity duration-300 gap-1 border-white border-b-[2px] cursor-pointer' onClick={() => setIsOpen(true)}>
                         <span>
-                            Voir plus
+                            {t("see-more")}
                         </span>
                         <svg width="18" height="18" className='text-white font-bold' viewBox="0 0 24 24" fill="none">
                             <path d="M19 5L5 19M19 5H6.4M19 5V17.6" stroke="white" strokeWidth="2" />
@@ -64,13 +66,13 @@ const AmbassadorsCard = ({ data }) => {
                         </h2>
                         <div className='h-full lg:pb-10 pb-5'>
                             <div className='mt-6'>
-                                <p className='text-[28px] text-black uppercase'>Country</p>
+                                <p className='text-[28px] text-black uppercase'>{a("country")}</p>
                                 <h4 className='text-[28px] uppercase mt-1 text-[#0000004d]'>
                                     {country}
                                 </h4>
                             </div>
                             <div className='mt-3'>
-                                <p className='text-[28px] text-black uppercase'>home spot</p>
+                                <p className='text-[28px] text-black uppercase'>{a("home-spot")}</p>
                                 <h4 className='text-[28px] uppercase mt-1 text-[#0000004d]'>
                                     {homeSpot}
                                 </h4>
