@@ -34,7 +34,7 @@ export async function getPosts(options = {}) {
             }
         }
         const localePath = localeValue === 'en' ? '' : localeValue;
-        const baseUrl = `${WP_BASE_URL.replace(/\/$/, '')}${localePath ? `/${localePath}` : ''}`;
+        const baseUrl = `${WP_BASE_URL.replace(/\/$/, '')}/${localePath ? `/${localePath}` : ''}`;
         const apiUrl = `${baseUrl}/wp-json/wp/v2/posts`;
 
         // If fetchAll is true, we'll paginate through all posts

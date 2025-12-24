@@ -2,6 +2,7 @@ import BlogCard from "@/Shared/Card/BlogCard";
 import { getPosts } from "@/app/actions/getBlogs";
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 export const metadata = {
     title: "Blog - Foiling Tips & Gear Reviews",
@@ -34,18 +35,19 @@ export const metadata = {
 
 
 
-const BreadCums = () => {
+const BreadCums = async ({ locale }) => {
+    const t = await getTranslations("breadcum", locale);
     return (
         <div className='absolute top-6 z-20 global-padding uppercase'>
             <div className='font-semibold text-sm text-white/50'>
-                <Link className='inline' href={'/'}>Accueil</Link> / <Link className='inline text-white' href={'/blog'}>Blog</Link>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline text-white' href={'/blog'}>Blog</Link>
             </div>
         </div>
     )
 }
 
 
-export default async function BlogPage() {
+export default async function BlogPage({ locale }) {
     let blogs = [];
     let error = null;
 
@@ -62,7 +64,7 @@ export default async function BlogPage() {
         // Fallback to empty array if WordPress is not available
         blogs = [];
     }
-
+    const t = await getTranslations("blog", locale);
 
     return (
         <div className="min-h-screen">
@@ -77,9 +79,9 @@ export default async function BlogPage() {
                 />
                 <BreadCums />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
-                    <h1 className="global-h1">Blog</h1>
+                    <h1 className="global-h1">{t("blog")}</h1>
                     <p className="mt-2 text-[18px] text-white font-semibold max-w-md px-6">
-                        Découvrez des conseils sur le foiling, des informations sur l’industrie et des revues de matériel pour les riders de tous niveaux.
+                        {t("heading")}
                     </p>
                 </div>
             </div>

@@ -7,24 +7,26 @@ const image2 = "/assets/images/Team/Rectangle-6.png"
 import FeatureBar from '@/Shared/Afs-Events/FeatureBar';
 import Team from '@/Shared/Afs-Team/Team';
 import { getTeamMember } from '@/app/actions/WC/getTeamMembers';
+import { getTranslations } from 'next-intl/server';
 
 export const metadata = {
     title: 'AFS L’équipe - AFS Foiling',
     description: 'Meet the AFS team: designers, developers, and athletes behind our foiling gear and products.'
 }
 
-const BreadCums = () => {
+const BreadCums = async ({ locale }) => {
+    const t = await getTranslations("breadcum", locale);
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>
-                <Link className='inline' href={'/'}>Accueil</Link> / <span className='text-black'> L’équipe</span>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <span className='text-black'>AFS Team</span>
             </div>
         </div>
     )
 }
 
 
-const page = async () => {
+const page = async ({ locale }) => {
     // Administration member-role=2485
     const administration = await getTeamMember(2135);
     // Marketing member-role=2122
@@ -45,14 +47,14 @@ const page = async () => {
     // Commerce member-role=2134
     const commerce = await getTeamMember(2134);
 
-
+    const t = await getTranslations("afs-team", locale);
     return (
         <div className='max-w-[1920px] mx-auto'>
             <div className='bg-white global-padding relative pt-4'>
                 <div>
                     <BreadCums />
                     <div className='lg:my-[80px] my-[40px]'>
-                        <h1 className='global-h1 text-center relative'>L&apos;équipe Foil And Co.</h1>
+                        <h1 className='global-h1 text-center relative'>{t("the-foil")}</h1>
                     </div>
                     {/* First Image Section */}
                     <div className='flex items-start gap-10 global-margin flex-col lg:flex-row'>
@@ -61,8 +63,14 @@ const page = async () => {
                         </div>
                         <div className='lg:pt-10 lg:w-[40%]'>
                             <div className='max-w-[520px] lg:text-left text-center'>
-                                <h2 className='lg:text-[36px] text-[32px] font-bold leading-[110%] tracking-[-0.01em]'>Des collaborateurs animés par une même passion</h2>
-                                <p className='text-lg font-semibold mt-6'>Chez Foil And Co., notre équipe partage une passion commune pour l’innovation et l’excellence. Chaque membre contribue à faire avancer notre mission avec engagement, créativité et expertise, afin de vous offrir des produits et services de qualité. Découvrez les visages de ceux qui oeuvrent à la production de vos équipements favoris.</p>
+                                {t.rich("h-2", {
+                                    h: (chunks) => (
+                                        <h2 className="lg:text-[36px] text-[32px] font-bold leading-[110%] tracking-[-0.01em]">
+                                            {chunks}
+                                        </h2>
+                                    ),
+                                    p: (chunks) => <p className="text-lg font-semibold mt-6">{chunks}</p>
+                                })}
                             </div>
                         </div>
                     </div>
@@ -84,12 +92,15 @@ const page = async () => {
                             <p className='lg:text-[clamp(3.125rem,.9028rem+3.4722vw,4.375rem)] text-[32px] tracking-[-.3px]
                             lg:leading-[110%] leading-[100%] font-semibold max-w-[1600px] text-white 
                             text-center uppercase z-30 relative mx-auto'>
-                                <span className='text-[#1D98FF]'>Révélez votre potentiel avec nous !</span> Nous sommes à la recherches de personnes talentueuses et passionées voulant imposer de nouveaux standards dans le monde du foil et de l'équipement des sports nautiques. <span className='text-[#1D98FF]'>Rejoignez l'équipe aujourd'hui !</span>
+                                {t.rich("span-1", {
+                                    span1: (chunks) => <span className="text-[#1D98FF]">{chunks}</span>,
+                                    span2: (chunks) => <span className="text-[#1D98FF]">{chunks}</span>
+                                })}
                             </p>
 
                             <Link href='/' className='flex items-center justify-center lg:mt-10 mt-5'>
                                 <button className='uppercase text-white text-base flex items-center gap-1 font-medium bg-[#1D98FF] lg:px-4 lg:py-[14px] px-2 py-2 rounded-[4px] z-30 relative'>
-                                    <span>voir les postes</span>
+                                    <span>{t("view")}</span>
                                     <svg width="20" height="20" className='text-white' viewBox="0 0 24 24" fill="none">
                                         <path d="M19 5L5 19M19 5H6.4M19 5V17.6" stroke="white" strokeWidth="2" />
                                     </svg>
@@ -102,7 +113,6 @@ const page = async () => {
                     </div>
                 </div>
             </div>
-            <FeatureBar />
         </div>
     );
 };

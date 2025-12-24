@@ -20,10 +20,12 @@ import React, { useRef, useState } from 'react';
 import TeamCard from "../Card/TeamCard";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(ScrollTrigger)
 
 const Team = ({ data }) => {
+    const t = useTranslations("afs-team");
     const { administration, marketing, burue, logistique, commerce, production_foil, production_plances } = data;
     // const teamRef = useRef(null);
     const contentRef = useRef(null)
@@ -60,32 +62,37 @@ const Team = ({ data }) => {
         <div className="flex items-start justify-between relative h-full min-h-screen gap-10">
             <div className="lg:w-[18%] w-0 hidden lg:block z-30 h-fit sticky top-[174px]">
                 <div>
-                    <h3 className="text-xl uppercase font-semibold">Équipe AFS</h3>
+                    <h3 className="text-xl uppercase font-semibold">{t("team")}</h3>
                     <ul className="mt-4 space-y-6 text-gray-400">
                         <li onClick={() => setActiveId("foil")}
                             className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "foil" ? "text-black" : ""} flex items-center gap-1`}>
                             <Link href="#foil" className="flex items-center gap-1">{activeId === "foil" && <ArrowRight className="w-5 h-5" />}
-                                Production foils</Link>
+                                {t("p-foils")}
+                            </Link>
                         </li>
 
                         <li onClick={() => setActiveId("plances")} className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "plances" ? "text-black" : ""} flex items-center gap-1`}>
                             <Link href="#plances" className="flex items-center gap-1">{activeId === "plances" && <ArrowRight className="w-5 h-5" />}
-                                Production planches</Link>
+                                {t("boards")}
+                            </Link>
                         </li>
 
                         <li onClick={() => setActiveId("burue")} className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "burue" ? "text-black" : ""} flex items-center gap-1`}>
                             <Link href="#burue" className="flex items-center gap-1">{activeId === "burue" && <ArrowRight className="w-5 h-5" />}
-                                Bureau d’étude</Link>
+                                {t("bur")}
+                            </Link>
                         </li>
 
                         <li onClick={() => setActiveId("logistic")} className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "logistic" ? "text-black" : ""} flex items-center gap-1`}>
                             <Link href="#logistic" className="flex items-center gap-1">{activeId === "logistic" && <ArrowRight className="w-5 h-5" />}
-                                LOGISTIQUE</Link>
+                                {t("logistics")}
+                            </Link>
                         </li>
 
                         <li onClick={() => setActiveId("commerce")} className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "commerce" ? "text-black" : ""} flex items-center gap-1`}>
                             <Link href="#commerce" className="flex items-center gap-1">{activeId === "commerce" && <ArrowRight className="w-5 h-5" />}
-                                Commerce</Link>
+                                {t("commerce")}
+                            </Link>
                         </li>
 
                         <li onClick={() => setActiveId("marketing")} className={`uppercase font-semibold hover:text-black text-base leading-[130%] cursor-pointer ${activeId === "marketing" ? "text-black" : ""} flex items-center gap-1`}>
@@ -105,8 +112,9 @@ const Team = ({ data }) => {
                     <div className="mb-10 flex items-center justify-center lg:gap-3 gap-[6px]">
                         <p className="global-h1">40</p>
                         <p className="lg:text-[30px] text-2xl font-bold leading-[110%] tracking-[-0.01em]">
-                            le nombre de <br />
-                            collaborateurs chez Foil And Co.
+                            {t.rich("number", {
+                                br: () => <br />
+                            })}
                         </p>
                     </div>
                 </div>

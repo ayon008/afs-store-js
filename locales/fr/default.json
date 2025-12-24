@@ -4,6 +4,77 @@
     "mission": "NOS MISSIONS",
     "pageTitle": "L'ESSENCE DE LA FEUILLE"
   },
+  "afsAdvance": {
+    "afsHeadline": "AFS Advanced est notre façon de concentrer notre savoir-faire dans les conceptions les plus avancées, ce qui constitue l'essence et l'avenir d'AFS.",
+    "title": "L'ESSENCE DE LA FEUILLE"
+  },
+  "afs-team": {
+    "boards": "Production de planches",
+    "bur": "Bureau d'études",
+    "commerce": "Commerce",
+    "h-2": "<h>Des employés animés par une passion commune</h><p>Chez Foil And Co, notre équipe partage une passion commune pour l'innovation et l'excellence. Chacun contribue à l'avancement de notre mission avec engagement, créativité et expertise, afin de vous offrir des produits et services de qualité. Découvrez les visages de ceux qui travaillent à la fabrication de vos équipements préférés.</p>",
+    "logistics": "LOGISTIQUE",
+    "number": "le nombre de <br> de salariés à Foil And Co.",
+    "p-foils": " Feuilles de production",
+    "span": "<span1>Révélez votre potentiel avec nous !</span1> Nous sommes à la recherche de personnes talentueuses et passionnées voulant imposer de nouveaux standards dans le monde du foil et de l'équipement des sports nautiques. <span2>Rejoignez l'équipe aujourd'hui !</span2>",
+    "span-1": "<span1>Libérez votre potentiel avec nous !</span1> Nous recherchons des personnes talentueuses et passionnées qui souhaitent établir de nouvelles normes dans le monde du foiling et des équipements de sports nautiques. <span2>Rejoignez l'équipe dès aujourd'hui !</span2>",
+    "team": "L'équipe AFS",
+    "the-foil": "L'équipe Foil And Co.",
+    "view": "Voir les messages"
+  },
+  "AHDhistory": {
+    "1996": "1996 voit l'arrivée du duo breton Patrice Belbeoch et Jean-Marie Guiriec (shaper). C'est la naissance du très populaire Convertible 267, un shape Wave/Slalom - Trifins/Single.",
+    "1997": "1997 marque le début d'une ère de domination totale des flotteurs AHD jusqu'au début des années 2000. AHD accueille le multiple champion de France et futur champion du monde Antoine Albeau avec Jean Bouldoire dans la forme.",
+    "AHD": "Les coureurs d'AHD montent sur les podiums et remportent des victoires dans différents pays.",
+    "AHD is": "L'AHD est aussi une planche légendaire",
+    "AHD was": "AHD a été fondée en Australie en 1987 par Harry Germann et le rider Tom Luedecke. La marque s'est rapidement installée aux États-Unis pour poursuivre son expansion sur le célèbre spot des gorges du fleuve Columbia.",
+    "Allride": "Allride",
+    "An all": "Un tableau polyvalent",
+    "Brazilian": "Le rider brésilien Kauli Seadi est devenu l'effigie de la marque, et en 2005 il a remporté le titre de champion du monde de vagues sur son Kauli Pro Model !",
+    "Bruno": "Bruno André rejoint le département R&D de la marque. AHD va surfer sur l'innovation et les nouvelles disciplines. C'est l'époque des premières planches Racing compactes (Diamond), des planches Freestyle et des planches Super-X \"Maxxride\".",
+    "Change": "Changement de forme en 2003, AHD accueille Pascal Gerber et crée un nouveau centre de R&D en Tunisie.",
+    "Christophe": "Christophe Piaget rachète la marque, rapatrie les moules et installe une usine de production à Collombey, en Suisse. AHD marque l'arrivée des premières planches à sandwich de série, avec des modèles phares comme le race slalom 289, le slalom 26, le Swell City 250 et bien sûr l'Eliminator. De nouveaux modèles sont ensuite créés avec un certain Roberto Ricci à la barre.",
+    "Concept": "Concept",
+    "Development": "Le développement est axé sur les décollages à faible vitesse et les vents légers, avec des équipements moins encombrants.",
+    "Fish, Wind-Sup": "Poisson, Wind-Sup",
+    "Foil&co": "Foil&co prend en main le destin de AHD.",
+    "Forever": "Associés à jamais à l'image d'AHD, les milliers d'ambassadeurs qui nous ont accompagnés au fil des ans.",
+    "For the": "Pour le reste de la \"gamme traditionnelle\", AHD s'appuie sur des formes de valeurs efficaces et durables dans le temps (Expressions, Fast Forwards, Zen).",
+    "Freerace": "Freerace",
+    "In": "En 2002, AHD a délocalisé son usine de production en Tunisie.",
+    "In 1993": "En 1993, c'est sur la nouvelle AHD 288 que Sébastien Carle remporte le championnat du monde en Egypte, avant de se classer 2ème sur la même planche de production lors de la coupe du monde de La Torche, démontrant ainsi l'efficacité des nouvelles planches de production face aux meilleurs prototypes mondiaux.",
+    "In 2007": "En 2007, Thierry Pen, Jean-Paul Riou, Pascal Gerber et Bruno André fondent Tridenn. Cette nouvelle société reprend alors les rênes de la marque AHD avec pour devise \"l'innovation dans le domaine oublié des vents de 0 à 15 nœuds\".",
+    "In 2009": "En 2009, le premier combo flotteur/voile en carbone de série est présenté au salon nautique de Paris. AFS deviendra une marque à part entière, avec une usine de production en Bretagne.",
+    "In 2010": "En 2010, un travail parallèle sur le foil a permis de surfer des vagues de foil en totale autonomie à l'aide d'une pagaie. Le sealion peut tout faire : planche à voile, surf, supfoil et windfoil !",
+    "In this": "Dans cette plage de vent faible, l'équipement qui permet de planer est une formule de 1m de large et un 12m !",
+    "Its shape": "Sa forme est atypique, avec une ouverture à l'avant qui permet de conserver la longueur du rail indispensable à la glisse par vent faible avec un volume porteur réduit. L'ouverture réduit l'impact du vent sur le flotteur en vol.",
+    "It’s the": "C'est l'année d'un nouveau titre mondial pour la marque et du premier titre de champion du monde de vagues pour un Français (P. Belbeoch).",
+    "It was": "C'est aussi l'année d'un nouveau titre mondial pour la marque et du premier titre en vague pour un Français en Coupe du monde (P.Belbeoch).",
+    "Like": "Comme Sylvain Hernigou, qui monte sur nos chars depuis 1997 ! Nous ne pouvons pas tous les citer ici.",
+    "Maxxride": "Maxxride domine les épreuves de freestyle : Antoine Albeau remporte son premier titre mondial.",
+    "Maxxride2": "Maxxride",
+    "Maxxride dominates": "Maxxride domine les épreuves de freestyle : Antoine Albeau remporte son premier titre mondial. Les pilotes AHD montent sur les podiums et remportent des victoires dans différents pays.",
+    "RACING": "COURSE",
+    "Sébastien": "Sébastien Carle a remporté le championnat du monde de production en Égypte, avant de se classer deuxième sur la même planche de production lors de la coupe du monde de La Torche.",
+    "Swiss": "Les planches creuses (NT) fabriquées en Suisse sont un grand succès en Formule !",
+    "Thank you": "Merci beaucoup !",
+    "The best": "Les meilleurs cavaliers rêvent de rejoindre l'équipe AHD, qui compte déjà quelques grands noms (A.Albeau, M.Pritchard, J.Taboulet, C.Moussilmani, W.Pedrick, J.Hawkins, Paula Daian,...).",
+    "The first": "Le premier bateau AFS-1 dédié au foiling fait 100 litres et 65 cm de large. Et avec une voile de 7m, il vole dans le calme.",
+    "The Raceboard": "Le Raceboard Eliminator a dominé sa catégorie, Sven Rasmussen remportant le premier titre mondial en 1991. Il a ensuite remporté le titre européen l'année suivante.",
+    "The Venezuelan": "Le Vénézuélien Diony Guadagnino a adopté le concept et a accompagné la marque pendant une bonne décennie, avec de magnifiques images sur les différents spots du monde sur son \"DG Pro Model\", et de belles performances en PWA et Défi Wind sur des planches de Slalom qui sont toujours aussi performantes de génération en génération (SL1, SL2, SL3).",
+    "title": "L'histoire d'AHD",
+    "Waveboards": "Les planches à vagues sont de plus en plus courtes et en 2006, AHD lance la Seal, la planche à flotteurs qui deviendra un concept populaire à l'avenir. La Seal est une planche à vagues Thrusters de 2m10 qui marque le début d'une révolution dans la navigation par vent léger...",
+    "Wave riding lightwind": "Vagues par vent faible",
+    "Wave/slalom": "Vague/slalom - Trifins/single",
+    "With Foil becoming": "Le Foil devenant de plus en plus important, Tanguy Le Bihan et Thierry Pen créent en 2018 Foil&co et installent une usine de production en Bretagne. Tridenn et Foil&co fusionnent."
+  },
+  "blog": {
+    "blog": "Blog",
+    "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues de matériel pour les riders de tous niveaux."
+  },
+  "Board": {
+    "Board": "Conseil d'administration"
+  },
   "breadcum": {
     "gliss": "Gliss Attitude",
     "glissUp": "Gliss Up",
@@ -11,6 +82,15 @@
     "home": "Accueil",
     "Visit The Factory": "Visite de l'usine",
     "Wind Foil 2023 Guide": "Guide de la feuille de vent 2023"
+  },
+  "clinique-de-la-planche": {
+    "Backthen": "À l'époque, la \"Clinique\" était un atelier de réparation situé dans un petit jardin. Le marché étant florissant, nous avons acheté une maison pour stocker les produits, ainsi qu'un magasin situé à 200 mètres, ce qui nous a permis de lancer officiellement l'activité. Plus tard, la maison est également devenue un magasin.",
+    "Equipe": "Équipe clinique du conseil d'administration",
+    "Established on": "Créé le 2 mai 1982, le magasin vendait et réparait des bateaux. Il s'appelait la \"Clinique du Bateau\". Progressivement, ils se sont lancés sur le marché de la planche à voile. La pratique explose et le magasin est rebaptisé \"Clinique du bateau et de la planche\".",
+    "La Clinique": "La Clinique de la Planche est l'un des plus anciens magasins d'équipement nautique de France, toujours en activité aujourd'hui.",
+    "Store in Caen": "Magasin à Caen",
+    "sub": "L'un des plus anciens magasins d'équipement maritime de France équipé de matériel AFS",
+    "The relationship": "La relation avec Foil&Co a commencé avec AHD Boards et s'est poursuivie avec AFS Foils. La clinique souhaitait proposer des produits en carbone abordables et fabriqués en France."
   },
   "DirectSailing": {
     "Address": "Adresse",
@@ -43,6 +123,18 @@
     "Using the": "En utilisant le même lien, vous indiquez le matériel que vous souhaitez acheter.",
     "Well": "Nous vous aiderons à évaluer l'état de votre équipement afin que vous puissiez l'échanger dès aujourd'hui.",
     "You will": "Vous recevrez une estimation du coût de la restauration dans les 24 heures."
+  },
+  "footer": {
+    "about": "À propos de nous",
+    "accept": "J'accepte la politique de confidentialité et les conditions d'utilisation",
+    "client": "Client du service",
+    "copy": "Tous droits réservés. ©2025",
+    "email": "Saisissez votre adresse électronique pour vous abonner à nos bulletins d'information",
+    "li-1": "<item1><link1>Configurateur de feuilles</link1></item1><item><link2>Meilleure correspondance stab</link2></item><item><link3>Comparateur 3 stabs / aile avant</link3></item><item><link4>Comparaison des mâts</link4></item><item><link5>Construction de la planche</link5></item><item><link6>Equipement</link6></item><item><link7>Récupération</link7></item><item><link8>Caractéristiques du film</link8></item><item><link9>Taille de la vis</link9></item>",
+    "li-2": "<item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>\n      <item><link7>Conditions générales de vente</link7></item>\n      <item><link8>Politique de confidentialité</link8></item>",
+    "li-3": " <item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>",
+    "tools": "Outils d'achat",
+    "Universe": "Univers"
   },
   "Form": {
     "title": "Formulaire"
@@ -117,6 +209,7 @@
     "featuredTitle": "Meilleures ventes",
     "homeTitle": "L'esprit du fleuret depuis 2009",
     "more": "En savoir plus sur AFS",
+    "news": "nouvelles",
     "playVideo": "LIRE LA VIDÉO",
     "scrollText": "Lire la suite de la visite",
     "see-more": "Voir plus d'informations",

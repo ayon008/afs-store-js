@@ -1,19 +1,23 @@
-import Link from "next/link";
 
-const BreadCums = () => {
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+const BreadCums = async ({ locale }) => {
+  const b = await getTranslations("breadcum", locale);
   return (
     <div className="mb-5 uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Home
+          {b("home")}
         </Link>
-        / <span className="text-black">AHD history</span>
+        / <span className="text-white">AHD history</span>
       </div>
     </div>
   );
 };
 
-export default function ahd() {
+export default async function ahd({ locale }) {
+  const t = await getTranslations("AHDhistory", locale);
+  const e = await getTranslations("Board", locale);
   return (
     <>
       <div
@@ -35,7 +39,7 @@ export default function ahd() {
           >
             <div className="max-w-[1920px] mx-auto flex flex-col global-padding h-[calc(100vh-120px)] justify-end pb-10">
               <BreadCums />
-              <h1 className="global-h1 text-left text-white">The AHD story</h1>
+              <h1 className="global-h1 text-left text-white">{t("title")}</h1>
             </div>
           </div>
         </div>
@@ -43,9 +47,7 @@ export default function ahd() {
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            AHD was founded in Australia in 1987 by Harry Germann and rider Tom
-            Luedecke. The brand soon moved to the USA to continue its expansion
-            on the famous Columbia River Gorges spot.
+            {t("AHD was")}
           </p>
           <div className="relative block">
             <img
@@ -59,21 +61,14 @@ export default function ahd() {
             </h2>
           </div>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Christophe Piaget bought the brand, repatriated the molds and set up
-            a production plant in Collombey, Switzerland. AHD marked the arrival
-            of the first production sandwich boards, with flagship models such
-            as the race slalom 289, slalom 26, Swell City 250 and, of course,
-            the Eliminator. New models were then created with a certain Roberto
-            Ricci at the helm.
+            {t("Christophe")}
           </p>
         </div>
 
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            The Raceboard Eliminator dominated its class, with Sven Rasmussen
-            winning the first world title in 1991. He followed this up with the
-            European title the following year.
+            {t("The Raceboard")}
           </p>
           <div className="relative block">
             <img
@@ -88,24 +83,17 @@ export default function ahd() {
           </div>
 
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In 1993, it was on the new AHD 288 that Sébastien Carle won the
-            World Championship in Egypt, before coming 2nd on the same
-            production board at the World Cup in La Torche, demonstrating the
-            efficiency of the new production boards against the world’s best
-            prototypes.
+            {t("In 1993")}
           </p>
         </div>
 
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            1996 saw the arrival of Breton duo Patrice Belbeoch and Jean-Marie
-            Guiriec (shaper). This was the birth of the ultra-popular
-            Convertible 267, a Wave/Slalom – Trifins/Single shape.
+            {t("1996")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            It was also the year of a new world title for the brand and the
-            first wave title for a Frenchman in the World Cup (P.Belbeoch).
+            {t("It was")}
           </p>
           <div className="relative block">
             <img
@@ -120,10 +108,7 @@ export default function ahd() {
           </div>
 
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            1997 marked the start of an era of total domination by AHD floats
-            until the early 2000s. AHD welcomes multiple French champion and
-            future world champion Antoine Albeau with Jean Bouldoire in the
-            shape.
+            {t("1997")}
           </p>
         </div>
 
@@ -142,41 +127,32 @@ export default function ahd() {
           </div>
 
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Bruno André joins the brand’s R&D department. AHD will surf on
-            innovation and new disciplines. This was the era of the first
-            compact Racing boards (Diamond), Freestyle boards and Super-X
-            “Maxxride” boards.
+            {t("Bruno")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Swiss-made hollow boards (NT) are a big hit in Formula!
+            {t("Swiss")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Maxxride dominates freestyle events: Antoine Albeau wins his first
-            world title.
+            {t("Maxxride")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            AHD riders complete the podiums and go on to win victories in
-            various countries.
+            {t("AHD")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            The best riders dream of joining the AHD team, which already
-            includes some of the greats (A.Albeau, M.Pritchard, J.Taboulet,
-            C.Moussilmani, W.Pedrick, J.Hawkins, Paula Daian,…).
+            {t("The best")}
           </p>
         </div>
 
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In 2002 AHD relocated its production plant to Tunisia.
+            {t("In")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Change of shaper in 2003, AHD welcomes Pascal Gerber and creates a
-            new R&D center in Tunisia.
+            {t("Change")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Brazilian rider Kauli Seadi became the effigy of the brand, and in
-            2005 he won the world wave title on his Kauli Pro Model!
+            {t("Brazilian")}
           </p>
           <div className="relative block">
             <img
@@ -191,10 +167,7 @@ export default function ahd() {
           </div>
 
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Waveboards are becoming shorter and shorter, and in 2006 AHD
-            launches the Seal, the floatboard that will become a popular concept
-            in the future. The Seal is a 2m10 Thrusters waveboard that marks the
-            start of a revolution in lightwind wave riding…
+            {t("Waveboards")}
           </p>
         </div>
 
@@ -213,37 +186,26 @@ export default function ahd() {
           </div>
 
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In 2007 Thierry Pen, Jean-Paul Riou, Pascal Gerber and Bruno André
-            founded Tridenn. This new company then took over the reins of the
-            AHD brand with the motto “innovation in the forgotten 0-15 knot wind
-            range”.
+            {t("In 2007")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Development is focused on low-speed take-offs and light winds, with
-            less cumbersome equipment.
+            {t("Development")}
           </p>
           <p className="text-[16px] md:text-[20px] text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In this lightwind range, the equipment that allows you to glide is a
-            1m wide formula and a 12m!
+            {t("In this")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            The first AFS-1 baord dedicated to foiling is 100 liters and 65cm
-            wide. And with a 7m sail, it flies in the calm.
+            {t("The first")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Its shape is atypical, with an opening at the front that keeps the
-            rail length essential for gliding in light winds with a low
-            load-bearing volume. The opening reduces the impact of wind on the
-            float in flight.
+            {t("Its shape")}
           </p>
         </div>
 
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In 2009, the first production carbon float/sail combo was presented
-            at the Paris Boat Show. AFS will become a brand in its own right,
-            with a production plant in Brittany.
+            {t("In 2009")}
           </p>
           <div className="relative block">
             <img
@@ -258,49 +220,37 @@ export default function ahd() {
           </div>
 
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            In 2010, parallel work on the foil has made it possible to surf foil
-            waves in complete autonomy using a paddle. The sealion can do it
-            all: windsurfing, surfsailing, supfoil and windfoil!
+            {t("In 2010")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            For the rest of the “traditional range”, AHD relies on value shapes
-            that are efficient and durable over time (Expressions, Fast
-            Forwards, Zen).
+            {t("For the")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-20 mx-auto">
-            The Venezuelan Diony Guadagnino embraced the concept and accompanied
-            the brand for a good decade, with magnificent images on the world’s
-            different spots on his “DG Pro Model”, and some great performances
-            in PWA and Défi Wind on Slalom boards that are still performing well
-            from generation to generation (SL1, SL2, SL3).
+            {t("The Venezuelan")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Forever associated with the AHD image, the thousands of ambassadors
-            who have accompanied us over the years.
+            {t("Forever")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Like Sylvain Hernigou, who has been riding our floats since 1997! We
-            can’t list them all here.
+            {t("Like")}
           </p>
           <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-            Thank you so much!
+            {t("Thank you")}
           </p>
         </div>
         {/* content */}
         <div className="max-w-[1370px] mx-auto global-padding ">
           <div className="mb-20 relative block">
             <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mb-10 mx-auto">
-              With Foil becoming increasingly important, in 2018 Tanguy Le Bihan
-              and Thierry Pen created Foil&co and set up a production plant in
-              Brittany. Tridenn and Foil&co merge.
+              {t("With Foil becoming")}
             </p>
             <p className="text-4 md:text-5 text-white font-semibold leading-[130%] max-w-[1220px] global-padding mx-auto">
-              Foil&co takes AHD’s destiny into its own hands.
+              {t("Foil&co")}
             </p>
           </div>
           <div className="mb-10 relative block">
             <h2 className="global-h1 text-white text-center max-w-[900px] mx-auto">
-              AHD is also legendary boards
+              {t("AHD is")}
             </h2>
           </div>
           {/* board wrapper */}
@@ -324,14 +274,12 @@ export default function ahd() {
                       <span className="text-[#0389b6]">1993</span> - AHD 288
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      RACING
+                      {t("RACING")}
                     </p>
                   </div>
 
                   <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    Sébastien Carle won the Production World Championship in
-                    Egypt, before placing second on the same production board at
-                    the La Torche World Cup.
+                    {t("Sébastien")}
                   </p>
                 </div>
               </div>
@@ -365,13 +313,12 @@ export default function ahd() {
                       <span className="text-[#0389b6]">1996</span> - AHD 267
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      Wave/slalom - Trifins/single
+                      {t("Wave/slalom")}
                     </p>
                   </div>
 
                   <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    It’s the year of a new world title for the brand and the
-                    first World Cup wave title for a Frenchman (P. Belbeoch).
+                    {t("It’s the")}
                   </p>
                 </div>
               </div>
@@ -440,15 +387,11 @@ export default function ahd() {
                       <span className="text-[#0389b6]">1993</span> - AHD 288
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      RACING
+                      {t("RACING")}
                     </p>
                   </div>
 
-                  <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    Sébastien Carle won the Production World Championship in
-                    Egypt, before placing second on the same production board at
-                    the La Torche World Cup.
-                  </p>
+                  <p className="text-4 md:text-5 text-white font-semibold leading-[130%]"></p>
                 </div>
               </div>
 
@@ -486,9 +429,7 @@ export default function ahd() {
                   </div>
 
                   <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    Sébastien Carle won the Production World Championship in
-                    Egypt, before placing second on the same production board at
-                    the La Torche World Cup.
+                    {t("Sébastien")}
                   </p>
                 </div>
               </div>
@@ -554,17 +495,15 @@ export default function ahd() {
                 <div className="flex flex-col gap-10">
                   <div className="flex flex-col gap-5">
                     <h3 className="text-white text-[clamp(1.625rem,0.2438rem+2.8812vw,3.125rem)] leading-[1]">
-                      <span className="text-[#0389b6]">2001</span> - AHD
-                      Maxxride
+                      <span className="text-[#0389b6]">2001</span> - AHD (t
+                      {"Maxxride2"})
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      Allride
+                      {t("Allride")}
                     </p>
                   </div>
                   <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    Maxxride dominates freestyle events: Antoine Albeau wins his
-                    first world title. AHD drivers complete the podiums and win
-                    in various countries.
+                    {t("Maxxride dominates")}
                   </p>
                 </div>
               </div>
@@ -598,7 +537,7 @@ export default function ahd() {
                       <span className="text-[#0389b6]">2006</span> - AHD Seal
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      Wave riding lightwind
+                      {t("Wave riding lightwind")}
                     </p>
                   </div>
                 </div>
@@ -631,14 +570,14 @@ export default function ahd() {
                   <div className="flex flex-col gap-5">
                     <h3 className="text-white text-[clamp(1.625rem,0.2438rem+2.8812vw,3.125rem)] leading-[1]">
                       <span className="text-[#0389b6]">2008</span> - SEALION
-                      Concept
+                      {t("Concept")}
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
-                      Fish, Wind-Sup
+                      {t("Fish, Wind-Sup")}
                     </p>
                   </div>
                   <p className="text-4 md:text-5 text-white font-semibold leading-[130%]">
-                    An all-purpose board
+                    (t{"An all"})
                   </p>
                 </div>
               </div>
@@ -669,7 +608,7 @@ export default function ahd() {
                   <div className="flex flex-col gap-5">
                     <h3 className="text-white text-[clamp(1.625rem,0.2438rem+2.8812vw,3.125rem)] leading-[1]">
                       <span className="text-[#0389b6]">2009</span> - AFS ONE
-                      Board & foil
+                      {e("Board")} & foil
                     </h3>
                     <p className="text-[20px] text-white font-semibold leading-[130%]">
                       Windfoil, SUP foil

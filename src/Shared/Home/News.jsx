@@ -2,11 +2,12 @@ import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getPosts } from "@/app/actions/getBlogs";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 /* ----------------------------- News Card ----------------------------- */
-const NewsCard = ({ article }) => {
+const NewsCard = async ({ article, locale }) => {
   const category = article.categories?.[0];
+  const t = await getTranslations("home", locale);
 
   return (
     <article className="flex flex-col justify-between gap-[24px] lg:gap-10 py-5 border-t-2 border-b-2 border-t-[#00000026] border-b-[#00000026]">
@@ -39,7 +40,7 @@ const NewsCard = ({ article }) => {
           href={`/blog/${article.slug}`}
           className="flex items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-blue"
         >
-          <span>See More</span>
+          <span>{t("see-more")}</span>
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
         </Link>
       </div>
@@ -47,8 +48,8 @@ const NewsCard = ({ article }) => {
   );
 };
 
-const News = async () => {
-  const t = useTranslations("home");
+const News = async ({ locale }) => {
+  const t = await getTranslations("home", locale);
   let blogs = [];
 
   try {
@@ -66,7 +67,7 @@ const News = async () => {
 
   return (
     <div className="mx-auto max-w-[1920px] global-padding global-margin">
-      <h2 className="global-h2 mb-8 text-[#111111]">News</h2>
+      <h2 className="global-h2 mb-8 text-[#111111] capitalize">{t("news")}</h2>
 
       {blogs.length > 0 && (
         <div className="grid grid-cols-1 gap-[clamp(1.25rem,-0.8333rem+2.7778vw,2.5rem)] md:grid-cols-2 lg:grid-cols-3">
@@ -80,7 +81,7 @@ const News = async () => {
         href="/blogs"
         className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
       >
-        See More
+        {t("see-more")}
         <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
       </Link>
     </div>

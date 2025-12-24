@@ -1,11 +1,15 @@
+"use client";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const BreadCums = () => {
+  const b = useTranslations("breadcum");
+
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Home
+          {b("home")}
         </Link>
         / <span className="text-black">Clinique de la planche</span>
       </div>
@@ -14,6 +18,9 @@ const BreadCums = () => {
 };
 
 export default function Clinique() {
+  const b = useTranslations("surfone");
+  const t = useTranslations("clinique-de-la-planche");
+  const d = useTranslations("DirectSailing");
   return (
     <>
       {/* HERO */}
@@ -25,14 +32,13 @@ export default function Clinique() {
 
             <div className="flex flex-col gap-[20px]">
               <h1 className="global-h1">
-                AFS products are available in the{" "}
+                {b("heading")}{" "}
                 <span className="text-[#1e98ff]">Clinique de la planche</span>{" "}
-                store.
+                {b("store")}
               </h1>
 
               <p className="max-w-[360px] text-[18px] font-semibold text-[#111111B2] max-[1024px]:text-[16px]">
-                One of France’s oldest marine equipment stores with AFS
-                equipment
+                {t("sub")}
               </p>
             </div>
           </div>
@@ -40,7 +46,7 @@ export default function Clinique() {
           {/* HERO FOOTER */}
           <div className="flex flex-col gap-[20px] border-b border-black/40 pb-[20px] leading-[1.2] md:flex-row md:flex-wrap md:justify-between">
             <div className="flex flex-col gap-[4px]">
-              <h4 className="font-bold text-[#111111]">Store</h4>
+              <h4 className="font-bold text-[#111111]">{b("store")}</h4>
               <a
                 href="https://www.cliniquedelaplanche.com/"
                 target="_blank"
@@ -70,7 +76,7 @@ export default function Clinique() {
             </div>
 
             <div className="flex flex-col gap-[4px] md:basis-[210px] md:shrink-0">
-              <h4 className="font-bold text-[#111111]">Address</h4>
+              <h4 className="font-bold text-[#111111]">{d("Address")}</h4>
               <p className="font-semibold text-[#111111B2]">
                 11 rue de la dives, 14000 Caen, France
               </p>
@@ -113,7 +119,7 @@ export default function Clinique() {
 
       {/* HISTOIRE */}
       <div className="global-margin global-padding flex flex-col gap-[40px] max-w-[1920px] mx-auto">
-        <h2 className="global-h2">History</h2>
+        <h2 className="global-h2">{d("History")}</h2>
 
         <div className="flex flex-col gap-[40px] md:flex-row">
           <div className="flex basis-[25%] flex-col space-y-[12px] pt-[120px] max-[1024px]:pt-0">
@@ -123,36 +129,27 @@ export default function Clinique() {
               src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-3.png"
               className="w-full"
             />
-            <span>Store in Caen</span>
+            <span>{t("Store in Caen")}</span>
           </div>
 
           <div className="flex-1">
             <p className="max-w-[1024px] pb-[40px] text-[18px] font-semibold leading-[130%] text-[#111]/75">
-              Established on May 2, 1982, the store sold and repaired boats. It
-              was called the “Clinique du Bateau”. Gradually, they entered the
-              windsurfing market. The practice exploded, and they renamed the
-              store “Clinique du bateau et de la planche”.
+              {t("Established on")}
             </p>
 
             <h2 className="mb-[40px] text-[32px] font-semibold uppercase leading-[105%] text-[#111]/70">
-              <span className="text-[#1D98FF]">"</span>Backthen, the "Clinique"
-              was a repair shop in a small garden. With the market flourishing,
-              we bought a house to store the products, as well as a store 200m
-              away, enabling us to officially launch the business. Later, the
-              house also became a store.
+              <span className="text-[#1D98FF]">"</span>
+              {t("Backthen")}
               <span className="text-[#1D98FF]">"</span>
             </h2>
 
             <div className="flex flex-col gap-[20px] max-[1024px]:flex-col lg:flex-row lg:justify-between">
               <div className="max-w-[385px] space-y-[40px] pb-[20px] text-[18px] font-medium leading-[130%] text-[#111]/75">
                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
-                  The relationship with Foil&Co began with AHD Boards and
-                  continued with AFS Foils. The clinic wanted to offer carbon
-                  products that were affordable and made in France.
+                  {t("The relationship")}
                 </p>
                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
-                  La Clinique de la Planche is one of France’s oldest nautical
-                  equipment stores, still in business today.
+                  {t("La Clinique")}
                 </p>
               </div>
 
@@ -163,7 +160,7 @@ export default function Clinique() {
                   src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-7.png"
                   className="w-full"
                 />
-                <span>Equipe Clinique de la planche</span>
+                <span>{t("Equipe")}</span>
               </div>
             </div>
           </div>

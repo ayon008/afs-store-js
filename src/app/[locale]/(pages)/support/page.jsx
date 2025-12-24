@@ -1,13 +1,51 @@
-"use client";
-
+import Head from "next/head";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
 
-export default function AfsSupport() {
+
+export default function AfsSupport({ locale }) {
   const t = useTranslations("support");
 
   return (
     <>
+      <Head>
+        <title>{t("title")}</title>
+
+        {/* Basic SEO */}
+        <meta
+          name="description"
+          content="AFS Support – Contact our team for any technical issues, guidance, or assistance with your AFS products."
+        />
+        <meta name="robots" content="index, follow" />
+        <meta
+          name="keywords"
+          content="AFS, support, foiling, help, SAV, assistance"
+        />
+
+        {/* OG / Social Preview */}
+        <meta property="og:title" content="AFS Support" />
+        <meta
+          property="og:description"
+          content="Reach out to AFS Support for technical help, product assistance, and expert guidance."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:image"
+          content="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
+        />
+
+        {/* Twitter Preview */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AFS Support" />
+        <meta
+          name="twitter:description"
+          content="Need help with your AFS gear? We're here for you."
+        />
+        <meta
+          name="twitter:image"
+          content="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
+        />
+      </Head>
       <div className="bg-[#F0F0F0] min-h-[calc(100vh - 80px)] global-margin pb-[40px]">
         <Image
           src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
@@ -513,7 +551,7 @@ export default function AfsSupport() {
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
+                <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
                   Read all
                 </span>
                 <svg
@@ -553,7 +591,7 @@ export default function AfsSupport() {
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
+                <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
                   Read all
                 </span>
                 <svg
@@ -592,7 +630,7 @@ export default function AfsSupport() {
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
+                <span class="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
                   Read all
                 </span>
                 <svg
@@ -688,18 +726,18 @@ export default function AfsSupport() {
       >
         <h1 className="global-h2">FAQ</h1>
 
-        <div className="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
+        <div class="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
           <h3 className="text-[clamp(1.5rem,1.4274rem+0.3226vw,1.75rem)] font-bold">
             Foil
           </h3>
-          <div className="relative">
-            <input type="checkbox" id="acc1" className="hidden peer" />
+          <div class="relative">
+            <input type="checkbox" id="acc1" class="hidden peer" />
             <label
               for="acc1"
-              className="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
+              class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
               Mon foil siffle ?
-              <span className="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
+              <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -716,8 +754,8 @@ export default function AfsSupport() {
                 </svg>
               </span>
             </label>
-            <div className="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-40 font-semibold text-[#404040]">
-              <p className="py-[16px]">
+            <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-40 font-semibold text-[#404040]">
+              <p class="py-[16px]">
                 {t("consult")}{" "}
                 <a
                   className="global-blue"
@@ -734,18 +772,18 @@ export default function AfsSupport() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
+        <div class="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
           <h3 className="text-[clamp(1.5rem,1.4274rem+0.3226vw,1.75rem)] font-bold">
             {t("board")}
           </h3>
-          <div className="relative">
-            <input type="checkbox" id="acc2" className="hidden peer" />
+          <div class="relative">
+            <input type="checkbox" id="acc2" class="hidden peer" />
             <label
               for="acc2"
-              className="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
+              class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
               {t("need")}
-              <span className="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
+              <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -762,36 +800,36 @@ export default function AfsSupport() {
                 </svg>
               </span>
             </label>
-            <div className="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
-              <p className="py-4">
+            <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
+              <p class="py-4">
                 {t("need-please")}
               </p>
 
-              <p className="py-2">
+              <p class="py-2">
                 {t("ahd")}
               </p>
 
-              <p className="py-2">Colors for AFS Fire and Fly:</p>
-              <ul className="py-2">
+              <p class="py-2">Colors for AFS Fire and Fly:</p>
+              <ul class="py-2">
                 {t.rich("size", {
                   li: (chunks) => <li>{chunks}</li>
                 })}              </ul>
 
-              <p className="py-2">{t("color")}</p>
-              <ul className="py-2">
+              <p class="py-2">{t("color")}</p>
+              <ul class="py-2">
                 <li>Navy blue rails: RAL 5013</li>
               </ul>
 
-              <p className="py-2">Colors for the Sealion Rasta:</p>
-              <ul className="py-2">
+              <p class="py-2">Colors for the Sealion Rasta:</p>
+              <ul class="py-2">
                 {t.rich("color-size", {
                   li: (chunks) => <li>{chunks}</li>,
                   span: (chunks) => <span>{chunks}</span>
                 })}
               </ul>
 
-              <p className="py-2">Colors for AHD SL-S:</p>
-              <ul className="py-2">
+              <p class="py-2">Colors for AHD SL-S:</p>
+              <ul class="py-2">
                 {t.rich("black", {
                   li: (chunks) => <li>{chunks}</li>,
                 })}
@@ -806,18 +844,18 @@ export default function AfsSupport() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
+        <div class="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
           <h3 className="text-[clamp(1.5rem,1.4274rem+0.3226vw,1.75rem)] font-bold">
             Wing
           </h3>
-          <div className="relative">
-            <input type="checkbox" id="acc3" className="hidden peer" />
+          <div class="relative">
+            <input type="checkbox" id="acc3" class="hidden peer" />
             <label
               for="acc3"
-              className="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
+              class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
               {t("change")}
-              <span className="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
+              <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -834,34 +872,34 @@ export default function AfsSupport() {
                 </svg>
               </span>
             </label>
-            <div className="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
-              <p className="py-4">
+            <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
+              <p class="py-4">
                 {t("wilf")}
-                <ul className="py-2">
+                <ul class="py-2">
                   <li>{t("v1")}</li>
                 </ul>
                 <Image
-                  className="py-2"
+                  class="py-2"
                   src="https://afs-foiling.com/fr/wp-content/uploads/2023/10/resize-169627230787765529Capetoile.jpeg"
                   alt="resize-169627230787765529Capetoile"
                   width={1920}
                   height={120}
                   className="max-w-[520px]"
                 />
-                <ul className="py-2">
+                <ul class="py-2">
                   <li>
                     {t("v2")}
                   </li>
                 </ul>
                 <Image
-                  className="py-2"
+                  class="py-2"
                   src="https://afs-foiling.com/fr/wp-content/uploads/2023/10/Cap-rouge-e1696272591756.jpeg"
                   alt="Red cap"
                   width={1920}
                   height={120}
                   className="max-w-[520px]"
                 />
-                <ul className="py-2">
+                <ul class="py-2">
                   <li>
                     {t("v3")}
                   </li>
