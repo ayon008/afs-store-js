@@ -30,14 +30,7 @@ export default function AboutVideoSection() {
             {t("homeTitle")}
           </h2>
           <p className="text-white/80 leading-[120%] text-[clamp(0.875rem,0.6448rem+0.4802vw,1.125rem)] font-semibold max-w-[520px]">
-            AFS’s mission is to offer the best-performing foils, boards and
-            wings, while guaranteeing first-rate accessibility and stability. To
-            ensure that all riders can practice their sport in complete safety,
-            whatever the conditions and whatever their riding style (freeride,
-            carving, downwind, surf foil, etc.). These products are designed and
-            manufactured in Brittany, France, by Foil And Co. French
-            manufacturing using the most advanced techniques to offer you the
-            best quality!
+            {t("video")}
           </p>
         </div>
 

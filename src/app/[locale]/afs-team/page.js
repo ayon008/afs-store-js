@@ -57,7 +57,7 @@ const page = async () => {
                     {/* First Image Section */}
                     <div className='flex items-start gap-10 global-margin flex-col lg:flex-row'>
                         <div className='lg:w-[60%] relative'>
-                            <Image src={teamImage} alt='Our Team' className='mx-auto rounded-md object-cover' />
+                            <Image src={teamImage} width={1000} height={1000} alt='Our Team' className='mx-auto rounded-md object-cover' />
                         </div>
                         <div className='lg:pt-10 lg:w-[40%]'>
                             <div className='max-w-[520px] lg:text-left text-center'>
@@ -77,7 +77,7 @@ const page = async () => {
                     <div className='max-w-[1920px] mx-auto relative'>
                         {/* IMAGES BEHIND */}
                         <div className='z-10 relative lg:absolute lg:top-10 lg:right-10  overflow-hidden rounded-[4px]'>
-                            <Image src={image1} alt='AFS_TEAM' className='lg:w-[250px] lg:h-[250px] w-[40%] h-[40%] max-w-[250px] ml-auto' />
+                            <Image src={image1} width={250} height={250} alt='AFS_TEAM' className='lg:w-[250px] lg:h-[250px] w-[40%] h-[40%] max-w-[250px] ml-auto' />
                         </div>
                         <div>
                             {/* TEXT ABOVE EVERYTHING */}
@@ -97,7 +97,7 @@ const page = async () => {
                             </Link>
                         </div>
                         <div className='z-10 relative lg:absolute lg:left-10 lg:bottom-10 overflow-hidden rounded-[4px]'>
-                            <Image src={image2} alt='AFS_TEAM' className='lg:w-[250px] lg:h-[250px] w-[40%] h-[40%] max-w-[250px]' />
+                            <Image src={image2} width={250} height={250} alt='AFS_TEAM' className='lg:w-[250px] lg:h-[250px] w-[40%] h-[40%] max-w-[250px]' />
                         </div>
                     </div>
                 </div>

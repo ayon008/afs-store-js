@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const BreadCums = () => {
+  const b = useTranslations("breadcum");
+  const t = useTranslations("service-request");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Home
+          {b("breadcum")}
         </Link>
-        / <span className="text-black">service request</span>
+        / <span className="text-black">{t("title")}</span>
       </div>
     </div>
   );
 };
 
-export default function service() {
+export default function Service() {
+  const t = useTranslations("service-request");
   return (
     <>
       {/* HERO */}
@@ -25,7 +29,7 @@ export default function service() {
           <div className="flex flex-col gap-[20px]">
             <BreadCums />
             <h1 className="text-center global-h1 py-10 uppercase">
-              Service request
+              {t("title")}
             </h1>
             <iframe
               src="https://n8n.foilandco.com/form/e9b3a3d4-4b77-47af-b9cb-b7bfa436f8b8"

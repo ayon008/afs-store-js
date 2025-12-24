@@ -8,6 +8,7 @@ import "swiper/css/navigation";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const CustomerServiceData = [
   {
@@ -43,7 +44,6 @@ const CustomerServiceData = [
 
 const AmbassadorsCard = ({ data }) => {
   const { title, description, url } = data;
-
   return (
     <div className="bg-[#F7F7F7] md:max-w-[340px] h-auto lg:max-w-[430px] lg:h-[320px] max-w-full w-full flex lg:flex-row flex-col-reverse  lg:items-stretch items-start rounded-[4px] overflow-hidden group relative">
       {/* Text */}
@@ -102,10 +102,10 @@ export default function CustomerService() {
   const swiperRef = useRef(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
-
+  const t = useTranslations("home");
   return (
     <section className="max-w-[1920px] mx-auto global-padding global-margin">
-      <h2 className="global-h2 mb-8">AFS Customer Service</h2>
+      <h2 className="global-h2 mb-8">{t("service")}</h2>
 
       <Swiper
         modules={[Navigation]}

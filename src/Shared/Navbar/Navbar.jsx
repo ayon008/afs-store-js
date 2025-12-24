@@ -13,7 +13,7 @@ import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
 import { useLocale } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname} from "@/i18n/navigation";
 import SearchOverlay from "./search";
 
 const Navbar = ({ NAV_LINKS }) => {
@@ -40,6 +40,52 @@ const Navbar = ({ NAV_LINKS }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldRedirect]);
+
+  const [blogData, setBlogData] = useState(null);
+  const slugMatch = pathName.match(/^\/blog\/([^\/]+)/)
+  const slug = slugMatch ? slugMatch[1] : null
+
+  const localeValue = locale === 'en' ? '' : locale;
+
+  // useEffect(() => {
+  //   if (!slug) return;
+
+  //   const fetchBlogData = async () => {
+  //     try {
+  //       // Construire l'URL correctement en gérant le cas où localeValue est vide
+  //       const baseUrl = (process.env.NEXT_PUBLIC_WP_API || 'https://staging.afs-foiling.com').replace(/\/$/, '');
+  //       const localePath = localeValue ? `/${localeValue}` : '';
+  //       const url = `${baseUrl}${localePath}/wp-json/wp/v2/posts?slug=${slug}&_embed`;
+
+  //       console.log('[Navbar] Fetching blog from:', url);
+
+  //       const response = await fetch(url);
+
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch blog data: ${response.status} ${response.statusText}`);
+  //       }
+
+  //       const data = await response.json();
+
+  //       if (!data || !Array.isArray(data) || data.length === 0) {
+  //         console.warn('[Navbar] No blog post found for slug:', slug);
+  //         setBlogData(null);
+  //         return;
+  //       }
+
+  //       setBlogData(data[0]);
+  //       console.log('[Navbar] Blog data fetched successfully:', data[0]?.title?.rendered || data[0]?.slug);
+  //     } catch (error) {
+  //       console.error('[Navbar] Error fetching blog data:', error);
+  //       setBlogData(null);
+  //     }
+  //   }
+
+  //   fetchBlogData();
+  // }, [slug, localeValue, locale]);
+
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

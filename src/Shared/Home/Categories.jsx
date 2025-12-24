@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 const categories = [
   {
@@ -70,11 +71,12 @@ const categories = [
 }));
 
 export default function CategorySection() {
+  const t = useTranslations("home");
   return (
     <section className="w-full">
       <div className="max-w-[1920px] mx-auto global-padding global-margin">
         {/* Title */}
-        <h2 className="global-h2 mb-8">Shop by category</h2>
+        <h2 className="global-h2 mb-8">{t("category")}</h2>
 
         {/* Category grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-5 gap-3 justify-center">

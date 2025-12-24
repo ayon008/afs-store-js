@@ -1,7 +1,7 @@
+import BlogCard from "@/Shared/Card/BlogCard";
+import { getPosts } from "@/app/actions/getBlogs";
 import Image from "next/image";
 import Link from "next/link";
-import { getPosts } from "@/app/actions/getBlogs";
-import BlogCard from "@/Shared/Card/BlogCard";
 
 export const metadata = {
     title: "Blog - Foiling Tips & Gear Reviews",
@@ -66,7 +66,7 @@ export default async function BlogPage() {
 
     return (
         <div className="min-h-screen">
-            <div className="w-full global-margin relative h-[calc(100vh-139px)] max-h-[450px]">
+            <div className="w-full global-margin relative h-[384px]">
                 <Image
                     src="/images/blogs/paraglider.png"
                     alt="Paraglider"
@@ -84,7 +84,7 @@ export default async function BlogPage() {
                 </div>
             </div>
 
-            <main className="w-full global-padding global-margin max-w-[1920px] mx-auto">
+            <main className="w-full global-padding global-margin">
                 {error && (
                     <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                         <p>Error loading blog posts: {error}</p>

@@ -25,7 +25,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 const Team = ({ data }) => {
     const { administration, marketing, burue, logistique, commerce, production_foil, production_plances } = data;
-    const teamRef = useRef(null);
+    // const teamRef = useRef(null);
     const contentRef = useRef(null)
     const [activeId, setActiveId] = useState("foil");
 

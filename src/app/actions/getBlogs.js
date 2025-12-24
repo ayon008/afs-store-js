@@ -2,12 +2,8 @@
 
 import { getLocale } from "next-intl/server";
 
-
-
-
 export async function getPosts(options = {}) {
-    const localeValue = await getLocale();
-    let WP_BASE_URL = `${process.env.WP_BASE_URL}/${localeValue === 'en' ? '' : localeValue}`;
+    const WP_BASE_URL = process.env.WP_BASE_URL;
 
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
@@ -21,11 +17,24 @@ export async function getPosts(options = {}) {
         categories,
         search,
         fetchAll = false,
+        locale: providedLocale,
         ...otherParams
     } = options;
 
     try {
-        const baseUrl = WP_BASE_URL.replace(/\/$/, '');
+        // Try to get locale value, but fallback to empty string if called outside request scope (e.g., during build)
+        let localeValue = providedLocale;
+        if (localeValue === undefined) {
+            try {
+                localeValue = await getLocale();
+            } catch (error) {
+                // If getLocale fails (e.g., during build), default to empty string (en locale)
+                console.warn('[getPosts] Could not get locale, defaulting to empty string:', error.message);
+                localeValue = '';
+            }
+        }
+        const localePath = localeValue === 'en' ? '' : localeValue;
+        const baseUrl = `${WP_BASE_URL.replace(/\/$/, '')}${localePath ? `/${localePath}` : ''}`;
         const apiUrl = `${baseUrl}/wp-json/wp/v2/posts`;
 
         // If fetchAll is true, we'll paginate through all posts
@@ -196,6 +205,8 @@ function transformPosts(posts) {
  * @returns {Promise<Object>} Post object
  */
 export async function getPost(identifier, bySlug = false) {
+    const WP_BASE_URL = process.env.WP_BASE_URL;
+    
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }
@@ -297,6 +308,8 @@ export async function getPost(identifier, bySlug = false) {
  * @returns {Promise<Array>} Array of category objects
  */
 export async function getCategories(options = {}, fetchOpts = { next: { revalidate: 60 } }) {
+    const WP_BASE_URL = process.env.WP_BASE_URL;
+    
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }

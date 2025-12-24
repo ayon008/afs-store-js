@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getPosts } from "@/app/actions/getBlogs";
+import { useTranslations } from "next-intl";
 
 /* ----------------------------- News Card ----------------------------- */
 const NewsCard = ({ article }) => {
@@ -47,6 +48,7 @@ const NewsCard = ({ article }) => {
 };
 
 const News = async () => {
+  const t = useTranslations("home");
   let blogs = [];
 
   try {

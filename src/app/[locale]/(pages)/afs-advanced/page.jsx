@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 /* ======================================================
    HERO SECTION (UNCHANGED)
@@ -8,6 +9,7 @@ import React, { useState, useEffect } from "react";
 
 // YouTube video ID
 const YOUTUBE_VIDEO_ID = "So9EJiIJ6eQ";
+
 
 // Full embed URL
 const YOUTUBE_EMBED_URL =
@@ -18,6 +20,8 @@ const YOUTUBE_EMBED_URL =
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
+
+  const t = useTranslations("advance");
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2500);
@@ -60,9 +64,7 @@ export default function Page() {
               color: "#fff",
             }}
           >
-            THE ESSENCE
-            <br />
-            OF FOILING
+            {t("pageTitle")}
           </h1>
         </div>
       </div>
@@ -169,6 +171,7 @@ const MissionPillar = ({ title, description }) => (
 );
 
 function MissionSection() {
+  const t = useTranslations("advance");
   return (
     <section
       className="min-h-screen py-20"
@@ -185,7 +188,7 @@ function MissionSection() {
               color: "#fff",
             }}
           >
-            OUR MISSIONS
+            {t("mission")}
           </h1>
           <p className="max-w-xs text-right text-white">
             Our mission at AFS Advanced is based on 4 pillars.

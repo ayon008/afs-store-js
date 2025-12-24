@@ -1,17 +1,19 @@
 "use client";
 import { ArrowUpRight } from "lucide-react";
-
+import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
 import Link from "next/link";
 
 const BreadCums = () => {
+  const b = useTranslations("breadcum");
+  const c = useTranslations("reconditioning");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#ccc]">
         <Link className="inline" href="/">
-          Home
+          {b("home")}
         </Link>
-        / <span className="text-white"> reconditioning</span>
+        / <span className="text-white"> {c("title")}</span>
       </div>
     </div>
   );
@@ -31,6 +33,7 @@ export default function Reconditioning() {
       setIsPlaying(false);
     }
   };
+  const t = useTranslations("reconditioning");
 
   return (
     <>
@@ -41,14 +44,11 @@ export default function Reconditioning() {
 
           <div className="mt-10 flex gap-10 justify-between flex-col md:flex-row">
             <h1 className="text-white global-h1 flex-[0] md:flex-[55%_0_0]">
-              Our range of reconditioned foils
+              {t("heading")}
             </h1>
 
             <p className="flex-[0] text-white font-semibold md:flex-[30%_0_0]">
-              We are proud to present our refurbished products, an initiative
-              that reflects our commitment to the environment and our desire to
-              provide you with products that are close to new condition, at a
-              more affordable price and with the same high level of service.
+              {t("heading_2")}
             </p>
           </div>
         </div>
@@ -84,17 +84,12 @@ export default function Reconditioning() {
           </div>
 
           <div className="z-[1] mb-5 global-padding flex flex-col gap-5">
-            <h2 className="text-white global-h2">
-              With this conviction in mind, we have set up a reconditioning line
-              in our Brittany factory to repair and refurbish all our products
-              that can be reconditioned by our experts, whether it's a returned
-              product, damaged packaging or purchased equipment.
-            </h2>
+            <h2 className="text-white global-h2">{t("sub")}</h2>
             <Link
               href="/product-category/reconditioned-used/"
               className="text-[#1d98ff] font-bold text-[18px]"
             >
-              Discover refurbished products
+              {t("sub_sub")}
               <arrow-up-right className="w-4 h-4 text-[#1d98ff]" />
             </Link>
           </div>

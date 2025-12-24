@@ -9,7 +9,8 @@ const TeamImage = ({ src, text, hoverSrc }) => {
             <Image
                 src={src}
                 alt={text}
-                placeholder='blur'
+                width={1000}
+                height={1000}
                 loading="lazy"
                 className="
                     rounded-md 
@@ -23,7 +24,8 @@ const TeamImage = ({ src, text, hoverSrc }) => {
             <Image
                 src={hoverSrc}
                 alt={text}
-                placeholder='blur'
+                width={1000}
+                height={1000}
                 loading="lazy"
                 className="
                     rounded-md absolute inset-0 
