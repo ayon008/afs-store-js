@@ -23,7 +23,7 @@ const Navbar = ({ NAV_LINKS }) => {
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const locale = useLocale();
-  const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart } = useCart();
+  const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart, loadCart } = useCart();
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
@@ -32,6 +32,12 @@ const Navbar = ({ NAV_LINKS }) => {
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
   const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
   const [selectedCurrency, setSelectedCurrency] = useState(currentCurrency);
+
+  // Update selectedCurrency when cart currency changes
+  useEffect(() => {
+    const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+    setSelectedCurrency(newCurrency);
+  }, [currentCurrencySymbol]);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
   const [notification, setNotification] = useState(null);
@@ -104,6 +110,15 @@ const Navbar = ({ NAV_LINKS }) => {
       setRedirectPath(newPath);
       setShouldRedirect(true);
     } else {
+      // If only currency changed, reload cart to get updated currency
+      if (currencyChanged) {
+        // Note: Currency change might require locale change in WooCommerce
+        // For now, reload the page to ensure currency is updated
+        console.log('Currency changed to:', selectedCurrency);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
       setPopUp(false);
     }
     return selectedValues;

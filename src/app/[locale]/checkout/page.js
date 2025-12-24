@@ -8,6 +8,7 @@ import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/W
 import { selectShippingRate, updateBillingAndCart } from "@/app/actions/Woo-Coommerce/Shop/Cart/cart";
 import CheckoutMonetico from "@/lib/CheckoutMonitico";
 import CheckoutPayPal from "@/lib/CheckoutPaypal";
+import CheckoutAuthorize from "@/lib/CheckoutAuthorize";
 import { countriesList } from "@/lib/countriesList";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -168,6 +169,54 @@ const CheckoutPageContent = () => {
             }
         }
 
+        // Check if currency is USD and locale is EN
+        const currencySymbol = cart?.totals?.currency_symbol || '';
+        const currencyCode = cart?.totals?.currency_code || '';
+        const isUSD = currencySymbol === '$' || 
+                     currencySymbol === 'USD' ||
+                     currencySymbol?.toUpperCase() === 'USD' ||
+                     currencyCode?.toUpperCase() === 'USD';
+        const isEUR = currencySymbol === '€' || 
+                     currencySymbol === 'EUR' ||
+                     currencySymbol?.toUpperCase() === 'EUR' ||
+                     currencyCode?.toUpperCase() === 'EUR';
+        const isEN = locale === 'en';
+
+        // Debug logging
+        console.log('Payment method filter - Currency:', currencySymbol, 'Currency Code:', currencyCode, 'Locale:', locale, 'isUSD:', isUSD, 'isEUR:', isEUR, 'isEN:', isEN);
+
+        // If locale is EN AND currency is USD (not EUR), show only authnet (Authorize.Net) payment method
+        if (isEN && isUSD && !isEUR) {
+            console.log('EN locale and USD currency detected: Filtering for authnet (Authorize.Net) payment method only');
+            const authorizeMethods = methods.filter(method => {
+                // Ensure method is an object
+                if (!method || typeof method !== 'object') return false;
+                
+                const methodId = method.id?.toLowerCase() || '';
+                const methodTitle = method.title?.toLowerCase() || '';
+                
+                // Return only methods that contain "authnet" in ID (Authorize.Net gateway)
+                // or "authorize" in ID/title as fallback
+                const isAuthorize = methodId === 'authnet' || 
+                                   methodId.includes('authnet') ||
+                                   methodId.includes('authorize') || 
+                                   methodTitle.includes('authorize');
+                
+                if (isAuthorize) {
+                    console.log(`Authorize method found - ID: ${method.id}, Title: ${method.title}`);
+                }
+                
+                return isAuthorize;
+            });
+            console.log('Authorize methods found:', authorizeMethods.length, authorizeMethods.map(m => ({ id: m.id, title: m.title })));
+            
+            // Only return authorize methods if we found any, otherwise return empty array
+            if (authorizeMethods.length > 0) {
+                return authorizeMethods;
+            }
+        }
+
+        // Otherwise, use the existing filter logic
         return methods.filter(method => {
             // Ensure method is an object
             if (!method || typeof method !== 'object') return false;
@@ -177,6 +226,15 @@ const CheckoutPageContent = () => {
 
             // Exclude Credit Card
             if (methodId === 'credit-card' || methodTitle.includes('credit card')) {
+                return false;
+            }
+
+            // Exclude Authorize.Net - should only show for EN locale with USD currency
+            // If we reach here, it means we're not in EN+USD scenario, so exclude Authorize
+            if (methodId === 'authnet' || 
+                methodId.includes('authnet') ||
+                methodId.includes('authorize') || 
+                methodTitle.includes('authorize')) {
                 return false;
             }
 
@@ -202,11 +260,26 @@ const CheckoutPageContent = () => {
     };
 
     const filteredPaymentMethods = filterPaymentMethods(paymentMethods);
+    
+    // Debug: Log filtered payment methods
+    useEffect(() => {
+        console.log('Filtered payment methods:', filteredPaymentMethods);
+        console.log('Cart currency:', cart?.totals?.currency_symbol);
+        console.log('Locale:', locale);
+    }, [filteredPaymentMethods, cart?.totals?.currency_symbol, locale]);
 
     // Function to get translated payment method title and description
     const getPaymentMethodTranslation = (method) => {
         const methodId = method.id?.toLowerCase() || '';
         const methodTitle = method.title?.toLowerCase() || '';
+        
+        // Check for Authorize
+        if (methodId.includes('authorize') || methodTitle.includes('authorize')) {
+            return {
+                title: method.title || 'Authorize.Net',
+                description: t("paymentMethods.cardDescription") || 'Pay securely with your credit card'
+            };
+        }
         
         // Check for PayPal
         if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
@@ -253,13 +326,20 @@ const CheckoutPageContent = () => {
         const fetchPaymentMethods = async () => {
             try {
                 const data = await getPaymentMethods();
-                // Ensure data is an array
+                // Debug: Log all payment methods to identify authorize ID
+                console.log('All payment methods received:', data);
                 if (Array.isArray(data)) {
+                    data.forEach(method => {
+                        console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
+                    });
                     setPaymentMethods(data);
                 } else if (data && typeof data === 'object') {
                     // If it's an object, try to convert to array
                     const methodsArray = Object.values(data);
                     if (Array.isArray(methodsArray)) {
+                        methodsArray.forEach(method => {
+                            console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
+                        });
                         setPaymentMethods(methodsArray);
                     } else {
                         setPaymentMethods([]);
@@ -336,7 +416,7 @@ const CheckoutPageContent = () => {
                             address_2: '',
                             city: billingData.billing_city || '',
                             state: billingData.billing_state || '',
-                            postcode: billingData.billing_postcode || '',
+                            postcode: billingData.billing_postcode?.trim() || '',
                             country: billingData.billing_country || '',
                             email: billingData.billing_email || '',
                             phone: billingData.billing_phone || '',
@@ -1391,6 +1471,7 @@ const CheckoutPageContent = () => {
                                 const isMonetico = method.id?.toLowerCase().includes('monetico') ||
                                     method.title?.toLowerCase().includes('carte bancaire');
                                 const isPayPal = method.id === 'paypal' || method.id === 'ppcp-gateway';
+                                const isAuthorize = method.id === 'authnet' || method.id?.toLowerCase().includes('authnet');
                                 
                                 // Get translated title and description
                                 const paymentTranslation = getPaymentMethodTranslation(method);
@@ -1486,6 +1567,44 @@ const CheckoutPageContent = () => {
                                                 />
                                             </div>
                                         )}
+
+                                        {/* Authorize Component */}
+                                        {isAuthorize && (
+                                            <div className="mt-2">
+                                                <CheckoutAuthorize
+                                                    cartData={{
+                                                        totals: cart.totals,
+                                                        lineItems: items.map(item => ({
+                                                            product_id: item.id,
+                                                            quantity: item.quantity,
+                                                            variation_id: item.variation_id || 0
+                                                        })),
+                                                        shippingLines: cart.shipping_rates?.[0]?.shipping_rates
+                                                            ?.filter(rate => rate.selected)
+                                                            .map(rate => ({
+                                                                method_id: rate.method_id,
+                                                                method_title: rate.name,
+                                                                total: (rate.price / 100).toString()
+                                                            })) || []
+                                                    }}
+                                                    customerData={{
+                                                        ...watchFields,
+                                                        billing: {
+                                                            ...watchFields,
+                                                            first_name: watchFields.billing_first_name,
+                                                            last_name: watchFields.billing_last_name,
+                                                            email: watchFields.billing_email,
+                                                        }
+                                                    }}
+                                                    disabled={!watchFields.terms}
+                                                    onSuccess={(details) => {
+                                                        clearSavedFormData();
+                                                        clearCart();
+                                                        router.push(`/order-success?order_id=${details.orderId}`);
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                     </PaymentMethodCard>
                                 )
                             })}
@@ -1513,7 +1632,8 @@ const CheckoutPageContent = () => {
 
                             {!watchFields.payment_method?.toLowerCase().includes('monetico') &&
                                 watchFields.payment_method !== 'paypal' &&
-                                watchFields.payment_method !== 'ppcp-gateway' ? (
+                                watchFields.payment_method !== 'ppcp-gateway' &&
+                                watchFields.payment_method !== 'authnet' ? (
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || !watchFields.terms}

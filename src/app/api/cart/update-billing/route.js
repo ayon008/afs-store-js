@@ -72,6 +72,13 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
+        // Clean and validate postcode - some countries don't require postcodes
+        // Trim postcode and set to empty string if invalid format might cause issues
+        const cleanedBillingAddress = {
+            ...billing_address,
+            postcode: billing_address.postcode?.trim() || ''
+        };
+
         // Make request to WooCommerce to update billing address
         // Also update shipping address with billing address by default (WooCommerce uses shipping address for shipping rates calculation)
         const response = await fetch(`${WC_STORE_URL}/cart/update-customer`, {
@@ -82,9 +89,9 @@ export async function POST(request) {
                 ...(allCookies ? { "Cookie": allCookies } : {}),
             },
             body: JSON.stringify({
-                billing_address: billing_address,
+                billing_address: cleanedBillingAddress,
                 // Set shipping address to billing address by default (user can override if they check the shipping address checkbox)
-                shipping_address: billing_address
+                shipping_address: cleanedBillingAddress
             }),
             cache: "no-store",
         });

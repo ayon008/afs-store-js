@@ -123,6 +123,10 @@ export async function POST(req) {
       orderId: responseData.id,
       orderNumber: responseData.number,
       status: responseData.status,
+      payment_url: responseData.payment_url || null,
+      checkout_payment_url: responseData.checkout_payment_url || null,
+      orderKey: responseData.order_key || null,
+      order_key: responseData.order_key || null,
     });
   } catch (error) {
     console.error('Order creation error:', error);

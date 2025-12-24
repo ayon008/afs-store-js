@@ -34,10 +34,15 @@ const PaymentMethodCard = ({
                      method.title?.toLowerCase().includes('carte bancaire');
   const isBacs = method.id === 'bacs' ||
                  method.title?.toLowerCase().includes('virement');
+  const isAuthorize = method.id?.toLowerCase().includes('authorize') ||
+                     method.title?.toLowerCase().includes('authorize');
 
   const getIcon = () => {
     if (isPayPal) {
       return <PayPalIcon className={`w-6 h-6 ${selected ? 'text-white' : 'text-[#003087]'}`} />;
+    }
+    if (isAuthorize) {
+      return <CreditCard className={`w-6 h-6 ${selected ? 'text-white' : 'text-gray-600'}`} />;
     }
     if (isMonetico) {
       return <CreditCard className={`w-6 h-6 ${selected ? 'text-white' : 'text-gray-600'}`} />;
