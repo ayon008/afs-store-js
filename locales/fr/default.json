@@ -190,6 +190,10 @@
     "Well": "Nous vous aiderons à évaluer l'état de votre équipement afin que vous puissiez l'échanger dès aujourd'hui.",
     "You will": "Vous recevrez une estimation du coût de la restauration dans les 24 heures."
   },
+  "filter": {
+    "categories": "Catégories",
+    "finish": "FINITION"
+  },
   "footer": {
     "about": "À propos de nous",
     "accept": "J'accepte la politique de confidentialité et les conditions d'utilisation",
@@ -294,6 +298,8 @@
   "login": {
     "address": "Se connecter avec une autre adresse électronique",
     "company": "Entreprise (facultatif)",
+    "confirm": "Confirmer le mot de passe",
+    "current": "Mot de passe existant",
     "email": "Email ou nom d'utilisateur Se connecter",
     "exclusive": "Je souhaite recevoir des offres exclusives",
     "first": "Prénom",
@@ -301,10 +307,15 @@
     "last": "Nom de famille",
     "me": "Souvenez-vous de moi",
     "new": "Nouveau sur le site ?",
+    "new-p": "Nouveau mot de passe",
     "password": "Mot de passe",
     "postal": "Code postal",
     "required-first": "Le prénom est obligatoire",
     "required-last": "Le nom de famille est obligatoire",
+    "reset": "Réinitialiser le mot de passe",
+    "save": "SAUVEGARDE",
+    "secure": "Vous pouvez modifier facilement et en toute sécurité votre mot de passe actuel afin de renforcer la sécurité de votre compte.",
+    "set": "Définir un nouveau mot de passe",
     "signin": "Se connecter",
     "signup": "s'inscrire",
     "street": "Numéro et nom de la rue",
@@ -363,6 +374,20 @@
     "title": "Besoin de conseils",
     "While you": "En attendant notre réponse, n'hésitez pas à consulter nos différents guides :",
     "You want": "Vous souhaitez nous contacter - écrivez-nous, nous vous aiderons."
+  },
+  "orders": {
+    "details": "Détails",
+    "p": "Vous pouvez y consulter toutes vos commandes précédentes, suivre l'état des commandes actives, les modifier ou les annuler si nécessaire, et commander à nouveau des articles sans avoir à les ajouter à nouveau à votre panier.",
+    "payment": "Paiement",
+    "price": "Prix",
+    "q": "Quantité",
+    "r": "Bénéficiaire",
+    "rate": "Taux forfaitaire",
+    "shipping": "Expédition"
+  },
+  "payment": {
+    "heading": "<title>Modes de paiement</title><desc>Vous pouvez utiliser des cartes de crédit et de débit, des portefeuilles électroniques, le paiement à la livraison, les virements bancaires et d'autres modes de paiement alternatifs. Notre objectif est de vous offrir un maximum de <strong>commodité</strong> et de <strong>sécurité</strong> lors de vos achats, en vous proposant différentes options de paiement en fonction de vos choix et de vos besoins.</desc>",
+    "p": "<title>Vos moyens de paiement</title><desc>Les nouveaux moyens de paiement ne peuvent être ajoutés que lors du paiement. <link>Contactez-nous</link> si vous avez besoin d'aide.</desc>"
   },
   "privacy": {
     "policy": "Politique de confidentialité"

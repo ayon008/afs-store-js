@@ -13,8 +13,8 @@ import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
 import SearchOverlay from "./search";
+import Cookies from 'js-cookie';
 import Notification from "../Notification/Notification";
 
 const Navbar = ({ NAV_LINKS }) => {
@@ -112,6 +112,7 @@ const Navbar = ({ NAV_LINKS }) => {
     } else {
       // If only currency changed, reload cart to get updated currency
       if (currencyChanged) {
+        Cookies.set('currency', selectedCurrency);
         // Note: Currency change might require locale change in WooCommerce
         // For now, reload the page to ensure currency is updated
         console.log('Currency changed to:', selectedCurrency);
@@ -235,7 +236,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
             {/* Profile */}
 
-            <Link href={"/login"}>
+            <Link href={`/${locale}/login`}>
               <svg
                 width="24"
                 height="24"

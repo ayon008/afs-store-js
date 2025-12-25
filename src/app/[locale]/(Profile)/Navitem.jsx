@@ -91,7 +91,7 @@ const NavItems = () => {
     return (
         <ul className="space-y-[18px] mt-[22px] xl:block flex flex-wrap items-center gap-[10px] w-full">
             {NAV_ITEMS.map((item, i) => {
-                const isActive = pathname.includes(item.href);
+                const isActive = pathname.endsWith(item.href);
            
                 return (
                     <li key={i}>

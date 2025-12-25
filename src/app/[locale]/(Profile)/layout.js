@@ -1,9 +1,7 @@
 import '../globals.css';
-import { alliance } from '@/fonts/Alliance';
 import NavItems from './Navitem';
 import { getAuthenticatedUser } from '../../actions/WC/Auth/getAuth';
 import { getTranslations } from 'next-intl/server';
-import { getLang } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 
 
 export const metadata = {
@@ -50,32 +48,27 @@ export default async function RootLayout({ children, locale }) {
 
     const user = await getAuthenticatedUser();
     const t = await getTranslations("profile", locale);
-    const localeValue = await getLang();
 
     return (
-        <html lang={localeValue} className={alliance.className}>
-            <body className="font-alliance">
-                <main className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
-                    <div className=''>
-                        <div className='pb-10 global-b-bottom-d'>
-                            <h1 className='global-h1'>{t("hello")}, {user?.last_name}</h1>
-                        </div>
-                    </div>
-                    <div className='flex items-start justify-between xl:flex-row flex-col gap-10 mt-10'>
-                        {/* Side Bar */}
-                        <aside className='block xl:sticky xl:top-[170px] xl:max-w-[320px] xl:min-w-[250px] w-full xl:basis-[30%_0_0] aside-nav'>
-                            <h3 className='uppercase leading-[100%] bg-[#1F1F1F] p-[6px] text-white text-xl font-bold'>
-                                {t("profile")}
-                            </h3>
-                            <NavItems />
-                        </aside>
-                        {/* Content */}
-                        <div className='flex-1 p-[clamp(1.25rem,0.099rem+2.401vw,2.5rem)] bg-[#F0F0F0]'>
-                            {children}
-                        </div>
-                    </div>
-                </main>
-            </body>
-        </html>
+        <div className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
+            <div className=''>
+                <div className='pb-10 global-b-bottom-d'>
+                    <h1 className='global-h1'>{t("hello")}, {user?.last_name}</h1>
+                </div>
+            </div>
+            <div className='flex items-start justify-between xl:flex-row flex-col gap-10 mt-10'>
+                {/* Side Bar */}
+                <aside className='block xl:sticky xl:top-[170px] xl:max-w-[320px] xl:min-w-[250px] w-full xl:basis-[30%_0_0] aside-nav'>
+                    <h3 className='uppercase leading-[100%] bg-[#1F1F1F] p-[6px] text-white text-xl font-bold'>
+                        {t("profile")}
+                    </h3>
+                    <NavItems />
+                </aside>
+                {/* Content */}
+                <div className='flex-1 p-[clamp(1.25rem,0.099rem+2.401vw,2.5rem)] bg-[#F0F0F0]'>
+                    {children}
+                </div>
+            </div>
+        </div>
     );
 }

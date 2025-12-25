@@ -33,25 +33,25 @@ function getWooCommerceCookiesFromRequest(req) {
 async function isCartEmpty(req) {
     try {
         const allCookies = req.cookies.getAll();
-        
+
         // Quick check: if no WooCommerce session cookies at all, cart is likely empty
         const hasWooCommerceCookies = allCookies.some(cookie =>
             cookie.name.includes('woocommerce') ||
             cookie.name.includes('wc_') ||
             cookie.name === 'PHPSESSID'
         );
-        
+
         if (!hasWooCommerceCookies) {
             return true; // No session cookies, cart is empty
         }
-        
+
         // If we have cookies, make a quick API call to verify cart items
         const cookieHeader = getWooCommerceCookiesFromRequest(req);
-        
+
         if (!cookieHeader) {
             return true; // No cookies to send, cart is empty
         }
-        
+
         const response = await fetch(`${WC_STORE_URL}/cart`, {
             method: 'GET',
             headers: {
@@ -69,7 +69,7 @@ async function isCartEmpty(req) {
         const cartData = await response.json();
         const items = cartData?.items || [];
         const itemsCount = cartData?.items_count || 0;
-        
+
         // Cart is empty if no items or items_count is 0
         return items.length === 0 || itemsCount === 0;
     } catch (error) {
@@ -119,7 +119,7 @@ export default async function middleware(req) {
     const validToken = token && !isExpired(token);
 
     const authRoutes = ["/login", "/signup"];
-    const protectedRoutes = ["/my-account", "/orders"];
+    const protectedRoutes = ["/my-account/*", "/my-account", "/orders"];
 
     const isAuthRoute = authRoutes.some(route => pathWithoutLocale.startsWith(route));
     const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));

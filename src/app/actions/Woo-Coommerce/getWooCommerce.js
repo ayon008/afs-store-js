@@ -167,9 +167,10 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         for (let i = 1; ; i++) {
             let url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?category=${firstCategory}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&per_page=${per_page}&page=${i}`;
 
-
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
+
+            console.log(url, 'urlProduct');
 
 
             const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
@@ -234,13 +235,18 @@ export const getChildCategories = async (parentId) => {
     return categoriesWithChildren;
 }
 
-
+export const getCurrency = async () => {
+    const cookieStore = await cookies();
+    const currency = cookieStore.get('currency')?.value;
+    return currency;
+}
 
 // Get single product by their slug
 
 export const getProductBySlug = async (slug) => {
     const localeValue = await getLocaleValue();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?slug=${slug}`;
+    const currency = await getCurrency();
+    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?slug=${slug}&currency=${currency || 'euro'}`;
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products?slug=${slug}`;
     try {
         const response = await fetch(url, {
@@ -252,6 +258,8 @@ export const getProductBySlug = async (slug) => {
         const data = await response.json();
         const product = data[0];
 
+        console.log(product, 'product');
+
         if (product) {
             const basePrice = parseFloat(product.price) || 0;
             const priceWithTax = await calculatePriceWithTax(basePrice, product.tax_class);
@@ -261,6 +269,137 @@ export const getProductBySlug = async (slug) => {
     } catch (error) {
         console.log(error);
         return { error: true }
+    }
+}
+
+
+
+// get woo-commerce orders 
+
+export const getOrders = async () => {
+
+    const locale = await getLocale();
+    const authHeader =
+        "Basic " +
+        Buffer.from(
+            `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
+        ).toString("base64");
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    const user = await getAuthenticatedUser();
+
+    if (!token || !user?.id) {
+        return [];
+    }
+
+    const userId = user.id;
+    const perPage = 100;
+
+    let allOrders = [];
+
+
+    // 1️⃣ First request (to know total pages)
+    const firstRes = await fetch(
+        `${process.env.WP_BASE_URL}/wp-json/wc/v3/orders?customer=${userId}&page=1&per_page=${perPage}&orderby=date&order=desc&lang=${locale}`,
+        {
+            headers: { Authorization: authHeader },
+            cache: "no-store",
+        }
+    );
+
+
+    if (!firstRes.ok) {
+        throw new Error("Failed to fetch orders");
+    }
+
+    const totalPages = Number(firstRes.headers.get("X-WP-TotalPages")) || 1;
+    const firstOrders = await firstRes.json();
+
+    allOrders.push(...firstOrders);
+
+    // 2️⃣ Fetch remaining pages
+    for (let page = 2; page <= totalPages; page++) {
+        const res = await fetch(
+            `${process.env.WP_BASE_URL}/wp-json/wc/v3/orders?customer=${userId}&page=${page}&per_page=${perPage}&orderby=date&order=desc&lang=${locale}`,
+            {
+                headers: { Authorization: authHeader },
+                cache: "no-store",
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch orders on page ${page}`);
+        }
+
+        const orders = await res.json();
+        allOrders.push(...orders);
+    }
+
+    return allOrders;
+};
+
+
+export async function changePasswordAction(data) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+
+    if (!token) {
+        return { success: false, error: 'Not authenticated' };
+    }
+
+    const { currentPassword, newPassword } = data;
+
+    console.log('currentPassword', currentPassword);
+
+
+    try {
+        // 1️⃣ Get current user (to obtain username/email)
+        const user = await getAuthenticatedUser();
+
+        const username = user.slug; // or user.email
+
+        // 2️⃣ Verify current password
+        const verifyRes = await fetch(
+            `${process.env.WP_BASE_URL}/wp-json/jwt-auth/v1/token`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    password: currentPassword,
+                }),
+            }
+        );
+
+        if (!verifyRes.ok) {
+            return { success: false, error: 'Current password is incorrect' };
+        }
+
+        // 3️⃣ Change password
+        const changeRes = await fetch(
+            `${process.env.WP_BASE_URL}/wp-json/wp/v2/users/me`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    password: newPassword,
+                }),
+            }
+        );
+
+        if (!changeRes.ok) {
+            return { success: false, error: 'Failed to change password' };
+        }
+
+        return { success: true };
+    } catch (err) {
+        console.error(err);
+        return { success: false, error: 'Something went wrong' };
     }
 }
 

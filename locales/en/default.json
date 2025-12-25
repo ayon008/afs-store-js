@@ -190,6 +190,10 @@
     "Well": "We’ll help you assess the condition of your equipment so you\n                  can trade it in today.",
     "You will": "You will receive the estimated cost of restoration within 24\n                  hours."
   },
+  "filter": {
+    "categories": "Categories",
+    "finish": "FINISH"
+  },
   "footer": {
     "about": "About Us",
     "accept": "I accept the privacy policy and terms of use",
@@ -294,6 +298,8 @@
   "login": {
     "address": "Sign in with another email address",
     "company": "Company (Optional)",
+    "confirm": "Confirm password",
+    "current": "Existing password",
     "email": "Email or username\nLog in",
     "exclusive": "I would like to receive exclusive offers",
     "first": "First Name",
@@ -301,10 +307,15 @@
     "last": "Last Name",
     "me": "Remember me",
     "new": "New to the website?",
+    "new-p": "New password",
     "password": "Password",
     "postal": "Code Postal",
     "required-first": "First Name is Required",
     "required-last": "Last Name is Required",
+    "reset": "Reset password",
+    "save": "SAVE",
+    "secure": "You can securely and easily change your current password to enhance the security of your account.",
+    "set": "Set a new password",
     "signin": "Log in",
     "signup": "sign up",
     "street": "Street number and name",
@@ -363,6 +374,20 @@
     "title": "Need advice",
     "While you": "While you wait for our reply, feel free to read our various guides:",
     "You want": "You want to contact us — write to us, we will help you."
+  },
+  "orders": {
+    "details": "Details",
+    "p": "Here, you can review all your previous orders, track the status of active orders, edit or cancel them as needed, and easily reorder past purchases without the need to add items to your cart again.",
+    "payment": "Payment",
+    "price": "Price",
+    "q": "Quantity",
+    "r": "Recipient",
+    "rate": "Flat Rate",
+    "shipping": "Shipping"
+  },
+  "payment": {
+    "heading": "<title>Modes de paiement</title><desc>Vous pouvez utiliser des cartes de crédit et de débit, des portefeuilles électroniques, le paiement à la livraison, les virements bancaires et d'autres modes de paiement alternatifs. Notre objectif est de vous offrir un maximum de <strong>commodité</strong> et de <strong>sécurité</strong> lors de vos achats, en vous proposant différentes options de paiement en fonction de vos choix et de vos besoins.</desc>",
+    "p": "<title>Vos moyens de paiement</title><desc>Les nouveaux moyens de paiement ne peuvent être ajoutés que lors du paiement. <link>Contactez-nous</link> si vous avez besoin d'aide.</desc>"
   },
   "privacy": {
     "policy": "Privacy Policy"

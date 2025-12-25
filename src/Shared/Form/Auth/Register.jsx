@@ -25,11 +25,13 @@ const Register = () => {
     const router = useRouter();
 
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
 
     const onSubmit = async (data) => {
 
         const { first_name, last_name, email, password } = data;
+        setLoading(true);
         try {
             const response = await registerStoreUser({
                 username: email, display_name: `${first_name} ${last_name}`, first_name: first_name, last_name: last_name, email: email, password: password, nickname: `${first_name} ${last_name}`
@@ -38,11 +40,13 @@ const Register = () => {
                 router.push('/login');
                 setError("");
                 reset();
+                setLoading(false);
             }
 
         } catch (error) {
             console.log(error.message);
             setError(error.message);
+            setLoading(false);
         }
     };
 
@@ -63,7 +67,7 @@ const Register = () => {
                     </div>
                 )
             }
-            <div className="flex items-center justify-center lg:mt-[80px] mt-[40px] global-margin">
+            <div className={`${loading ? "opacity-50" : "opacity-100"} flex items-center justify-center lg:mt-[80px] mt-[40px] global-margin`}>
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     onKeyDown={(e) => {

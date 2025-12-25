@@ -50,6 +50,7 @@ const Login = () => {
             }
         } catch (error) {
             console.log(error.message);
+            setLoading(false);
             setErrorMessage(error.message);
         }
     };

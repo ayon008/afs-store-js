@@ -4,6 +4,7 @@ import { getCart, updateBillingAndCart, updateShippingAndCart } from "../../Woo-
 // app/actions/auth.ts
 import { cookies } from "next/headers";
 import { getLocaleValue } from "../../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
 // import { getWooCommerceCookies } from "./StoreApi/cookie-handler";
 // import { getCart } from "./StoreApi/cart";
 
@@ -106,6 +107,7 @@ export const registerStoreUser = async (userInfo) => {
 
 export const loginUser = async (userInfo) => {
     const localeValue = await getLocaleValue();
+    const locale = await getLocale();
     try {
         const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/jwt-auth/v1/token`, {
             method: "POST",
