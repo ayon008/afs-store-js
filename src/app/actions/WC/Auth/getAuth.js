@@ -161,6 +161,7 @@ export const loginUser = async (userInfo) => {
 
 export async function updateProfile(data) {
     const localeValue = await getLocaleValue();
+
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
@@ -197,7 +198,6 @@ export async function updateProfile(data) {
                 nickname: data.nickname,
             }),
         });
-
         const wpResult = await wpUpdateRes.json();
 
 
@@ -209,7 +209,7 @@ export async function updateProfile(data) {
         // 3️⃣ Update WooCommerce billing/shipping info
         if (data.billing || data.shipping) {
 
-            const wcRes = await fetch(`${process.env.WP_BASE_URL}/wp-json/wc/v3/customers/${wpUser.id}`, {
+            const wcRes = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/customers/${wpUser.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

@@ -8,11 +8,16 @@ import { countriesList } from "@/lib/countriesList";
 import CountrySelect from "@/Shared/Input/DropDown";
 import Input from "@/Shared/Input/Input";
 import FormButton from "@/Shared/Button/FormButton";
+import { useTranslations } from "next-intl";
 
 const ForthForm = ({ setMessage }) => {
-
+    const t = useTranslations("profile");
     const [show, setShow] = useState(false);
     const { user, loading, refreshUser } = useAuth();
+    const a = useTranslations("ambassadors");
+    const c = useTranslations("login");
+    const d = useTranslations("checkout");
+    const e = useTranslations("DirectSailing");
 
     const { register, handleSubmit, watch, formState: { errors }, reset } = useForm({
         defaultValues: {
@@ -46,7 +51,7 @@ const ForthForm = ({ setMessage }) => {
             const result = await updateShippingInfo(data);
             if (result.success) {
                 await refreshUser();
-                setMessage({ success: true, message: 'Your shipping address has been updated successfully.' });
+                setMessage({ success: true, message: t("shipping") });
                 setShow(false);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
@@ -69,14 +74,20 @@ const ForthForm = ({ setMessage }) => {
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
             <div className="flex items-center justify-between pb-1 global-b-bottom-d">
-                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">Shipping Address</h3>
+                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">{t("s")}</h3>
                 <button onClick={() => setShow(!show)} className="flex items-center gap-1 cursor-pointer" type="button">
                     <Pen className="w-3 h-3" />
-                    <span className="text-sm uppercase leading-[100%]">{show ? "Cancel" : "Edit"}</span>
+                    <span className="text-sm uppercase leading-[100%]">{show ? t("cancel") : t("Edit")}</span>
                 </button>
             </div>
-
-            <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mt-6" onSubmit={handleSubmit(onSubmit)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSubmit(onSubmit)();
+                    }
+                }}
+            >
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-5 2xl:grid-cols-3">
                     <div>
                         <Input
@@ -92,7 +103,7 @@ const ForthForm = ({ setMessage }) => {
                     </div>
                     <div>
                         <CountrySelect
-                            label="Country"
+                            label={a("country")}
                             id="country"
                             register={register("country", { required: true })}
                             defaultValue={watchFields.country}
@@ -103,7 +114,7 @@ const ForthForm = ({ setMessage }) => {
                     </div>
                     <div>
                         <Input
-                            label="Postal Code"
+                            label={c("postal")}
                             type="text"
                             id="postal"
                             register={register("postal", { required: true })}
@@ -115,7 +126,7 @@ const ForthForm = ({ setMessage }) => {
                     </div>
                     <div>
                         <Input
-                            label="City"
+                            label={d("city")}
                             type="text"
                             id="ville"
                             register={register("ville", { required: true })}
@@ -127,7 +138,7 @@ const ForthForm = ({ setMessage }) => {
                     </div>
                     <div className="lg:col-span-2">
                         <Input
-                            label="Address"
+                            label={e("Address")}
                             type="text"
                             id="adresse"
                             register={register("adresse", { required: true })}
@@ -141,7 +152,7 @@ const ForthForm = ({ setMessage }) => {
                 {
                     show && (
                         <div className="mt-5">
-                            <FormButton type="submit" label="Save Changes" />
+                            <FormButton type="submit" label={t("save")} />
                         </div>
                     )
                 }

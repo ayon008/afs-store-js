@@ -1,23 +1,15 @@
-"use client";
+"use client"
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-// Navigation items
-const NAV_ITEMS = [
-    { label: "Information", href: "/my-profile", icon: "user" },
-    { label: "Orders", href: "/my-profile/orders", icon: "orders" },
-    { label: "Payment Methods", href: "/my-profile/payment-methods", icon: "payment" },
-    { label: "SAV", href: "/demande-sav", icon: "sav" },
-    { label: "Change Password", href: "/my-profile/reinitialiser-mot-de-passe", icon: "password" },
-    { label: "Log Out", href: "/my-profile/logout", icon: "logout" }
-];
+
 
 // Custom SVG renderer for string icons
 const CustomIcon = ({ name, isActive }) => {
     const cls = `${isActive ? "text-[#111]" : "text-[#808080]"} group-hover:text-[#111] w-4 h-4`;
-
     switch (name) {
         case "orders":
             return (
@@ -68,7 +60,7 @@ const CustomIcon = ({ name, isActive }) => {
 
         case "logout":
             return (
-                <LogOut className={cls} />
+                <LogOut size={'0.8rem'} className={cls} />
             );
         case "user":
             return (
@@ -79,18 +71,28 @@ const CustomIcon = ({ name, isActive }) => {
     }
 };
 
+
+
+
 const NavItems = () => {
     const pathname = usePathname();
+    const t = useTranslations("profile");
+    // Navigation items
+    const NAV_ITEMS = [
+        { label: t("info"), href: "/my-account", icon: "user" },
+        { label: t("order"), href: "/my-account/orders", icon: "orders" },
+        { label: t("payment"), href: "/my-account/payment-methods", icon: "payment" },
+        { label: "SAV", href: "/demande-sav", icon: "sav" },
+        { label: t("change"), href: "/my-account/reinitialiser-mot-de-passe", icon: "password" },
+        { label: t("logout"), href: "/my-account/logout", icon: "logout" },
+        { label: "", href: "", icon: <></> }
+    ];
 
     return (
-        <ul className="space-y-[18px] mt-[22px] xl:block flex items-center gap-[10px] w-full">
+        <ul className="space-y-[18px] mt-[22px] xl:block flex flex-wrap items-center gap-[10px] w-full">
             {NAV_ITEMS.map((item, i) => {
-                const isActive = item.href
-                    ? pathname === item.href || pathname.startsWith(item.href + "/")
-                    : false;
-
-                const Icon = typeof item.icon === "function" ? item.icon : null;
-
+                const isActive = pathname.includes(item.href);
+           
                 return (
                     <li key={i}>
                         <Link

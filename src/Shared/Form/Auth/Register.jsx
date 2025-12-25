@@ -8,8 +8,10 @@ import Input from "@/Shared/Input/Input";
 import Password from "@/Shared/Input/Password";
 import FormButton from "@/Shared/Button/FormButton";
 import { AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const Register = () => {
+    const t = useTranslations("login");
     const {
         register,
         handleSubmit,
@@ -72,21 +74,21 @@ const Register = () => {
                     }}
                     className="max-w-[420px] w-full py-[50px] px-[35px] bg-[#F0F0F0] rounded-[4px]"
                 >
-                    <h1 className="lg:text-5xl lg:leading-[53px] font-bold mb-8 text-2xl leading-[26px] text-center">
-                        Sign up
+                    <h1 className="lg:text-5xl lg:leading-[53px] font-bold mb-8 text-2xl leading-[26px] text-center capitalize">
+                        {t("signup")}
                     </h1>
 
                     {/* FIRST NAME */}
                     <div className="mb-7">
                         <Input
-                            label="First Name"
+                            label={t("first")}
                             id="first_name"
                             type="text"
                             placeholder=""
                             register={register("first_name", {
                                 validate: (value) => {
                                     // if (value.length < 2) return true; // no error before 2 letters
-                                    return value ? true : "First Name is Required";
+                                    return value ? true : t("required-first");
                                 },
                             })}
                             error={errors.first_name?.message}
@@ -98,14 +100,14 @@ const Register = () => {
                     {/* LAST NAME */}
                     <div className="mb-7">
                         <Input
-                            label="Last Name"
+                            label={t("last")}
                             id="last_name"
                             type="text"
                             placeholder=""
                             register={register("last_name", {
                                 validate: (value) => {
                                     // if (value.length < 2) return true;
-                                    return value ? true : "Last Name is Required";
+                                    return value ? true : t("required-last");
                                 },
                             })}
                             error={errors.last_name?.message}
@@ -117,7 +119,7 @@ const Register = () => {
                     {/* EMAIL */}
                     <div className="mb-7">
                         <Input
-                            label="Email or Username"
+                            label={t("email")}
                             id="email"
                             type="text"
                             placeholder=""
@@ -133,7 +135,7 @@ const Register = () => {
                     {/* PASSWORD */}
                     <div className="mb-7">
                         <Password
-                            label="Password"
+                            label={t("password")}
                             id="password"
                             placeholder=""
                             register={register("password", {
@@ -177,8 +179,8 @@ const Register = () => {
                                 {...register("yes", { required: "You must agree to continue" })}
                                 className="w-4 h-4"
                             />
-                            <p className="text-[15px] leading-[19px]">
-                                I would like to receive exclusive offers
+                            <p className="text-[15px] leading-[19px] capitalize">
+                                {t("exclusive")}
                             </p>
                         </div>
 
@@ -193,22 +195,25 @@ const Register = () => {
                     {/* PRIVACY INFO */}
                     <div className="mt-6">
                         <p className="text-sm font-semibold leading-[17px]">
-                            Your personal data will be used to assist you during your visit to the
-                            website, manage access to your account, and for other reasons described
-                            in our{" "}
-                            <span className="text-[#1D98FE]">politique de confidentialité</span>.
+                            {t.rich("text", {
+                                policy: (chunks) => (
+                                    <span className="text-[#1D98FE]">
+                                        {chunks}
+                                    </span>
+                                ),
+                            })}
                         </p>
                     </div>
 
                     {/* SUBMIT BUTTON */}
                     <div className="mt-6 flex items-center justify-center">
-                        <FormButton type="submit" label={"sign up"} />
+                        <FormButton type="submit" label={t("signup")} />
                     </div>
 
                     {/* SIGN IN LINK */}
                     <div className="mt-6 font-semibold text-base leading-[24px] text-center">
                         <Link href={"/login"} className="underline">
-                            Sign in with another email address
+                            {t("address")}
                         </Link>
                     </div>
                 </form>

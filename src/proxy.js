@@ -119,14 +119,14 @@ export default async function middleware(req) {
     const validToken = token && !isExpired(token);
 
     const authRoutes = ["/login", "/signup"];
-    const protectedRoutes = ["/my-profile", "/orders"];
+    const protectedRoutes = ["/my-account", "/orders"];
 
     const isAuthRoute = authRoutes.some(route => pathWithoutLocale.startsWith(route));
     const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
 
     // Handle auth redirects
     if (isAuthRoute && validToken) {
-        return NextResponse.redirect(new URL(`/${locale}/my-profile`, req.url));
+        return NextResponse.redirect(new URL(`/${locale}/my-account`, req.url));
     }
 
     if (isProtectedRoute && !validToken) {

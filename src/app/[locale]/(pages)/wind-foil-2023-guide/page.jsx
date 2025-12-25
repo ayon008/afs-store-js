@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { alliance } from "@/fonts/Alliance";
 
 /* ---------------- Breadcrumbs ---------------- */
 
@@ -311,7 +312,7 @@ export default function Wind() {
               {t("paddles_for_surfing_sub")}
             </p>
             <div className="compatibilite">
-              <table>
+              <table className={`${alliance.className}`}>
                 <tbody>
                   <tr>
                     <th>{t("table_1_practical_walk")}</th>

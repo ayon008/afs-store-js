@@ -8,10 +8,15 @@ import useAuth from '@/Shared/Hooks/useAuth';
 import { countriesList } from '@/lib/countriesList';
 import { updateBillingInfo } from '@/app/actions/WC/Auth/getAuth';
 import CountrySelect from '@/Shared/Input/DropDown';
+import { useTranslations } from 'next-intl';
 
 const ThirdForm = ({ setMessage }) => {
     const [show, setShow] = useState(false);
     const { user, loading, refreshUser } = useAuth();
+    const t = useTranslations("profile");
+    const a = useTranslations("login");
+    const c = useTranslations("ambassadors");
+    const d = useTranslations("checkout");
 
     const { register, handleSubmit, watch, reset, trigger, formState: { errors } } = useForm({
         defaultValues: {
@@ -58,7 +63,7 @@ const ThirdForm = ({ setMessage }) => {
         try {
             const result = await updateBillingInfo(data);
             if (result.success) {
-                setMessage({ success: true, message: 'Your billing address has been updated successfully.' });
+                setMessage({ success: true, message: t("success") });
                 // Refresh user context to show updated billing info
                 await refreshUser();
                 setShow(false); // Close edit mode on success
@@ -77,21 +82,21 @@ const ThirdForm = ({ setMessage }) => {
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
             <div className="flex items-center justify-between pb-1 global-b-bottom-d">
-                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">Billing Address</h3>
+                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">{t("billing")}</h3>
                 <button
                     className="flex items-center gap-1 cursor-pointer"
                     onClick={() => setShow(!show)}
                     type="button"
                 >
                     <Pen className="w-3 h-3" />
-                    <span className="text-sm uppercase leading-[100%]">{show ? "Cancel" : "Edit"}</span>
+                    <span className="text-sm uppercase leading-[100%]">{show ? t("cancel") : t("Edit")}</span>
                 </button>
             </div>
 
             <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-5 2xl:grid-cols-3">
                     <Input
-                        label="First Name"
+                        label={a("first")}
                         type="text"
                         id="billing_first_name"
                         register={register("billing_first_name", { required: true })}
@@ -101,7 +106,7 @@ const ThirdForm = ({ setMessage }) => {
                         show={show}
                     />
                     <Input
-                        label="Last Name"
+                        label={a("last")}
                         type="text"
                         id="billing_last_name"
                         register={register("billing_last_name", { required: true })}
@@ -111,7 +116,7 @@ const ThirdForm = ({ setMessage }) => {
                         show={show}
                     />
                     <Input
-                        label="Company (Optional)"
+                        label={a("company")}
                         type="text"
                         id="billing_company"
                         register={register("billing_company", { required: false })}
@@ -121,7 +126,7 @@ const ThirdForm = ({ setMessage }) => {
                         show={show}
                     />
                     <CountrySelect
-                        label="Country"
+                        label={c("country")}
                         id="country"
                         defaultValue={watchFields.country}
                         register={register("country", { required: true })}
@@ -131,7 +136,7 @@ const ThirdForm = ({ setMessage }) => {
                     />
                     <div className='md:col-span-2 col-span-1'>
                         <Input
-                            label="Street number and name"
+                            label={a("street")}
                             type="text"
                             id="billing_address_1"
                             register={register("billing_address_1", { required: true })}
@@ -142,7 +147,7 @@ const ThirdForm = ({ setMessage }) => {
                         />
                     </div>
                     <Input
-                        label="Code Postal"
+                        label={a("postal")}
                         type="text"
                         id="billing_postcode"
                         register={register("billing_postcode", { required: true })}
@@ -152,7 +157,7 @@ const ThirdForm = ({ setMessage }) => {
                         show={show}
                     />
                     <Input
-                        label="City"
+                        label={d("city")}
                         type="text"
                         id="billing_city"
                         register={register("billing_city", { required: true })}
@@ -162,7 +167,7 @@ const ThirdForm = ({ setMessage }) => {
                         show={show}
                     />
                     <Input
-                        label="Phone"
+                        label={t("phone")}
                         type="tel"
                         id="billing_phone"
                         register={register("billing_phone", { required: true })}
@@ -185,7 +190,7 @@ const ThirdForm = ({ setMessage }) => {
 
                 {show && (
                     <div className="mt-5">
-                        <FormButton type="submit" label="Save Changes" />
+                        <FormButton type="submit" label={t("save")} />
                     </div>
                 )}
             </form>

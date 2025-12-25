@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from "react-hook-form";
-import { useRouter } from 'next/navigation';
 import { AlertCircle } from "lucide-react";
 import Input from '@/Shared/Input/Input';
 import Password from '@/Shared/Input/Password';
 import FormButton from '@/Shared/Button/FormButton';
 import { loginUser } from '@/app/actions/WC/Auth/getAuth';
 import useAuth from '@/Shared/Hooks/useAuth';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 
 const Login = () => {
     const router = useRouter();
@@ -21,14 +22,19 @@ const Login = () => {
 
     const { refreshUser } = useAuth();
 
+    const [loading, setLoading] = useState(false);
+
 
     const [errorMessage, setErrorMessage] = useState(null);
+
+    const t = useTranslations("login");
 
 
     const onSubmit = async (data) => {
 
         const { email, password, remember } = data;
         setErrorMessage("");
+        setLoading(true);
         try {
             const response = await loginUser({ username: email, password: password, remember: !!remember });
             if (response.token) {
@@ -39,7 +45,8 @@ const Login = () => {
                 } catch (e) {
                     console.warn('refreshUser failed', e);
                 }
-                router.push('/my-profile');
+                setLoading(false);
+                router.push('/my-account');
             }
         } catch (error) {
             console.log(error.message);
@@ -58,7 +65,7 @@ const Login = () => {
                 )
             }
 
-            <div className='flex items-center justify-center lg:mt-[80px] mt-[40px] global-margin'>
+            <div className={`flex items-center justify-center lg:mt-[80px] mt-[40px] global-margin ${loading ? "opacity-50" : "opacity-100"}`}>
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     onKeyDown={(e) => {
@@ -69,11 +76,11 @@ const Login = () => {
                     }}
                     className='max-w-[420px] w-full py-[50px] px-[35px] bg-[#F0F0F0] rounded-[4px]'
                 >
-                    <h1 className='lg:text-5xl lg:leading-[53px] font-bold mb-8 text-2xl leading-[26px] text-center'>Se connecter</h1>
+                    <h1 className='lg:text-5xl lg:leading-[53px] font-bold mb-8 text-2xl leading-[26px] text-center'>{t("signin")}</h1>
 
                     <div className='mb-7'>
                         <Input
-                            label='Email or username'
+                            label={t("email")}
                             id='email'
                             type='text'
                             placeholder=''
@@ -83,7 +90,7 @@ const Login = () => {
                     </div>
                     <div className='mb-4'>
                         <Password
-                            label='Password'
+                            label={t("password")}
                             id='password'
                             placeholder=''
                             register={register("password", { required: "Password is required" })}
@@ -91,22 +98,22 @@ const Login = () => {
                         />
                     </div>
 
-                    <Link href={'/forgot-password'}><p className='text-center text-sm leading-[100%] underline'>Forgot your password?</p></Link>
+                    <Link href={'/forgot-password'}><p className='text-center text-sm leading-[100%] underline'>{t("forgot")}</p></Link>
 
                     <div className='flex items-center justify-center mt-6 gap-1'>
                         <input type='checkbox' {...register("remember")} />
-                        <p className='text-[15px] leading-[19px]'>Remember me</p>
+                        <p className='text-[15px] leading-[19px]'>{t("me")}</p>
                     </div>
 
                     <div className='flex items-center justify-center mt-3'>
-                        <FormButton type="submit" label="LOGIN" />
+                        <FormButton type="submit" label={t("signin")} />
                     </div>
 
                     <div className='mt-6'>
-                        <p className='text-[15px] leading-[19px] text-center mb-4'>New to the website?</p>
+                        <p className='text-[15px] leading-[19px] text-center mb-4'>{t("new")}</p>
                         <div className='flex items-center justify-center'>
                             <Link href='/signup'>
-                                <FormButton label='sign up' />
+                                <FormButton label={t("signup")} />
                             </Link>
                         </div>
                     </div>

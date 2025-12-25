@@ -1,5 +1,6 @@
 import FeatureBar from '@/Shared/Afs-Events/FeatureBar';
 import Register from '@/Shared/Form/Auth/Register';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import React from 'react';
 
@@ -19,11 +20,12 @@ export const metadata = {
 };
 
 
-const BreadCums = () => {
+const BreadCums = async ({ locale }) => {
+    const t = await getTranslations("breadcum", locale);
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>
-                <Link className='inline' href={'/'}>Accueil</Link> / <span className='text-black'>Mon compte</span>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <span className='text-black'>My Account</span>
             </div>
         </div>
     )
@@ -37,7 +39,6 @@ const page = () => {
                 <BreadCums />
                 <Register />
             </div>
-            <FeatureBar />
         </div>
     );
 };

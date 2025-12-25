@@ -27,7 +27,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
-  
+
   // Get current currency from cart or default to 'euro'
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
   const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
@@ -70,24 +70,24 @@ const Navbar = ({ NAV_LINKS }) => {
       language: selectedLanguage, // "en" ou "fr"
       currency: selectedCurrency, // "usd" ou "euro"
     };
-    
+
     // Clear cart if language or currency changes
     const languageChanged = selectedLanguage !== locale;
-    
+
     // Get current currency from cart or default to 'euro'
     const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
     const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
     const currencyChanged = selectedCurrency !== currentCurrency;
-    
+
     // Clear the cart if language or currency changes
     if (languageChanged || currencyChanged) {
       try {
         // Check if cart has items before clearing
         const hasItems = cart && cart.items && cart.items.length > 0;
-        
+
         if (hasItems) {
           const result = await handleClearCart();
-          
+
           // Show notification if cart was cleared successfully
           if (result && result.success) {
             if (languageChanged) {
@@ -103,7 +103,7 @@ const Navbar = ({ NAV_LINKS }) => {
         console.error('Error clearing cart:', error);
       }
     }
-    
+
     if (languageChanged) {
       const currentPath = '/';
       const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
@@ -195,7 +195,7 @@ const Navbar = ({ NAV_LINKS }) => {
           duration={5000}
         />
       )}
-      
+
       <nav className={notification ? 'sticky left-0 right-0 top-0 z-[99] text-white w-full mt-[73px]' : 'sticky left-0 right-0 top-0 z-[99] text-white w-full'}>
         {/* Logo and Search Part */}
         <div
@@ -214,7 +214,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 width={150}
                 height={45}
                 priority
-                className=""
+                className="lg:w-[150px] aspect-[150/45] w-[120px]"
               />
             </Link>
           </div>
@@ -254,7 +254,7 @@ const Navbar = ({ NAV_LINKS }) => {
             {/* Cart */}
             <button
               onClick={openSideCart}
-              className="flex items-center justify-center relative p-1 md:p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
+              className="flex items-center justify-center relative p-1 md:p-2 rounded-full cursor-pointer transition-colors duration-200"
             >
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none">
 
@@ -291,9 +291,9 @@ const Navbar = ({ NAV_LINKS }) => {
             </button>
 
             {/* Language */}
-            <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
-              <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} fis mr-2 scale-125`}></span>
-              <span className="text-white text-[0rem] font-extrabold tracking-wide">
+            <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
+              <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
+              <span className="text-white font-extrabold tracking-wide">
                 {locale === 'fr' ? 'FR' : 'EN'}
               </span>
             </button>
@@ -599,7 +599,7 @@ const Navbar = ({ NAV_LINKS }) => {
           <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">
             Products
           </p>
-          <ul className="mt-5 space-y-4">
+          <ul className="mt-5 space-y-4 pb-10">
             {NAV_LINKS?.map((link, idx) => (
               <li
                 onClick={() => handleShow(link.name)}
@@ -631,6 +631,24 @@ const Navbar = ({ NAV_LINKS }) => {
             ))}
 
           </ul>
+          <div>
+            <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">
+              Others
+            </p>
+            <div className="space-y-4">
+              <button onClick={() => setPopUp(true)} className="mt-4 flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
+                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} h-[10.29px] mt-[2px] w-[13.71px] mr-2 scale-125`}></span>
+                <span className="text-black font-extrabold tracking-wide">
+                  {locale === 'fr' ? 'FR' : 'EN'}
+                </span>
+                <span className="mx-[2px]">/</span>
+                <span className="flex items-center gap-[2px] text-black font-extrabold tracking-wide">
+                  {selectedCurrency === 'euro' ? <Euro className="inline mr-1 w-4 h-4" /> : <DollarSign className="inline mr-1 mt-[2px] w-4 h-4" />}
+                  {selectedCurrency === 'euro' ? 'EUR' : 'USD'}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       {/* 2nd slide */}

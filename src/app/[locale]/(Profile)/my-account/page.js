@@ -4,13 +4,15 @@ import ForthForm from '@/Shared/Form/My-Profile/ForthForm';
 import SecondForm from '@/Shared/Form/My-Profile/SecondForm';
 import ThirdForm from '@/Shared/Form/My-Profile/ThirdForm';
 import { AlertCircle, CheckCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 
 
 const Page = () => {
 
-    const [message, setMessage] = useState({});
 
+    const t = useTranslations("profile");
+    const [message, setMessage] = useState({});
 
     return (
         <div className='space-y-[clamp(2.5rem,1.349rem+2.401vw,3.75rem)]'>
@@ -36,8 +38,10 @@ const Page = () => {
             }
 
             <div className='space-y-[clamp(0.875rem,0.5297rem+0.7203vw,1.25rem)]'>
-                <h2 className='global-h2'>User information</h2>
-                <p className='profile-p'>Here you can enter or edit public information about yourself. The data will be used in the future for ordering. The changes you make will be displayed immediately after saving.</p>
+                <h2 className='global-h2 capitalize'>{t("user")}</h2>
+                <p className='profile-p capitalize'>
+                    {t("here")}
+                </p>
                 <div className='space-y-[clamp(2.5rem,1.349rem+2.401vw,3.75rem)]'>
                     {/* 1st form */}
                     <FirstForm setMessage={setMessage} />

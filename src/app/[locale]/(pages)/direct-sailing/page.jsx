@@ -17,7 +17,7 @@ const BreadCums = () => {
     );
 };
 
-export default function direct() {
+export default function Direct() {
     const t = useTranslations("DirectSailing");
 
     return (

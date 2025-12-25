@@ -120,8 +120,6 @@ export const updateBillingAndCart = async (billingData) => {
 
 export const updateShippingAndCart = async (shippingData) => {
     const localeValue = await getLocaleValue();
-    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
-    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
     if (!token) {
@@ -174,7 +172,7 @@ export const updateShippingAndCart = async (shippingData) => {
         console.log("Updating shipping address with payload:", shippingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {

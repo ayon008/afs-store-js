@@ -40,8 +40,19 @@ export async function getLocaleValue() {
     return localeValue === 'en' ? '' : localeValue;
 }
 
+export async function getLang(params) {
+    const localeValue = await getLocale();
+    return localeValue;
+}
 
 
+// logout
+export async function logout() {
+    const cookieStore = await cookies();
+    cookieStore.delete('auth_token');
+    cookieStore.delete('user_data');
+    return { success: true };
+}
 
 
 export const getCountryDetails = async (country) => {
@@ -672,11 +683,11 @@ export async function applyCoupon(couponCode) {
 export async function clearCart() {
     const localeValue = await getLocaleValue();
     const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
-    
+
     try {
         // Get WooCommerce cookies
         const cookieHeader = await getWooCommerceCookies();
-        
+
         // Use /cart/items endpoint with DELETE method to clear all items
         const response = await fetch(`${WC_STORE_URL}/cart/items`, {
             method: 'DELETE',
