@@ -27,9 +27,17 @@ const Products = ({ id }) => {
 
     const renderCategories = (categories) => {
         const logSelectedCategoryIds = () => {
+            // Save current scroll position
+            const scrollPosition = window.scrollY || window.pageYOffset;
             const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
             const selectedIds = Array.from(checkedBoxes).map(cb => cb.value)?.length > 0 ? Array.from(checkedBoxes).map(cb => cb.value) : id;
             setIds(selectedIds);
+            // Restore scroll position after render
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollPosition);
+                });
+            });
         };
 
         return (
