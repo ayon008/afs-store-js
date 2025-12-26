@@ -95,10 +95,14 @@ const Products = ({ id }) => {
         },
     })
 
-    const maxPrice = isLoadingAllProducts ? 0 : Math.max(...allProductsData?.map(p => p?.price));
-    const minPrice = isLoadingAllProducts ? 0 : Math.min(...allProductsData?.map(p => p?.price));
+    const maxPrice = isLoadingAllProducts ? 0 : Math.max(...allProductsData?.map(p => Number(p?.price).toFixed(2)));
+    const minPrice = isLoadingAllProducts ? 0 : Math.min(...allProductsData?.map(p => Number(p?.price).toFixed(2)));
 
     const [value, setValue] = useState([minPrice, maxPrice]);
+
+    useEffect(() => {
+        setValue([minPrice, maxPrice]);
+    }, [minPrice, maxPrice]);
 
     const handleChange = (val) => {
         // Use current pathname instead of hardcoded slug so this works for any category
@@ -110,6 +114,8 @@ const Products = ({ id }) => {
             router.refresh();
         });
     }
+
+    console.log(value);
 
 
 
@@ -129,7 +135,7 @@ const Products = ({ id }) => {
                             }
                         </div>
                         {
-                            isLoading ? <div>Loading...</div> : <>
+                            isLoadingAllProducts ? <div>Loading...</div> : <>
                                 <div>
                                     <label className='uppercase text-base font-medium mb-4 block' htmlFor="vol">{t("price")}</label>
                                     <RangeSlider min={minPrice} max={maxPrice} defaultValue={[min || minPrice, max || maxPrice]} onInput={(val) => handleChange(val)} className='my-dashed-slider -ml-2' />
@@ -196,7 +202,7 @@ const Products = ({ id }) => {
                         }
                     </div>
                     <div>
-                        {isLoading ? <div>Loading...</div> :
+                        {isLoadingAllProducts ? <div>Loading...</div> :
                             <>
                                 <label className='uppercase text-base font-medium mb-4 block' for="vol">PRIX</label>
                                 <RangeSlider min={minPrice} max={maxPrice} defaultValue={[min || minPrice, max || maxPrice]} onInput={(val) => handleChange(val)} className='my-dashed-slider -ml-2' />
