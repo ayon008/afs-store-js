@@ -1,8 +1,8 @@
-'use client';
+"use client"
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo } from 'react';
 import FormButton from '../Button/FormButton';
+import { useTranslations } from 'next-intl';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -50,7 +50,8 @@ export default function ProductCard({
     singlePrice,
     bestseller = "",
     alt,
-    type = "simple"
+    type = "simple",
+    locale
 }) {
     const productLink = `/product/${slug || name.toLowerCase().replace(/\s+/g, '-')}`;
 
@@ -59,29 +60,8 @@ export default function ProductCard({
         .replace(/ - \[#\d+\]/g, "")
         .trim();
 
+    const t = useTranslations('product');
 
-    // Helper function to update price in WooCommerce HTML
-    const updatePriceInHtml = (priceHtml, newPrice) => {
-        if (!priceHtml || !newPrice) return priceHtml;
-
-        // Format the new price (e.g., 374.17 -> "374,17")
-        const formattedPrice = parseFloat(newPrice).toFixed(2).replace('.', ',');
-
-        // Replace the price inside <bdi> tags, keeping the currency symbol
-        // Pattern: matches content before the currency symbol span
-        const updatedHtml = priceHtml.replace(
-            /(<bdi>)[\d\s,.]+(<span class="woocommerce-Price-currencySymbol">)/g,
-            `$1${formattedPrice}$2`
-        );
-
-        return updatedHtml;
-    };
-
-
-    // Update the price HTML with calculated tax price
-    const changePrice = useMemo(() => {
-        return updatePriceInHtml(price, singlePrice);
-    }, [price, singlePrice]);
 
 
     return (
@@ -139,12 +119,12 @@ export default function ProductCard({
                     </h2>
                     <p
                         className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
-                        dangerouslySetInnerHTML={{ __html: changePrice }}
+                        dangerouslySetInnerHTML={{ __html: price }}
                     />
                 </div>
                 <div className="">
                     <Link href={`/product/${slug}`}>
-                        <FormButton label={'DECOUVRIR'} />
+                        <FormButton label={t('discover')} />
                     </Link>
                 </div>
             </div>

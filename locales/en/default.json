@@ -195,6 +195,13 @@
     "finish": "FINISH"
   },
   "footer": {
+    "1st": "Click & Collect",
+    "2nd": "Secure payments in 3 or 4 instalments",
+    "3rd": "Advice from enthusiasts",
+    "4th": "Satisfaction guaranteed or your money back",
+    "5th": "2 to 3 years warranty",
+    "6th": "Worldwide delivery",
+    "7th": "Tax refund available",
     "about": "About Us",
     "accept": "I accept the privacy policy and terms of use",
     "client": "Service Client",
@@ -408,6 +415,10 @@
     "charterSection9": "<h2>IX. IS YOUR DATA TRANSFERRED OUTSIDE THE EUROPEAN UNION?</h2><p>We may transfer your data to countries outside the European Union for the purposes described in this Policy. For each of these transfers, we ensure that your data benefits from a level of protection equivalent to that offered in Europe. Transfers are made only to countries that are recognized as providing an adequate level of data protection by the European Commission. In the event that data is transferred to a country that does not offer an adequate level of protection, Foil and Co and its partners or service providers undertake to frame the transfer by means of appropriate guarantees (such as the European Commission’s standard contractual clauses) which you can request from the DPO’s address indicated above.</p>",
     "privacyCharter": "<p>Foil and Co, registered under no.822 822 615 R.C.S. BREST, attaches great importance to the protection of your personal data and carefully monitors compliance with the protective provisions relating to privacy and the processing of personal data, in particular the European Regulation on the protection of individuals with regard to the processing of personal data and on the free movement of such data (EU Regulation 2016/679 of 26 April 2016), the law of 6 January 1978 known as the “Data Protection Act” as amended in 2018, as well as the recommendations emanating from the CNIL (hereinafter the “Legislation in force”). The purpose of this personal data protection charter (hereinafter the “Charter”) is to describe how and when Foil and Co, as data controller, collects, uses and communicates certain personal data (hereinafter the “Data”) that you send to us in order to meet your needs but also to optimize and improve the quality of the services we offer you.</p>",
     "title": "PRIVACY POLICY"
+  },
+  "product": {
+    "discover": "DISCOVER",
+    "price": "Price"
   },
   "profile": {
     "account": "Log Out of Your Account",

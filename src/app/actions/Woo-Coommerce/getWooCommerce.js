@@ -15,6 +15,13 @@ const authHeader = Buffer
 const WP_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
 const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
+export const getCurrency = async () => {
+    const cookieStore = await cookies();
+    const currencyValue = cookieStore.get('currency')?.value;
+    const currency = currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
+    return currency;
+}
+
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
     if (!header) return [];
@@ -150,7 +157,8 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
-    const localeValue = await getLocaleValue();
+    const currency = await getCurrency();
+    const locale = await getLocale();
     try {
         // Convert "12,40" or [12,40] or 12 → always array
         let categories = Array.isArray(ids)
@@ -159,19 +167,16 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
         if (categories.length === 0) return [];
 
-        const firstCategory = categories.join(",");
+        const categoriesIds = categories.join(",");
         let allProducts = [];
         const per_page = 100;
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?category=${firstCategory}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&per_page=${per_page}&page=${i}`;
+            let url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?category=${categoriesIds}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,price_with_tax,sale_price,price_html,type&per_page=${per_page}&page=${i}&lang=${locale}&currency=${currency}`;
 
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
-
-            console.log(url, 'urlProduct');
-
 
             const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
@@ -186,20 +191,13 @@ export const getProductsByCategoryId = async (ids, max, min) => {
             if (!response.ok) break;
 
             const data = await response.json();
+
             if (!Array.isArray(data) || data.length === 0) break;
 
-            const dataWithTax = await Promise.all(
-                data.map(async (product) => {
-                    const basePrice = parseFloat(product.price) || 0;
-                    const priceWithTax = await calculatePriceWithTax(basePrice, product.tax_class);
-                    return { ...product, price_with_tax: priceWithTax };
-                })
-            );
-            allProducts.push(...dataWithTax);
+            allProducts.push(...data);
 
             if (data.length < per_page) break;
         }
-
         return allProducts;
 
     } catch (error) {
@@ -222,6 +220,8 @@ export const getChildCategories = async (parentId) => {
         },
         next: { revalidate: 3600 },
     });
+
+
     if (!response.ok) throw new Error(`WooCommerce API error: ${response.statusText}`);
     const data = await response.json();
 
@@ -235,11 +235,7 @@ export const getChildCategories = async (parentId) => {
     return categoriesWithChildren;
 }
 
-export const getCurrency = async () => {
-    const cookieStore = await cookies();
-    const currency = cookieStore.get('currency')?.value;
-    return currency;
-}
+
 
 // Get single product by their slug
 
@@ -258,7 +254,6 @@ export const getProductBySlug = async (slug) => {
         const data = await response.json();
         const product = data[0];
 
-        console.log(product, 'product');
 
         if (product) {
             const basePrice = parseFloat(product.price) || 0;
@@ -406,13 +401,15 @@ export async function changePasswordAction(data) {
 
 
 export const getPrice = async (productId, selectedVariation) => {
-    const localeValue = await getLocaleValue();
+    const locale = await getLocale();
+    const currency = await getCurrency();
+    console.log(currency, 'currency');
+
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&lang=${locale}&currency=${currency}`;
 
     try {
         const cart = await getCart();
-        console.log(cart, 'cart');
         const defaultCountry = cart?.data?.shipping_address?.country || cart?.data?.billing_address?.country || "FR"; // Default to France
         const user = await getAuthenticatedUser();
         let userCountry;

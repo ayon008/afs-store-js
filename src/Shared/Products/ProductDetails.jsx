@@ -194,10 +194,6 @@ const ProductDetails = ({ data }) => {
         ? (allVariationsSelected && variationPrice && !priceLoading && isInStock)
         : (baseInStock && !priceLoading);
 
-
-
-
-
     return (
         <>
             <div>
@@ -274,13 +270,8 @@ const ProductDetails = ({ data }) => {
                         {variationPrice && !priceLoading && (
                             <div className='space-y-1'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
-                                    {parseFloat(variationPrice)?.toFixed(2)}€
+                                    {parseFloat(variationPrice)?.toFixed(2)}
                                 </span>
-                                {/* {variationTaxAmount > 0 && (
-                                    <small className='text-gray-500 text-sm block'>
-                                        (dont {variationTaxAmount?.toFixed(2)}€ de TVA {variationCountry && `- ${variationCountry}`})
-                                    </small>
-                                )} */}
                             </div>
                         )}
 

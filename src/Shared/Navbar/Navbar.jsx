@@ -1,6 +1,6 @@
 
 "use client";
-import { ArrowLeft, DollarSign, Euro, Search, X, Info } from "lucide-react";
+import { ArrowLeft, DollarSign, Euro, Search, X, Info, PoundSterling } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // import SearchOverlay from "../../components/search";
@@ -27,17 +27,35 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
-
-  // Get current currency from cart or default to 'euro'
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
-  const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
-  const [selectedCurrency, setSelectedCurrency] = useState(currentCurrency);
 
-  // Update selectedCurrency when cart currency changes
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    const cookieCurrency = Cookies.get('currency');
+    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
+      return cookieCurrency;
+    }
+    currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD' ? 'usd' : 'euro';
+  });
+
+  // Update selectedCurrency when cart currency changes, but prioritize cookie
   useEffect(() => {
-    const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
-    setSelectedCurrency(newCurrency);
+    const cookieCurrency = Cookies.get('currency');
+    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
+      setSelectedCurrency(cookieCurrency);
+    } else {
+      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : 'usd';
+      setSelectedCurrency(newCurrency);
+    }
   }, [currentCurrencySymbol]);
+
+  // Set cookie whenever selectedCurrency changes
+  useEffect(() => {
+    if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
+      Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax' });
+    }
+  }, [selectedCurrency]);
+
+
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
   const [notification, setNotification] = useState(null);
@@ -112,10 +130,13 @@ const Navbar = ({ NAV_LINKS }) => {
     } else {
       // If only currency changed, reload cart to get updated currency
       if (currencyChanged) {
-        Cookies.set('currency', selectedCurrency);
+        // Set cookie with 1 year expiration
+        const currentPath = '/';
         // Note: Currency change might require locale change in WooCommerce
         // For now, reload the page to ensure currency is updated
-        console.log('Currency changed to:', selectedCurrency);
+        const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
+        setRedirectPath(newPath);
+        setShouldRedirect(true);
         setTimeout(() => {
           window.location.reload();
         }, 500);
@@ -292,12 +313,21 @@ const Navbar = ({ NAV_LINKS }) => {
             </button>
 
             {/* Language */}
-            <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
-              <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
-              <span className="text-white font-extrabold tracking-wide">
-                {locale === 'fr' ? 'FR' : 'EN'}
-              </span>
-            </button>
+            <div onClick={() => setPopUp(true)} className="flex items-center">
+              <button className="flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
+                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} md:mr-2 mr-0 md:scale-125 scale-100`}></span>
+                <span className="text-white font-extrabold tracking-wide md:block hidden">
+                  {locale === 'fr' ? 'FR' : 'EN'}
+                </span>
+              </button>
+              <span>/</span>
+              {/* Currency */}
+              <div>
+                {
+                  selectedCurrency === 'euro' ? <div className="flex items-center gap-1"><Euro className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">EUR</span></div> : selectedCurrency === 'usd' ? <div className="flex items-center gap-1"><DollarSign className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">USD</span></div> : <div className="flex items-center gap-1"><PoundSterling className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">GBP</span></div>
+                }
+              </div>
+            </div>
           </div>
         </div>
 
@@ -937,10 +967,10 @@ const Navbar = ({ NAV_LINKS }) => {
                   </li>
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      {currentCurrency === 'euro' ? <Euro className="" size={24} /> : <DollarSign className="" size={24} />}
-                      {currentCurrency === 'euro' ? t("euro") : t("usDollar")}
+                      {selectedCurrency === 'euro' ? <Euro className="" size={24} /> : <DollarSign className="" size={24} />}
+                      {selectedCurrency === 'euro' ? t("euro") : t("usDollar")}
                     </span>
-                    <span className="font-bold">{currentCurrency === 'euro' ? 'EUR' : 'USD'}</span>
+                    <span className="font-bold">{selectedCurrency === 'euro' ? 'EUR' : 'USD'}</span>
                   </li>
                 </ul>
               </div>
@@ -1038,6 +1068,27 @@ const Navbar = ({ NAV_LINKS }) => {
                         {t("usDollar")}
                       </span>
                       <span className="font-bold">USD</span>
+                    </label>
+                  </li>
+                  <li
+                    onClick={() => setSelectedCurrency('gbp')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'gbp' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="currency"
+                        value="gbp"
+                        className="hidden"
+                        checked={selectedCurrency === 'gbp'}
+                        onChange={() => setSelectedCurrency('gbp')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <PoundSterling className="" size={24} />
+                        British Pound
+                      </span>
+                      <span className="font-bold">GBP</span>
                     </label>
                   </li>
                 </ul>

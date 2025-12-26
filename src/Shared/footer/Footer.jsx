@@ -196,7 +196,9 @@ const Footer = () => {
                                 strokeLinejoin="round"
                             ></path>
                         </svg>
-                        <p>Click & Collect</p>
+                        <p>
+                            {t("1st")}
+                        </p>
                     </div>
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">
                         <svg
@@ -214,7 +216,9 @@ const Footer = () => {
                                 strokeLinejoin="round"
                             ></path>
                         </svg>
-                        <p>Paiements sécurisés en 3 ou 4 fois</p>
+                        <p>
+                            {t("2nd")}
+                        </p>
                     </div>
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">
                         <svg
@@ -232,7 +236,7 @@ const Footer = () => {
                                 strokeLinejoin="round"
                             ></path>
                         </svg>
-                        <p>Conseils de passionnés</p>
+                        <p>{t("3rd")}</p>
                     </div>
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">
                         <svg
@@ -250,7 +254,7 @@ const Footer = () => {
                                 strokeLinejoin="round"
                             ></path>
                         </svg>
-                        <p>Satisfait ou remboursé</p>
+                        <p>{t("4th")}</p>
                     </div>
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">
                         <svg
@@ -268,7 +272,7 @@ const Footer = () => {
                                 strokeLinejoin="round"
                             ></path>
                         </svg>
-                        <p>2 à 3 ans de garantie</p>
+                        <p>{t("5th")}</p>
                     </div>
                     <div className="footer-box p-[clamp(1rem,_0.5556rem+0.6944vw,_1.25rem)] flex flex-col items-center justify-start gap-[4px]">
                         <svg
@@ -284,8 +288,8 @@ const Footer = () => {
                                 strokeWidth="2"
                             ></path>
                         </svg>
-                        <p>Livraison dans le monde entier</p>
-                        <p className="text-[#999999]">Détaxe disponible</p>
+                        <p>{t("6th")}</p>
+                        <p className="text-[#999999]">{t("7th")}</p>
                     </div>
                     {/* Keep other icons same */}
                 </div>

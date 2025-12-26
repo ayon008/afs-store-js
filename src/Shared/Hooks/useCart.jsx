@@ -1,16 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-
-// import {
-//     getCart as getCartAction, addToCart as addToCartAction, updateCartItem,
-//     removeCartItem,
-//     clearCart,
-//     applyCoupon,
-//     removeCoupon
-// } from '../../app/actions/Woo-Coommerce/getWooCommerce';
-// import { getUserTaxRate } from '../funtions/getWooCommerce';
-
 import {
     addToCart as addToCartAction, updateCartItem, removeCartItem, clearCart, applyCoupon, removeCoupon
 } from "../../app/actions/Woo-Coommerce/getWooCommerce"

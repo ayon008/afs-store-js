@@ -36,7 +36,6 @@ const SideCart = ({ isOpen, onClose }) => {
 
 
     const cartItems = cart?.items || [];
-    console.log(cartItems, 'cartItems');
 
     const currencySymbol = cart?.totals?.currency_symbol || '€';
     const total = cart?.totals?.total_price / 100;

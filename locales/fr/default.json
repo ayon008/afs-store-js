@@ -195,6 +195,13 @@
     "finish": "FINITION"
   },
   "footer": {
+    "1st": "Click & Collect",
+    "2nd": "Paiements sécurisés en 3 ou 4 fois",
+    "3rd": "Conseils de passionnés",
+    "4th": "Satisfaction garantie ou remboursement",
+    "5th": "Garantie de 2 à 3 ans",
+    "6th": "Livraison dans le monde entier",
+    "7th": "Remboursement d'impôt disponible",
     "about": "À propos de nous",
     "accept": "J'accepte la politique de confidentialité et les conditions d'utilisation",
     "client": "Client du service",
@@ -408,6 +415,10 @@
     "charterSection9": "<h2>IX. VOS DONNÉES SONT-ELLES TRANSFÉRÉES EN DEHORS DE L'UNION EUROPÉENNE ?</h2><p>Nous pouvons transférer vos données vers des pays situés en dehors de l'Union européenne aux fins décrites dans la présente politique. Pour chacun de ces transferts, nous nous assurons que vos données bénéficient d'un niveau de protection équivalent à celui offert en Europe. Les transferts sont effectués uniquement vers des pays reconnus comme offrant un niveau adéquat de protection des données par la Commission européenne. En cas de transfert de données vers un pays n'offrant pas un niveau de protection adéquat, Foil and Co et ses partenaires ou prestataires de services s'engagent à encadrer le transfert par des garanties appropriées (telles que les clauses contractuelles types de la Commission européenne) que vous pouvez demander à l'adresse du DPD indiquée ci-dessus.</p>",
     "privacyCharter": "<p>Foil and Co, enregistrée sous le n° 822 822 615 R.C.S. BREST, attache une grande importance à la protection de vos données personnelles et veille attentivement au respect des dispositions protectrices relatives à la vie privée et au traitement des données personnelles, notamment le Règlement européen relatif à la protection des personnes physiques à l'égard du traitement des données à caractère personnel et à la libre circulation de ces données (Règlement UE 2016/679 du 26 avril 2016), la loi du 6 janvier 1978 dite \" Loi Informatique et Libertés \" telle que modifiée en 2018, ainsi que les recommandations émanant de la CNIL (ci-après la \" Législation en vigueur \"). La présente charte de protection des données personnelles (ci-après la \" Charte \") a pour objet de décrire comment et quand Foil and Co, en tant que responsable de traitement, collecte, utilise et communique certaines données personnelles (ci-après les \" Données \") que vous nous transmettez afin de répondre à vos besoins mais aussi d'optimiser et d'améliorer la qualité des services que nous vous proposons.</p>",
     "title": "POLITIQUE DE CONFIDENTIALITÉ"
+  },
+  "product": {
+    "discover": "DÉCOUVRIR",
+    "price": "Prix"
   },
   "profile": {
     "account": "Déconnexion de votre compte",

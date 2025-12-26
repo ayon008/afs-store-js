@@ -119,7 +119,7 @@ export default async function middleware(req) {
     const validToken = token && !isExpired(token);
 
     const authRoutes = ["/login", "/signup"];
-    const protectedRoutes = ["/my-account/*", "/my-account", "/orders"];
+    const protectedRoutes = ["/my-account", "/my-account/logout", "/my-account/orders", "/my-account/payment-methods", "/my-account/reinitialiser-mot-de-passe", "/demande-sav", "/orders"];
 
     const isAuthRoute = authRoutes.some(route => pathWithoutLocale.startsWith(route));
     const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
