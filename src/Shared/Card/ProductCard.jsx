@@ -1,6 +1,7 @@
-"use client"
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useMemo } from 'react';
 import FormButton from '../Button/FormButton';
 import { useTranslations } from 'next-intl';
 
@@ -50,8 +51,7 @@ export default function ProductCard({
     singlePrice,
     bestseller = "",
     alt,
-    type = "simple",
-    locale
+    type = "simple"
 }) {
     const productLink = `/product/${slug || name.toLowerCase().replace(/\s+/g, '-')}`;
 
@@ -60,8 +60,32 @@ export default function ProductCard({
         .replace(/ - \[#\d+\]/g, "")
         .trim();
 
-    const t = useTranslations('product');
 
+    // Helper function to update price in WooCommerce HTML
+    const updatePriceInHtml = (priceHtml, newPrice) => {
+        if (!priceHtml || !newPrice) return priceHtml;
+
+        // Format the new price (e.g., 374.17 -> "374,17")
+        const formattedPrice = parseFloat(newPrice).toFixed(2).replace('.', ',');
+
+        // Replace the price inside <bdi> tags, keeping the currency symbol
+        // Pattern: matches content before the currency symbol span
+        const updatedHtml = priceHtml.replace(
+            /(<bdi>)[\d\s,.]+(<span class="woocommerce-Price-currencySymbol">)/g,
+            `$1${formattedPrice}$2`
+        );
+
+        return updatedHtml;
+    };
+
+
+    // Update the price HTML with calculated tax price
+    const changePrice = useMemo(() => {
+        return updatePriceInHtml(price, singlePrice);
+    }, [price, singlePrice]);
+
+
+    const t = useTranslations('product');
 
 
     return (
@@ -76,7 +100,10 @@ export default function ProductCard({
                         alt={alt || name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className={`object-contain absolute inset-0 pt-5 opacity-100 ${hoverImage && "group-hover:opacity-0"} transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]`}
+                        className={` object-contain absolute inset-0 pt-5
+      opacity-100 ${hoverImage && "group-hover:opacity-0"}
+      transition-opacity duration-300
+      ease-[cubic-bezier(.19,1,.22,1)]`}
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =
@@ -91,7 +118,12 @@ export default function ProductCard({
                             alt={`${alt || name} - hover`}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]"
+                            className="
+        object-cover absolute inset-0
+        opacity-0 group-hover:opacity-100
+        transition-opacity duration-300
+        ease-[cubic-bezier(.19,1,.22,1)]
+      "
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.classList.add('opacity-0');
