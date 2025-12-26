@@ -672,11 +672,13 @@ export async function updateCartItem(itemKey, quantity) {
 export const getRecentProducts = async () => {
     try {
         const localeValue = await getLocaleValue();
+        const currency = await getCurrency();
+        const locale = await getLocale();
         const authHeader = Buffer
             .from(`${consumerKey}:${consumerSecret}`)
             .toString("base64");
 
-        const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`;
+        const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`;
 
         const response = await fetch(url, {
             headers: {
@@ -702,13 +704,14 @@ export async function searchProducts(query) {
     if (!query) return [];
 
     try {
-        const localeValue = await getLocaleValue();
+        const locale = await getLocale();
+        const currency = await getCurrency();
         const authHeader = Buffer
             .from(`${consumerKey}:${consumerSecret}`)
             .toString("base64");
 
         const res = await fetch(
-            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`,
             {
                 headers: {
                     Authorization: `Basic ${authHeader}`
