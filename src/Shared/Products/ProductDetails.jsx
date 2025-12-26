@@ -6,6 +6,7 @@ import Image from 'next/image';
 import PopUp from '../PopUp/PopUp';
 import { getPrice } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useCart from '../Hooks/useCart';
+import Cookies from 'js-cookie';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -76,13 +77,13 @@ const ProductDetails = ({ data }) => {
         if (!attributes || attributes.length === 0) return;
         if (!allVariationsSelected) {
             // Reset price when selections change
-                    setVariationPrice(null);
-                    setVariationTaxAmount(null);
-                    setVariationCountry(null);
-                    setVariationId(null);
-                    setVariationInStock(true);
-                    setVariationAttributes(null);
-                    return;
+            setVariationPrice(null);
+            setVariationTaxAmount(null);
+            setVariationCountry(null);
+            setVariationId(null);
+            setVariationInStock(true);
+            setVariationAttributes(null);
+            return;
         }
 
         const fetchVariationPrice = async () => {
@@ -151,6 +152,9 @@ const ProductDetails = ({ data }) => {
         return formattedVariations;
     };
 
+    const currency = Cookies.get('currency');
+    const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+
     // Handle add to cart
     const onSubmit = async (formData) => {
         // For variable products: require variationPrice and isInStock
@@ -164,14 +168,14 @@ const ProductDetails = ({ data }) => {
         setAddingToCart(true);
         try {
             // Use variation attributes from the matched variation (already in correct WooCommerce format)
-            const formattedVariations = hasVariations 
+            const formattedVariations = hasVariations
                 ? formatVariationsForWooCommerce()
                 : {};
 
             const result = await handleAddToCart(
-                productId, 
-                1, 
-                variationId || null, 
+                productId,
+                1,
+                variationId || null,
                 formattedVariations
             );
             console.log(result, 'result');
@@ -270,7 +274,7 @@ const ProductDetails = ({ data }) => {
                         {variationPrice && !priceLoading && (
                             <div className='space-y-1'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
-                                    {parseFloat(variationPrice)?.toFixed(2)}
+                                    {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
                                 </span>
                             </div>
                         )}
