@@ -115,10 +115,6 @@ const Products = ({ id }) => {
         });
     }
 
-    console.log(value);
-
-
-
     return (
         <div className='flex items-start justify-center gap-10 lg:flex-row flex-col global-padding max-w-[1920px] mx-auto relative'>
             <div className='lg:w-[20%] w-full md:sticky md:top-[170px]'>
