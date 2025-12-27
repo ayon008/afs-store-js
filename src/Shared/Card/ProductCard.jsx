@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import FormButton from '../Button/FormButton';
 import { useTranslations } from 'next-intl';
+import Cookies from 'js-cookie';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -87,6 +88,8 @@ export default function ProductCard({
 
     const t = useTranslations('product');
 
+    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+
 
     return (
         <div className="group w-full bg-[#F7F7F7] flex flex-col justify-between mx-auto rounded-[4px] overflow-hidden h-auto">
@@ -149,10 +152,12 @@ export default function ProductCard({
                     <h2 className="text-[clamp(0.875rem,0.805rem+0.2667vw,1.125rem)] uppercase lg:leading-[20px] leading-[100%] font-bold">
                         {cleanTitle}
                     </h2>
-                    <p
-                        className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
-                        dangerouslySetInnerHTML={{ __html: price }}
-                    />
+                    {
+                        price ? <p
+                            className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
+                            dangerouslySetInnerHTML={{ __html: changePrice }}
+                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1'>{singlePrice}{currencySymbol}</font>
+                    }
                 </div>
                 <div className="">
                     <Link href={`/product/${slug}`}>

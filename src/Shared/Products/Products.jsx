@@ -11,7 +11,7 @@ import { getChildCategories, getProductsByCategoryId } from '@/app/actions/Woo-C
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
-
+import default_image from '../../../public/assets/images/Team/Group-1-3.png.webp';
 
 const Products = ({ id }) => {
     const router = useRouter();
@@ -174,12 +174,11 @@ const Products = ({ id }) => {
                     : <div className='grid xl:grid-cols-3 3xl:grid-cols-5 2xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-3 lg:gap-6 gap-4 lg:w-[80%] w-full grid-cols-2 max-w-[1920px] mx-auto global-margin'>
                         {
                             productData?.map((product, i) => {
-                                const images = product?.images;
-                                const bestseller = product?.acf?.bestseller;
-                                const hoverImage = product?.acf?.img?.url;
-                                const src = Array.isArray(images) && images.length > 0 ? images[0]?.src : null;
+                                const image = product?.featured_img;
+                                const bestseller = product?.bestseller;
+                                const hoverImage = product?.img;
                                 return (
-                                    <ProductCard price={product?.price_html} singlePrice={product?.price} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={src || default_image} key={i} slug={product?.slug} />
+                                    <ProductCard price={product?.price_html} singlePrice={product?.price} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
                                 )
                             })
                         }

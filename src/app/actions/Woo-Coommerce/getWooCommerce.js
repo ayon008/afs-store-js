@@ -155,6 +155,8 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
     }
 };
 
+
+
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
     const currency = await getCurrency();
@@ -173,7 +175,7 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?category=${categoriesIds}&status=publish&stock_status=instock&_fields=id,name,images,slug,categories,price,regular_price,price_with_tax,sale_price,price_html,type&per_page=${per_page}&page=${i}&lang=${locale}&currency=${currency}`;
+            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}`
 
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
@@ -181,16 +183,16 @@ export const getProductsByCategoryId = async (ids, max, min) => {
             const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
             const response = await fetch(url, {
-                headers: {
-                    Authorization: `Basic ${auth}`,
-                },
+                // headers: {
+                //     Authorization: `Basic ${auth}`,
+                // },
                 cache: "force-cache",
                 next: { revalidate: 3600 }
             });
 
             if (!response.ok) break;
 
-            const data = await response.json();
+            const { data } = await response.json();
 
             if (!Array.isArray(data) || data.length === 0) break;
 
@@ -198,6 +200,7 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
             if (data.length < per_page) break;
         }
+
         return allProducts;
 
     } catch (error) {
@@ -212,7 +215,8 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
 export const getChildCategories = async (parentId) => {
     const localeValue = await getLocaleValue();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
+    const locale = await getLocale();
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug&lang=${locale}`;
     // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
     const response = await fetch(url, {
         headers: {
@@ -711,7 +715,7 @@ export async function searchProducts(query) {
             .toString("base64");
 
         const res = await fetch(
-            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`,
+            `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`,
             {
                 headers: {
                     Authorization: `Basic ${authHeader}`

@@ -417,8 +417,20 @@
     "title": "PRIVACY POLICY"
   },
   "product": {
+    "close": "Close",
+    "delete": "Delete all",
     "discover": "DISCOVER",
-    "price": "Price"
+    "latestSearches": "Latest searches :",
+    "Loading": {
+      "": {
+        "": {
+          "": "Loading..."
+        }
+      }
+    },
+    "no": "No products found",
+    "price": "Price",
+    "searchPlaceholder": "Search For..."
   },
   "profile": {
     "account": "Log Out of Your Account",

@@ -417,8 +417,20 @@
     "title": "POLITIQUE DE CONFIDENTIALITÉ"
   },
   "product": {
+    "close": "Fermer",
+    "delete": "Supprimer tout",
     "discover": "DÉCOUVRIR",
-    "price": "Prix"
+    "latestSearches": "Dernières recherches :",
+    "Loading": {
+      "": {
+        "": {
+          "": "Chargement..."
+        }
+      }
+    },
+    "no": "Aucun produit trouvé",
+    "price": "Prix",
+    "searchPlaceholder": "Rechercher..."
   },
   "profile": {
     "account": "Déconnexion de votre compte",

@@ -60,8 +60,10 @@ export default async function BestSellers({ locale }) {
                             const bestseller = product?.acf?.bestseller;
                             const hoverImage = product?.acf?.img?.url;
                             const src = Array.isArray(images) && images.length > 0 ? images[0]?.src : null;
+                            console.log(product?.price);
+                            
                             return (
-                                <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={src || default_image} key={i} slug={product?.slug} />
+                                <ProductCard price={product?.price_html} singlePrice={product?.price} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={src || default_image} key={i} slug={product?.slug} />
                             )
                         }
                         )
