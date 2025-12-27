@@ -1,28 +1,31 @@
 import Image from 'next/image';
 import React from 'react';
 import moment from "moment";
+import BlogContent from "@/Shared/Blog/BlogContent"
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import BlogContent from '@/Shared/Blog/BlogContent';
-import { getPosts } from '@/app/actions/getBlogs';
-
+import { getPosts } from '@/lib/wp';
+import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
+import { getLocale } from 'next-intl/server';
+import { redirect } from '@/i18n/navigation';
 
 
 export async function generateMetadata({ params }) {
+    const localeValue = await getLocaleValue();
     const { slug } = await params;
-
     const response = await fetch(
-        `${process.env.WP_BASE_URL}/wp-json/wp/v2/posts?slug=${slug}&_embed`,
-        { next: { revalidate: 60 } } // optional caching
+        `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/posts?slug=${slug}&_embed`
     );
     const data = await response.json();
     const blog = data[0];
+
     if (!blog) {
         return {
             title: "Blog Not Found",
             description: "The requested blog post could not be found.",
         };
     }
+
 
     const title = decodeEntities(blog?.title?.rendered || "Blog");
 
@@ -60,46 +63,22 @@ export async function generateMetadata({ params }) {
 
 export const revalidate = 60;
 
-// Generate static params without using getPosts (avoids calling getLocale/headers at build time)
 export async function generateStaticParams() {
-    try {
-        const baseEnv = process.env.WP_BASE_URL;
-        if (!baseEnv) {
-            console.warn('[blog/[slug]] WP_BASE_URL is not set. Skipping static params generation.');
-            return [];
-        }
+    const blogs = await getPosts({
+        fetchAll: true,
+        orderby: "date",
+        order: "desc",
+    });
 
-        const baseUrl = baseEnv.replace(/\/$/, '');
-        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=1&_fields=slug`;
-
-        const res = await fetch(apiUrl, {
-            cache: 'no-store',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!res.ok) {
-            console.error('[blog/[slug]] Failed to fetch posts for static params:', res.status, res.statusText);
-            return [];
-        }
-
-        const posts = await res.json();
-
-        if (!Array.isArray(posts)) return [];
-
-        return posts.map((post) => ({
-            slug: post.slug,
-        }));
-    } catch (error) {
-        console.error('[blog/[slug]] Error in generateStaticParams:', error);
-        return [];
-    }
+    return blogs.map(blog => ({
+        slug: blog.slug,
+    }));
 }
 
 export const getCategories = async (id = null) => {
     try {
-        const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/wp-json/wp/v2/categories`;
+        const localeValue = await getLocaleValue();
+        const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/${localeValue}/wp-json/wp/v2/categories`;
 
         const url = id
             ? `${base}/${id}?_embed`
@@ -126,14 +105,14 @@ export const decodeEntities = (str = "") =>
         .replace(/&gt;/g, ">");
 
 const page = async ({ params }) => {
+    const localeValue = await getLocaleValue();
     const { slug } = await params;
     const response = await fetch(
-        `${process.env.WP_BASE_URL}/wp-json/wp/v2/posts?slug=${slug}&_embed`
+        `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/posts?slug=${slug}&_embed`
     );
     const data = await response.json();
-    const blog = data[0];
 
-    console.log(blog);
+    const blog = data[0];
 
     // If the blog is undefined, bail early to avoid later operations that assume the blog exists
     if (!blog) {
@@ -163,51 +142,34 @@ const page = async ({ params }) => {
     const authorName = decodeEntities(blog?._embedded?.author?.[0]?.name ?? ''); // "Antonin"
     const categoryId = blog?.categories?.[0];
     const categoryData = await getCategories(categoryId);
-
     const categoryName = categoryData?.name ?? 'Unknown Category';
-
-
-    if (!blog) {
-        return (
-            <div className="max-w-3xl mx-auto p-10 text-center bg-[#f4f4f4] min-h-screen">
-                <h1 className="text-3xl font-bold mb-4">Blog not found 😢</h1>
-                <Link
-                    href="/blog"
-                    className="text-blue-600 hover:text-blue-800 underline flex items-center justify-center gap-2"
-                >
-                    <ArrowRight size={16} className="rotate-180" /> Back to blogs
-                </Link>
-            </div>
-        );
-    }
 
     const BreadCums = () => {
         return (
-            <div className='absolute top-6 z-20 uppercase'>
+            <div className='absolute top-6 z-20 global-padding uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>Home</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryId}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
+                    <Link className='inline' href={'/'}>Accueil</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryId}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
                 </div>
             </div>
         )
     }
 
+
     return (
         <div className='w-full relative'>
             {/* HERO SECTION */}
-            <header className="relative h-fit w-full overflow-hidden global-margin relative">
+            <header className="relative h-fit w-full overflow-hidden global-margin">
                 <Image
                     src={featuredImage}
                     alt={alt}
                     width={1264}
                     height={780}
                     priority
-                    className="object-cover w-full aspect-[1264/780] max-h-[780px] h-screen object-center"
+                    className="object-cover w-full aspect-[1264/780] max-h-[780px] min-h-screen object-center"
                 />
-                <div className='max-w-[1920px] mx-auto global-padding'>
-                    <BreadCums />
-                </div>
+                <BreadCums />
                 <div className='absolute inset-0 bg-black/40 z-10  backdrop-blur-[4px]'></div>
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 w-full p-8 text-white gap-10 mb-20 flex lg:flex-row flex-col items-start justify-between global-padding max-w-[1920px] mx-auto">
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 w-full p-8 text-white gap-10 mb-20 flex lg:flex-row flex-col items-start justify-between global-padding">
                     <h1 className="global-h1">
                         {blogTitle}
                     </h1>

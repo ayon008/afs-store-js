@@ -1,15 +1,17 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 const BreadCums = () => {
+  const t = useTranslations("breadcum")
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Home
+          {t("home")}
         </Link>
-        / <span className="text-black">PRIVACY POLICY</span>
+        / <span className="text-black">{t("p")}</span>
       </div>
     </div>
   );

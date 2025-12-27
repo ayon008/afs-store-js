@@ -5,13 +5,15 @@ import Link from 'next/link'
 import React from 'react'
 import { useState } from 'react'
 import { Play, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 
 const BreadCums = () => {
+    const t = useTranslations('breadcum');
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>
-                <Link className='inline' href={'/'}>Home</Link> / <span className='text-black'> Visit The Factory</span>
+                <Link className='inline' href={'/'}>{t('home')}</Link> / <span className='text-black'>{t("Visit The Factory")}</span>
             </div>
         </div>
     )
@@ -19,6 +21,7 @@ const BreadCums = () => {
 
 const Page = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const t = useTranslations('visit');
     return (
         <div className="visit-the-factory h-screen relative" style={{ backgroundImage: "url('https://staging.afs-foiling.com/wp-content/uploads/2025/03/image-1-5.png')", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}>
             {/* Blur overlay */}
@@ -27,8 +30,8 @@ const Page = () => {
                 <BreadCums />
                 <div className="flex lg:flex-row items-end flex-col justify-between gap-5 h-full">
                     <div>
-                        <h1 className="text-[40px] max-w-[475px] font-bold leading-[110%] mb-5 text-white">Precision down to the smallest detail.</h1>
-                        <p className="text-[#FFFFFFCC] text-lg" >The production of foils and boards is a real challenge. It requires precision and expertise at every stage, from the design to the final assembly. Our factory is equipped with the latest technology to ensure the best quality and performance.</p>
+                        <h1 className="text-[40px] max-w-[475px] font-bold leading-[110%] mb-5 text-white">{t("precission")}</h1>
+                        <p className="text-[#FFFFFFCC] text-lg" >{t("the-production")}</p>
                     </div>
 
                     <div className="relative overflow-hidden rounded-sm lg:flex-[50%_0_0] flex-1">
@@ -48,7 +51,7 @@ const Page = () => {
                             >
                                 <Play className="h-5 w-5 text-white fill-white" />
                                 <span className="text-white text-base font-semibold tracking-wider">
-                                    PLAY VIDEO
+                                    {t("play")}
                                 </span>
                             </button>
                         </div>
@@ -61,7 +64,7 @@ const Page = () => {
                             >
                                 <Play className="h-4 w-4 text-white fill-white" />
                                 <span className="text-white text-sm font-semibold tracking-wider">
-                                    PLAY VIDEO
+                                    {t("play")}
                                 </span>
                             </button>
                         </div>

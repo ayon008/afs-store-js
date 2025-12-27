@@ -1,11 +1,15 @@
 import Head from "next/head";
 import Image from "next/image";
+import { useTranslations } from 'next-intl';
 
-export default function AfsSupport() {
+
+export default function AfsSupport({ locale }) {
+  const t = useTranslations("support");
+
   return (
     <>
       <Head>
-        <title>AFS Support – Need Help?</title>
+        <title>{t("title")}</title>
 
         {/* Basic SEO */}
         <meta
@@ -53,7 +57,7 @@ export default function AfsSupport() {
         />
 
         <div className="global-padding flex items-center justify-center flex-col gap-[60px] md:gap-[80px] flex-wrap">
-          <h1 className="global-h1">AFS Support</h1>
+          <h1 className="global-h1">{t("title")}</h1>
           <ul className="w-full flex flex-wrap gap-[10px] items-center justify-center">
             <li>
               <a
@@ -84,7 +88,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Repair my product
+                    {t("repair")}
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -134,7 +138,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    User manual
+                    {t("user-manual")}
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -198,7 +202,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Spare parts
+                    {t("parts")}
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -248,7 +252,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Equipment trade-in
+                    {t("equipement")}
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -348,7 +352,7 @@ export default function AfsSupport() {
                 </svg>
                 <div className="flex items-center gap-[4px] justify-center flex-col">
                   <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                    Service request
+                    {t("service-req")}
                   </p>
                   <icon className="arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <svg
@@ -377,13 +381,11 @@ export default function AfsSupport() {
         className="flex flex-col gap-[80px] justify-center items-center global-margin global-padding"
       >
         <div className="flex flex-col gap-[20px] max-w-[680px]">
-          <h2 className="global-h2 text-center">Repair my product</h2>
+          <h2 className="global-h2 text-center">{t("repair-my")}</h2>
           <p className="global-p text-center">
-            Here you will find all the information you need about repair options
-            for your product. Select the category you are interested in to find
-            out about the repair options available.{" "}
+            {t("repair-here")}{" "}
             <strong>
-              These services only apply to AFS, AHD, and Sealion products.
+              {t("these")}
             </strong>
           </p>
         </div>
@@ -424,7 +426,7 @@ export default function AfsSupport() {
               </svg>
               <h2 className="global-h2">Wing</h2>
               <p className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)]">
-                Contact an authorized AFS repairer:
+                {t("contact")}
               </p>
               <ul>
                 <li>
@@ -434,7 +436,7 @@ export default function AfsSupport() {
                     rel="noopener noreferrer"
                     className="global-blue font-semibold"
                   >
-                    I broke my sail
+                    {t("i-broke")}
                   </a>
                 </li>
                 <li>
@@ -504,14 +506,14 @@ export default function AfsSupport() {
                   stroke-linejoin="round"
                 ></path>
               </svg>
-              <h2 className="global-h2">Foil and boards</h2>
+              <h2 className="global-h2">{t("foil")}</h2>
               <p className="max-w-[520px] text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] text-[#FFFFFFCC]">
-                Our repair experts know how to restore your AFS equipment.
+                {t("our-repair")}
               </p>
               <ul>
                 <li>
                   <a href="/demande-sav/" className="global-blue font-semibold">
-                    Contact us for a quote.
+                    {t("contact-us")}
                   </a>
                 </li>
               </ul>
@@ -519,8 +521,7 @@ export default function AfsSupport() {
           </div>
         </div>
         <p className="text-center max-w-[680px] font-semibold">
-          In addition, we have prepared tutorial articles to guide you in
-          resolving the most common issues on your own.
+          {t("in-addition")}
         </p>
       </div>
 
@@ -528,7 +529,7 @@ export default function AfsSupport() {
         id="Notice"
         className="flex flex-col gap-[40px] justify-center items-center global-margin global-padding"
       >
-        <h2 className="global-h2">User manual</h2>
+        <h2 className="global-h2">{t("user-manual")}</h2>
         <div className="flex flex-wrap gap-x-[40px] gap-y-[40px] justify-between w-[1080px] max-w-[100%]">
           <div className="group w-[calc(50%-20px)] md:w-[250px]">
             <a
@@ -546,7 +547,7 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Foil — user manual
+                Foil — {t("user-manual")}
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -586,7 +587,7 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Board — user manual
+                {t("board")} - {t("user-manual")}
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -625,7 +626,7 @@ export default function AfsSupport() {
               />
 
               <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-                Wing — user manual
+                Wing — {t("user-manual")}
               </p>
 
               <span className="flex items-center gap-[4px] arrow block md:opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -655,7 +656,7 @@ export default function AfsSupport() {
         id="Pieces"
         className="flex flex-col gap-[40px] justify-center items-center global-margin global-padding max-w-[1920px] mx-auto"
       >
-        <h2 className="global-h2">Spare parts</h2>
+        <h2 className="global-h2">{t("parts")}</h2>
         <div
           id="Reprise"
           className="flex gap-[10px] h-[auto] md:h-[clamp(37.5rem,18.3649rem+25.9459vw,49.5rem)] bg-[#dbdbdb] rounded w-full justify-between items-center flex-col md:flex-row"
@@ -683,17 +684,16 @@ export default function AfsSupport() {
                 stroke-linejoin="round"
               ></path>
             </svg>
-            <h2 className="global-h2">Equipment recovery</h2>
+            <h2 className="global-h2 text-center">{t("recovery-equip")}</h2>
             <p className="text-center text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold">
-              We will take back your old AFS foil when you purchase a new one.
-              AFS foil!
+              {t("we-will")}
             </p>
             <a
               className="flex gap-[4px] justify-center items-center"
               href="https://afs-foiling.com/fr/fr/reprise-materiel/"
             >
               <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
-                Request a return
+                {t("return")}
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -756,14 +756,14 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-40 font-semibold text-[#404040]">
               <p class="py-[16px]">
-                Consult this{" "}
+                {t("consult")}{" "}
                 <a
                   className="global-blue"
                   href="https://afs-foiling.com/fr/fr/votre-foil-fait-du-bruit-cela-en-devient-genant-il-existe-une-solution/"
                 >
-                  article
+                  {t("article")}
                 </a>{" "}
-                to quickly and easily resolve the issue,{" "}
+                {t("quicly")}{" "}
                 <a className="global-blue" href="https://youtu.be/T0l2ZrmIXok">
                   or watch this video.
                 </a>
@@ -774,7 +774,7 @@ export default function AfsSupport() {
 
         <div class="flex flex-col gap-[12px] w-[100%] max-w-[1060px]">
           <h3 className="text-[clamp(1.5rem,1.4274rem+0.3226vw,1.75rem)] font-bold">
-            Board
+            {t("board")}
           </h3>
           <div class="relative">
             <input type="checkbox" id="acc2" class="hidden peer" />
@@ -782,8 +782,7 @@ export default function AfsSupport() {
               for="acc2"
               class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
-              I need to repair my board, is it possible to know the color or RAL
-              code?
+              {t("need")}
               <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -803,54 +802,44 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
               <p class="py-4">
-                Please note, there may be slight differences between the color
-                code and the actual appearance of the board depending on the
-                techniques used in the workshop or factory. The codes provided
-                are those that come closest to the final result.
+                {t("need-please")}
               </p>
 
               <p class="py-2">
-                The AHD blue on our boards (Thunderbolt, Topaz, Compact) is
-                RAL5012.
+                {t("ahd")}
               </p>
 
               <p class="py-2">Colors for AFS Fire and Fly:</p>
               <ul class="py-2">
-                <li>Red: RAL 3020s</li>
-                <li>White: RAL 9010</li>
-                <li>Gray: RAL 7012</li>
-                <li>Blue: RAL 5019</li>
-              </ul>
+                {t.rich("size", {
+                  li: (chunks) => <li>{chunks}</li>
+                })}              </ul>
 
-              <p class="py-2">Colors for the Sealion Strapped:</p>
+              <p class="py-2">{t("color")}</p>
               <ul class="py-2">
                 <li>Navy blue rails: RAL 5013</li>
               </ul>
 
               <p class="py-2">Colors for the Sealion Rasta:</p>
               <ul class="py-2">
-                <li>
-                  Red: <span>NCS S 0570-Y90R</span>
-                </li>
-                <li>
-                  Green: <span>NCS S 0565-G50Y</span>
-                </li>
-                <li>
-                  Pads: <span>Amarillo-7 / Verde-6 / Rojo-22 / Blanco</span>
-                </li>
+                {t.rich("color-size", {
+                  li: (chunks) => <li>{chunks}</li>,
+                  span: (chunks) => <span>{chunks}</span>
+                })}
               </ul>
 
               <p class="py-2">Colors for AHD SL-S:</p>
               <ul class="py-2">
-                <li>Black: Hexa #292B2C</li>
-                <li>Blue: Hexa #1B8AB2</li>
+                {t.rich("black", {
+                  li: (chunks) => <li>{chunks}</li>,
+                })}
               </ul>
 
-              <p> class="py-4"Colors for AHD Fury:</p>
-              <ul class="py-2">
-                <li>Blue gradient: Hexa #1B8AB2 → #292B2C</li>
-                <li>Red: Hexa #FE5558</li>
-              </ul>
+              {t.rich("ay", {
+                p: (chunks) => <p className="py-4">{chunks}</p>,
+                ul: (chunks) => <ul className="py-2 list-disc pl-5">{chunks}</ul>,
+                li: (chunks) => <li>{chunks}</li>
+              })}
             </div>
           </div>
         </div>
@@ -865,8 +854,7 @@ export default function AfsSupport() {
               for="acc3"
               class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
-              I want to change the strut or center strut of my wing, how can I
-              identify my wing generation?
+              {t("change")}
               <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -886,9 +874,9 @@ export default function AfsSupport() {
             </label>
             <div class="max-h-0 overflow-hidden transition-[max-height,padding] duration-300 peer-checked:max-h-[100%] font-semibold text-[#404040]">
               <p class="py-4">
-                WILF → 3 possible versions:
+                {t("wilf")}
                 <ul class="py-2">
-                  <li>V1 → black cap</li>
+                  <li>{t("v1")}</li>
                 </ul>
                 <Image
                   class="py-2"
@@ -900,7 +888,7 @@ export default function AfsSupport() {
                 />
                 <ul class="py-2">
                   <li>
-                    V2 → red cap without deflation valve on the center strut
+                    {t("v2")}
                   </li>
                 </ul>
                 <Image
@@ -913,19 +901,15 @@ export default function AfsSupport() {
                 />
                 <ul class="py-2">
                   <li>
-                    V3 → red cap and deflation valve on the center strut -
-                    connection tube between strut and center strut: angled on
-                    the strut and straight on center strut / connection tube
-                    between strut and center strut: straight on the strut and
-                    angled on center strut
+                    {t("v3")}
                   </li>
                 </ul>
-                WILD → only one possible version DIAMOND → only one possible
-                version
+                {t('last')}
               </p>
             </div>
           </div>
         </div>
+
       </div>
     </>
   );

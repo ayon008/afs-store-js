@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from "gsap"
+import { useTranslations } from 'next-intl';
 
 const Footer = () => {
     const [first, setFirst] = useState(false);
@@ -169,6 +170,8 @@ const Footer = () => {
         return () => ctx.revert();
     }, { dependencies: [fourth] });
 
+    const t = useTranslations("footer");
+
     return (
         <footer className='bg-[#f0f0f0]'>
             {/* TOP ICON ROW */}
@@ -293,7 +296,7 @@ const Footer = () => {
                     <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/12/svgviewer-output-36.svg'} width={172} height={144} alt='Logo-Afs' className='mb-10' />
                     <div className="news-letter max-w-[360px] w-full flex flex-col gap-4">
                         <h3 className="text-[16px] font-bold leading-[1.1] text-[#404040]">
-                            Enter your email address to subscribe to our newsletters
+                            {t("email")}
                         </h3>
 
                         <form className="flex flex-col gap-3 text-black">
@@ -329,19 +332,19 @@ const Footer = () => {
                             </div>
                             <span className='flex items-start gap-1 text-[#999] text-lg font-lg leading-[100%]'>
                                 <input type='checkbox' className='' />
-                                <label htmlFor="">I accept the privacy policy and terms of use</label>
+                                <label htmlFor="">{t("accept")}</label>
                             </span>
                         </form>
                     </div>
                 </div>
                 <div className='lg:flex-1 w-full grid lg:grid-cols-4 grid-cols-1 lg:gap-5 lg:border-none border rounded-sm overflow-hidden'>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFirst(!first); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Universe
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFirst(!first); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("Universe")}
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${first ? 'rotate-180' : ''}`} />
                         </h3>
                         <ul ref={contentRef} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
                             <li className='pt-5'>
-                                <Link href={''} className=''>Wingfoil</Link>
+                                <Link href={``} className=''>Wingfoil</Link>
                             </li>
                             <li>
                                 <Link href={''} className=''>Downwind</Link>
@@ -373,99 +376,70 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setSecond(!second); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Service Client
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setSecond(!second); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("client")}
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${second ? 'rotate-180' : ''}`} />
                         </h3>
                         <ul ref={contentRef2} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            <li className='pt-5'>
-                                <Link href={''} className=''>Foil Configurator</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Best match stab</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Comparator 3 stabs / front wing</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Mast comparison</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Board Construction</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Equipment</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Recovery</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Foil Characteristics</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Screw Size</Link>
-                            </li>
+                            {t.rich("li-1", {
+                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
+                                item: (chunks) => <li>{chunks}</li>,
+
+                                link1: (chunks) => <Link href="/foil-configurator">{chunks}</Link>,
+                                link2: (chunks) => <Link href="/best-match-stab">{chunks}</Link>,
+                                link3: (chunks) => <Link href="/comparator">{chunks}</Link>,
+                                link4: (chunks) => <Link href="/mast-comparison">{chunks}</Link>,
+                                link5: (chunks) => <Link href="/board-construction">{chunks}</Link>,
+                                link6: (chunks) => <Link href="/equipment">{chunks}</Link>,
+                                link7: (chunks) => <Link href="/recovery">{chunks}</Link>,
+                                link8: (chunks) => <Link href="/foil-characteristics">{chunks}</Link>,
+                                link9: (chunks) => <Link href="/screw-size">{chunks}</Link>
+                            })}
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setThird(!third); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>About Us
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setThird(!third); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("about")}
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${third ? 'rotate-180' : ''}`} />
                         </h3>
                         <ul ref={contentRef3} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            <li className='pt-5'>
-                                <Link href={''} className=''>Afs advance</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Made in france</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Notice</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Team</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Join Us</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Legal Notices</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>General terms and conditions of sale</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Privacy Policy</Link>
-                            </li>
+                            {t.rich("li-2", {
+                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
+                                item: (chunks) => <li>{chunks}</li>,
+
+                                link1: (chunks) => <Link href="/afs-advance">{chunks}</Link>,
+                                link2: (chunks) => <Link href="/made-in-france">{chunks}</Link>,
+                                link3: (chunks) => <Link href="/notice">{chunks}</Link>,
+                                link4: (chunks) => <Link href="/team">{chunks}</Link>,
+                                link5: (chunks) => <Link href="/join-us">{chunks}</Link>,
+                                link6: (chunks) => <Link href="/legal-notices">{chunks}</Link>,
+                                link7: (chunks) => (
+                                    <Link href="/terms-and-conditions">{chunks}</Link>
+                                ),
+                                link8: (chunks) => <Link href="/privacy-policy">{chunks}</Link>
+                            })}
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFourth(!fourth); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>Purchasing tools
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFourth(!fourth); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("tools")}
                             <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${fourth ? 'rotate-180' : ''}`} />
                         </h3>
                         <ul ref={contentRef4} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            <li className='pt-5'>
-                                <Link href={''} className=''>Afs advance</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Made in france</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Notice</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Team</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Join Us</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Legal Notices</Link>
-                            </li>
+                            {t.rich("li-3", {
+                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
+                                item: (chunks) => <li>{chunks}</li>,
+
+                                link1: (chunks) => <Link href="/afs-advance">{chunks}</Link>,
+                                link2: (chunks) => <Link href="/made-in-france">{chunks}</Link>,
+                                link3: (chunks) => <Link href="/notice">{chunks}</Link>,
+                                link4: (chunks) => <Link href="/team">{chunks}</Link>,
+                                link5: (chunks) => <Link href="/join-us">{chunks}</Link>,
+                                link6: (chunks) => <Link href="/legal-notices">{chunks}</Link>
+                            })}
                         </ul>
                     </div>
                 </div>
             </div>
             <div className='global-padding'>
-                <p className='text-base font-semibold pt-4 pb-5 global-border-top text-[#111111bf] leading-[100%]'>Foil and Co., All rights are reserved. ©2025</p>
+                <p className='text-base font-semibold pt-4 pb-5 global-border-top text-[#111111bf] leading-[100%]'>{t("copy")}</p>
             </div>
         </footer>
     );

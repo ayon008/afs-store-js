@@ -4,17 +4,19 @@ import { getCategories as getCategoriesFromWP } from '@/lib/wp';
 import Image from 'next/image';
 import Link from 'next/link';
 import BlogCard from '@/Shared/Card/BlogCard';
+import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 
 
 
 const categoryPost = async (id) => {
     try {
+        const localeValue = await getLocaleValue();
         if (!id) throw new Error("Category ID is required");
 
         const base = process.env.WP_BASE_URL?.replace(/\/$/, "");
         if (!base) throw new Error("WP_BASE_URL is missing in environment variables");
 
-        const url = `${base}/wp-json/wp/v2/posts?categories=${id}&_embed&per_page=100`;
+        const url = `${base}/${localeValue}/wp-json/wp/v2/posts?categories=${id}&_embed&per_page=100`;
 
         const res = await fetch(url, {
             next: { revalidate: 60 }, // ISR caching

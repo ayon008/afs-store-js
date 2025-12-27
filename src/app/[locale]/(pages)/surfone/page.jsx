@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const BreadCums = () => {
+  const b = useTranslations("breadcum");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
         <Link className="inline" href="/">
-          Home
+          {b("home")}
         </Link>
         / <span className="text-black">Surfone</span>
       </div>
@@ -16,6 +18,9 @@ const BreadCums = () => {
 };
 
 export default function Surfone() {
+  const t = useTranslations("surfone");
+  const g = useTranslations("wing-foil-bordeaux-gliss-up");
+
   return (
     <>
       {/* HERO */}
@@ -27,13 +32,12 @@ export default function Surfone() {
 
             <div className="flex flex-col gap-[20px]">
               <h1 className="global-h1">
-                AFS products are available in the
-                <span className="text-[#1e98ff]">Surfone</span> store
+                {g("afs-products-are-available-at-the")}
+                <span className="text-[#1e98ff]"> Surfone</span> {g("store")}
               </h1>
 
               <p className="max-w-[360px] text-[18px] font-semibold text-[#111111B2] max-[1024px]:text-[16px]">
-                Surfone offers a wide range of products for all levels and types
-                of practice, including AFS equipment
+                {t("sub_h")}
               </p>
             </div>
           </div>
@@ -41,7 +45,7 @@ export default function Surfone() {
           {/* HERO FOOTER */}
           <div className="flex flex-col gap-[20px] border-b border-black/40 pb-[20px] leading-[1.2] md:flex-row md:flex-wrap md:justify-between">
             <div className="flex flex-col gap-[4px]">
-              <h4 className="font-bold text-[#111111]">Store</h4>
+              <h4 className="font-bold text-[#111111]">{t("store")}</h4>
               <a
                 href="https://www.surfone-leucate.com/"
                 target="_blank"
@@ -97,7 +101,7 @@ export default function Surfone() {
             rel="noopener noreferrer"
             className="absolute bottom-[20px] left-[20px] z-[2] flex items-center justify-center gap-[4px] rounded-[4px] bg-[#1f1f1f] p-[12px] text-[14px] font-bold uppercase text-white"
           >
-            Store access map
+            {g("Store access map")}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="12"
@@ -117,7 +121,7 @@ export default function Surfone() {
 
       {/* HISTOIRE */}
       <div className="global-margin global-padding flex flex-col gap-[40px] max-w-[1920px] mx-auto">
-        <h2 className="global-h2">History</h2>
+        <h2 className="global-h2">{g("History")}</h2>
 
         <div className="flex flex-col gap-[40px] md:flex-row">
           <div className="flex basis-[25%] flex-col space-y-[12px] pt-[120px] max-[1024px]:pt-0">
@@ -127,22 +131,17 @@ export default function Surfone() {
               src="https://afs-foiling.com/wp-content/uploads/2024/01/image-4-2.png"
               className="w-full"
             />
-            <span>Store in Bordeaux</span>
+            <span>{g("Store in Bordeaux")}</span>
           </div>
 
           <div className="flex-1">
             <p className="max-w-[1024px] pb-[40px] text-[18px] font-semibold leading-[130%] text-[#111]/75">
-              The Surfone store was set up in 1978 in the seaside resort of Port
-              Leucate on the Terres Catalanes, a mecca for board sports renowned
-              for its Tramontane wind. The team welcomes you in a 400m2 space,
-              offering a wide range of products for all levels and types of
-              practice.
+              {t("The Surfone store was")}
             </p>
 
             <h2 className="mb-[40px] text-[32px] font-semibold uppercase leading-[105%] text-[#111]/70">
-              <span className="text-[#1D98FF]">"</span>The sales staff are keen
-              sailors who don't hesitate to get in the water to test all the
-              products so they can give you the best advice!
+              <span className="text-[#1D98FF]">"</span>
+              {t("The sales staff")}
               <span className="text-[#1D98FF]">"</span>
             </h2>
 
@@ -158,10 +157,7 @@ export default function Surfone() {
                   Laura Fernandez “LAURA WIND
                 </p>
                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
-                  Passionate about nature, and windsurfing in particular, Laura
-                  has recently taken up windsurf-foil and wing foil to give you
-                  even better advice at Surfone. She’s an aficionado of stand-up
-                  paddling, preferably in the waves, with the occasional ballad.
+                  {t("Passionate about nature")}
                 </p>
               </div>
 
@@ -172,7 +168,7 @@ export default function Surfone() {
                   src="https://afs-foiling.com/wp-content/uploads/2024/01/image-1-6.png"
                   className="w-full"
                 />
-                <span>Gliss Up Team</span>
+                <span>{g("gliss")}</span>
               </div>
             </div>
           </div>
