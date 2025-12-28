@@ -1,6 +1,6 @@
 "use server"
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
 
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
@@ -10,12 +10,12 @@ const authHeader = Buffer
 
 // get All the parent Categories
 export const getParentCategory = async (slug) => {
-    const localeValue = await getLocaleValue();
+    const locale = await getLocale();
     if (!slug || typeof slug !== "string") {
         throw new Error("A valid category slug must be provided.");
     }
 
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(slug)}`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(slug)}&lang=${locale}`;
 
     try {
         const response = await fetch(url, {

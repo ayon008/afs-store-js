@@ -19,8 +19,18 @@ const Products = ({ id, childCategories }) => {
     const [isPending, startTransition] = useTransition();
     const t = useTranslations('product');
     const a = useTranslations('filter');
-    const currency = Cookies.get('currency');
-    const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+    
+    // Initialiser avec une valeur par défaut stable pour éviter les erreurs d'hydratation
+    const [currencySymbol, setCurrencySymbol] = useState('€');
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Mettre à jour le symbole de devise après le montage du composant (côté client uniquement)
+    useEffect(() => {
+        setIsMounted(true);
+        const currency = Cookies.get('currency');
+        const symbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+        setCurrencySymbol(symbol);
+    }, []);
 
     const [ids, setIds] = useState([id]);
 

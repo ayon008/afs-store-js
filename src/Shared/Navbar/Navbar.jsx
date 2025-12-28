@@ -28,17 +28,14 @@ const Navbar = ({ NAV_LINKS }) => {
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+  
+  // Initialiser avec une valeur par défaut stable pour éviter les erreurs d'hydratation
+  const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  const [isMounted, setIsMounted] = useState(false);
 
-  const [selectedCurrency, setSelectedCurrency] = useState(() => {
-    const cookieCurrency = Cookies.get('currency');
-    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
-      return cookieCurrency;
-    }
-    currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD' ? 'usd' : 'euro';
-  });
-
-  // Update selectedCurrency when cart currency changes, but prioritize cookie
+  // Initialiser la devise après le montage du composant (côté client uniquement)
   useEffect(() => {
+    setIsMounted(true);
     const cookieCurrency = Cookies.get('currency');
     if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
       setSelectedCurrency(cookieCurrency);
@@ -46,7 +43,19 @@ const Navbar = ({ NAV_LINKS }) => {
       const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : 'usd';
       setSelectedCurrency(newCurrency);
     }
-  }, [currentCurrencySymbol]);
+  }, []);
+
+  // Update selectedCurrency when cart currency changes, but prioritize cookie
+  useEffect(() => {
+    if (!isMounted) return;
+    const cookieCurrency = Cookies.get('currency');
+    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
+      setSelectedCurrency(cookieCurrency);
+    } else {
+      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : 'usd';
+      setSelectedCurrency(newCurrency);
+    }
+  }, [currentCurrencySymbol, isMounted]);
 
   // Set cookie whenever selectedCurrency changes
   useEffect(() => {

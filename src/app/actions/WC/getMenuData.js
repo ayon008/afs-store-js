@@ -2,6 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { getCurrency } from "../Woo-Coommerce/getWooCommerce";
+import { convertWpUrlToNextUrl } from "@/lib/urlConverter";
 
 
 
@@ -51,20 +52,61 @@ export const getMenuItems = async () => {
 
         const items = data;
         const menuData = items?.map((item) => {
+            // Convertir l'URL principale
+            const convertedHref = item?.url 
+                ? convertWpUrlToNextUrl(item.url, locale) 
+                : "#";
+
             return (
                 {
                     name: item?.title ?? "",
-                    href: item?.url ?? "#",
+                    href: convertedHref,
 
                     sublinks: Array.isArray(item?.children)
-                        ? item.children.map((child) => ({
-                            name: child?.title ?? "",
-                            id: child?.id ?? null,
-                            button_one: child?.button_one ?? null,
-                            button_two: child?.button_two ?? null,
-                            products: child?.menu_products ?? [],
-                            url: child?.url ?? null,
-                        }))
+                        ? item.children.map((child) => {
+                            // Convertir l'URL du sous-lien
+                            const convertedChildUrl = child?.url 
+                                ? convertWpUrlToNextUrl(child.url, locale) 
+                                : null;
+
+                            // Convertir les URLs des produits
+                            const convertedProducts = Array.isArray(child?.menu_products)
+                                ? child.menu_products.map((product) => ({
+                                    ...product,
+                                    url: product?.url 
+                                        ? convertWpUrlToNextUrl(product.url, locale) 
+                                        : product?.url
+                                }))
+                                : [];
+
+                            // Convertir les URLs des boutons
+                            const convertedButtonOne = child?.button_one 
+                                ? {
+                                    ...child.button_one,
+                                    url: child.button_one?.url 
+                                        ? convertWpUrlToNextUrl(child.button_one.url, locale) 
+                                        : child.button_one?.url
+                                }
+                                : null;
+
+                            const convertedButtonTwo = child?.button_two 
+                                ? {
+                                    ...child.button_two,
+                                    url: child.button_two?.url 
+                                        ? convertWpUrlToNextUrl(child.button_two.url, locale) 
+                                        : child.button_two?.url
+                                }
+                                : null;
+
+                            return {
+                                name: child?.title ?? "",
+                                id: child?.id ?? null,
+                                button_one: convertedButtonOne,
+                                button_two: convertedButtonTwo,
+                                products: convertedProducts,
+                                url: convertedChildUrl,
+                            };
+                        })
                         : [],
                 }
             )

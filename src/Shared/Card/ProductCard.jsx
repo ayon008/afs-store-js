@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import FormButton from '../Button/FormButton';
 import { useTranslations } from 'next-intl';
 import Cookies from 'js-cookie';
@@ -88,7 +88,17 @@ export default function ProductCard({
 
     const t = useTranslations('product');
 
-    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+    // Initialiser avec une valeur par défaut stable pour éviter les erreurs d'hydratation
+    const [currencySymbol, setCurrencySymbol] = useState('€');
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Mettre à jour le symbole de devise après le montage du composant (côté client uniquement)
+    useEffect(() => {
+        setIsMounted(true);
+        const cookieCurrency = Cookies.get('currency');
+        const symbol = cookieCurrency === 'euro' ? '€' : cookieCurrency === 'usd' ? '$' : '£';
+        setCurrencySymbol(symbol);
+    }, []);
 
 
     return (
@@ -103,10 +113,7 @@ export default function ProductCard({
                         alt={alt || name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className={` object-contain absolute inset-0 pt-5
-      opacity-100 ${hoverImage && "group-hover:opacity-0"}
-      transition-opacity duration-300
-      ease-[cubic-bezier(.19,1,.22,1)]`}
+                        className={`object-contain absolute inset-0 pt-5 opacity-100 ${hoverImage && "group-hover:opacity-0"} transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]`}
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =
@@ -121,12 +128,7 @@ export default function ProductCard({
                             alt={`${alt || name} - hover`}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            className="
-        object-cover absolute inset-0
-        opacity-0 group-hover:opacity-100
-        transition-opacity duration-300
-        ease-[cubic-bezier(.19,1,.22,1)]
-      "
+                            className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]"
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.classList.add('opacity-0');
