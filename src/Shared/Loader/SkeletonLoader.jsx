@@ -17,16 +17,6 @@ export default function SkeletonProjectCard() {
                 </div>
                 <div className="h-10 bg-gray-300 rounded w-1/2 mx-auto"></div>
             </div>
-
-            {/* Shimmer animation for image */}
-            <style jsx>{`
-        @keyframes shimmer {
-          100% { transform: translateX(120%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 1.2s infinite;
-        }
-      `}</style>
         </div>
     );
 }

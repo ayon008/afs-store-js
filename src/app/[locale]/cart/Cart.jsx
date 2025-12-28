@@ -3,7 +3,6 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag, Package } from 'lucide-react';
 import useCart from '@/Shared/Hooks/useCart';
-import FormButton from '@/Shared/Button/FormButton';
 import CartList from './CartList';
 import ShippingMethodCard from '@/Shared/Shipping/ShippingMethodCard';
 import { selectShippingRate } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';

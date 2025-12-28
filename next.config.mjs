@@ -28,6 +28,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'upload.wikimedia.org',
       },
+      {
+        protocol: 'https',
+        hostname: 'fast.afs-foiling.fr',
+      },
+      {
+        protocol: 'https',
+        hostname: 'symphonious-entremet-0885e2.netlify.app',
+      },
     ],
   },
 };

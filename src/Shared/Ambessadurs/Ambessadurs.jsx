@@ -5,27 +5,23 @@ import Sec1 from './Sec1';
 import Map from './Map';
 import { allAmbassadors } from '@/app/actions/WC/getAllAmbessador';
 import AmbassadorsCard from '../Card/AmbassedurCard';
+import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 
 const Ambassedor = ({ categories, countries }) => {
+    const t = useTranslations("ambassadors");
     const [country, setCountry] = useState(null);
-    const [data, setData] = useState([]);
-    const [countryName, setCountryName] = useState("COUNTRY");
-    // Discipline
+    const [countryName, setCountryName] = useState(t("country"));
     const [activeTab, setActiveTab] = useState(null);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const load = async () => {
-            const allData = await allAmbassadors(activeTab, country);
-            setData(allData);
-            setLoading(false);
-        };
-        load();
-    }, [activeTab, country]);
+    const { data, isLoading } = useQuery({
+        queryKey: ['ambassadors', activeTab, country],
+        queryFn: async () => await allAmbassadors(activeTab, country),
+    })
 
 
 
-    if (loading) {
+    if (isLoading) {
         return <div className='h-[400px] w-full flex items-center justify-center'>
             <p className='text-3xl text-center'>Loading....</p>
         </div>

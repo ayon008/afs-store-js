@@ -1,6 +1,6 @@
 
 "use client";
-import { ArrowLeft, DollarSign, Euro, Search, X } from "lucide-react";
+import { ArrowLeft, DollarSign, Euro, Search, X, Info, PoundSterling } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // import SearchOverlay from "../../components/search";
@@ -12,25 +12,55 @@ import { useGSAP } from "@gsap/react";
 import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
-import { useLocale } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import SearchOverlay from "./search";
+import Cookies from 'js-cookie';
+import Notification from "../Notification/Notification";
 
 const Navbar = ({ NAV_LINKS }) => {
+  const t = useTranslations("common");
 
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const locale = useLocale();
-  const { cart, sideCartOpen, openSideCart, closeSideCart } = useCart();
+  const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart, loadCart } = useCart();
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
-  const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    const cookieCurrency = Cookies.get('currency');
+    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
+      return cookieCurrency;
+    }
+    currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD' ? 'usd' : 'euro';
+  });
+
+  // Update selectedCurrency when cart currency changes, but prioritize cookie
+  useEffect(() => {
+    const cookieCurrency = Cookies.get('currency');
+    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
+      setSelectedCurrency(cookieCurrency);
+    } else {
+      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : 'usd';
+      setSelectedCurrency(newCurrency);
+    }
+  }, [currentCurrencySymbol]);
+
+  // Set cookie whenever selectedCurrency changes
+  useEffect(() => {
+    if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
+      Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax' });
+    }
+  }, [selectedCurrency]);
+
+
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
+  const [notification, setNotification] = useState(null);
 
   const totalQty = cart?.items_count;
-  const pathName = usePathname();
 
   // Effet pour gérer la redirection après la soumission du formulaire
   useEffect(() => {
@@ -41,22 +71,76 @@ const Navbar = ({ NAV_LINKS }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldRedirect]);
 
-  const [blogData, setBlogData] = useState(null);
-  const slugMatch = pathName.match(/^\/blog\/([^\/]+)/)
-  const slug = slugMatch ? slugMatch[1] : null
 
-  const handleSubmit = (e) => {
+  // Auto-hide notification after 5 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const selectedValues = {
       language: selectedLanguage, // "en" ou "fr"
       currency: selectedCurrency, // "usd" ou "euro"
     };
-    if (selectedLanguage !== locale) {
+
+    // Clear cart if language or currency changes
+    const languageChanged = selectedLanguage !== locale;
+
+    // Get current currency from cart or default to 'euro'
+    const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+    const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+    const currencyChanged = selectedCurrency !== currentCurrency;
+
+    // Clear the cart if language or currency changes
+    if (languageChanged || currencyChanged) {
+      try {
+        // Check if cart has items before clearing
+        const hasItems = cart && cart.items && cart.items.length > 0;
+
+        if (hasItems) {
+          const result = await handleClearCart();
+
+          // Show notification if cart was cleared successfully
+          if (result && result.success) {
+            if (languageChanged) {
+              setNotification(t("cartClearedLanguage"));
+            } else if (currencyChanged) {
+              setNotification(t("cartClearedCurrency"));
+            }
+          } else {
+            console.error('Failed to clear cart:', result?.error);
+          }
+        }
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+      }
+    }
+
+    if (languageChanged) {
       const currentPath = '/';
       const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
       setRedirectPath(newPath);
       setShouldRedirect(true);
     } else {
+      // If only currency changed, reload cart to get updated currency
+      if (currencyChanged) {
+        // Set cookie with 1 year expiration
+        const currentPath = '/';
+        // Note: Currency change might require locale change in WooCommerce
+        // For now, reload the page to ensure currency is updated
+        const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
+        setRedirectPath(newPath);
+        setShouldRedirect(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
       setPopUp(false);
     }
     return selectedValues;
@@ -124,7 +208,17 @@ const Navbar = ({ NAV_LINKS }) => {
 
   return (
     <>
-      <nav className="sticky left-0 right-0 top-0 z-[99] text-white w-full">
+      {/* Notification Banner */}
+      {notification && (
+        <Notification
+          message={notification}
+          type="info"
+          onClose={() => setNotification(null)}
+          duration={5000}
+        />
+      )}
+
+      <nav className={notification ? 'sticky left-0 right-0 top-0 z-[99] text-white w-full mt-[73px]' : 'sticky left-0 right-0 top-0 z-[99] text-white w-full'}>
         {/* Logo and Search Part */}
         <div
           className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between"
@@ -142,7 +236,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 width={150}
                 height={45}
                 priority
-                className=""
+                className="lg:w-[150px] aspect-[150/45] w-[120px]"
               />
             </Link>
           </div>
@@ -163,7 +257,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
             {/* Profile */}
 
-            <Link href={"/login"}>
+            <Link href={`/${locale}/login`}>
               <svg
                 width="24"
                 height="24"
@@ -182,7 +276,7 @@ const Navbar = ({ NAV_LINKS }) => {
             {/* Cart */}
             <button
               onClick={openSideCart}
-              className="flex items-center justify-center relative p-1 md:p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
+              className="flex items-center justify-center relative p-1 md:p-2 rounded-full cursor-pointer transition-colors duration-200"
             >
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none">
 
@@ -219,12 +313,21 @@ const Navbar = ({ NAV_LINKS }) => {
             </button>
 
             {/* Language */}
-            <button onClick={() => setPopUp(true)} className="hidden md:flex items-center justify-center text-sm font-extrabold p-2 rounded-full hover:bg-gray-700 transition-colors duration-200">
-              <span className="fi fi-fr fis mr-2 scale-125"></span>
-              <span className="text-white text-[0rem] font-extrabold tracking-wide">
-                FR
-              </span>
-            </button>
+            <div onClick={() => setPopUp(true)} className="flex items-center">
+              <button className="flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
+                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} md:mr-2 mr-0 md:scale-125 scale-100`}></span>
+                <span className="text-white font-extrabold tracking-wide md:block hidden">
+                  {locale === 'fr' ? 'FR' : 'EN'}
+                </span>
+              </button>
+              <span>/</span>
+              {/* Currency */}
+              <div>
+                {
+                  selectedCurrency === 'euro' ? <div className="flex items-center gap-1"><Euro className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">EUR</span></div> : selectedCurrency === 'usd' ? <div className="flex items-center gap-1"><DollarSign className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">USD</span></div> : <div className="flex items-center gap-1"><PoundSterling className="" size={16} /><span className="text-white font-extrabold tracking-wide text-sm md:block hidden">GBP</span></div>
+                }
+              </div>
+            </div>
           </div>
         </div>
 
@@ -527,7 +630,7 @@ const Navbar = ({ NAV_LINKS }) => {
           <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">
             Products
           </p>
-          <ul className="mt-5 space-y-4">
+          <ul className="mt-5 space-y-4 pb-10">
             {NAV_LINKS?.map((link, idx) => (
               <li
                 onClick={() => handleShow(link.name)}
@@ -559,6 +662,24 @@ const Navbar = ({ NAV_LINKS }) => {
             ))}
 
           </ul>
+          <div>
+            <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">
+              Others
+            </p>
+            <div className="space-y-4">
+              <button onClick={() => setPopUp(true)} className="mt-4 flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
+                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} h-[10.29px] mt-[2px] w-[13.71px] mr-2 scale-125`}></span>
+                <span className="text-black font-extrabold tracking-wide">
+                  {locale === 'fr' ? 'FR' : 'EN'}
+                </span>
+                <span className="mx-[2px]">/</span>
+                <span className="flex items-center gap-[2px] text-black font-extrabold tracking-wide">
+                  {selectedCurrency === 'euro' ? <Euro className="inline mr-1 w-4 h-4" /> : <DollarSign className="inline mr-1 mt-[2px] w-4 h-4" />}
+                  {selectedCurrency === 'euro' ? 'EUR' : 'USD'}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       {/* 2nd slide */}
@@ -825,7 +946,7 @@ const Navbar = ({ NAV_LINKS }) => {
           {/* 1st div */}
           <div className="py-4 lg:px-10 px-5 shadow-[0_6px_8px_rgba(91,104,113,0.1)]">
             <div className="flex items-center gap-5">
-              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">Choose your location and language</h2>
+              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">{t("chooseLocationLanguage")}</h2>
               <div className="w-fit p-[5px] rounded-full border border-[#111]">
                 <X onClick={() => setPopUp(!showPopUp)} className="cursor-pointer" />
               </div>
@@ -835,21 +956,21 @@ const Navbar = ({ NAV_LINKS }) => {
           <div className="py-4 lg:px-10 px-5 max-h-[calc(100vh-140px)] overflow-y-scroll popup-scroll-bar">
             <div className="flex flex-col gap-[30px]">
               <div className="flex flex-col gap-4 mb-[30px]">
-                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">Your current language and currency</p>
+                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">{t("currentLanguageCurrency")}</p>
                 <ul className="flex flex-col gap-3">
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <span className="fi fi-us mr-2 scale-125"></span>
-                      English
+                      <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
+                      {locale === 'fr' ? t("french") : t("english")}
                     </span>
-                    <span className="font-bold">English</span>
+                    <span className="font-bold">{locale === 'fr' ? t("french") : t("english")}</span>
                   </li>
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <Euro className="" size={24} />
-                      Euro
+                      {selectedCurrency === 'euro' ? <Euro className="" size={24} /> : <DollarSign className="" size={24} />}
+                      {selectedCurrency === 'euro' ? t("euro") : t("usDollar")}
                     </span>
-                    <span className="font-bold">EUR</span>
+                    <span className="font-bold">{selectedCurrency === 'euro' ? 'EUR' : 'USD'}</span>
                   </li>
                 </ul>
               </div>
@@ -875,9 +996,9 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <span className="fi fi-us mr-2 scale-125"></span>
-                        English
+                        {t("english")}
                       </span>
-                      <span className="font-bold">English</span>
+                      <span className="font-bold">{t("english")}</span>
                     </label>
                   </li>
                   <li
@@ -896,9 +1017,9 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <span className="fi fi-fr mr-2 scale-125"></span>
-                        Français
+                        {t("french")}
                       </span>
-                      <span className="font-bold">French</span>
+                      <span className="font-bold">{t("french")}</span>
                     </label>
                   </li>
                 </ul>
@@ -923,7 +1044,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <Euro className="" size={24} />
-                        Euro
+                        {t("euro")}
                       </span>
                       <span className="font-bold">EUR</span>
                     </label>
@@ -944,9 +1065,30 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <DollarSign className="" size={24} />
-                        US Dollar
+                        {t("usDollar")}
                       </span>
                       <span className="font-bold">USD</span>
+                    </label>
+                  </li>
+                  <li
+                    onClick={() => setSelectedCurrency('gbp')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'gbp' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="currency"
+                        value="gbp"
+                        className="hidden"
+                        checked={selectedCurrency === 'gbp'}
+                        onChange={() => setSelectedCurrency('gbp')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        <PoundSterling className="" size={24} />
+                        British Pound
+                      </span>
+                      <span className="font-bold">GBP</span>
                     </label>
                   </li>
                 </ul>

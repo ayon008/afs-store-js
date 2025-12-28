@@ -3,31 +3,17 @@ const default_image = "/assets/images/GWEN-WB-D-lite-1024x573.png.webp"
 import Link from 'next/link';
 import Products from '@/Shared/Products/Products';
 import { getParentCategory } from '@/app/actions/WC/getParentCategory';
-import { getChildCategories, getProductsByCategoryId } from '@/app/actions/Woo-Coommerce/getWooCommerce';
+import { getChildCategories } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 
 const page = async ({ params, searchParams }) => {
     // Catch All Route
     const { slug } = await params;
-    // Destructuring the params from slug
-    const [parent, ...children] = slug;
-
     // Getting the Category details by the slug [lase category of the slug]
     const category = await getParentCategory(slug[slug?.length - 1].toLowerCase());
-
-
     // Category Image
     const image = category?.image?.src || default_image;
-    // const productData = await getProductsByCategoryId(category?.id);
-    const productData = await getProductsByCategoryId(category?.id);
-
-    // console.log("productData", productData.length);
-
-    const maxPrice = Math.max(...productData.map(p => p?.price_with_tax));
-    const minPrice = Math.min(...productData.map(p => p?.price_with_tax));
-
+    // child categories
     const childCategories = await getChildCategories(category?.id);
-
-    const { min = null, max = null } = await searchParams;
 
     const BreadCums = () => {
         let path = "/category-product";
@@ -56,7 +42,7 @@ const page = async ({ params, searchParams }) => {
 
 
     return (
-        <div>
+        <div className='global-margin'>
             <div className='lg:h-[620px] h-[485px] w-full relative global-margin bg-no-repeat bg-cover bg-center'
                 style={{ backgroundImage: `url(${image})` }}
             >
@@ -70,7 +56,7 @@ const page = async ({ params, searchParams }) => {
                 </div>
             </div>
             <div>
-                <Products maxPrice={maxPrice} minPrice={minPrice} childCategories={childCategories} min={min} max={max} id={category?.id} allProducts={productData} />
+                <Products childCategories={childCategories} id={category?.id} />
             </div>
         </div>
     );

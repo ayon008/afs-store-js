@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 /* ======================================================
    HERO SECTION (UNCHANGED)
@@ -79,25 +80,25 @@ export default function Page() {
             className="text-[40px] md:text-[50px] font-semibold leading-[48px] md:leading-[55px]"
             style={{ fontFamily: '"Alliance No.2", sans-serif' }}
           >
-            <span className="font-light">
-              AFS Advanced is our way of concentrating our
-            </span>{" "}
-            <b>know-how</b> <span className="font-light">and</span>{" "}
-            <b>expertise</b>{" "}
-            <span className="font-light">
-              into the most advanced designs, which is the essence and the
-            </span>{" "}
-            <b className="underline">future of AFS.</b>
+            {t.rich("advanced", {
+              light: (chunks) => <span className="font-light">{chunks}</span>,
+              bold: (chunks) => <b>{chunks}</b>,
+              underline: (chunks) => <b className="underline">{chunks}</b>
+            })}
           </h1>
         </div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-20 px-4 md:px-8">
-          <img
+          <Image
+            width={1920}
+            height={1080}
             src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-11.51.22.jpg"
             className="w-full object-cover shadow-xl"
             alt=""
           />
-          <img
+          <Image
+            width={1920}
+            height={1080}
             src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-09.56.24.jpg"
             className="w-full object-cover shadow-xl"
             alt=""
@@ -105,7 +106,9 @@ export default function Page() {
         </div>
 
         <div className="w-full pb-20">
-          <img
+          <Image
+            width={1920}
+            height={1080}
             src="https://afs-foiling.com/wp-content/uploads/2022/09/Group-16.png"
             className="w-full object-cover"
             alt=""
@@ -130,20 +133,10 @@ export default function Page() {
    MISSION SECTION COMPONENT
 ====================================================== */
 
-const pillars = [
-  { title: "Development", description: "Develop products of excellence." },
-  {
-    title: "Expertise",
-    description: "Provide advanced expertise at the highest level.",
-  },
-  { title: "Innovation", description: "Innovation at the service of passion." },
-  {
-    title: "Experience",
-    description: "Offer an exceptional customer experience.",
-  },
-];
+
 
 const MissionPillar = ({ title, description }) => (
+
   <div className="mb-12 md:mb-16">
     <h3
       style={{
@@ -172,6 +165,19 @@ const MissionPillar = ({ title, description }) => (
 
 function MissionSection() {
   const t = useTranslations("advance");
+  const pillars = [
+    { title: t("development"), description: t("products") },
+    {
+      title: t("expertise"),
+      description: t("des"),
+    },
+    { title: "Innovation", description: t("inno") },
+    {
+      title: t("experience"),
+      description: t("offer"),
+    },
+  ];
+
   return (
     <section
       className="min-h-screen py-20"
@@ -191,12 +197,14 @@ function MissionSection() {
             {t("mission")}
           </h1>
           <p className="max-w-xs text-right text-white">
-            Our mission at AFS Advanced is based on 4 pillars.
+            {t("our")}
           </p>
         </header>
 
         <div className="grid md:grid-cols-2 gap-20">
-          <img
+          <Image
+            width={768}
+            height={820}
             src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-27-at-11.03.18@2x-768x820.jpg"
             className="w-full object-cover shadow-2xl"
             alt=""
@@ -217,6 +225,7 @@ function MissionSection() {
 ====================================================== */
 
 function AFSCareSection() {
+  const t = useTranslations("advance");
   return (
     <section
       className="min-h-screen flex items-center justify-center"
@@ -230,16 +239,21 @@ function AFSCareSection() {
       }}
     >
       <div className="text-center space-y-6">
-        <img
+        <Image
           src="https://afs-foiling.com/wp-content/uploads/2022/09/logo-afs-advance-300x121.png"
           className="mx-auto w-[240px]"
+          width={240}
+          height={121}
           alt=""
         />
-        <p className="text-white font-medium">3 years warranty</p>
-        <p className="text-white">Extensive live consulting service</p>
-        <p className="text-white">
-          Getting started session with development team
-        </p>
+        {t.rich("last", {
+          item: (chunks) => (
+            <p className="text-white">{chunks}</p>
+          ),
+          strong: (chunks) => (
+            <span className="font-medium">{chunks}</span>
+          )
+        })}
       </div>
     </section>
   );

@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 
 const BreadCums = () => {
   const b = useTranslations("breadcum");
-  const t = useTranslations("madeInFrance");
 
   return (
     <div className="mb-[20px] uppercase">
@@ -20,7 +19,7 @@ const BreadCums = () => {
   );
 };
 
-export default function madeFr() {
+export default function MadeFr() {
   const t = useTranslations("madeInFrance");
   return (
     <>

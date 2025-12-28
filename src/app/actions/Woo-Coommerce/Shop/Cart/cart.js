@@ -3,15 +3,14 @@
 
 import { cookies } from "next/headers";
 import { getWooCommerceCookies } from "../../Cookies/cookie-handler";
-import { getLocaleValue } from "../../getWooCommerce";
-
+import { getCurrency, getLocaleValue } from "../../getWooCommerce";
 
 
 
 // Get cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function getCart() {
-    const localeValue = await getLocaleValue();
-    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+
+    const WP_URL = `${process.env.WP_BASE_URL}`;
     const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
@@ -120,8 +119,6 @@ export const updateBillingAndCart = async (billingData) => {
 
 export const updateShippingAndCart = async (shippingData) => {
     const localeValue = await getLocaleValue();
-    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
-    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
     if (!token) {
@@ -174,7 +171,7 @@ export const updateShippingAndCart = async (shippingData) => {
         console.log("Updating shipping address with payload:", shippingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {
@@ -217,7 +214,7 @@ export async function selectShippingRate(rateId, packageId = 0) {
     const localeValue = await getLocaleValue();
     const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
     const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
-    
+
     try {
         if (!rateId) {
             return { success: false, error: 'Shipping rate ID is required' };

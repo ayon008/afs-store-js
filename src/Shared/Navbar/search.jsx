@@ -15,6 +15,8 @@ import gsap from 'gsap';
 import { useForm } from 'react-hook-form';
 import { getRecentProducts, searchProducts } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useGetData from "../../Shared/FetchFn/getData"
+import { useTranslations } from 'next-intl';
+import Cookies from 'js-cookie';
 const SEARCH_HISTORY_KEY = 'search_history';
 const MAX_HISTORY_ITEMS = 10;
 
@@ -22,6 +24,8 @@ const MAX_HISTORY_ITEMS = 10;
 
 
 const SearchOverlay = ({ isOpen, onClose }) => {
+
+    const t = useTranslations('product')
 
     // React Hook Form
     const { register, handleSubmit, watch, reset, setValue } = useForm();
@@ -125,6 +129,8 @@ const SearchOverlay = ({ isOpen, onClose }) => {
     };
 
 
+    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+
 
     const searchRef = useRef(null);
     useGSAP(() => {
@@ -148,12 +154,12 @@ const SearchOverlay = ({ isOpen, onClose }) => {
             <div className="bg-white lg:h-auto h-screen overflow-y-scroll p-6 space-y-6" ref={searchRef} style={{ clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)" }}>
                 <div className="flex items-center justify-between gap-[10px]">
                     <button onClick={onClose} className="flex items-center gap-2 text-[#111] text-sm cursor-pointer">
-                        <X className="w-4 h-4" /> Close
+                        <X className="w-4 h-4" /> {t('close')}
                     </button>
                     <form className="flex-[1_0_0] w-full relative" onSubmit={handleSubmit(onSubmit)}>
                         <input
                             type="text"
-                            placeholder="Search for..."
+                            placeholder={t('searchPlaceholder')}
                             className="px-4 py-2 flex-[1_0_0] w-full focus:outline-none border-b-2 border-b-[#1D98FF] pl-10"
                             {...register('search')}
                         />
@@ -163,7 +169,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 {/* Search History */}
                 {searchHistory.length > 0 && (
                     <div className="flex flex-wrap items-center gap-4">
-                        <span>Latest searches :</span>
+                        <span>{t('latestSearches')}</span>
                         {searchHistory.map((term, index) => (
                             <div onClick={() => setValue('search', term)} key={index} className="flex items-center gap-1 justify-center cursor-pointer bg-[#f7F7F7] rounded-sm text-sm w-fit py-1 px-2">
                                 <span>{term}</span>
@@ -173,7 +179,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                             </div>
                         ))}
                         <button type="button" onClick={clearHistory} className="text-[#1D98FF] font-semibold text-sm cursor-pointer">
-                            Delete all
+                            {t('delete')}
                         </button>
                     </div>
                 )}
@@ -201,7 +207,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                 {priceHtml ? (
                                                     <div className='text-[#111] text-sm leading-[100%] text-center' dangerouslySetInnerHTML={{ __html: priceHtml }} />
                                                 ) : (
-                                                    <font className='text-[#111] text-sm leading-[100%] text-center'>{price}€</font>
+                                                    <font className='text-[#111] text-sm leading-[100%] text-center'>{price}{currencySymbol}</font>
                                                 )}
                                             </Link>
                                         </div>
@@ -246,7 +252,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                     {priceHtml ? (
                                                         <div className='text-[#111] text-sm leading-[100%] text-center' dangerouslySetInnerHTML={{ __html: priceHtml }} />
                                                     ) : (
-                                                        <font className='text-[#111] text-sm leading-[100%] text-center'>{price}€</font>
+                                                        <font className='text-[#111] text-sm leading-[100%] text-center'>{price}{currencySymbol}</font>
                                                     )}
                                                 </Link>
                                             </SwiperSlide>
@@ -255,7 +261,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                 ) : (
                                     !isSearching && (
                                         <div className='text-center py-8 text-[#111] text-sm'>
-                                            {isLoading ? 'Chargement...' : 'Aucun produit trouvé'}
+                                            {isLoading ? t("Loading...") : t("no")}
                                         </div>
                                     )
                                 )

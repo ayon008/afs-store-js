@@ -1,10 +1,9 @@
 "use server";
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
-
+import { getLocale } from "next-intl/server";
 export const getEventsDestinations = async () => {
-    const localeValue = await getLocaleValue();
-    const BASE = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const locale = await getLocale();
+    const BASE = `${process.env.WP_BASE_URL}`;
 
     // Check environment variable
     if (!BASE) {
@@ -14,7 +13,7 @@ export const getEventsDestinations = async () => {
 
     try {
         const res = await fetch(
-            `${BASE}/${localeValue}/wp-json/wp/v2/destination?per_page=100`,
+            `${BASE}/wp-json/wp/v2/destination?per_page=100&lang=${locale}`,
             {
                 next: { revalidate: 3600 }, // ISR cache
             }
@@ -44,8 +43,8 @@ export const getEventsDestinations = async () => {
 };
 
 export const getAllEvents = async (selectedId) => {
-    const localeValue = await getLocaleValue();
-    const BASE = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const locale = await getLocale();
+    const BASE = `${process.env.WP_BASE_URL}`;
 
     if (!BASE) {
         console.error("❌ WP_BASE_URL is missing!");
@@ -58,11 +57,13 @@ export const getAllEvents = async (selectedId) => {
     try {
         // We loop for 1 → 100 pages max (WP won’t go beyond)
         for (let page = 1; page <= 100; page++) {
-            const url = selectedId ? `${BASE}/wp-json/wp/v2/event?destination=${selectedId}` : `${BASE}/wp-json/wp/v2/event?per_page=${perPage}&page=${page}&_embed`
+            const url = selectedId ? `${BASE}/wp-json/wp/v2/event?destination=${selectedId}&lang=${locale}&_embed&per_page=${perPage}&page=${page}` : `${BASE}/wp-json/wp/v2/event?per_page=${perPage}&page=${page}&_embed&lang=${locale}`;
+
             const res = await fetch(
                 url,
                 {
                     next: { revalidate: 3600 },
+                    cache: "force-cache"
                 }
             );
 

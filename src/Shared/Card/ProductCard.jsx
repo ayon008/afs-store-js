@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import FormButton from '../Button/FormButton';
+import { useTranslations } from 'next-intl';
+import Cookies from 'js-cookie';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -84,6 +86,11 @@ export default function ProductCard({
     }, [price, singlePrice]);
 
 
+    const t = useTranslations('product');
+
+    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+
+
     return (
         <div className="group w-full bg-[#F7F7F7] flex flex-col justify-between mx-auto rounded-[4px] overflow-hidden h-auto">
             {/* Image Section */}
@@ -96,7 +103,10 @@ export default function ProductCard({
                         alt={alt || name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className={`object-contain absolute inset-0 pt-5 opacity-100 ${hoverImage && "group-hover:opacity-0"} transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]`}
+                        className={` object-contain absolute inset-0 pt-5
+      opacity-100 ${hoverImage && "group-hover:opacity-0"}
+      transition-opacity duration-300
+      ease-[cubic-bezier(.19,1,.22,1)]`}
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =
@@ -111,7 +121,12 @@ export default function ProductCard({
                             alt={`${alt || name} - hover`}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-[cubic-bezier(.19,1,.22,1)]"
+                            className="
+        object-cover absolute inset-0
+        opacity-0 group-hover:opacity-100
+        transition-opacity duration-300
+        ease-[cubic-bezier(.19,1,.22,1)]
+      "
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.classList.add('opacity-0');
@@ -137,14 +152,17 @@ export default function ProductCard({
                     <h2 className="text-[clamp(0.875rem,0.805rem+0.2667vw,1.125rem)] uppercase lg:leading-[20px] leading-[100%] font-bold">
                         {cleanTitle}
                     </h2>
-                    <p
-                        className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
-                        dangerouslySetInnerHTML={{ __html: changePrice }}
-                    />
+                    {
+                        price ? <p
+                            className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
+                            dangerouslySetInnerHTML={{ __html: changePrice }}
+                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1'>{singlePrice}{currencySymbol}</font>
+                    }
                 </div>
                 <div className="">
+                    <p>{singlePrice}</p>
                     <Link href={`/product/${slug}`}>
-                        <FormButton label={'DECOUVRIR'} />
+                        <FormButton label={t('discover')} />
                     </Link>
                 </div>
             </div>

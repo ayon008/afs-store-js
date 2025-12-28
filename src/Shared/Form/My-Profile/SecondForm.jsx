@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '@/Shared/Hooks/useAuth';
 import { updateProfile } from '@/app/actions/WC/Auth/getAuth';
+import { useTranslations } from 'next-intl';
 
 const SecondForm = ({ setMessage }) => {
     const [show, setShow] = useState(false);
@@ -20,6 +21,9 @@ const SecondForm = ({ setMessage }) => {
     });
 
     const watchFields = watch();
+
+    const t = useTranslations("profile");
+    const a = useTranslations("login");
 
     // Reset form when user loads
     useEffect(() => {
@@ -66,21 +70,30 @@ const SecondForm = ({ setMessage }) => {
         }
     };
 
+
+    
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
             <div className="flex items-center justify-between pb-1 global-b-bottom-d">
-                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">Contact info</h3>
+                <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">{t("contact")}</h3>
                 <button
                     className="flex items-center gap-1 cursor-pointer"
                     onClick={() => setShow(!show)}
                     type="button"
                 >
                     <Pen className="w-3 h-3" />
-                    <span className="text-sm uppercase leading-[100%]">{show ? "Cancel" : "Edit"}</span>
+                    <span className="text-sm uppercase leading-[100%]">{show ? t("cancel") : t("Edit")}</span>
                 </button>
             </div>
 
-            <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mt-6" onSubmit={handleSubmit(onSubmit)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSubmit(onSubmit)();
+                    }
+                }}
+            >
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-5 2xl:grid-cols-3">
                     <div>
                         <Input
@@ -96,7 +109,7 @@ const SecondForm = ({ setMessage }) => {
                     </div>
                     <div>
                         <Input
-                            label="Phone"
+                            label={t("phone")}
                             type="tel"
                             id="billing_phone"
                             register={register("billing_phone")}
@@ -110,7 +123,7 @@ const SecondForm = ({ setMessage }) => {
 
                 {show && (
                     <div className="mt-5">
-                        <FormButton type="submit" label="Save Changes" />
+                        <FormButton type="submit" label={t("save")} />
                     </div>
                 )}
             </form>

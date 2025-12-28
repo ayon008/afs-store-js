@@ -2,25 +2,27 @@ import Link from 'next/link';
 import React from 'react';
 import FeatureBar from '@/Shared/Afs-Events/FeatureBar';
 import Login from '@/Shared/Form/Auth/Login';
+import { getTranslations } from 'next-intl/server';
 
 export const metadata = {
-    title: "Mon compte | AFS Store",
-    description: "Connectez-vous à votre compte AFS Store pour accéder à votre profil, vos commandes et vos fonctionnalités exclusives.",
-    keywords: "connexion, se connecter, compte, authentification",
+    title: "My Account | AFS Store",
+    description: "Login to your AFS Store account to access your profile, orders and exclusive features.",
+    keywords: "login, account, profile, orders, exclusive features",
     openGraph: {
-        title: "Connexion | AFS Store",
-        description: "Connectez-vous à votre compte AFS Store pour accéder à votre profil, vos commandes et vos fonctionnalités exclusives.",
+        title: "Login | AFS Store",
+        description: "Login to your AFS Store account to access your profile, orders and exclusive features.",
         type: "website",
     },
 };
 
 
 
-const BreadCums = () => {
+const BreadCums = async ({ locale }) => {
+    const t = await getTranslations("breadcum", locale);
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>
-                <Link className='inline' href={'/'}>Accueil</Link> / <span className='text-black'>Mon compte</span>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <span className='text-black'>My Account</span>
             </div>
         </div>
     )
@@ -33,7 +35,6 @@ const page = async () => {
                 <BreadCums />
                 <Login />
             </div>
-            <FeatureBar />
         </div>
     );
 };

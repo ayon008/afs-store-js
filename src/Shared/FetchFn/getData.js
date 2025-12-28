@@ -11,3 +11,6 @@ export default function GetData(key, fn, params = "") {
     })
     return { isLoading, isError, error, data, refetch }
 }
+
+
+

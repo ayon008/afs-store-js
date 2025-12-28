@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { getPosts } from '@/lib/wp';
 import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import { getLocale } from 'next-intl/server';
-import { redirect } from '@/i18n/navigation';
+import { getTranslations } from 'next-intl/server';
 
 
 export async function generateMetadata({ params }) {
@@ -104,7 +103,8 @@ export const decodeEntities = (str = "") =>
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">");
 
-const page = async ({ params }) => {
+const page = async ({ params, locale }) => {
+    const t = await getTranslations("blog", locale);
     const localeValue = await getLocaleValue();
     const { slug } = await params;
     const response = await fetch(
@@ -144,11 +144,12 @@ const page = async ({ params }) => {
     const categoryData = await getCategories(categoryId);
     const categoryName = categoryData?.name ?? 'Unknown Category';
 
-    const BreadCums = () => {
+    const BreadCums = async ({ locale }) => {
+        const t = await getTranslations("breadcum", locale);
         return (
             <div className='absolute top-6 z-20 global-padding uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>Accueil</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryId}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
+                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryId}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
                 </div>
             </div>
         )

@@ -1,11 +1,15 @@
 "use server"
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
+import { getCurrency } from "../Woo-Coommerce/getWooCommerce";
+
+
 
 export const getMenuItems = async () => {
-    const localeValue = await getLocaleValue();
+    const locale = await getLocale();
+    const currency = await getCurrency();
     try {
-        const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/custom/v1/menus/2118`,
+        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/custom/v1/menus/2118`,
             {
                 next: { revalidate: 3600 },
                 cache: "force-cache"

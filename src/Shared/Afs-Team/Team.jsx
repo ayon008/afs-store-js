@@ -30,11 +30,7 @@ const Team = ({ data }) => {
     // const teamRef = useRef(null);
     const contentRef = useRef(null)
     const [activeId, setActiveId] = useState("foil");
-
-
-    console.log(activeId);
-
-
+  
 
     useGSAP(() => {
         if (!contentRef.current) return;
@@ -112,9 +108,8 @@ const Team = ({ data }) => {
                     <div className="mb-10 flex items-center justify-center lg:gap-3 gap-[6px]">
                         <p className="global-h1">40</p>
                         <p className="lg:text-[30px] text-2xl font-bold leading-[110%] tracking-[-0.01em]">
-                            {t.rich("number", {
-                                br: () => <br />
-                            })}
+                            {t("number")} <br />
+                            {t("foil-co")}
                         </p>
                     </div>
                 </div>
@@ -124,7 +119,7 @@ const Team = ({ data }) => {
                     <TeamImage
                         hoverSrc={hoverImage}
                         src={image}
-                        text={"Production foils"}
+                        text={t("p-foils")}
                     />
                     <div className="grid 2xl:grid-cols-4 xl:grid-cols-3 grid-cols-2 lg:gap-5 gap-[10px] my-8">
                         {production_foil?.map((member, i) => {
@@ -143,7 +138,7 @@ const Team = ({ data }) => {
                     <TeamImage
                         src={image2}
                         hoverSrc={hoverImage2}
-                        text={"Production planches"}
+                        text={t("boards")}
                     />
                     <div className="grid 2xl:grid-cols-4 xl:grid-cols-3 grid-cols-2 lg:gap-5 gap-[10px] my-8">
                         {production_plances?.map((member, i) => {
@@ -161,7 +156,7 @@ const Team = ({ data }) => {
                     <TeamImage
                         src={image3}
                         hoverSrc={hoverImage3}
-                        text={"Bureau d’étude"}
+                        text={t("bur")}
                     />
                     <div className="grid 2xl:grid-cols-4 xl:grid-cols-3 grid-cols-2 lg:gap-5 gap-[10px] my-8">
                         {burue?.map((member, i) => {
@@ -174,7 +169,7 @@ const Team = ({ data }) => {
                     </div>
                 </div>
                 <div id="logistic" className="team-section">
-                    <TeamImage src={image4} hoverSrc={hoverImage4} text={"LOGISTIQUE"} />
+                    <TeamImage src={image4} hoverSrc={hoverImage4} text={t("logistics")} />
                     {/*Logisitc member-role=2133  */}
                     <div className="grid 2xl:grid-cols-4 xl:grid-cols-3 grid-cols-2 lg:gap-5 gap-[10px] my-8">
                         {logistique?.map((member, i) => {
