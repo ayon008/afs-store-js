@@ -3,6 +3,7 @@ const default_image = "/assets/images/GWEN-WB-D-lite-1024x573.png.webp"
 import Link from 'next/link';
 import Products from '@/Shared/Products/Products';
 import { getParentCategory } from '@/app/actions/WC/getParentCategory';
+import { getChildCategories } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 
 const page = async ({ params, searchParams }) => {
     // Catch All Route
@@ -11,6 +12,8 @@ const page = async ({ params, searchParams }) => {
     const category = await getParentCategory(slug[slug?.length - 1].toLowerCase());
     // Category Image
     const image = category?.image?.src || default_image;
+    // child categories
+    const childCategories = await getChildCategories(category?.id);
 
     const BreadCums = () => {
         let path = "/category-product";
@@ -53,7 +56,7 @@ const page = async ({ params, searchParams }) => {
                 </div>
             </div>
             <div>
-                <Products id={category?.id} />
+                <Products childCategories={childCategories} id={category?.id} />
             </div>
         </div>
     );

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 const default_image = "/assets/images/Team/Group-1-3.png.webp"
 import Image from 'next/image';
-
-import moment from "moment";
 import PopUp from '../PopUp/PopUp';
-// import "moment/locale/fr";
+import { useTranslations } from 'next-intl';
 
-// moment.locale("fr");
 
 const TeamCard = ({ member }) => {
     const memberData = member?.acf;
@@ -23,6 +20,8 @@ const TeamCard = ({ member }) => {
     const missions = memberData["quelles_sont_vos_missions_"];
     const role = memberData["vous_pouvez_decrire_en_quelques_mots_ce_que_vous_appreciez_dans_votre_role_"];
     const last_line = memberData["vous_pouvez_partagez_une_anecdote_un_souvenir_ou_un_moment_marquant_vecu_chez_foil_and_co_"];
+
+    const a = useTranslations("home");
 
 
     const [isOpen, setOpen] = useState(false);
@@ -63,7 +62,7 @@ const TeamCard = ({ member }) => {
                         <p className='lg:text-lg text-sm font-medium leading-[125%]'>{jobTitle}</p>
                         {
                             pop_up && <div onClick={() => setOpen(true)} className='flex items-center border-white w-fit cursor-pointer border-b'>
-                                <p className='lg:text-lg text-sm font-medium leading-[125%]'>VOIR PLUS</p>
+                                <p className='lg:text-lg text-sm font-medium leading-[125%]'>{a("see-more")}</p>
                                 <svg width="20" height="20" className='text-white' viewBox="0 0 24 24" fill="none">
                                     <path d="M19 5L5 19M19 5H6.4M19 5V17.6" stroke="white" strokeWidth="2" />
                                 </svg>

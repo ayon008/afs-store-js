@@ -3,8 +3,6 @@ import Link from 'next/link';
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
 
-// import FeatureBar from '../../constants/FeatureBar';
-
 export const metadata = {
     title: 'AFS EVENTS - FRANCE US UK EU - AFS',
     description: "AFS Events all over the globe",
@@ -32,13 +30,15 @@ const BreadCums = async ({ locale }) => {
 const page = async ({ locale }) => {
     const t = await getTranslations("afs-event", locale);
     return (
-        <div>
-            <div className='bg-[#111111] global-padding relative pt-4 min-h-screen text-white'>
+        <div className='bg-[#111111] text-white'>
+            <div className='global-padding relative pt-4 lg:h-screen lg:max-h-[600px] h-auto text-white'>
                 <BreadCums />
-                <div className='lg:mt-[80px] mt-[40px] global-margin'>
+                <div className='lg:mt-[80px] my-[40px] global-margin'>
                     <h1 className='global-h1 text-center relative'>AFS Events</h1>
                     <p className='text-center mt-4 lg:w-[40%] w-full text-lg leading-[22px] font-semibold mx-auto'>{t("headline")}</p>
                 </div>
+            </div>
+            <div className='lg:pl-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]'>
                 <Events />
             </div>
         </div>

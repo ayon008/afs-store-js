@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import EventDropDown from './EventDropDown';
 import { getAllEvents } from '@/app/actions/WC/getAllEvents';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 
 const Events = () => {
 
@@ -13,7 +14,7 @@ const Events = () => {
 
     const mapRef = useRef(null);
     const [selectedId, setSelectedId] = useState(null);
-    const [data, setData] = useState([]);
+    // const [data, setData] = useState([]);
     const [shop_name, setShopName] = useState("");
     const [selectedShop, setSelectedShop] = useState(null);
 
@@ -65,14 +66,16 @@ const Events = () => {
         }
     ];
 
-    useEffect(() => {
-        const load = async () => {
-            const data = await getAllEvents(selectedId);
-            setData(data);
-        }
-        load();
-    }, [selectedId]);
+    const { data, isLoading } = useQuery({
+        queryKey: ['events', selectedId],
+        queryFn: async () => await getAllEvents(selectedId),
+    })
 
+    console.log(selectedId);
+    
+
+
+    console.log(data);
 
     const containerStyle = {
         width: '100%',
@@ -163,7 +166,7 @@ const Events = () => {
     return (
         <div className='max-w-[1920px] mx-auto'>
             <div className='flex items-center lg:flex-row flex-col lg:h-dvh lg:max-h-[746px] h-[1020px] gap-4'>
-                <div className='lg:w-1/3 lg:h-full w-full overflow-hidden'>
+                <div className='lg:w-1/3 lg:h-full w-full overflow-hidden lg:px-0 px-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]'>
                     <EventDropDown selectedId={selectedId} setSelectedId={setSelectedId} />
                     <h3 className='lg:text-[50px] lg:leading-[55px] text-[32px] leading-[32px] text-white font-bold mt-4 mb-6'>
                         {t("nombre")}

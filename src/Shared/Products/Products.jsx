@@ -13,7 +13,7 @@ import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import default_image from '../../../public/assets/images/Team/Group-1-3.png.webp';
 
-const Products = ({ id }) => {
+const Products = ({ id, childCategories }) => {
     const router = useRouter();
     const pathname = usePathname();
     const [isPending, startTransition] = useTransition();
@@ -23,7 +23,6 @@ const Products = ({ id }) => {
     const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
 
     const [ids, setIds] = useState([id]);
-
 
     const renderCategories = (categories) => {
         const logSelectedCategoryIds = () => {
@@ -76,15 +75,6 @@ const Products = ({ id }) => {
     const min = params.get('min');
     const max = params.get('max');
 
-    // Child Categories
-    const { isLoading: isLoadingChildCategories, isError: isErrorChildCategories, error: errorChildCategories, data: childCategories, refetch: refetchChildCategories } = useQuery({
-        queryKey: ['child-categories', id],
-        queryFn: async () => {
-            const data = await getChildCategories(id);
-            return data;
-        },
-    })
-
     // Products
     const { isLoading, isError, data: productData, refetch } = useQuery({
         queryKey: ['product-data', ids, max, min],
@@ -130,13 +120,9 @@ const Products = ({ id }) => {
                     <div className='lg:h-[calc(90vh-140px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
                         <div className='mb-6'>
                             <p className='font-semibold text-base leading-[100%] text-black mb-4 uppercase'>{a("categories")}</p>
-                            {
-                                isLoadingChildCategories ? <div>Loading...</div> : <>
-                                    {childCategories && childCategories.length > 0
-                                        ? renderCategories(childCategories)
-                                        : <p className="text-sm text-gray-500">No {a("categories")}</p>}
-                                </>
-                            }
+                            {childCategories && childCategories.length > 0
+                                ? renderCategories(childCategories)
+                                : <p className="text-sm text-gray-500">No {a("categories")}</p>}
                         </div>
                         {
                             isLoadingAllProducts ? <div>Loading...</div> : <>
@@ -178,7 +164,7 @@ const Products = ({ id }) => {
                                 const bestseller = product?.bestseller;
                                 const hoverImage = product?.img;
                                 return (
-                                    <ProductCard price={product?.price_html} singlePrice={product?.price} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
+                                    <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
                                 )
                             })
                         }
@@ -196,13 +182,9 @@ const Products = ({ id }) => {
                     </div>
                     <div className='mb-4 mt-4 h-[50%] overflow-y-scroll popup-scroll-bar-1'>
                         <p className='font-semibold text-base leading-[100%] text-black mb-4'>{a("categories")}</p>
-                        {
-                            isLoadingChildCategories ? <div>Loading...</div> : <>
-                                {childCategories && childCategories.length > 0
-                                    ? renderCategories(childCategories)
-                                    : <p className="text-sm text-gray-500">No {a("categories")}</p>}
-                            </>
-                        }
+                        {childCategories && childCategories.length > 0
+                            ? renderCategories(childCategories)
+                            : <p className="text-sm text-gray-500">No {a("categories")}</p>}
                     </div>
                     <div>
                         {isLoadingAllProducts ? <div>Loading...</div> :
@@ -227,6 +209,5 @@ const Products = ({ id }) => {
 };
 
 export default Products;
-
 
 

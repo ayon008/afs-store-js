@@ -159,7 +159,6 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
-    const currency = await getCurrency();
     const locale = await getLocale();
     try {
         // Convert "12,40" or [12,40] or 12 → always array
@@ -173,9 +172,12 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         let allProducts = [];
         const per_page = 100;
 
+        const user = await getAuthenticatedUser();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
+
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}`
+            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}&shipping_country=${shippingCountry}`
 
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
@@ -183,11 +185,8 @@ export const getProductsByCategoryId = async (ids, max, min) => {
             const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
             const response = await fetch(url, {
-                // headers: {
-                //     Authorization: `Basic ${auth}`,
-                // },
                 cache: "force-cache",
-                next: { revalidate: 3600 }
+                next: { revalidate: 3600 },
             });
 
             if (!response.ok) break;
@@ -214,10 +213,9 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
 
 export const getChildCategories = async (parentId) => {
-    const localeValue = await getLocaleValue();
     const locale = await getLocale();
     const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug&lang=${locale}`;
-    // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/categories?parent=${parentId}&per_page=100&_fields=id,name,slug`;
+
     const response = await fetch(url, {
         headers: {
             Authorization: `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64')}`,
@@ -244,10 +242,8 @@ export const getChildCategories = async (parentId) => {
 // Get single product by their slug
 
 export const getProductBySlug = async (slug) => {
-    const localeValue = await getLocaleValue();
-    const currency = await getCurrency();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?slug=${slug}&currency=${currency || 'euro'}`;
-    // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products?slug=${slug}`;
+    const locale = await getLocale();
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}`;
     try {
         const response = await fetch(url, {
             headers: {
@@ -406,23 +402,10 @@ export async function changePasswordAction(data) {
 
 export const getPrice = async (productId, selectedVariation) => {
     const locale = await getLocale();
-    const currency = await getCurrency();
-    console.log(currency, 'currency');
-
-    // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&lang=${locale}&currency=${currency}`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&lang=${locale}`;
 
     try {
-        const cart = await getCart();
-        const defaultCountry = cart?.data?.shipping_address?.country || cart?.data?.billing_address?.country || "FR"; // Default to France
         const user = await getAuthenticatedUser();
-        let userCountry;
-        if (user) {
-            // Priority: shipping country > billing country > default FR
-            userCountry = user.shipping?.country || user.billing?.country || "FR";
-        } else {
-            userCountry = defaultCountry;
-        }
 
         const response = await fetch(url, {
             headers: {

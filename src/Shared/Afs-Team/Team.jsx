@@ -30,11 +30,7 @@ const Team = ({ data }) => {
     // const teamRef = useRef(null);
     const contentRef = useRef(null)
     const [activeId, setActiveId] = useState("foil");
-
-
-    console.log(activeId);
-
-
+  
 
     useGSAP(() => {
         if (!contentRef.current) return;

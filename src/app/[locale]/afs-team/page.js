@@ -6,7 +6,7 @@ const image1 = "/assets/images/Team/Rectangle-4-32.png";
 const image2 = "/assets/images/Team/Rectangle-6.png"
 import Team from '@/Shared/Afs-Team/Team';
 import { getTeamMember } from '@/app/actions/WC/getTeamMembers';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 export const metadata = {
     title: 'AFS L’équipe - AFS Foiling',
@@ -25,28 +25,29 @@ const BreadCums = async ({ locale }) => {
 }
 
 
-const page = async ({ locale }) => {
+const page = async () => {
+    const locale = await getLocale();
     // Administration member-role=2485
-    const administration = await getTeamMember(2135);
+    const administration = await getTeamMember(locale === "fr" ? 2135 : 2485);
     // Marketing member-role=2122
-    const marketing = await getTeamMember(2122);
+    const marketing = await getTeamMember(locale === "fr" ? 2122 : 2479);
 
     // Logistique member-role=2133
-    const logistique = await getTeamMember(2133);
+    const logistique = await getTeamMember(locale === "fr" ? 2133 : 2483);
 
     // Burue member-role=2132
-    const burue = await getTeamMember(2132);
+    const burue = await getTeamMember(locale === "fr" ? 2132 : 2482);
 
     // production-plances = 2131
-    const production_plances = await getTeamMember(2131);
+    const production_plances = await getTeamMember(locale === "fr" ? 2131 : 2481);
 
     // production-foil = 2129
-    const production_foil = await getTeamMember(2129);
+    const production_foil = await getTeamMember(locale === "fr" ? 2129 : 2480);
 
     // Commerce member-role=2134
-    const commerce = await getTeamMember(2134);
+    const commerce = await getTeamMember(locale === "fr" ? 2134 : 2484);
 
-    const t = await getTranslations("afs-team", locale);
+    const t = await getTranslations("afs-team");
     return (
         <div className='max-w-[1920px] mx-auto'>
             <div className='bg-white global-padding relative pt-4'>
