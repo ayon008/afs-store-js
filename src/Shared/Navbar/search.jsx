@@ -191,7 +191,8 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                         {
                             products && products.length > 0 ? (
                                 products.map((product) => {
-                                    const image = product?.images?.[0]?.src || '/images/placeholder.png';
+                                    const image = product.featured_img || '/images/placeholder.png';
+                                    console.log("image", image);
                                     const name = product?.name || '';
                                     const price = product?.price || product?.regular_price || '0';
                                     const priceHtml = product?.price_html || '';
@@ -236,7 +237,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                             {
                                 products && products.length > 0 ? (
                                     products.map((product) => {
-                                        const image = product?.images?.[0]?.src || '/images/placeholder.png';
+                                        const image = product?.featured_img || '/images/placeholder.png';
                                         const name = product?.name || '';
                                         const price = product?.price || product?.regular_price || '0';
                                         const priceHtml = product?.price_html || '';

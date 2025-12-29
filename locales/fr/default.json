@@ -313,6 +313,7 @@
     "current": "Mot de passe existant",
     "currentP": "Le mot de passe actuel est incorrect",
     "email": "Email ou nom d'utilisateur",
+    "enter": "Saisissez l'adresse électronique que vous avez utilisée pour créer votre compte et vous recevrez un lien pour réinitialiser votre mot de passe.",
     "exclusive": "Je souhaite recevoir des offres exclusives",
     "first": "Prénom",
     "forgot": "Vous avez oublié votre mot de passe ?",

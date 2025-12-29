@@ -78,14 +78,12 @@ export const getCountryDetails = async (country) => {
         return error;
     }
 }
-
 export const calculatePriceWithTax = async (basePrice, tax_class = "standard", country = null) => {
-    const localeValue = await getLocaleValue();
     try {
         // Get user country from shipping/billing address, default to France
-        const cookieHeader = await getWooCommerceCookies();
+        const currency = await getCurrency();
         let userCountry = country;
-        const cart = await getCart(cookieHeader);
+        const cart = await getCart();
         const defaultCountry = cart?.data?.shipping_address?.country || cart?.data?.billing_address?.country || "FR";
 
         if (!userCountry) {
@@ -104,7 +102,7 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 
         while (true) {
             const response = await fetch(
-                `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/taxes?per_page=${per_page}&page=${page}`,
+                `${process.env.WP_BASE_URL}/wp-json/wc/v3/taxes?per_page=${per_page}&page=${page}&lang=fr&currency=${currency}`,
                 {
                     headers: {
                         Authorization: `Basic ${authHeader}`,
@@ -156,10 +154,12 @@ export const calculatePriceWithTax = async (basePrice, tax_class = "standard", c
 };
 
 
-
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
     const locale = await getLocale();
+    const currency = await getCurrency();
+    console.log("currency", currency);
+
     try {
         // Convert "12,40" or [12,40] or 12 → always array
         let categories = Array.isArray(ids)
@@ -177,7 +177,7 @@ export const getProductsByCategoryId = async (ids, max, min) => {
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}&shipping_country=${shippingCountry}`
+            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}&shipping_country=${shippingCountry}&currency=${currency}`
 
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
@@ -243,7 +243,8 @@ export const getChildCategories = async (parentId) => {
 
 export const getProductBySlug = async (slug) => {
     const locale = await getLocale();
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}`;
+    const currency = await getCurrency();
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}&currency=${currency}`;
     try {
         const response = await fetch(url, {
             headers: {
@@ -372,14 +373,56 @@ export async function changePasswordAction(data) {
 }
 
 
+export const lostPassword = async (email) => {
+    if (!email) {
+        return { success: false, error: 'Email is required' };
+    }
+    try {
+        const res = await fetch(
+            `${process.env.WP_BASE_URL}/wp-json/auth/v1/forgot-password`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            }
+        );
+
+        console.log("res", res);
+
+        if (!res.ok) {
+            const err = await res.json();
+            return { success: false, error: err.message || 'Failed' };
+        }
+        const data = await res.json();
+        return { success: true, message: data.message };
+
+    } catch (error) {
+        console.log(error);
+        return { success: false, error: error.message };
+    }
+}
+
+
 
 
 export const getPrice = async (productId, selectedVariation) => {
-    const locale = await getLocale();
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&lang=${locale}`;
+    const currency = await getCurrency();
+    // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}`;
 
     try {
+        // Get user country for tax calculation
+        // If logged in: use shipping country, then billing country
+        // If not logged in: default to France (FR)
+        let userCountry = "FR"; // Default to France
+
         const user = await getAuthenticatedUser();
+        if (user) {
+            // Priority: shipping country > billing country > default FR
+            userCountry = user.shipping?.country || user.billing?.country || "FR";
+        }
 
         const response = await fetch(url, {
             headers: {
@@ -438,6 +481,7 @@ export const getPrice = async (productId, selectedVariation) => {
         return null;
     }
 };
+
 
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
@@ -568,8 +612,8 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
 
 // update cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function updateCartItem(itemKey, quantity) {
-    const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const locale = await getLocale();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1&lang=${locale}`;
     try {
         const cookieHeader = await getWooCommerceCookies();
 
@@ -632,19 +676,21 @@ export async function updateCartItem(itemKey, quantity) {
 
 export const getRecentProducts = async () => {
     try {
-        const localeValue = await getLocaleValue();
         const currency = await getCurrency();
         const locale = await getLocale();
+        const user = await getAuthenticatedUser();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
         const authHeader = Buffer
             .from(`${consumerKey}:${consumerSecret}`)
             .toString("base64");
 
-        const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`;
+        // const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`;
+        const url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?orderby=date&order=desc&per_page=20&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`
 
         const response = await fetch(url, {
-            headers: {
-                Authorization: `Basic ${authHeader}`
-            },
+            // headers: {
+            //     Authorization: `Basic ${authHeader}`
+            // },
             cache: "no-store"
         });
 
@@ -653,7 +699,7 @@ export const getRecentProducts = async () => {
             return [];
         }
 
-        const data = await response.json();
+        const { data } = await response.json();
         return Array.isArray(data) ? data : [];
     }
     catch (error) {
@@ -666,17 +712,19 @@ export async function searchProducts(query) {
 
     try {
         const locale = await getLocale();
+        const user = await getAuthenticatedUser();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
         const currency = await getCurrency();
         const authHeader = Buffer
             .from(`${consumerKey}:${consumerSecret}`)
             .toString("base64");
 
         const res = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?search=${encodeURIComponent(query)}&per_page=100&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`,
+            `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?search=${encodeURIComponent(query)}&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`,
             {
-                headers: {
-                    Authorization: `Basic ${authHeader}`
-                },
+                // headers: {
+                //     Authorization: `Basic ${authHeader}`
+                // },
                 cache: "no-store",
             }
         );
@@ -686,7 +734,7 @@ export async function searchProducts(query) {
             return [];
         }
 
-        const data = await res.json();
+        const { data } = await res.json();
         return Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Error searching products:', error);

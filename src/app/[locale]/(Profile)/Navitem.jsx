@@ -83,7 +83,7 @@ const NavItems = () => {
         { label: t("order"), href: "/my-account/orders", icon: "orders" },
         { label: t("payment"), href: "/my-account/payment-methods", icon: "payment" },
         { label: "SAV", href: "/demande-sav", icon: "sav" },
-        { label: t("change"), href: "/my-account/reinitialiser-mot-de-passe", icon: "password" },
+        { label: t("change"), href: "/my-account/reset-password", icon: "password" },
         { label: t("logout"), href: "/my-account/logout", icon: "logout" },
         { label: "", href: "", icon: <></> }
     ];

@@ -313,6 +313,7 @@
     "current": "Existing password",
     "currentP": "Current password is incorrect",
     "email": "Email or username",
+    "enter": "Enter the email address you used to create your account, and you will receive a link to reset your password.",
     "exclusive": "I would like to receive exclusive offers",
     "first": "First Name",
     "forgot": "Forgot your password?",

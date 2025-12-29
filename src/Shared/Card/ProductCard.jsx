@@ -160,7 +160,6 @@ export default function ProductCard({
                     }
                 </div>
                 <div className="">
-                    <p>{singlePrice}</p>
                     <Link href={`/product/${slug}`}>
                         <FormButton label={t('discover')} />
                     </Link>

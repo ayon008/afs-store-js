@@ -125,6 +125,10 @@ const ProductDetails = ({ data }) => {
         fetchVariationPrice();
     }, [allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
 
+
+    console.log(variationPrice,'variationPrice');
+
+
     // Decode HTML entities
     const decodeHtmlEntities = (text) => {
         if (!text) return text;
