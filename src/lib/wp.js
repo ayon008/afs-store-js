@@ -1,6 +1,8 @@
 // WordPress REST API helper functions
 // Configure WP_BASE_URL in your environment variables (e.g., WP_BASE_URL=https://afs-foiling.com)
 
+import { getLocale } from "next-intl/server";
+
 const WP_BASE_URL = process.env.WP_BASE_URL;
 
 if (!WP_BASE_URL) {
@@ -20,12 +22,26 @@ export async function getPosts(options = {}) {
         categories,
         search,
         fetchAll = false,
+        locale: providedLocale,
         ...otherParams
     } = options;
 
+
+
     try {
+        // Try to get locale, but allow it to be provided or default to empty string if called outside request scope
+        let locale = providedLocale;
+        if (locale === undefined) {
+            try {
+                locale = await getLocale();
+            } catch (error) {
+                // If getLocale fails (e.g., during build), default to empty string
+                console.warn('[getPosts] Could not get locale, defaulting to empty string:', error.message);
+                locale = '';
+            }
+        }
         const baseUrl = WP_BASE_URL.replace(/\/$/, '');
-        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts`;
+        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts&lang=${locale}`;
 
         // If fetchAll is true, we'll paginate through all posts
         if (fetchAll) {
@@ -303,6 +319,7 @@ export async function getCategories(options = {}, fetchOpts = { next: { revalida
     }
 
     try {
+        const { locale, ...otherOptions } = options;
         const baseUrl = WP_BASE_URL.replace(/\/$/, '');
         const apiUrl = `${baseUrl}/wp-json/wp/v2/categories`;
 
@@ -310,8 +327,12 @@ export async function getCategories(options = {}, fetchOpts = { next: { revalida
             per_page: '100', // Get all categories
             orderby: 'name',
             order: 'asc',
-            ...options
+            ...otherOptions
         });
+        
+        if (locale) {
+            params.append('lang', locale);
+        }
 
         const url = `${apiUrl}?${params.toString()}`;
         console.log(`[getCategories] Fetching: ${url}`);

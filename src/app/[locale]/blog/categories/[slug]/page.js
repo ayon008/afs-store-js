@@ -4,14 +4,13 @@ import { getCategories as getCategoriesFromWP } from '@/lib/wp';
 import Image from 'next/image';
 import Link from 'next/link';
 import BlogCard from '@/Shared/Card/BlogCard';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 
 
 
-const categoryPost = async (id) => {
+const categoryPost = async (id, locale) => {
     try {
-        const locale = await getLocale();
         if (!id) throw new Error("Category ID is required");
 
         const base = process.env.WP_BASE_URL?.replace(/\/$/, "");
@@ -86,41 +85,55 @@ const categoryPost = async (id) => {
 
 
 
-export async function generateStaticParams() {
-    try {
-        const categories = await getCategoriesFromWP();
-        return categories.map(category => ({
-            slug: category.slug.toString()
-        }));
-    } catch (error) {
-        console.error('Error generating static params for categories:', error);
-        return [];
-    }
-}
 
 
-const page = async ({ params, locale }) => {
-    const { slug } = await params;
-    const categoryData = await getCategoriesBySlug(slug);
+// export async function generateStaticParams() {
+//     try {
+//         const locales = ["en", "fr"];
+//         const params = [];
+        
+//         for (const locale of locales) {
+//             try {
+//                 const categories = await getCategoriesFromWP({ locale });
+//                 for (const category of categories) {
+//                     params.push({
+//                         locale,
+//                         slug: category.slug.toString()
+//                     });
+//                 }
+//             } catch (error) {
+//                 console.error(`Error fetching categories for locale ${locale}:`, error);
+//             }
+//         }
+        
+//         return params;
+//     } catch (error) {
+//         console.error('Error generating static params for categories:', error);
+//         return [];
+//     }
+// }
+
+
+const page = async ({ params }) => {
+    const { slug, locale } = await params;
+    const categoryData = await getCategoriesBySlug(slug, locale);
     const id = categoryData?.[0]?.id;
-    const blogs = await categoryPost(id);
+    const blogs = await categoryPost(id, locale);
     const categoryName = categoryData?.[0]?.name ?? 'Unknown Category';
 
+    const t = await getTranslations("blog", locale);
+    const a = await getTranslations("breadcum", locale);
 
-    // const categoryName = categoryData?.name ?? 'Unknown Category';
+    const BreadCums = () => {
 
-    const BreadCums = async ({ locale }) => {
-        const t = await getTranslations("breadcum", locale);
         return (
             <div className='absolute top-6 z-20 uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <span className='inline text-white'>{categoryName}</span>
+                    <Link className='inline' href={'/'}>{a("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <span className='inline text-white'>{categoryName}</span>
                 </div>
             </div>
         )
     }
-
-    const t = await getTranslations("blog", locale);
 
 
     return (

@@ -5,15 +5,13 @@ import BlogContent from "@/Shared/Blog/BlogContent"
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { getPosts } from '@/lib/wp';
-import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 
 export async function generateMetadata({ params }) {
-    const localeValue = await getLocaleValue();
-    const { slug } = await params;
+    const { slug, locale } = await params;
     const response = await fetch(
-        `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/posts?slug=${slug}&_embed`
+        `${process.env.WP_BASE_URL}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${locale}`
     );
     const data = await response.json();
     const blog = data[0];
@@ -62,21 +60,37 @@ export async function generateMetadata({ params }) {
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-    const blogs = await getPosts({
-        fetchAll: true,
-        orderby: "date",
-        order: "desc",
-    });
+// export async function generateStaticParams() {
+//     const locales = ["en", "fr"];
+//     const params = [];
 
-    return blogs.map(blog => ({
-        slug: blog.slug,
-    }));
-}
+//     // Fetch posts for each locale separately to avoid getLocale() issues
+//     for (const locale of locales) {
+//         try {
+//             const blogs = await getPosts({
+//                 fetchAll: true,
+//                 orderby: "date",
+//                 order: "desc",
+//                 locale: locale, // Pass locale explicitly to avoid getLocale() call
+//             });
 
-export const getCategories = async (id = null) => {
+//             for (const blog of blogs) {
+//                 params.push({
+//                     locale,
+//                     slug: blog.slug,
+//                 });
+//             }
+//         } catch (error) {
+//             console.error(`Error fetching posts for locale ${locale}:`, error);
+//             // Continue with other locales even if one fails
+//         }
+//     }
+
+//     return params;
+// }
+
+export const getCategories = async (id = null, locale) => {
     try {
-        const locale = await getLocale();
         const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/wp-json/wp/v2/categories`;
 
         const url = id ?
@@ -94,9 +108,8 @@ export const getCategories = async (id = null) => {
         return id ? null : [];
     }
 };
-export const getCategoriesBySlug = async (slug = null) => {
+export const getCategoriesBySlug = async (slug = null, locale) => {
     try {
-        const locale = await getLocale();
         const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/wp-json/wp/v2/categories`;
 
         const url = slug
@@ -123,12 +136,15 @@ export const decodeEntities = (str = "") =>
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">");
 
-const page = async ({ params, locale }) => {
+
+
+
+
+const page = async ({ params }) => {
+    const { slug, locale } = await params;
     const t = await getTranslations("blog", locale);
-    const localeValue = await getLocaleValue();
-    const { slug } = await params;
     const response = await fetch(
-        `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/posts?slug=${slug}&_embed`
+        `${process.env.WP_BASE_URL}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${locale}`
     );
     const data = await response.json();
 
@@ -163,20 +179,20 @@ const page = async ({ params, locale }) => {
     console.log(blog?.categories);
 
     const categoryId = blog?.categories?.[0];
-    const categoryData = await getCategories(categoryId);
+    const categoryData = await getCategories(categoryId, locale);
     const categoryName = categoryData?.name ?? 'Unknown Category';
 
-    const BreadCums = async ({ locale }) => {
-        const t = await getTranslations("breadcum", locale);
+    const a = await getTranslations("breadcum", locale);
+    
+    const BreadCums = () => {
         return (
             <div className='absolute top-6 z-20 global-padding uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryData?.slug}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
+                    <Link className='inline' href={'/'}>{a("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryData?.slug}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
                 </div>
             </div>
         )
     }
-
 
     return (
         <div className='w-full relative'>
