@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,7 +11,8 @@ const decodeEntities = (str = "") =>
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">");
 
-export default function BlogCard({ blog }) {
+export default async function BlogCard({ blog }) {
+    const t = await getTranslations("blog");
     return (
         <div className="w-full">
             {/* Image */}
@@ -96,7 +98,7 @@ export default function BlogCard({ blog }) {
                             color: "rgb(29, 152, 255)",
                         }}
                     >
-                        Read more
+                        {t("read")}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"

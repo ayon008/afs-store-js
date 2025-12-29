@@ -34,10 +34,13 @@
     "foil-co": "employés de Foil And Co.",
     "h-2": "<h>Des employés animés par une passion commune</h><p>Chez Foil And Co, notre équipe partage une passion commune pour l'innovation et l'excellence. Chacun contribue à l'avancement de notre mission avec engagement, créativité et expertise, afin de vous offrir des produits et services de qualité. Découvrez les visages de ceux qui travaillent à la fabrication de vos équipements préférés.</p>",
     "logistics": "LOGISTIQUE",
+    "memory": "Un moment mémorable à Foil And Co.",
     "number": "le nombre de",
     "p-foils": " Feuilles de production",
+    "role": "Ce que vous appréciez dans votre fonction",
     "span": "<span1>Révélez votre potentiel avec nous !</span1> Nous sommes à la recherche de personnes talentueuses et passionnées voulant imposer de nouveaux standards dans le monde du foil et de l'équipement des sports nautiques. <span2>Rejoignez l'équipe aujourd'hui !</span2>",
     "span-1": "<span1>Libérez votre potentiel avec nous !</span1> Nous recherchons des personnes talentueuses et passionnées qui souhaitent établir de nouvelles normes dans le monde du foiling et des équipements de sports nautiques. <span2>Rejoignez l'équipe dès aujourd'hui !</span2>",
+    "start": "Démarrer à Foil And Co.",
     "team": "L'équipe AFS",
     "the-foil": "L'équipe Foil And Co.",
     "view": "Voir les messages"
@@ -96,7 +99,8 @@
   },
   "blog": {
     "blog": "Blog",
-    "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues d'équipement pour les riders de tous niveaux."
+    "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues d'équipement pour les riders de tous niveaux.",
+    "read": "Lire la suite"
   },
   "Board": {
     "Board": "Conseil d'administration"
@@ -307,10 +311,11 @@
     "company": "Entreprise (facultatif)",
     "confirm": "Confirmer le mot de passe",
     "current": "Mot de passe existant",
-    "email": "Email ou nom d'utilisateur Se connecter",
+    "currentP": "Le mot de passe actuel est incorrect",
+    "email": "Email ou nom d'utilisateur",
     "exclusive": "Je souhaite recevoir des offres exclusives",
     "first": "Prénom",
-    "forgot": "Mot de passe oublié ?",
+    "forgot": "Vous avez oublié votre mot de passe ?",
     "last": "Nom de famille",
     "me": "Souvenez-vous de moi",
     "new": "Nouveau sur le site ?",
@@ -326,7 +331,8 @@
     "signin": "Se connecter",
     "signup": "s'inscrire",
     "street": "Numéro et nom de la rue",
-    "text": "Vos données personnelles seront utilisées pour vous aider lors de votre visite sur le site web, pour gérer l'accès à votre compte et pour d'autres raisons décrites dans notre <policy>politique de confidentialité</policy>."
+    "text": "Vos données personnelles seront utilisées pour vous aider lors de votre visite sur le site web, pour gérer l'accès à votre compte et pour d'autres raisons décrites dans notre <policy>politique de confidentialité</policy>.",
+    "updated": "Mot de passe mis à jour avec succès"
   },
   "madeInFrance": {
     "At foil and Co": "Chez foil and Co, notre exemple le plus réussi est la réutilisation des déchets de carbone pré-imprégnés. Ils sont récupérés pour former les plaques, c'est-à-dire la base des feuilles. Il n'y a donc pas plus de 3 % de perte de matières premières au cours du cycle de production.",

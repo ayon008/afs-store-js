@@ -74,6 +74,7 @@ export const getAuthenticatedUser = async () => {
 
 // Create User / Register User
 export const registerStoreUser = async (userInfo) => {
+    const locale = await getLocale();
     try {
         const token = btoa("upwork13:shariar5175A"); // username:password
 

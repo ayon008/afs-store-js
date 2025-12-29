@@ -22,6 +22,7 @@ const TeamCard = ({ member }) => {
     const last_line = memberData["vous_pouvez_partagez_une_anecdote_un_souvenir_ou_un_moment_marquant_vecu_chez_foil_and_co_"];
 
     const a = useTranslations("home");
+    const t = useTranslations("afs-team");
 
 
     const [isOpen, setOpen] = useState(false);
@@ -82,7 +83,7 @@ const TeamCard = ({ member }) => {
                         </h2>
                         <div className='overflow-y-scroll h-full lg:pb-10 pb-5 popup-scroll-bar'>
                             <div className='mt-6'>
-                                <p className='text-base font-medium uppercase'>Début chez Foil And Co.</p>
+                                <p className='text-base font-medium uppercase'>{t("start")}</p>
                                 <h4 className='text-lg font-normal text-gray-500 mt-1'>
                                     {join_date}
                                 </h4>
@@ -96,7 +97,7 @@ const TeamCard = ({ member }) => {
                             {
                                 role &&
                                 <div className='mt-4'>
-                                    <p className='text-base uppercase'>Ce que vous aimez dans votre rôle</p>
+                                    <p className='text-base uppercase'>{t("role")}</p>
                                     <p className='text-base leading-[24px] text-gray-500 mt-1'>
                                         {role}
                                     </p>
@@ -104,7 +105,7 @@ const TeamCard = ({ member }) => {
                             }
                             {
                                 last_line && <div className='mt-4'>
-                                    <p className='text-base uppercase'>Un souvenir marquant chez Foil And Co.</p>
+                                    <p className='text-base uppercase'>{t("memory")}</p>
                                     <p className='text-base leading-[24px] text-gray-500 mt-1'>
                                         {last_line}
                                     </p>

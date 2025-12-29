@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { registerStoreUser } from "@/app/actions/WC/Auth/getAuth";
+import { loginUser, registerStoreUser } from "@/app/actions/WC/Auth/getAuth";
 import Input from "@/Shared/Input/Input";
 import Password from "@/Shared/Input/Password";
 import FormButton from "@/Shared/Button/FormButton";
@@ -37,12 +37,19 @@ const Register = () => {
                 username: email, display_name: `${first_name} ${last_name}`, first_name: first_name, last_name: last_name, email: email, password: password, nickname: `${first_name} ${last_name}`
             });
             if (response.id) {
-                router.push('/login');
-                setError("");
-                reset();
-                setLoading(false);
+                const loginResponse = await loginUser({ username: email, password: password });
+                if (loginResponse.token) {
+                    reset();
+                    try {
+                        await refreshUser();
+                    } catch (e) {
+                        console.warn('refreshUser failed', e);
+                    }
+                    setLoading(false);
+                    router.push('/my-account');
+                }
             }
-
+            setLoading(false);
         } catch (error) {
             console.log(error.message);
             setError(error.message);
@@ -201,8 +208,8 @@ const Register = () => {
                         <p className="text-sm font-semibold leading-[17px]">
                             {t.rich("text", {
                                 policy: (chunks) => (
-                                    <span className="text-[#1D98FE]">
-                                        {chunks}
+                                    <span className="text-[#1D98FE] underline">
+                                        <Link href={"/privacy-policy"}>{chunks}</Link>
                                     </span>
                                 ),
                             })}

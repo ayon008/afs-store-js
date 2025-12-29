@@ -22,7 +22,7 @@
   "afs-event": {
     "headline": "Discover all the events organised by AFS for our brands.",
     "nombre": "Number of shops:",
-    "pays": "Choose a country"
+    "pays": "Choisir un pays"
   },
   "afs-products": {
     "tests": "<h>Tests and reviews</h><p>Find out what the trade press has to say about our products</p>"
@@ -34,10 +34,13 @@
     "foil-co": "employees at Foil And Co.",
     "h-2": "<h>Employees driven by a shared passion</h><p>At Foil And Co, our team shares a common passion for innovation and excellence. Each member contributes to advancing our mission with commitment, creativity and expertise, in order to offer you quality products and services. Discover the faces of those who work to produce your favourite equipment.</p>",
     "logistics": "LOGISTICS",
+    "memory": "A memorable moment at Foil And Co.",
     "number": "the number of",
     "p-foils": " Production foils",
+    "role": "What you enjoy about your role",
     "span": "<span1>Révélez votre potentiel avec nous !</span1> Nous sommes à la recherches de personnes talentueuses et passionées voulant imposer de nouveaux standards dans le monde du foil et de l'équipement des sports nautiques. <span2>Rejoignez l'équipe aujourd'hui !</span2>",
     "span-1": "<span1>Unlock your potential with us!</span1> We are seeking talented and passionate individuals who want to set new standards in the world of foiling and water sports equipment. <span2>Join the team today!</span2>",
+    "start": "Start at Foil And Co.",
     "team": "AFS Team",
     "the-foil": "The Foil And Co. team",
     "view": "view posts"
@@ -96,7 +99,8 @@
   },
   "blog": {
     "blog": "Blog",
-    "heading": "Discover foiling tips, industry information, and equipment reviews for riders of all levels."
+    "heading": "Discover foiling tips, industry information, and equipment reviews for riders of all levels.",
+    "read": "Read More"
   },
   "Board": {
     "Board": "Board"
@@ -307,10 +311,11 @@
     "company": "Company (Optional)",
     "confirm": "Confirm password",
     "current": "Existing password",
-    "email": "Email or username\nLog in",
+    "currentP": "Current password is incorrect",
+    "email": "Email or username",
     "exclusive": "I would like to receive exclusive offers",
     "first": "First Name",
-    "forgot": "Mot de passe oublié ?",
+    "forgot": "Forgot your password?",
     "last": "Last Name",
     "me": "Remember me",
     "new": "New to the website?",
@@ -326,7 +331,8 @@
     "signin": "Log in",
     "signup": "sign up",
     "street": "Street number and name",
-    "text": "Your personal data will be used to assist you during your visit to the website, manage access to your account, and for other reasons described in our <policy>privacy policy</policy>."
+    "text": "Your personal data will be used to assist you during your visit to the website, manage access to your account, and for other reasons described in our <policy>privacy policy</policy>.",
+    "updated": "Password Updated Successfully"
   },
   "madeInFrance": {
     "At foil and Co": "At foil and Co our most successful example is the reuse of\n                prepreg carbon scrap. They are recovered to form the plates,\n                i.e. the base of the foils. Therefore, there is no more than a\n                3% loss on raw materials during the production cycle.",

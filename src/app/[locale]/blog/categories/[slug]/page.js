@@ -1,23 +1,23 @@
 import React from 'react';
-import { getCategories } from '../../[slug]/page';
+import { getCategoriesBySlug } from '../../[slug]/page';
 import { getCategories as getCategoriesFromWP } from '@/lib/wp';
 import Image from 'next/image';
 import Link from 'next/link';
 import BlogCard from '@/Shared/Card/BlogCard';
-import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+
 
 
 
 const categoryPost = async (id) => {
     try {
-        const localeValue = await getLocaleValue();
+        const locale = await getLocale();
         if (!id) throw new Error("Category ID is required");
 
         const base = process.env.WP_BASE_URL?.replace(/\/$/, "");
         if (!base) throw new Error("WP_BASE_URL is missing in environment variables");
 
-        const url = `${base}/${localeValue}/wp-json/wp/v2/posts?categories=${id}&_embed&per_page=100`;
+        const url = `${base}/wp-json/wp/v2/posts?categories=${id}&_embed&per_page=100&lang=${locale}`;
 
         const res = await fetch(url, {
             next: { revalidate: 60 }, // ISR caching
@@ -90,7 +90,7 @@ export async function generateStaticParams() {
     try {
         const categories = await getCategoriesFromWP();
         return categories.map(category => ({
-            id: category.id.toString()
+            slug: category.slug.toString()
         }));
     } catch (error) {
         console.error('Error generating static params for categories:', error);
@@ -100,10 +100,14 @@ export async function generateStaticParams() {
 
 
 const page = async ({ params, locale }) => {
-    const { slug: id } = await params;
+    const { slug } = await params;
+    const categoryData = await getCategoriesBySlug(slug);
+    const id = categoryData?.[0]?.id;
     const blogs = await categoryPost(id);
-    const categoryData = await getCategories(id);
-    const categoryName = categoryData?.name ?? 'Unknown Category';
+    const categoryName = categoryData?.[0]?.name ?? 'Unknown Category';
+
+
+    // const categoryName = categoryData?.name ?? 'Unknown Category';
 
     const BreadCums = async ({ locale }) => {
         const t = await getTranslations("breadcum", locale);
@@ -121,7 +125,7 @@ const page = async ({ params, locale }) => {
 
     return (
         <div className="min-h-screen">
-            <div className="w-full global-margin relative h-[384px] global-padding relative">
+            <div className="w-full global-margin h-[384px] global-padding relative">
                 <Image
                     src="/images/blogs/paraglider.png"
                     alt="Paraglider"

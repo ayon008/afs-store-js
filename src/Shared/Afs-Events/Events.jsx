@@ -71,12 +71,6 @@ const Events = () => {
         queryFn: async () => await getAllEvents(selectedId),
     })
 
-    console.log(selectedId);
-    
-
-
-    console.log(data);
-
     const containerStyle = {
         width: '100%',
         height: '100%'

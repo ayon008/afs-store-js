@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { getPosts } from '@/lib/wp';
 import { getLocaleValue } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 
 export async function generateMetadata({ params }) {
@@ -76,12 +76,12 @@ export async function generateStaticParams() {
 
 export const getCategories = async (id = null) => {
     try {
-        const localeValue = await getLocaleValue();
-        const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/${localeValue}/wp-json/wp/v2/categories`;
+        const locale = await getLocale();
+        const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/wp-json/wp/v2/categories`;
 
-        const url = id
-            ? `${base}/${id}?_embed`
-            : `${base}?_embed&per_page=100`; // fetch all
+        const url = id ?
+            `${base}/${id}?_embed&lang=${locale}` :
+            `${base}?_embed&per_page=100&lang=${locale}`; // fetch all
 
         const res = await fetch(url, { cache: 'no-cache' });
 
@@ -92,6 +92,26 @@ export const getCategories = async (id = null) => {
     } catch (err) {
         console.error("Error in getCategories():", err);
         return id ? null : [];
+    }
+};
+export const getCategoriesBySlug = async (slug = null) => {
+    try {
+        const locale = await getLocale();
+        const base = `${process.env.WP_BASE_URL.replace(/\/$/, "")}/wp-json/wp/v2/categories`;
+
+        const url = slug
+            ? `${base}?slug=${slug}&_embed&lang=${locale}`
+            : `${base}?_embed&per_page=100&lang=${locale}`; // fetch all categories
+
+        const res = await fetch(url, { cache: 'no-cache' });
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch categories${slug ? ` with slug ${slug}` : ""}`);
+        }
+        return await res.json();
+    } catch (err) {
+        console.error("Error in getCategoriesBySlug():", err);
+        return slug ? null : [];
     }
 };
 
@@ -140,6 +160,8 @@ const page = async ({ params, locale }) => {
 
     // Author Name
     const authorName = decodeEntities(blog?._embedded?.author?.[0]?.name ?? ''); // "Antonin"
+    console.log(blog?.categories);
+
     const categoryId = blog?.categories?.[0];
     const categoryData = await getCategories(categoryId);
     const categoryName = categoryData?.name ?? 'Unknown Category';
@@ -149,7 +171,7 @@ const page = async ({ params, locale }) => {
         return (
             <div className='absolute top-6 z-20 global-padding uppercase'>
                 <div className='font-semibold text-sm text-white/50'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryId}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
+                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={'/blog'}>Blog</Link> / <Link href={`/blog/categories/${categoryData?.slug}`} className='inline'>{categoryName}</Link> / <span className='text-white'>{blogTitle}</span>
                 </div>
             </div>
         )
