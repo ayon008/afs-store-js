@@ -203,7 +203,7 @@
   },
   "filter": {
     "categories": "Catégories",
-    "finish": "FINITION"
+    "finish": "TERMINER"
   },
   "footer": {
     "1st": "Click & Collect",
@@ -490,7 +490,7 @@
     "hello": "Bonjour",
     "here": "Ici, vous pouvez saisir ou modifier des informations publiques vous concernant. Ces données seront utilisées ultérieurement pour passer des commandes. Les modifications apportées seront affichées immédiatement après l'enregistrement.",
     "info": "Informations",
-    "logout": "Se déconnecter",
+    "logout": "Déconnecter",
     "order": "Commandes",
     "p": "Nous attendons avec impatience votre retour lorsque vous serez prêt à vous reconnecter. Votre compte est toujours là, avec vous, et vous pouvez y revenir chaque fois que vous en avez besoin.",
     "payment": "Modes de paiement",

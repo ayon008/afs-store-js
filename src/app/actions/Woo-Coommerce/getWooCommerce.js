@@ -78,88 +78,13 @@ export const getCountryDetails = async (country) => {
         return error;
     }
 }
-export const calculatePriceWithTax = async (basePrice, tax_class = "standard", country = null) => {
-    try {
-        // Get user country from shipping/billing address, default to France
-        const currency = await getCurrency();
-        let userCountry = country;
-        const cart = await getCart();
-        const defaultCountry = cart?.data?.shipping_address?.country || cart?.data?.billing_address?.country || "FR";
 
-        if (!userCountry) {
-            const user = await getAuthenticatedUser();
-            if (user) {
-                userCountry = user.shipping?.country || user.billing?.country || defaultCountry;
-            } else {
-                userCountry = defaultCountry;
-            }
-        }
-
-        // Fetch all tax rates (paginated)
-        const per_page = 100;
-        let page = 1;
-        let allTaxRates = [];
-
-        while (true) {
-            const response = await fetch(
-                `${process.env.WP_BASE_URL}/wp-json/wc/v3/taxes?per_page=${per_page}&page=${page}&lang=fr&currency=${currency}`,
-                {
-                    headers: {
-                        Authorization: `Basic ${authHeader}`,
-                        'Content-Type': 'application/json',
-                    },
-                    cache: "no-cache"
-                }
-            );
-
-            if (!response.ok) throw new Error('Failed to fetch tax rates');
-
-            const taxes = await response.json();
-            if (!Array.isArray(taxes) || taxes.length === 0) break;
-
-            allTaxRates.push(...taxes);
-            if (taxes.length < per_page) break;
-            page++;
-        }
-
-        // Normalize tax_class (same logic as getUserTaxRate)
-        const normalizedTaxClass = (!tax_class || tax_class === "" || tax_class === "standard")
-            ? "standard"
-            : tax_class.toLowerCase();
-
-        // Find matching tax rate by country AND tax_class
-        const matchingTax = allTaxRates.find(rate => {
-            const rateCountry = rate?.country?.toLowerCase() || "";
-            const rateClass = rate?.class?.toLowerCase() || "standard";
-
-            // Match country (case-insensitive)
-            const countryMatch = rateCountry === userCountry.toLowerCase();
-
-            // Match tax class (WooCommerce stores standard class as empty string)
-            const classMatch = (normalizedTaxClass === "standard" && (rateClass === "" || rateClass === "standard"))
-                || rateClass === normalizedTaxClass;
-
-            return countryMatch && classMatch;
-        });
-
-        // Calculate and apply tax
-        const taxRate = parseFloat(matchingTax?.rate) || 0;
-        const priceWithTax = basePrice + (basePrice * taxRate) / 100;
-
-        return parseFloat(priceWithTax?.toFixed(2));
-    } catch (error) {
-        console.error('Error calculating tax:', error);
-        return basePrice; // fallback to base price on error
-    }
-};
 
 
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
     const locale = await getLocale();
     const currency = await getCurrency();
-    console.log("currency", currency);
-
     try {
         // Convert "12,40" or [12,40] or 12 → always array
         let categories = Array.isArray(ids)
@@ -254,13 +179,6 @@ export const getProductBySlug = async (slug) => {
         })
         const data = await response.json();
         const product = data[0];
-
-
-        if (product) {
-            const basePrice = parseFloat(product.price) || 0;
-            const priceWithTax = await calculatePriceWithTax(basePrice, product.tax_class);
-            return { ...product, price_with_tax: priceWithTax };
-        }
         return product;
     } catch (error) {
         console.log(error);
@@ -361,9 +279,6 @@ export async function changePasswordAction(data) {
         }
     );
 
-
-    console.log('res', res);
-
     if (!res.ok) {
         const err = await res.json();
         return { success: false, error: err.message || 'Failed' };
@@ -422,43 +337,7 @@ export const getPrice = async (productId, selectedVariation) => {
             cache: "no-cache",
         });
         const variations = await response.json();
-
-        const matchedVariation = variations.find((variation) => {
-
-            return variation.attributes.every((attr) => {
-                // WooCommerce provides english slug → convert to readable name
-                const attrName = attr.name
-                    .replace("attribute_", "")
-                    .toLowerCase()
-                    .trim();
-
-                // Convert selectedVariation keys to lower-case comparison form
-                const selectedEntry = Object.entries(selectedVariation).find(
-                    ([key]) => key.toLowerCase().trim() === attrName
-                );
-
-                if (!selectedEntry) {
-                    return true;
-                }
-
-                const selectedValue = selectedEntry[1];
-
-                if (!selectedValue) return false;
-
-                // Compare values
-                return (
-                    selectedValue.toLowerCase().trim() ===
-                    attr.option.toLowerCase().trim()
-                );
-            });
-        });
-        console.log(matchedVariation.price_incl_tax);
-        return {
-            price: matchedVariation.price_incl_tax,
-            id: matchedVariation?.id,
-            attributes: matchedVariation
-        } || null;
-
+        return variations;
     } catch (error) {
         console.log(error);
         return null;

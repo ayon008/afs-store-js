@@ -12,7 +12,7 @@ const page = async ({ params }) => {
             <NotFound />
         )
     }
-    
+
     return (
         <div>
             <SingleProduct data={data} />

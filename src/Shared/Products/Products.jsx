@@ -143,7 +143,7 @@ const Products = ({ id, childCategories }) => {
                     </div>
                 </div>
                 <div>
-                    <p className='uppercase text-base font-semibold leading-[100%] pb-1 global-b-bottom lg:hidden block' onClick={() => setOpen(true)}>
+                    <p className='uppercase text-base font-semibold leading-[100%] pb-1 global-b-bottom-d lg:hidden block' onClick={() => setOpen(true)}>
                         Filter
                         <Filter className='inline ml-2 mb-1' size={'0.8rem'} />
                     </p>
@@ -180,13 +180,13 @@ const Products = ({ id, childCategories }) => {
 
 
             <PopUp isOpen={isOpen}>
-                <div className='w-[90%] mx-auto bg-white/95 h-[90vh] p-4 rounded-[4px] overflow-hidden shadow-xl'>
+                <div className='w-[90%] mx-auto bg-[#F7F7F7] h-auto p-[10px] rounded-[4px] overflow-hidden shadow-xl'>
                     <div className='relative'>
                         <p className='font-medium uppercase text-xs leading-[100%] pb-4 text-[#999] border-gray-300 border-b'>Filters</p>
                         <X className="w-4 h-4 absolute top-0 right-0 text-[#999]" onClick={() => setOpen(!isOpen)} />
                     </div>
-                    <div className='mb-4 mt-4 h-[50%] overflow-y-scroll popup-scroll-bar-1'>
-                        <p className='font-semibold text-base leading-[100%] text-black mb-4'>{a("categories")}</p>
+                    <p className='font-semibold text-base leading-[100%] text-black my-4'>{a("categories")}</p>
+                    <div className='mb-4 mt-4 max-h-[50vh] overflow-y-scroll popup-scroll-bar-1'>
                         {childCategories && childCategories.length > 0
                             ? renderCategories(childCategories)
                             : <p className="text-sm text-gray-500">No {a("categories")}</p>}
@@ -194,7 +194,7 @@ const Products = ({ id, childCategories }) => {
                     <div>
                         {isLoading ? <div>Loading...</div> :
                             <>
-                                <label className='uppercase text-base font-medium mb-4 block' for="vol">PRIX</label>
+                                <label className='font-semibold text-base leading-[100%] text-black mb-4 block' for="vol">{t("price")}</label>
                                 <RangeSlider
                                     min={minPrice}
                                     max={maxPrice}
@@ -207,7 +207,7 @@ const Products = ({ id, childCategories }) => {
                                 </div>
                             </>
                         }
-                        <button type='button' className='text-center bg-black text-white w-full mt-4 text-sm leading-[100%] py-5 font-semibold rounded-4xl cursor-pointer' onClick={() => setOpen(!isOpen)}>
+                        <button type='button' className='text-center bg-black text-white w-full mt-6 text-sm leading-[100%] py-4 font-semibold rounded-4xl cursor-pointer' onClick={() => setOpen(!isOpen)}>
                             {a("finish")}
                         </button>
                     </div>

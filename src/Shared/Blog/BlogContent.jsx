@@ -146,7 +146,7 @@ const BlogContent = ({ blog }) => {
         }, tableOfContentsRef);
 
         return () => ctx.revert();
-    }, { dependencies: [showTableOfContents]});
+    }, { dependencies: [showTableOfContents] });
 
 
     return (
@@ -211,14 +211,16 @@ const BlogContent = ({ blog }) => {
                 {/* Main Blog */}
                 <div className='flex-1 max-w-[790px]'>
                     <article ref={contentRef}>
-                        <div
+                        {/* <div
                             className='prose lg:text-[22px] text-[19px] font-semibold leading-[120%] prose-h1:text-4xl prose-headings:scroll-mt-2 prose-img:my-8 
                 prose-table:border prose-table:rounded-lg prose-table:shadow-lg prose-th:font-extrabold prose-th:bg-blue-50 prose-td:p-3 [&_h2]:mt-10  prose-table:w-full 
                 prose-a:font-bold
                 prose-a:text-blue-600 hover:prose-a:text-blue-800
                 prose-headings:text-gray-900 [&_img]:my-8 [&_iframe]:my-8 [&_iframe]:w-full'
                             dangerouslySetInnerHTML={{ __html: content }}
-                        />
+                        /> */}
+
+                        <div dangerouslySetInnerHTML={{ __html: content }} className='prose'/>
                     </article>
                 </div>
             </div>

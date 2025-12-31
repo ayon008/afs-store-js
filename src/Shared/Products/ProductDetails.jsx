@@ -8,6 +8,7 @@ import { getPrice } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -35,14 +36,20 @@ const ProductDetails = ({ data }) => {
 
     const { register, handleSubmit, watch } = useForm();
     const [variationPrice, setVariationPrice] = useState(null);
-    const [variationTaxAmount, setVariationTaxAmount] = useState(null);
-    const [variationCountry, setVariationCountry] = useState(null);
     const [variationId, setVariationId] = useState(null);
     const [variationInStock, setVariationInStock] = useState(true);
     const [variationAttributes, setVariationAttributes] = useState(null);
+
     const productId = data?.id;
 
-    const t = useTranslations("product")
+    const t = useTranslations("product");
+
+    const { isLoading, data: variations } = useQuery({
+        queryKey: ['variations', productId],
+        queryFn: async () => await getPrice(productId),
+        enabled: !!productId,
+        staleTime: 1000 * 60 * 5,
+    });
 
     // Check if product is in stock (base product)
     const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
@@ -81,8 +88,6 @@ const ProductDetails = ({ data }) => {
         if (!allVariationsSelected) {
             // Reset price when selections change
             setVariationPrice(null);
-            setVariationTaxAmount(null);
-            setVariationCountry(null);
             setVariationId(null);
             setVariationInStock(true);
             setVariationAttributes(null);
@@ -92,32 +97,61 @@ const ProductDetails = ({ data }) => {
         const fetchVariationPrice = async () => {
             setPriceLoading(true);
             try {
-                const matchedVariation = await getPrice(productId, watchedValues);
+                const matchedVariation = variations?.find((variation) => {
+                    return variation.attributes.every((attr) => {
+                        // WooCommerce provides english slug → convert to readable name
+                        const attrName = attr.name
+                            .replace("attribute_", "")
+                            .toLowerCase()
+                            .trim();
+
+                        // Convert selectedVariation keys to lower-case comparison form
+                        const selectedEntry = Object.entries(watchedValues).find(
+                            ([key]) => key.toLowerCase().trim() === attrName
+                        );
+
+                        if (!selectedEntry) {
+                            return true;
+                        }
+
+                        const selectedValue = selectedEntry[1];
+
+                        if (!selectedValue) return false;
+
+                        // Compare values
+                        return (
+                            selectedValue.toLowerCase().trim() ===
+                            attr.option.toLowerCase().trim()
+                        );
+                    });
+                });
+
+                // console.log(watchedValues, 'watchedValues');
+
+                // console.log(matchedVariation, 'matchedVariation');
+
+
+                // console.log(matchedVariation.attributes, 'matchedVariation.attributes');
+
                 if (matchedVariation) {
-                    setVariationPrice(matchedVariation.price);
-                    setVariationTaxAmount(matchedVariation.taxAmount);
-                    setVariationCountry(matchedVariation.userCountry);
+                    setVariationPrice(matchedVariation.price_incl_tax);
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
-                    setVariationAttributes(matchedVariation.attributes?.attributes || null);
+                    setVariationAttributes(matchedVariation.attributes || null);
                     // Check if the variation is in stock
-                    const stockStatus = matchedVariation.attributes?.stock_status;
+                    const stockStatus = matchedVariation.stock_status;
                     const variationStock = stockStatus
                         ? stockStatus === 'instock'
-                        : (matchedVariation.attributes?.in_stock === true || matchedVariation.attributes?.is_in_stock === true || matchedVariation.attributes?.purchasable !== false);
+                        : (matchedVariation.in_stock === true || matchedVariation.is_in_stock === true || matchedVariation.purchasable !== false);
                     setVariationInStock(variationStock);
                 } else {
                     setVariationPrice(null);
-                    setVariationTaxAmount(null);
-                    setVariationCountry(null);
                     setVariationId(null);
                     setVariationAttributes(null);
                 }
             } catch (error) {
                 console.error('Error fetching variation price:', error);
                 setVariationPrice(null);
-                setVariationTaxAmount(null);
-                setVariationCountry(null);
                 setVariationId(null);
                 setVariationAttributes(null);
             } finally {
@@ -127,9 +161,6 @@ const ProductDetails = ({ data }) => {
 
         fetchVariationPrice();
     }, [allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
-
-
-    console.log(variationPrice, 'variationPrice');
 
     const a = useTranslations("profile")
 
@@ -186,8 +217,7 @@ const ProductDetails = ({ data }) => {
                 variationId || null,
                 formattedVariations
             );
-            console.log(result, 'result');
-
+            
             if (!result?.success) {
                 alert(decodeHtmlEntities(result?.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
             }
@@ -220,7 +250,7 @@ const ProductDetails = ({ data }) => {
                 }
 
                 {/* Form */}
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-[30px] mt-5">
+                <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
                     <div className="flex flex-col gap-4">
                         <table>
                             <tbody className="flex flex-col gap-5">
@@ -279,7 +309,7 @@ const ProductDetails = ({ data }) => {
                         )}
 
                         {/* Price */}
-                        {variationPrice && !priceLoading && (
+                        {variationPrice && !priceLoading && variationInStock && (
                             <div className='space-y-1'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
                                     {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
@@ -293,14 +323,14 @@ const ProductDetails = ({ data }) => {
                         )}
 
                         {/* Out of Stock Message - for variable products */}
-                        {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
+                        {/* {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
                             <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )}
+                        )} */}
 
                         {/* Out of Stock Message - for simple products */}
-                        {!hasVariations && !baseInStock && (
+                        {/* {!hasVariations && !baseInStock && (
                             <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )}
+                        )} */}
 
                         {/* Button */}
                         <button
@@ -311,7 +341,7 @@ const ProductDetails = ({ data }) => {
                             {addingToCart
                                 ? t("add")
                                 : (hasVariations ? (!isInStock && allVariationsSelected) : !baseInStock)
-                                    ? t("stock")
+                                    ? t("buy")
                                     : t("buy")
                             }
                         </button>

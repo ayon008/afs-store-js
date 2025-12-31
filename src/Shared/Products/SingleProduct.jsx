@@ -41,24 +41,24 @@ const SingleProduct = ({ data }) => {
 
 
 
-    const BreadCums = () => {
-        const t = useTranslations("breadcum")
-        return (
-            <div className='uppercase mb-6'>
-                <div className='font-bold text-sm text-[#999999]'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> / <span className=''>
-                        <Link href={`/${locale}/product-category/foiling`}>foiling</Link>
-                    </span> {
-                        data?.categories[0] && <>
-                            / <span className=''>
-                                <Link href={`/${locale}/product-category/foiling/${data?.categories[0]?.slug}`}>{data?.categories[0]?.name}</Link>
-                            </span>
-                        </>
-                    }
-                </div>
-            </div>
-        )
-    }
+    // const BreadCums = () => {
+    //     const t = useTranslations("breadcum")
+    //     return (
+    //         <div className='uppercase mb-6'>
+    //             <div className='font-bold text-sm text-[#999999]'>
+    //                 <Link className='inline' href={'/'}>{t("home")}</Link> / <span className=''>
+    //                     <Link href={`/${locale}/product-category/foiling`}>foiling</Link>
+    //                 </span> {
+    //                     data?.categories[0] && <>
+    //                         / <span className=''>
+    //                             <Link href={`/${locale}/product-category/foiling/${data?.categories[0]?.slug}`}>{data?.categories[0]?.name}</Link>
+    //                         </span>
+    //                     </>
+    //                 }
+    //             </div>
+    //         </div>
+    //     )
+    // }
 
 
     useEffect(() => {

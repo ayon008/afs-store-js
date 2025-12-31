@@ -68,7 +68,7 @@ export default async function BlogPage({ locale }) {
 
     return (
         <div className="min-h-screen">
-            <div className="w-full global-margin relative max-h-[646px] h-[calc(100vh-139px)]">
+            <div className="w-full mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] relative max-h-[646px] h-[calc(100vh-139px)]">
                 <Image
                     src="/images/blogs/paraglider.png"
                     alt="Paraglider"
@@ -88,7 +88,7 @@ export default async function BlogPage({ locale }) {
                 </div>
             </div>
 
-            <main className="w-full global-padding global-margin max-w-[1920px] mx-auto">
+            <main className="w-full global-padding mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] max-w-[1920px] mx-auto">
                 {error && (
                     <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                         <p>Error loading blog posts: {error}</p>
