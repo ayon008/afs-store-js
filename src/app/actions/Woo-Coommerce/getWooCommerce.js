@@ -173,14 +173,11 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         const per_page = 100;
 
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
-
-        console.log(shippingCountry);
-
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
-            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=100&per_page=${per_page}&page=${i}&lang=${locale}&shipping_country=${shippingCountry}&currency=${currency}`
+            let url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?category=${categoriesIds}&per_page=${per_page}&page=${i}&lang=${locale}&shipping_country=${shippingCountry}&currency=${currency}`
 
             if (min != null) url += `&min_price=${Number(min)}`;
             if (max != null) url += `&max_price=${Number(max)}`;
@@ -415,7 +412,7 @@ export const getPrice = async (productId, selectedVariation) => {
     const locale = await getLocale();
     try {
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
         const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`;
 
         const response = await fetch(url, {
@@ -665,7 +662,7 @@ export const getRecentProducts = async () => {
         const currency = await getCurrency();
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
         // const authHeader = Buffer
         //     .from(`${consumerKey}:${consumerSecret}`)
         //     .toString("base64");
@@ -701,7 +698,7 @@ export async function searchProducts(query = "") {
     try {
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
         const currency = await getCurrency();
 
         const res = await fetch(
