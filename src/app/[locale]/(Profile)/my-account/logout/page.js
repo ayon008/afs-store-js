@@ -6,14 +6,17 @@ import { useRouter } from 'next/navigation';
 import FormButton from '@/Shared/Button/FormButton';
 import { logout } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import { useTranslations } from 'next-intl';
+import useCart from '@/Shared/Hooks/useCart';
 
 
 
 const Page = () => {
     const router = useRouter();
+    const { loadCart } = useCart();
     const handleLogOut = async () => {
         const response = await logout();
         if (response.success) {
+            await loadCart()
             router.push('/');
         }
     }

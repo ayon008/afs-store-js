@@ -135,7 +135,6 @@ const page = async ({ params }) => {
         )
     }
 
-
     return (
         <div className="min-h-screen">
             <div className="w-full global-margin h-[384px] global-padding relative">

@@ -4,19 +4,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import { Swiper, SwiperSlide } from "swiper/react";
-// Import required Swiper modules
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Reviews from '../Reviews/Reviews';
 import default_image from "../../../public/assets/images/Team/Group-1-3.png.webp"
-// import ProductDetails from './ProductDetails';
-import { getProductBySlug } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import ShimmerLoader from '../Loader/ShimmerLoader';
 import FaqSection from './FaqSection';
 import PopUp from '../PopUp/PopUp';
 import ProductDetails from './ProductDetails';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 // For youtube link in review and pop up section
 function extractYouTubeID(url) {
@@ -27,34 +25,41 @@ function extractYouTubeID(url) {
 }
 
 
-const SingleProduct = () => {
+const SingleProduct = ({ data }) => {
 
     const swiperRef = useRef(null); // Swiper instance
     const [activeIndex, setActiveIndex] = useState(0); // track active slide
-
     const [default_slide, setSlide] = useState(1);
-
     const params = useParams();
-    const { slug } = params;
-
-    const [loader, setLoader] = useState(true);
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        const load = async () => {
-            setLoader(true);
-            const data = await getProductBySlug(slug);
-            setData(data);
-            setLoader(false);
-        }
-        load();
-    }, [slug])
-
-    console.log(data, 'data');
+    const { slug, locale } = params;
 
     const [images, setImages] = useState([]);
     const [sliceLength, setLength] = useState(0);
     const [isOpen, setOpen] = useState(false);
+
+    const a = useTranslations("product")
+
+
+
+    const BreadCums = () => {
+        const t = useTranslations("breadcum")
+        return (
+            <div className='uppercase mb-6'>
+                <div className='font-bold text-sm text-[#999999]'>
+                    <Link className='inline' href={'/'}>{t("home")}</Link> / <span className=''>
+                        <Link href={`/${locale}/product-category/foiling`}>foiling</Link>
+                    </span> {
+                        data?.categories[0] && <>
+                            / <span className=''>
+                                <Link href={`/${locale}/product-category/foiling/${data?.categories[0]?.slug}`}>{data?.categories[0]?.name}</Link>
+                            </span>
+                        </>
+                    }
+                </div>
+            </div>
+        )
+    }
+
 
     useEffect(() => {
         if (!data) return; // wait for data to load
@@ -88,20 +93,9 @@ const SingleProduct = () => {
 
     const acf = data?.acf;
 
-
-
-    if (loader) {
-        return (
-            <div className='global-padding pt-4 max-w-[1920px] mx-auto'>
-                <ShimmerLoader />
-            </div>
-        )
-    }
-
-
     return (
         <div className='global-padding lg:pt-4 pt-0 max-w-[1920px] mx-auto w-full'>
-            {/* <BreadCums /> */}
+            <BreadCums />
             <div className='flex items-start lg:flex-row flex-col justify-between gap-10'>
                 <div className='lg:w-[60%] w-full'>
                     <div className='lg:grid grid-cols-2 gap-2.5 relative hidden'>
@@ -127,13 +121,17 @@ const SingleProduct = () => {
                             })
                         }
                         {
-                            sliceLength === 4 && <button className='px-4 py-2 rounded-[20px] bg-white border-[#ccc] border w-fit text-base leading-6 font-semibold absolute left-1/2 -translate-x-1/2 -bottom-5 cursor-pointer' onClick={() => setLength(images?.length)}>View all</button>
+                            sliceLength === 4 && <button className='px-4 py-2 rounded-[20px] bg-white border-[#ccc] border w-fit text-base leading-6 font-semibold absolute left-1/2 -translate-x-1/2 -bottom-5 cursor-pointer' onClick={() => setLength(images?.length)}>
+                                View all
+                            </button>
                         }
                         {
                             sliceLength > 4 && <button className='px-4 py-2 rounded-[20px] bg-white border-[#ccc] border w-fit text-base leading-6 font-semibold absolute left-1/2 -translate-x-1/2 -bottom-5 cursor-pointer' onClick={() => {
                                 setLength(4)
                                 window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}>Voir moins</button>
+                            }}>
+                                {a("less")}
+                            </button>
                         }
                     </div>
                     <div className='lg:hidden block -mx-5 bg-[#111]'>
@@ -225,11 +223,11 @@ const SingleProduct = () => {
                                                                         frameBorder="0"
                                                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                                         allowFullScreen
-                                                                        className="rounded-[4px] mx-auto block"
+                                                                        className="rounded-sm mx-auto block"
                                                                     ></iframe>
                                                                 ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center bg-black rounded-[4px]">
-                                                                        <Image src={img?.src || default_image} className='w-full h-full rounded-[4px] object-contain aspect-[1]' width={649} height={649} alt={img?.alt || "Video thumbnail"} />
+                                                                    <div className="w-full h-full flex items-center justify-center bg-black rounded-sm">
+                                                                        <Image src={img?.src || default_image} className='w-full h-full rounded-sm object-contain aspect-[1]' width={649} height={649} alt={img?.alt || "Video thumbnail"} />
                                                                         <span className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
                                                                             <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                                 <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>

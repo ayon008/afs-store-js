@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { getPosts } from '@/lib/wp';
 import { getTranslations } from 'next-intl/server';
+import NotFound from '@/Shared/NotFound/404';
 
 
 export async function generateMetadata({ params }) {
@@ -153,15 +154,7 @@ const page = async ({ params }) => {
     // If the blog is undefined, bail early to avoid later operations that assume the blog exists
     if (!blog) {
         return (
-            <div className="max-w-3xl mx-auto p-10 text-center bg-[#f4f4f4] min-h-screen">
-                <h1 className="text-3xl font-bold mb-4">Blog not found 😢</h1>
-                <Link
-                    href="/blog"
-                    className="text-blue-600 hover:text-blue-800 underline flex items-center justify-center gap-2"
-                >
-                    <ArrowRight size={16} className="rotate-180" /> Back to blogs
-                </Link>
-            </div>
+            <NotFound />
         );
     }
     // Date
@@ -183,7 +176,7 @@ const page = async ({ params }) => {
     const categoryName = categoryData?.name ?? 'Unknown Category';
 
     const a = await getTranslations("breadcum", locale);
-    
+
     const BreadCums = () => {
         return (
             <div className='absolute top-6 z-20 global-padding uppercase'>

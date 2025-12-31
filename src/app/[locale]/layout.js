@@ -58,7 +58,7 @@ export const metadata = {
 
 
 export default async function RootLayout({ children, params }) {
-  const NAV_LINKS = await getMenuItems();
+  const NAV_LINKS = await getMenuItems() || [];
   const { locale } = await params;
 
   if (!hasLocale(routing.locales, locale)) {

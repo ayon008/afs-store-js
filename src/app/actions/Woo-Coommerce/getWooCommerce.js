@@ -173,7 +173,10 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         const per_page = 100;
 
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+
+        console.log(shippingCountry);
+
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
@@ -409,20 +412,11 @@ export const lostPassword = async (email) => {
 
 export const getPrice = async (productId, selectedVariation) => {
     const currency = await getCurrency();
-    // const url = `https://afs-foiling.com/fr/wp-json/wc/v3/products/${productId}/variations?per_page=100`;
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}`;
-
+    const locale = await getLocale();
     try {
-        // Get user country for tax calculation
-        // If logged in: use shipping country, then billing country
-        // If not logged in: default to France (FR)
-        let userCountry = "FR"; // Default to France
-
         const user = await getAuthenticatedUser();
-        if (user) {
-            // Priority: shipping country > billing country > default FR
-            userCountry = user.shipping?.country || user.billing?.country || "FR";
-        }
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+        const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`;
 
         const response = await fetch(url, {
             headers: {
@@ -430,7 +424,6 @@ export const getPrice = async (productId, selectedVariation) => {
             },
             cache: "no-cache",
         });
-
         const variations = await response.json();
 
         const matchedVariation = variations.find((variation) => {
@@ -462,18 +455,9 @@ export const getPrice = async (productId, selectedVariation) => {
                 );
             });
         });
-
-        const basePrice = parseFloat(matchedVariation?.price) || 0;
-        const priceWithTax = await calculatePriceWithTax(basePrice, matchedVariation?.tax_class, userCountry);
-        const taxAmount = parseFloat((priceWithTax - basePrice).toFixed(2));
-
+        console.log(matchedVariation.price_incl_tax);
         return {
-            price: priceWithTax,
-            priceExcludingTax: basePrice,
-            taxAmount: taxAmount,
-            userCountry: userCountry, // Return the country used for tax calculation
-            id: matchedVariation?.id,
-            attributes: matchedVariation
+            price: matchedVariation.price_incl_tax,
         } || null;
 
     } catch (error) {
@@ -679,10 +663,10 @@ export const getRecentProducts = async () => {
         const currency = await getCurrency();
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
-        const authHeader = Buffer
-            .from(`${consumerKey}:${consumerSecret}`)
-            .toString("base64");
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
+        // const authHeader = Buffer
+        //     .from(`${consumerKey}:${consumerSecret}`)
+        //     .toString("base64");
 
         // const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products?orderby=date&order=desc&per_page=20&status=publish&_fields=id,name,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${locale}&currency=${currency}`;
         const url = `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?orderby=date&order=desc&per_page=20&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`
@@ -707,24 +691,20 @@ export const getRecentProducts = async () => {
         return [];
     }
 }
-export async function searchProducts(query) {
+
+
+export async function searchProducts(query = "") {
     if (!query) return [];
 
     try {
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || process.env.NEXT_PUBLIC_SHOP_LOCATION;
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || null;
         const currency = await getCurrency();
-        const authHeader = Buffer
-            .from(`${consumerKey}:${consumerSecret}`)
-            .toString("base64");
 
         const res = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?search=${encodeURIComponent(query)}&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`,
+            `${process.env.WP_BASE_URL}/wp-json/afs/v1/products?search=${encodeURIComponent(query)}&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}&per_page=100`,
             {
-                // headers: {
-                //     Authorization: `Basic ${authHeader}`
-                // },
                 cache: "no-store",
             }
         );

@@ -8,6 +8,7 @@ import "swiper/css/pagination";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "lucide-react";
 import PopUp from "../PopUp/PopUp";
+import { useTranslations } from "next-intl";
 
 const Reviews = ({ acf }) => {
     const thumbnail_one = acf?.thumbnail_one;
@@ -19,6 +20,8 @@ const Reviews = ({ acf }) => {
     const [show, setShow] = useState(false);
     const [activeIndex, setActiveIndex] = useState(1);
     const [link, setLink] = useState(null);
+
+    const t = useTranslations("product");
 
 
     console.log(link);
@@ -43,10 +46,14 @@ const Reviews = ({ acf }) => {
         return
     }
 
+    if (!acf) {
+        return
+    }
+
 
     return (
         <div>
-            <p className='text-[28px] leading-[34px] font-semibold text-black mb-4'>Reviews</p>
+            <p className='text-[28px] leading-[34px] font-semibold text-black mb-4'>{t("reviews")}</p>
             <div className="max-w-[1080px] rounded-sm overflow-hidden">
                 <Swiper
                     modules={[Navigation, Pagination]}
@@ -73,7 +80,7 @@ const Reviews = ({ acf }) => {
                                     <p onClick={() => {
                                         setShow(true)
                                         setLink(video_url_if_has_tow)
-                                    }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">Regarder la review <ArrowUpRight className="inline" size={"1.2rem"} /></p>
+                                    }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">{t("watch")} <ArrowUpRight className="inline" size={"1.2rem"} /></p>
                                 </div>
                                 <span onClick={() => {
                                     setShow(true)
@@ -95,7 +102,7 @@ const Reviews = ({ acf }) => {
                                 <p onClick={() => {
                                     setShow(true)
                                     setLink(video_url)
-                                }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">Regarder la review <ArrowUpRight className="inline" size={"1.2rem"} /></p>
+                                }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">{t("watch")} <ArrowUpRight className="inline" size={"1.2rem"} /></p>
                             </div>
                             <span onClick={() => {
                                 setShow(true)

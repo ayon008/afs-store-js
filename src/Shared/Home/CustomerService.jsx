@@ -10,40 +10,11 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-const CustomerServiceData = [
-  {
-    title: "Best match stab",
-    description:
-      "Find the stab that suits you best based on your front wing and your riding style.",
-    url: "https://afs-foiling.com/fr/wp-content/uploads/2024/04/Alan-fedit-74-1-scaled.jpeg",
-  },
-  {
-    title: "Foil configurator",
-    description:
-      "Find the complete foil that suits you from the AFS range based on your level and size.",
-    url: "https://afs-foiling.com/fr/wp-content/uploads/2025/06/comparateur.png",
-  },
-  {
-    title: "Compare 3 stabilizers",
-    description: "Want to compare stabilizers with your front wing?",
-    url: "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
-  },
-  {
-    title: "Equipment trade-in",
-    description:
-      "We will take back your old AFS equipment when you purchase a new product from us.",
-    url: "https://afs-foiling.com/fr/wp-content/uploads/2024/11/Gwen-WB-d-lite-.jpg",
-  },
-  {
-    title: "Need advice?",
-    description:
-      "Find out the different ways you can contact us: WhatsApp, chat, call an AFS expert, etc.",
-    url: "https://afs-foiling.com/fr/wp-content/uploads/2024/10/00107169-bombannes-adultes-wingfoil.webp",
-  },
-];
+
 
 const AmbassadorsCard = ({ data }) => {
   const { title, description, url } = data;
+  const t = useTranslations("home")
   return (
     <div className="bg-[#F7F7F7] md:max-w-[340px] h-auto lg:max-w-[430px] lg:h-[320px] max-w-full w-full flex lg:flex-row flex-col-reverse  lg:items-stretch items-start rounded-[4px] overflow-hidden group relative">
       {/* Text */}
@@ -59,7 +30,7 @@ const AmbassadorsCard = ({ data }) => {
           href="/text"
           className="flex items-center gap-1 text-[#00000080] font-bold uppercase block lg:hidden"
         >
-          <span>See more</span>
+          <span>{t("see-more")}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 5L5 19M19 5H6.4M19 5V17.6"
@@ -84,7 +55,7 @@ const AmbassadorsCard = ({ data }) => {
       {/* Overlay */}
       <div className="absolute inset-4 group-hover:inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 lg:flex hidden items-center justify-center text-white text-lg font-bold uppercase leading-[24px]">
         <div className="flex items-center gap-1 border-b-2 border-white cursor-pointer opacity-0 group-hover:opacity-100 delay-300 transition-opacity duration-300">
-          <span>See more</span>
+          <span>{t("see-more")}</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 5L5 19M19 5H6.4M19 5V17.6"
@@ -103,6 +74,37 @@ export default function CustomerService() {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
   const t = useTranslations("home");
+
+  const CustomerServiceData = [
+    {
+      title: "Best match stab",
+      description: t("best"),
+      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/04/Alan-fedit-74-1-scaled.jpeg",
+    },
+    {
+      title: t("foil"),
+      description:t("foil-des"),
+      url: "https://afs-foiling.com/fr/wp-content/uploads/2025/06/comparateur.png",
+    },
+    {
+      title: t("compare"),
+      description: t("compare-des"),
+      url: "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
+    },
+    {
+      title: t("equip"),
+      description: t("equip-des"),
+      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/11/Gwen-WB-d-lite-.jpg",
+    },
+    {
+      title: t("need"),
+      description:
+        t("need-des"),
+      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/10/00107169-bombannes-adultes-wingfoil.webp",
+    },
+  ];
+
+
   return (
     <section className="max-w-[1920px] mx-auto global-padding global-margin">
       <h2 className="global-h2 mb-8">{t("service")}</h2>

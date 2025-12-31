@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import React from 'react';
-import FeatureBar from '@/Shared/Afs-Events/FeatureBar';
 import Login from '@/Shared/Form/Auth/Login';
 import { getTranslations } from 'next-intl/server';
 
@@ -17,8 +16,8 @@ export const metadata = {
 
 
 
-const BreadCums = async ({ locale }) => {
-    const t = await getTranslations("breadcum", locale);
+const BreadCums = async () => {
+    const t = await getTranslations("breadcum");
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>

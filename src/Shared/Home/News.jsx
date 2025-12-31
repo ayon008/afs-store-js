@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server";
 const NewsCard = async ({ article, locale }) => {
   const category = article.categories?.[0];
   const t = await getTranslations("home", locale);
+  const b = await getTranslations("blog");
 
   return (
     <article className="flex flex-col justify-between gap-[24px] lg:gap-10 py-5 border-t-2 border-b-2 border-t-[#00000026] border-b-[#00000026]">
@@ -40,7 +41,7 @@ const NewsCard = async ({ article, locale }) => {
           href={`/blog/${article.slug}`}
           className="flex items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-blue"
         >
-          <span>{t("see-more")}</span>
+          <span>{b("see")}</span>
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
         </Link>
       </div>
@@ -50,6 +51,7 @@ const NewsCard = async ({ article, locale }) => {
 
 const News = async ({ locale }) => {
   const t = await getTranslations("home", locale);
+  const b = await getTranslations("blog")
   let blogs = [];
 
   try {
@@ -81,7 +83,7 @@ const News = async ({ locale }) => {
         href="/blogs"
         className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
       >
-        {t("see-more")}
+        {b("see-all")}
         <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
       </Link>
     </div>

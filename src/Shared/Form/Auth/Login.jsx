@@ -9,10 +9,9 @@ import FormButton from '@/Shared/Button/FormButton';
 import { loginUser } from '@/app/actions/WC/Auth/getAuth';
 import useAuth from '@/Shared/Hooks/useAuth';
 import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
+import useCart from '@/Shared/Hooks/useCart';
 
 const Login = () => {
-    const router = useRouter();
     const {
         register,
         handleSubmit,
@@ -21,6 +20,7 @@ const Login = () => {
     } = useForm();
 
     const { refreshUser } = useAuth();
+    const { loadCart } = useCart();
 
     const [loading, setLoading] = useState(false);
 
@@ -31,7 +31,6 @@ const Login = () => {
 
 
     const onSubmit = async (data) => {
-
         const { email, password, remember } = data;
         setErrorMessage("");
         setLoading(true);
@@ -42,11 +41,12 @@ const Login = () => {
                 reset();
                 try {
                     await refreshUser();
+                    await loadCart();
+                    window.location.assign("/my-account");
+                    setLoading(false);
                 } catch (e) {
                     console.warn('refreshUser failed', e);
                 }
-                setLoading(false);
-                router.push('/my-account');
             }
         } catch (error) {
             console.log(error.message);
@@ -54,6 +54,7 @@ const Login = () => {
             setErrorMessage(error.message);
         }
     };
+
 
     return (
         <div>
