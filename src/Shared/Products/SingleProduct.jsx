@@ -95,7 +95,7 @@ const SingleProduct = ({ data }) => {
 
     return (
         <div className='global-padding lg:pt-4 pt-0 max-w-[1920px] mx-auto w-full'>
-            <BreadCums />
+        
             <div className='flex items-start lg:flex-row flex-col justify-between gap-10'>
                 <div className='lg:w-[60%] w-full'>
                     <div className='lg:grid grid-cols-2 gap-2.5 relative hidden'>
@@ -134,7 +134,7 @@ const SingleProduct = ({ data }) => {
                             </button>
                         }
                     </div>
-                    <div className='lg:hidden block -mx-5 bg-[#111]'>
+                    <div className='lg:hidden block -mx-5 bg-black'>
                         <Swiper
                             modules={[Navigation, Pagination]}
                             slidesPerView={1}
