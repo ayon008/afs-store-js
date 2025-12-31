@@ -458,6 +458,8 @@ export const getPrice = async (productId, selectedVariation) => {
         console.log(matchedVariation.price_incl_tax);
         return {
             price: matchedVariation.price_incl_tax,
+            id: matchedVariation?.id,
+            attributes: matchedVariation
         } || null;
 
     } catch (error) {
