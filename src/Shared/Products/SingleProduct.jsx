@@ -25,7 +25,7 @@ function extractYouTubeID(url) {
 }
 
 
-const SingleProduct = ({ data }) => {
+const SingleProduct = ({ data, variations }) => {
 
     const swiperRef = useRef(null); // Swiper instance
     const [activeIndex, setActiveIndex] = useState(0); // track active slide
@@ -37,28 +37,9 @@ const SingleProduct = ({ data }) => {
     const [sliceLength, setLength] = useState(0);
     const [isOpen, setOpen] = useState(false);
 
-    const a = useTranslations("product")
+    const a = useTranslations("product");
+    const breadcrumb = data?.breadcrumb;
 
-
-
-    // const BreadCums = () => {
-    //     const t = useTranslations("breadcum")
-    //     return (
-    //         <div className='uppercase mb-6'>
-    //             <div className='font-bold text-sm text-[#999999]'>
-    //                 <Link className='inline' href={'/'}>{t("home")}</Link> / <span className=''>
-    //                     <Link href={`/${locale}/product-category/foiling`}>foiling</Link>
-    //                 </span> {
-    //                     data?.categories[0] && <>
-    //                         / <span className=''>
-    //                             <Link href={`/${locale}/product-category/foiling/${data?.categories[0]?.slug}`}>{data?.categories[0]?.name}</Link>
-    //                         </span>
-    //                     </>
-    //                 }
-    //             </div>
-    //         </div>
-    //     )
-    // }
 
 
     useEffect(() => {
@@ -93,9 +74,55 @@ const SingleProduct = ({ data }) => {
 
     const acf = data?.acf;
 
+
+
+    const BreadCums = () => {
+        const t = useTranslations("breadcum");
+        return (
+            <div className='uppercase mb-3'>
+                <div className='font-bold text-sm text-[#999999] '>
+                    <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span>
+                    {
+                        breadcrumb?.map((item, i) => {
+                            return (
+                                <span key={i}>
+                                    {i === breadcrumb.length - 1 ? (
+                                        // LAST ITEM → no link
+                                        <span className="text-black">
+                                            {item?.name}
+                                        </span>
+                                    ) : (
+                                        // OTHER ITEMS → link
+                                        <Link
+                                            href={`/product-category${item?.url}`}
+                                            className="text-[#999999]"
+                                        >
+                                            {item?.name}
+                                        </Link>
+                                    )}
+
+                                    {i < breadcrumb.length - 1 && (
+                                        <span
+                                            className={`mx-1 ${i === breadcrumb.length - 2
+                                                    ? "text-black"
+                                                    : "text-[#999999]"
+                                                }`}
+                                        >
+                                            /
+                                        </span>
+                                    )}
+                                </span>
+                            )
+                        })
+                    }
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className='global-padding lg:pt-4 pt-0 max-w-[1920px] mx-auto w-full'>
-        
+            <BreadCums />
             <div className='flex items-start lg:flex-row flex-col justify-between gap-10'>
                 <div className='lg:w-[60%] w-full'>
                     <div className='lg:grid grid-cols-2 gap-2.5 relative hidden'>
@@ -172,7 +199,7 @@ const SingleProduct = ({ data }) => {
 
                 {/* Details */}
                 <div className='lg:w-[40%] w-full'>
-                    <ProductDetails data={data} />
+                    <ProductDetails data={data} variations={variations} />
                 </div>
             </div>
 

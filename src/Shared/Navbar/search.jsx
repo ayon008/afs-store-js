@@ -61,7 +61,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 const searchLower = searchValue.toLowerCase().trim();
                 const matched = Array.isArray(results)
                     ? results.filter((product) =>
-                        product?.name?.toLowerCase().startsWith(searchLower)
+                        product?.name?.toLowerCase().includes(searchLower)
                     )
                     : [];
                 setProducts(matched);

@@ -3,17 +3,15 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Pen } from "lucide-react";
 import { updateShippingInfo } from "@/app/actions/WC/Auth/getAuth";
-import useAuth from "@/Shared/Hooks/useAuth";
 import { countriesList } from "@/lib/countriesList";
 import CountrySelect from "@/Shared/Input/DropDown";
 import Input from "@/Shared/Input/Input";
 import FormButton from "@/Shared/Button/FormButton";
 import { useTranslations } from "next-intl";
 
-const ForthForm = ({ setMessage }) => {
+const ForthForm = ({ setMessage, user, loading, refreshUser }) => {
     const t = useTranslations("profile");
     const [show, setShow] = useState(false);
-    const { user, loading, refreshUser } = useAuth();
     const a = useTranslations("ambassadors");
     const c = useTranslations("login");
     const d = useTranslations("checkout");

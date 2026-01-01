@@ -50,9 +50,10 @@ const NewsCard = async ({ article}) => {
   );
 };
 
-const News = async ({ locale }) => {
-  const t = await getTranslations("home", locale);
+const News = async () => {
+  const t = await getTranslations("home");
   const b = await getTranslations("blog")
+  const locale = await getLocale();
   let blogs = [];
 
   try {

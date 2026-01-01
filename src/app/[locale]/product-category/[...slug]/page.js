@@ -28,7 +28,7 @@ const page = async ({ params, searchParams }) => {
 
     const BreadCums = async () => {
         const t = await getTranslations("breadcum");
-        let path = "/category-product";
+        let path = "/product-category";
 
         return (
             <div className='uppercase'>

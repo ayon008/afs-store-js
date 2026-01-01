@@ -4,11 +4,9 @@ import { ArrowUpRight, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from 'next/image';
 import PopUp from '../PopUp/PopUp';
-import { getPrice } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -29,7 +27,7 @@ const updatePriceInHtml = (priceHtml, newPrice) => {
 };
 
 
-const ProductDetails = ({ data }) => {
+const ProductDetails = ({ data, variations }) => {
 
     const [priceLoading, setPriceLoading] = useState(false);
     const [addingToCart, setAddingToCart] = useState(false);
@@ -39,17 +37,9 @@ const ProductDetails = ({ data }) => {
     const [variationId, setVariationId] = useState(null);
     const [variationInStock, setVariationInStock] = useState(true);
     const [variationAttributes, setVariationAttributes] = useState(null);
-
-    const productId = data?.id;
+    const [matchedVariation, setMatchedVariation] = useState(null);
 
     const t = useTranslations("product");
-
-    const { isLoading, data: variations } = useQuery({
-        queryKey: ['variations', productId],
-        queryFn: async () => await getPrice(productId),
-        enabled: !!productId,
-        staleTime: 1000 * 60 * 5,
-    });
 
     // Check if product is in stock (base product)
     const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
@@ -60,11 +50,13 @@ const ProductDetails = ({ data }) => {
     const { handleAddToCart } = useCart();
 
     const acf = data?.acf;
+
     const compatibilite = acf?.compatibilite;
     const short_description = data?.short_description;
     const priceHtml = data?.price_html;
     const priceWithTax = data?.price_with_tax;
     const attributes = data?.attributes;
+    const productId = data?.id;
 
     // Update the price HTML with calculated tax price
     const price = useMemo(() => {
@@ -126,18 +118,18 @@ const ProductDetails = ({ data }) => {
                     });
                 });
 
-                // console.log(watchedValues, 'watchedValues');
-
-                // console.log(matchedVariation, 'matchedVariation');
-
-
-                // console.log(matchedVariation.attributes, 'matchedVariation.attributes');
-
                 if (matchedVariation) {
+                    const missingAttributes = Object.keys(watchedValues).filter(key => !matchedVariation?.attributes?.some(attr => attr?.name === key));
+                    const missingAttributeData = missingAttributes?.map(attr => {
+                        return { id: 0, name: attr, option: watchedValues[attr]?.replace(/['/]/g, "") || watchedValues[attr] };
+                    });
+
+                    setMatchedVariation(matchedVariation);
+
                     setVariationPrice(matchedVariation.price_incl_tax);
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
-                    setVariationAttributes(matchedVariation.attributes || null);
+                    setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);
                     // Check if the variation is in stock
                     const stockStatus = matchedVariation.stock_status;
                     const variationStock = stockStatus
@@ -217,7 +209,7 @@ const ProductDetails = ({ data }) => {
                 variationId || null,
                 formattedVariations
             );
-            
+
             if (!result?.success) {
                 alert(decodeHtmlEntities(result?.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
             }
@@ -250,7 +242,7 @@ const ProductDetails = ({ data }) => {
                 }
 
                 {/* Form */}
-                <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
+                <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5`}>
                     <div className="flex flex-col gap-4">
                         <table>
                             <tbody className="flex flex-col gap-5">
@@ -310,9 +302,19 @@ const ProductDetails = ({ data }) => {
 
                         {/* Price */}
                         {variationPrice && !priceLoading && variationInStock && (
-                            <div className='space-y-1'>
+                            <div className='space-y-2'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
                                     {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
+                                </span>
+                                <span className='text-base font-medium text-[#111]'>
+                                    {
+                                        currency === "usd" && matchedVariation?.acf?.USA_Stock ?
+                                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.USA_Stock}</>
+                                            :
+                                            matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
+                                            <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}
+                                            </>
+                                    }
                                 </span>
                             </div>
                         )}
@@ -323,14 +325,14 @@ const ProductDetails = ({ data }) => {
                         )}
 
                         {/* Out of Stock Message - for variable products */}
-                        {/* {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
+                        {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
                             <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )} */}
+                        )}
 
                         {/* Out of Stock Message - for simple products */}
-                        {/* {!hasVariations && !baseInStock && (
+                        {!hasVariations && !baseInStock && (
                             <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )} */}
+                        )}
 
                         {/* Button */}
                         <button
@@ -345,7 +347,6 @@ const ProductDetails = ({ data }) => {
                                     : t("buy")
                             }
                         </button>
-
                     </div>
                 </form>
 
@@ -362,8 +363,8 @@ const ProductDetails = ({ data }) => {
                         <small className='text-[15px] leading-[19px] block'>{t("return")}</small>
                     </div>
                     <div className='space-y-2'>
-                        <p className='text-base leading-[100%] font-bold'></p>
-                        <small className='text-[15px] leading-[19px] block'>{a("payment")}</small>
+                        <p className='text-base leading-[100%] font-bold'>{a("payment")}</p>
+                        <small className='text-[15px] leading-[19px] block'>{t("payment_single")}</small>
                         <div className='flex items-center gap-4 mt-4'>
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Layer_1-1.svg'} alt='visa' width={50} height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Group-26.svg'} alt='visa' width={50} height={50} />

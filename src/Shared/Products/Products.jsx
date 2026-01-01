@@ -118,10 +118,13 @@ const Products = ({ id, childCategories }) => {
                 <div className='hidden lg:block'>
                     <div className='lg:h-[calc(90vh-140px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
                         <div className='mb-6'>
-                            <p className='font-semibold text-base leading-[100%] text-black mb-4 uppercase'>{a("categories")}</p>
-                            {childCategories && childCategories.length > 0
-                                ? renderCategories(childCategories)
-                                : <p className="text-sm text-gray-500">No {a("categories")}</p>}
+                            {childCategories && childCategories.length > 0 &&
+
+                                <>
+                                    <p className='font-semibold text-base leading-[100%] text-black mb-4 uppercase'>{a("categories")}</p>
+                                    {renderCategories(childCategories)}
+                                </>
+                            }
                         </div>
                         {
                             isLoading ? <div>Loading...</div> : <>

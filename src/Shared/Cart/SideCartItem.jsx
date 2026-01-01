@@ -5,8 +5,6 @@ import Image from 'next/image'
 
 
 const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
-    console.log(item, 'item');
-
     // const { taxInfo } = useCart();
     const image = item.images?.[0]?.src || item.image;
     const name = item.name || item.title;
@@ -78,12 +76,9 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
                             return (
                                 <dl key={i} className="font-normal text-[12px] leading-[130%] text-[#111]">
                                     <span className='flex items-center gap-[2px]'>
-                                        <dt>
-                                            {variation?.attribute}:
-                                        </dt>
-                                        <dd>
-                                            <p>{variation?.value}</p>
-                                        </dd>
+                                        <dt dangerouslySetInnerHTML={{ __html: variation?.attribute }} />
+                                        <span className='text-xs text-[#959595]'>:</span>
+                                        <dd dangerouslySetInnerHTML={{ __html: variation?.value }} />
                                     </span>
                                 </dl>
                             )

@@ -163,9 +163,6 @@ export const getChildCategories = async (parentId) => {
 }
 
 
-
-// Get single product by their slug
-
 export const getProductBySlug = async (slug) => {
     const locale = await getLocale();
     const currency = await getCurrency();
