@@ -32,6 +32,8 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // Initialize with a default value that's the same on server and client to avoid hydration mismatch
   const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  // Track if the initial cookie has been read to avoid overwriting it
+  const [cookieInitialized, setCookieInitialized] = useState(false);
 
   // Update selectedCurrency from cookie/client-side data after mount to avoid hydration mismatch
   useEffect(() => {
@@ -50,15 +52,20 @@ const Navbar = ({ NAV_LINKS }) => {
         : 'usd';
       setSelectedCurrency(newCurrency);
     }
+    // Mark cookie as initialized after reading
+    setCookieInitialized(true);
   }, [currentCurrencySymbol]);
 
-  // Set cookie whenever selectedCurrency changes
+  // Set cookie whenever selectedCurrency changes, but only after initial read
   useEffect(() => {
+    // Don't write cookie until we've read the initial value
+    if (!cookieInitialized) return;
+    
     if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
       // Add path: '/' to ensure the cookie is accessible to all routes including server-side
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     }
-  }, [selectedCurrency]);
+  }, [selectedCurrency, cookieInitialized]);
 
 
   const [shouldRedirect, setShouldRedirect] = useState(false);
