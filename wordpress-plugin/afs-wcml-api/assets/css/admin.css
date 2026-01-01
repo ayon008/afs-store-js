@@ -1,0 +1,113 @@
+/**
+ * Admin styles for AFS WCML Manual Pricing plugin.
+ */
+
+.afs-wcml-currency-group {
+	border: 1px solid #ddd;
+	padding: 15px;
+	margin: 10px 0;
+	background: #f9f9f9;
+	border-radius: 4px;
+}
+
+.afs-wcml-currency-group h4 {
+	margin-top: 0;
+	margin-bottom: 15px;
+	color: #23282d;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.afs-wcml-currency-group .form-field {
+	margin-bottom: 15px;
+}
+
+.afs-wcml-currency-group label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: 600;
+	color: #23282d;
+}
+
+.afs-wcml-currency-group input[type="number"] {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+.afs-wcml-currency-group input[type="number"]:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: none;
+}
+
+.afs-wcml-variation-prices {
+	border-top: 1px solid #ddd;
+	margin-top: 20px;
+	padding-top: 20px;
+}
+
+.afs-wcml-variation-prices h4 {
+	margin-bottom: 15px;
+	color: #23282d;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.afs-wcml-variation-prices .form-row {
+	border: 1px solid #ddd;
+	padding: 10px;
+	margin: 5px 0;
+	background: #f9f9f9;
+	border-radius: 4px;
+}
+
+.afs-wcml-variation-prices .form-row strong {
+	display: block;
+	margin-bottom: 10px;
+	color: #23282d;
+}
+
+.afs-wcml-variation-prices .form-row-first,
+.afs-wcml-variation-prices .form-row-last {
+	width: 48%;
+	float: left;
+	margin-right: 2%;
+}
+
+.afs-wcml-variation-prices .form-row-last {
+	margin-right: 0;
+}
+
+.afs-wcml-variation-prices label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: 600;
+	color: #23282d;
+	font-size: 12px;
+}
+
+.afs-wcml-variation-prices input[type="number"] {
+	width: 100%;
+	padding: 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.afs-wcml-variation-prices input[type="number"]:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: none;
+}
+
+/* Clear floats */
+.afs-wcml-variation-prices .form-row::after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+
