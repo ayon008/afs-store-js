@@ -74,6 +74,12 @@ export async function GET(request) {
         // Use the full incoming cookie header - the browser sends all cookies
         // WooCommerce will filter what it needs from the Cookie header
         const allCookies = incomingCookieHeader;
+        
+        // Add WCML currency cookie for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         // Build headers for WooCommerce request
         const headers = {
@@ -85,9 +91,9 @@ export async function GET(request) {
             headers["Authorization"] = `Bearer ${token}`;
         }
 
-        // Always include cookies for session management
-        if (allCookies) {
-            headers["Cookie"] = allCookies;
+        // Always include cookies for session management (with WCML currency)
+        if (cookiesWithWcml) {
+            headers["Cookie"] = cookiesWithWcml;
         }
 
         // Add currency as query parameter

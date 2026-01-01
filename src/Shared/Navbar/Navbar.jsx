@@ -64,6 +64,10 @@ const Navbar = ({ NAV_LINKS }) => {
     if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
       // Add path: '/' to ensure the cookie is accessible to all routes including server-side
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+      
+      // Also set WCML cookie for WooCommerce Multilingual multi-currency support
+      const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
+      Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     }
   }, [selectedCurrency, cookieInitialized]);
 
@@ -134,19 +138,24 @@ const Navbar = ({ NAV_LINKS }) => {
       }
     }
 
+    // Convert to WCML format
+    const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
+    
     if (languageChanged) {
       const currentPath = pathname || '/';
       const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
-      // Ensure currency cookie is set before redirect
+      // Ensure currency cookies are set before redirect
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+      Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       setRedirectPath(newPath);
       setShouldRedirect(true);
     } else {
       // If only currency changed, reload cart to get updated currency
       if (currencyChanged) {
-        // Set the cookie synchronously before reload to ensure it's available on next page load
+        // Set the cookies synchronously before reload to ensure they're available on next page load
         Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
-        // Small delay to ensure cookie is written before reload
+        Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+        // Small delay to ensure cookies are written before reload
         setTimeout(() => {
           // Reload the current page to ensure currency is updated
           const currentPath = pathname || '/';

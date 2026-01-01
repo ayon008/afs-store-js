@@ -103,6 +103,12 @@ export async function POST(request) {
         // Use currency from client if provided, otherwise fallback to server cookie
         const currency = clientCurrency || await getCurrency();
         console.log('Using currency:', currency, '(from client:', !!clientCurrency, ')');
+        
+        // Add WCML currency cookie to the request for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));
@@ -209,13 +215,16 @@ export async function POST(request) {
         console.log('Final payload:', JSON.stringify(payload, null, 2));
         console.log('Variation attributes count:', payload.variation?.length || 0);
 
-        // Make request to WooCommerce to add item
-        const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+        // Make request to WooCommerce to add item (include currency param for WCML)
+        const addItemUrl = `${WC_STORE_URL}/cart/add-item?currency=${currency}`;
+        console.log('Add item URL:', addItemUrl);
+        
+        const response = await fetch(addItemUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
             },
             body: JSON.stringify(payload),
             cache: "no-store",
