@@ -47,7 +47,12 @@ export async function GET(request) {
     const WC_STORE_URL = localeValue 
         ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
         : `${baseUrl}/wp-json/wc/store/v1`;
-    const currency = await getCurrency();
+    
+    // Get currency from query parameter first, then fallback to cookie
+    const { searchParams } = new URL(request.url);
+    const clientCurrency = searchParams.get('currency');
+    const currency = clientCurrency || await getCurrency();
+    console.log('Cart API - Using currency:', currency, '(from client:', !!clientCurrency, ')');
     
     try {
         const cookieStore = await cookies();

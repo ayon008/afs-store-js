@@ -96,12 +96,13 @@ export async function POST(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Get currency from cookie
-        const currency = await getCurrency();
-
         // Get the payload from request body
         const body = await request.json();
-        const { id: productId, quantity = 1, variation_id: variationId, variation = {} } = body;
+        const { id: productId, quantity = 1, variation_id: variationId, variation = {}, currency: clientCurrency } = body;
+        
+        // Use currency from client if provided, otherwise fallback to server cookie
+        const currency = clientCurrency || await getCurrency();
+        console.log('Using currency:', currency, '(from client:', !!clientCurrency, ')');
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));

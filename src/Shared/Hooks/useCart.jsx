@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 import {
     addToCart as addToCartAction, updateCartItem, removeCartItem, clearCart, applyCoupon, removeCoupon
 } from "../../app/actions/Woo-Coommerce/getWooCommerce"
@@ -26,8 +27,12 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         const load = async () => {
             try {
+                // Get currency from client-side cookie
+                const currencyCookie = Cookies.get('currency') || 'euro';
+                const currency = currencyCookie === 'euro' ? 'EUR' : currencyCookie === 'gbp' ? 'GBP' : 'USD';
+                
                 // Use API route for better cookie synchronization with browser
-                const response = await fetch('/api/cart', {
+                const response = await fetch(`/api/cart?currency=${currency}`, {
                     method: 'GET',
                     credentials: 'include', // Important: include cookies
                 });
@@ -61,8 +66,12 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
 
+            // Get currency from client-side cookie
+            const currencyCookie = Cookies.get('currency') || 'euro';
+            const currency = currencyCookie === 'euro' ? 'EUR' : currencyCookie === 'gbp' ? 'GBP' : 'USD';
+
             // Use API route for better cookie synchronization with browser
-            const response = await fetch('/api/cart', {
+            const response = await fetch(`/api/cart?currency=${currency}`, {
                 method: 'GET',
                 credentials: 'include', // Important: include cookies
             });
@@ -87,6 +96,11 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
             
+            // Get currency from client-side cookie
+            const currencyCookie = Cookies.get('currency') || 'euro';
+            // Convert to WooCommerce format
+            const currency = currencyCookie === 'euro' ? 'EUR' : currencyCookie === 'gbp' ? 'GBP' : 'USD';
+            
             // Use API route instead of Server Action for better cookie handling
             const response = await fetch('/api/cart/add-item', {
                 method: 'POST',
@@ -99,6 +113,7 @@ export const CartProvider = ({ children }) => {
                     quantity,
                     variation_id: variationId,
                     variation: attributes,
+                    currency: currency, // Pass currency from client
                 }),
             });
             
