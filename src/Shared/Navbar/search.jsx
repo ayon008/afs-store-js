@@ -126,8 +126,16 @@ const SearchOverlay = ({ isOpen, onClose }) => {
         localStorage.removeItem(SEARCH_HISTORY_KEY);
     };
 
-
-    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+    // Currency symbol state - initialize with default to avoid hydration mismatch
+    const [currencySymbol, setCurrencySymbol] = useState('€');
+    
+    // Update currency symbol from cookie after mount (client-side only)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const currency = Cookies.get('currency');
+        const symbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+        setCurrencySymbol(symbol);
+    }, []);
 
 
     const searchRef = useRef(null);

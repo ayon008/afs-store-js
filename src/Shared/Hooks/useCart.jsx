@@ -26,10 +26,13 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         const load = async () => {
             try {
-                // Use API route instead of Server Action for better cookie synchronization
-                const data = await getCartAction();
-                // const data = await response.json();
-                setCart(data.data);
+                // Use API route for better cookie synchronization with browser
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    credentials: 'include', // Important: include cookies
+                });
+                const data = await response.json();
+                setCart(data);
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -58,14 +61,18 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
 
-            // Use Server Action for better cookie synchronization
-            const result = await getCartAction();
+            // Use API route for better cookie synchronization with browser
+            const response = await fetch('/api/cart', {
+                method: 'GET',
+                credentials: 'include', // Important: include cookies
+            });
+            const data = await response.json();
             
-            if (!result.success) {
-                throw new Error(result.error || 'Failed to load cart');
+            if (data.error) {
+                throw new Error(data.error || 'Failed to load cart');
             }
 
-            setCart(result.data);
+            setCart(data);
         } catch (err) {
             setError(err.message);
             console.error('Cart loading error:', err);
@@ -79,32 +86,54 @@ export const CartProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await addToCartAction(productId, quantity, variationId, attributes);
+            
+            // Use API route instead of Server Action for better cookie handling
+            const response = await fetch('/api/cart/add-item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Important: include cookies
+                body: JSON.stringify({
+                    id: productId,
+                    quantity,
+                    variation_id: variationId,
+                    variation: attributes,
+                }),
+            });
+            
+            const result = await response.json();
 
-            if (result.success) {
-                // Small delay to ensure cookies are synchronized
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Update items_count immediately for better UX
-                setCart(prev => {
-                    if (!prev) return prev;
-                    return {
-                        ...prev,
-                        items_count: (prev.items_count || 0) + quantity
-                    };
-                });
-
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
-                await loadCart();
+            if (result && result.success) {
+                // Use the cart data from the add-item response directly if available
+                if (result.data) {
+                    setCart(result.data);
+                } else {
+                    // Fallback: Update items_count immediately for better UX
+                    setCart(prev => {
+                        if (!prev) return prev;
+                        return {
+                            ...prev,
+                            items_count: (prev.items_count || 0) + quantity
+                        };
+                    });
+                    
+                    // Small delay to ensure cookies are synchronized before reload
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    // Then refresh full cart data
+                    await loadCart();
+                }
 
                 // Open side cart on successful add
                 openSideCart();
             } else {
-                setError(result.error);
-                console.error('Add to cart error:', result.error);
+                const errorMsg = result?.error || 'Erreur lors de l\'ajout au panier';
+                setError(errorMsg);
+                console.error('Add to cart error:', errorMsg);
             }
 
-            return result;
+            return result || { success: false, error: 'Aucune réponse du serveur' };
         } catch (err) {
             setError(err.message);
             console.error('Add to cart error:', err);

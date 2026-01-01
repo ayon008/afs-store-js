@@ -119,9 +119,23 @@ const ProductDetails = ({ data, variations }) => {
                 });
 
                 if (matchedVariation) {
-                    const missingAttributes = Object.keys(watchedValues).filter(key => !matchedVariation?.attributes?.some(attr => attr?.name === key));
-                    const missingAttributeData = missingAttributes?.map(attr => {
-                        return { id: 0, name: attr, option: watchedValues[attr]?.replace(/['/]/g, "") || watchedValues[attr] };
+                    // Find the corresponding attribute definition to get the slug
+                    const getAttributeSlug = (attrName) => {
+                        const attrDef = attributes?.find(a => a.name === attrName);
+                        return attrDef?.slug || `pa_${attrName.toLowerCase().replace(/\s+/g, '-')}`;
+                    };
+
+                    const missingAttributes = Object.keys(watchedValues).filter(key => !matchedVariation?.attributes?.some(attr => {
+                        const attrNameClean = attr?.name?.replace('attribute_', '').replace('pa_', '');
+                        return attrNameClean === key.toLowerCase() || attr?.name === key;
+                    }));
+                    const missingAttributeData = missingAttributes?.map(attrName => {
+                        const slug = getAttributeSlug(attrName);
+                        return { 
+                            id: 0, 
+                            name: `attribute_${slug}`, 
+                            option: watchedValues[attrName]?.replace(/['/]/g, "") || watchedValues[attrName] 
+                        };
                     });
 
                     setMatchedVariation(matchedVariation);
@@ -203,16 +217,45 @@ const ProductDetails = ({ data, variations }) => {
                 ? formatVariationsForWooCommerce()
                 : {};
 
+            // Debug logging
+            console.log('Adding to cart:', {
+                productId,
+                variationId,
+                hasVariations,
+                variationAttributes,
+                formattedVariations,
+                watchedValues
+            });
+
+            // For variable products, if formattedVariations is empty but we have watchedValues, use those
+            let finalVariations = formattedVariations;
+            if (hasVariations && Object.keys(formattedVariations).length === 0 && Object.keys(watchedValues).length > 0) {
+                // Use watchedValues as fallback - these are the form values selected by user
+                // WooCommerce expects attribute slugs (e.g., "pa_color") not names (e.g., "Color")
+                finalVariations = {};
+                attributes.forEach(attr => {
+                    if (watchedValues[attr.name]) {
+                        // Use slug if available, otherwise construct from name
+                        const attrKey = attr.slug || `pa_${attr.name.toLowerCase().replace(/\s+/g, '-')}`;
+                        finalVariations[attrKey] = watchedValues[attr.name];
+                    }
+                });
+                console.log('Using watchedValues as fallback:', finalVariations);
+            }
+
             const result = await handleAddToCart(
                 productId,
                 1,
                 variationId || null,
-                formattedVariations
+                finalVariations
             );
 
-            if (!result?.success) {
-                alert(decodeHtmlEntities(result?.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
+            // Only show alert if there's an actual error (success is explicitly false)
+            // Don't show alert if success is true or if result is undefined/null
+            if (result && result.success === false && result.error) {
+                alert(decodeHtmlEntities(result.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
             }
+            // If success is true, the cart should open automatically via useCart hook
         } catch (error) {
             console.error('Error adding to cart:', error);
             alert(decodeHtmlEntities(error?.message) || 'Une erreur est survenue lors de l\'ajout au panier.');

@@ -1,7 +1,7 @@
 // app/api/cart/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency, getBaseUrl } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
 
@@ -43,7 +43,12 @@ function extractWooCommerceCookies(cookieHeader) {
 
 export async function GET(request) {
     const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const baseUrl = await getBaseUrl();
+    const WC_STORE_URL = localeValue 
+        ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
+        : `${baseUrl}/wp-json/wc/store/v1`;
+    const currency = await getCurrency();
+    
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get("auth_token")?.value;
@@ -80,8 +85,11 @@ export async function GET(request) {
             headers["Cookie"] = allCookies;
         }
 
+        // Add currency as query parameter
+        const cartUrl = `${WC_STORE_URL}/cart?currency=${currency}`;
+
         // Make request to WooCommerce
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
+        const response = await fetch(cartUrl, {
             method: "GET",
             headers,
             cache: "no-store",

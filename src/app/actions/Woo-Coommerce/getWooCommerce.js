@@ -47,6 +47,12 @@ export async function getLocaleValue() {
     return localeValue === 'en' ? '' : localeValue;
 }
 
+// Helper function to get base URL without locale
+export async function getBaseUrl() {
+    // Remove any existing locale from WP_BASE_URL (e.g., /fr or /en)
+    return process.env.WP_BASE_URL?.replace(/\/[a-z]{2}\/?$/, '') || process.env.WP_BASE_URL || '';
+}
+
 export async function getLang(params) {
     const localeValue = await getLocale();
     return localeValue;
@@ -345,14 +351,19 @@ export const getPrice = async (productId, selectedVariation) => {
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const baseUrl = await getBaseUrl();
+    const WC_STORE_URL = localeValue 
+        ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
+        : `${baseUrl}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
+        const currency = await getCurrency();
 
         // Build payload for WooCommerce
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
+            currency: currency,
         };
 
         if (variationId) {
@@ -379,6 +390,9 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         }
 
         console.log('Adding to cart with payload:', JSON.stringify(payload, null, 2));
+        console.log('WC_STORE_URL:', WC_STORE_URL);
+        console.log('Cookie header present:', !!cookieHeader);
+        console.log('Cookie header length:', cookieHeader?.length || 0);
 
         // Call WooCommerce API directly
         const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
@@ -391,17 +405,39 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             body: JSON.stringify(payload),
             cache: 'no-store',
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
+        // Check if response is OK and is JSON
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
         if (!response.ok) {
             const errorText = await response.text();
+            
+            // If error is HTML (404 page), provide a more helpful error message
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.error('Add to cart received HTML error page (404). URL:', `${WC_STORE_URL}/cart/add-item`);
+                throw new Error(`L'API WooCommerce n'est pas accessible. Vérifiez que l'URL est correcte: ${WC_STORE_URL}/cart/add-item`);
+            }
+            
             let errorMessage = `Failed to add to cart: ${response.status}`;
             try {
                 const errorData = JSON.parse(errorText);
                 errorMessage = errorData.message || errorData.code || errorMessage;
             } catch {
-                errorMessage = errorText || errorMessage;
+                // If not JSON, use the text (truncated if too long)
+                errorMessage = errorText.length > 200 ? errorText.substring(0, 200) + '...' : errorText || errorMessage;
             }
             throw new Error(errorMessage);
+        }
+
+        // Check if response is JSON before parsing
+        if (!isJson) {
+            const text = await response.text();
+            console.warn('Add to cart response is not JSON, received:', text.substring(0, 100));
+            throw new Error('La réponse de l\'API n\'est pas au format JSON valide');
         }
 
         // Parse and set cookies from WooCommerce response
@@ -460,7 +496,9 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         revalidatePath('/cart');
         revalidatePath('/products');
 
-        return { success: true, ...result };
+        // Ensure success is always true when we reach here (response was ok)
+        // Put success: true after ...result to override any success property from result
+        return { ...result, success: true };
 
     } catch (error) {
         console.error('Add to cart error:', error);
