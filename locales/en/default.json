@@ -1,4 +1,8 @@
 {
+  "404": {
+    "appears": "It appears that nothing has been found at this location.",
+    "notfound": "The page cannot be found."
+  },
   "advance": {
     "aboutTitle": "AFS Advanced is our way of concentrating our know-how and expertise into the most advanced designs, which is the essence and the future of AFS.",
     "advanced": "<light>AFS Advanced is our way of concentrating our</light> <bold>know-how</bold> <light>and</light> <bold>expertise</bold> <light>into the most advanced designs, which is the essence and the</light> <underline>future of AFS.</underline>",
@@ -100,7 +104,9 @@
   "blog": {
     "blog": "Blog",
     "heading": "Discover foiling tips, industry information, and equipment reviews for riders of all levels.",
-    "read": "Read More"
+    "read": "Read More",
+    "see": "See more",
+    "see-all": "See all"
   },
   "Board": {
     "Board": "Board"
@@ -160,6 +166,7 @@
     "english": "English",
     "euro": "Euro",
     "french": "French",
+    "search": "Search...",
     "usDollar": "US Dollar"
   },
   "DirectSailing": {
@@ -196,7 +203,7 @@
   },
   "filter": {
     "categories": "Categories",
-    "finish": "FINISH"
+    "finish": "Change"
   },
   "footer": {
     "1st": "Click & Collect",
@@ -285,11 +292,20 @@
   },
   "home": {
     "ambassadors": "AFS Ambassadors team",
+    "best": "Find the stab that suits you best based on your front wing and your riding style.",
     "category": "Shop by category\n",
     "categoryShop": "Shop by category",
+    "compare": "Compare 3 stabilizers",
+    "compare-des": "Want to compare stabilizers with your front wing?",
+    "equip": "Equipment trade-in",
+    "equip-des": "We will take back your old AFS equipment when you purchase a new product from us.",
     "featuredTitle": "Best Sellers",
+    "foil": "Foil configurator",
+    "foil-des": "Find the complete foil that suits you from the AFS range based on your level and size.",
     "homeTitle": "The foiling spirit since 2009",
     "more": "More about AFS\n",
+    "need": "Need advice?",
+    "need-des": "Find out the different ways you can contact us: WhatsApp, chat, call an AFS expert, etc.",
     "news": "news",
     "playVideo": "PLAY VIDEO",
     "scrollText": "Scroll for the full visit",
@@ -424,10 +440,20 @@
     "title": "PRIVACY POLICY"
   },
   "product": {
+    "add": "ADDITION IN PROGRESS...",
+    "after-sale": "After-sales service",
+    "buy": "ADD TO BASKET",
     "close": "Close",
     "delete": "Delete all",
+    "Dimensions": "Dimensions",
     "discover": "DISCOVER",
+    "duration": "All our products come with a 2-year warranty.",
+    "expert": "AFS Product Expert",
+    "features": "Features",
+    "guide": "Size guide",
     "latestSearches": "Latest searches :",
+    "less": "See less",
+    "loading": " Loading price...",
     "Loading": {
       "": {
         "": {
@@ -435,9 +461,24 @@
         }
       }
     },
+    "need": "Need help choosing your equipment?",
     "no": "No products found",
+    "payment_single": "Secure payment. Simple and fast.",
+    "phone": "Make an appointment by telephone",
     "price": "Price",
-    "searchPlaceholder": "Search For..."
+    "recommended": "Recommended products",
+    "return": "Free returns within 15 days",
+    "reviews": "Reviews",
+    "searchPlaceholder": "Search For...",
+    "select": "Please select all options",
+    "size": "Size guide",
+    "stock": "Out of stock",
+    "stock_fr_acf": "Scheduled departure date",
+    "stock_usd_acf": "Stock",
+    "view": "View all",
+    "warranty": "Warranty",
+    "watch": "Watch the review",
+    "we": "We are here to provide you with comprehensive answers and advice to help you make the right choice."
   },
   "profile": {
     "account": "Log Out of Your Account",

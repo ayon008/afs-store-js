@@ -29,11 +29,11 @@ export default function AboutVideoSection() {
           <h2 className="global-h2 text-white">
             {t("homeTitle")}
           </h2>
-          <p className="text-white/80 leading-[120%] text-[clamp(0.875rem,0.6448rem+0.4802vw,1.125rem)] font-semibold max-w-[520px]">
+          <p className="text-white/80 leading-[120%] text-lg md:text-[clamp(0.875rem,0.6448rem+0.4802vw,1.125rem)] font-semibold">
             {t("video")}
           </p>
         </div>
-
+        
         <div className="relative overflow-hidden rounded-sm">
           <Image
             src="https://afs-foiling.com/fr/wp-content/uploads/2025/12/image-3-2.png"

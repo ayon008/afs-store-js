@@ -1,9 +1,8 @@
 
 "use client";
-import { ArrowLeft, DollarSign, Euro, Search, X, Info, PoundSterling } from "lucide-react";
+import { ArrowLeft, DollarSign, Euro, Search, X, PoundSterling } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-// import SearchOverlay from "../../components/search";
 import React, { useRef, useState, useEffect } from "react";
 import "flag-icons/css/flag-icons.min.css";
 import gsap from "gsap";
@@ -229,14 +228,14 @@ const Navbar = ({ NAV_LINKS }) => {
             <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
 
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center cursor-pointer">
               <Image
                 src="/logo.svg"
                 alt="Alpago Properties Clone"
                 width={150}
                 height={45}
                 priority
-                className="lg:w-[150px] aspect-[150/45] w-[120px]"
+                className="lg:w-[146px] md:w-[120px] w-[100px] h-auto"
               />
             </Link>
           </div>
@@ -250,7 +249,7 @@ const Navbar = ({ NAV_LINKS }) => {
               <input
                 onClick={() => setIsSearchOpen(true)}
                 className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 px-3 placeholder:text-white placeholder:text-sm placeholder:pl-8 placeholder:font-semibold"
-                placeholder="Rechercher..."
+                placeholder={t("search")}
               />
               <Search className="w-6 h-6 mr-2 text-white opacity-90 absolute -translate-y-1/2 left-3 top-1/2" />
             </div>

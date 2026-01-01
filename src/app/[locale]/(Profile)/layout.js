@@ -2,6 +2,7 @@ import '../globals.css';
 import NavItems from './Navitem';
 import { getAuthenticatedUser } from '../../actions/WC/Auth/getAuth';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
 
 export const metadata = {
@@ -43,6 +44,17 @@ export const metadata = {
 };
 
 
+const BreadCums = async () => {
+    const t = await getTranslations("breadcum");
+    return (
+        <div className='uppercase'>
+            <div className='font-bold text-sm text-[#999999]'>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <span className='text-black'>My Account</span>
+            </div>
+        </div>
+    )
+}
+
 
 export default async function RootLayout({ children, locale }) {
 
@@ -51,7 +63,8 @@ export default async function RootLayout({ children, locale }) {
 
     return (
         <div className='global-padding pt-4 global-margin max-w-[1920px] mx-auto'>
-            <div className=''>
+            <BreadCums />
+            <div className='mt-8'>
                 <div className='pb-10 global-b-bottom-d'>
                     <h1 className='global-h1'>{t("hello")}, {user?.last_name}</h1>
                 </div>

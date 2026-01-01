@@ -4,13 +4,11 @@ import Input from '@/Shared/Input/Input';
 import { Pen } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import useAuth from '@/Shared/Hooks/useAuth';
 import { updateProfile } from '@/app/actions/WC/Auth/getAuth';
 import { useTranslations } from 'next-intl';
 
-const SecondForm = ({ setMessage }) => {
+const SecondForm = ({ setMessage, user, loading, refreshUser }) => {
     const [show, setShow] = useState(false);
-    const { user, loading } = useAuth();
 
     const { register, handleSubmit, watch, formState: { errors }, reset, trigger } = useForm({
         defaultValues: {
@@ -63,6 +61,7 @@ const SecondForm = ({ setMessage }) => {
         if (updateData.success) {
             setMessage({ success: true, message: "Your contact details have been updated successfully." });
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            await refreshUser();
             setShow(false);
         } else {
             setMessage({ success: false, message: updateData.message || "Something went wrong" });
@@ -71,7 +70,7 @@ const SecondForm = ({ setMessage }) => {
     };
 
 
-    
+
     return (
         <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
             <div className="flex items-center justify-between pb-1 global-b-bottom-d">

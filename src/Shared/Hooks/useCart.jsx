@@ -74,12 +74,6 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Initial cart and tax rate load
-    // useEffect(() => {
-    //     loadCart();
-    //     loadTaxRate();
-    // }, []);
-
     // Add item to cart
     const handleAddToCart = async (productId, quantity = 1, variationId = null, attributes = {}) => {
         try {

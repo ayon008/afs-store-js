@@ -1,28 +1,72 @@
 "use client"
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import React, { useState, useTransition, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 import { Filter, X } from 'lucide-react';
 import ProductCard from '../Card/ProductCard';
 import PopUp from '../PopUp/PopUp';
 import SkeletonProjectCard from '../Loader/SkeletonLoader';
-import { getChildCategories, getProductsByCategoryId } from '@/app/actions/Woo-Coommerce/getWooCommerce';
+import { getProductsByCategoryId } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import default_image from '../../../public/assets/images/Team/Group-1-3.png.webp';
 
 const Products = ({ id, childCategories }) => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const [isPending, startTransition] = useTransition();
     const t = useTranslations('product');
     const a = useTranslations('filter');
     const currency = Cookies.get('currency');
     const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
-
+    const [isOpen, setOpen] = useState(false);
     const [ids, setIds] = useState([id]);
+    const [priceRange, setPriceRange] = useState([0, 0]);
+
+    // Products
+    const { isLoading, isError, data: allProductsData } = useQuery({
+        queryKey: ['all-products-data', ids],
+        queryFn: async () => {
+            const data = await getProductsByCategoryId(ids);
+            return data;
+        },
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
+
+    const { minPrice, maxPrice } = useMemo(() => {
+        if (!allProductsData || allProductsData.length === 0) {
+            return { minPrice: 0, maxPrice: 0 };
+        }
+
+        const prices = allProductsData.map(p => Number(p?.price));
+        return {
+            minPrice: Math.min(...prices),
+            maxPrice: Math.max(...prices)
+        };
+    }, [allProductsData]);
+
+    useEffect(() => {
+        if (minPrice > 0 || maxPrice > 0) {
+            setPriceRange([minPrice, maxPrice]);
+        }
+    }, [minPrice, maxPrice]);
+
+
+    const filteredProducts = useMemo(() => {
+        if (!allProductsData) return [];
+
+        const [min, max] = priceRange;
+        return allProductsData.filter(product => {
+            const price = Number(product?.price);
+            return price >= min && price <= max;
+        });
+    }, [allProductsData, priceRange]);
+
+    useEffect(() => {
+        setPriceRange([minPrice, maxPrice]);
+    }, [minPrice, maxPrice]);
+
+    const handleChange = (val) => {
+        setPriceRange(val);
+    }
 
     const renderCategories = (categories) => {
         const logSelectedCategoryIds = () => {
@@ -68,69 +112,33 @@ const Products = ({ id, childCategories }) => {
         );
     };
 
-    const [isOpen, setOpen] = useState(false);
-
-
-    const params = useSearchParams();
-    const min = params.get('min');
-    const max = params.get('max');
-
-    // Products
-    const { isLoading, isError, data: productData, refetch } = useQuery({
-        queryKey: ['product-data', ids, max, min],
-        queryFn: async () => {
-            const data = await getProductsByCategoryId(ids, max, min);
-            return data;
-        },
-    })
-
-    // Products
-    const { isLoading: isLoadingAllProducts, isError: isErrorAllProducts, data: allProductsData, refetch: refetchAllProducts } = useQuery({
-        queryKey: ['all-products-data', ids],
-        queryFn: async () => {
-            const data = await getProductsByCategoryId(ids);
-            return data;
-        },
-    })
-
-    const maxPrice = isLoadingAllProducts ? 0 : Math.max(...allProductsData?.map(p => Number(p?.price).toFixed(2)));
-    const minPrice = isLoadingAllProducts ? 0 : Math.min(...allProductsData?.map(p => Number(p?.price).toFixed(2)));
-
-    const [value, setValue] = useState([minPrice, maxPrice]);
-
-    useEffect(() => {
-        setValue([minPrice, maxPrice]);
-    }, [minPrice, maxPrice]);
-
-    const handleChange = (val) => {
-        // Use current pathname instead of hardcoded slug so this works for any category
-        const newUrl = `${pathname}?min=${val[0]}&max=${val[1]}`;
-        setValue(val)
-        // perform client navigation then refresh the server-rendered data
-        startTransition(() => {
-            router.replace(newUrl, { scroll: false });
-            router.refresh();
-        });
-    }
-
     return (
         <div className='flex items-start justify-center gap-10 lg:flex-row flex-col global-padding max-w-[1920px] mx-auto relative'>
             <div className='lg:w-[20%] w-full md:sticky md:top-[170px]'>
                 <div className='hidden lg:block'>
                     <div className='lg:h-[calc(90vh-140px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
                         <div className='mb-6'>
-                            <p className='font-semibold text-base leading-[100%] text-black mb-4 uppercase'>{a("categories")}</p>
-                            {childCategories && childCategories.length > 0
-                                ? renderCategories(childCategories)
-                                : <p className="text-sm text-gray-500">No {a("categories")}</p>}
+                            {childCategories && childCategories.length > 0 &&
+
+                                <>
+                                    <p className='font-semibold text-base leading-[100%] text-black mb-4 uppercase'>{a("categories")}</p>
+                                    {renderCategories(childCategories)}
+                                </>
+                            }
                         </div>
                         {
-                            isLoadingAllProducts ? <div>Loading...</div> : <>
+                            isLoading ? <div>Loading...</div> : <>
                                 <div>
                                     <label className='uppercase text-base font-medium mb-4 block' htmlFor="vol">{t("price")}</label>
-                                    <RangeSlider min={minPrice} max={maxPrice} defaultValue={[min || minPrice, max || maxPrice]} onInput={(val) => handleChange(val)} className='my-dashed-slider -ml-2' />
+                                    <RangeSlider
+                                        min={minPrice}
+                                        max={maxPrice}
+                                        value={priceRange}
+                                        onInput={handleChange}
+                                        className='my-dashed-slider -ml-2'
+                                    />
                                     <div className='text-[14px] leading-[15px] font-semibold mt-4'>
-                                        {currencySymbol}{min || value[0].toFixed(2)} — {currencySymbol}{max || value[1].toFixed(2)}
+                                        {currencySymbol}{priceRange[0].toFixed(2)} — {currencySymbol}{priceRange[1].toFixed(2)}
                                     </div>
                                 </div>
                             </>
@@ -138,7 +146,7 @@ const Products = ({ id, childCategories }) => {
                     </div>
                 </div>
                 <div>
-                    <p className='uppercase text-base font-semibold leading-[100%] pb-1 global-b-bottom lg:hidden block' onClick={() => setOpen(true)}>
+                    <p className='uppercase text-base font-semibold leading-[100%] pb-1 global-b-bottom-d lg:hidden block' onClick={() => setOpen(true)}>
                         Filter
                         <Filter className='inline ml-2 mb-1' size={'0.8rem'} />
                     </p>
@@ -159,7 +167,7 @@ const Products = ({ id, childCategories }) => {
                     </div>
                     : <div className='grid xl:grid-cols-3 3xl:grid-cols-5 2xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-3 lg:gap-6 gap-4 lg:w-[80%] w-full grid-cols-2 max-w-[1920px] mx-auto global-margin'>
                         {
-                            productData?.map((product, i) => {
+                            filteredProducts?.map((product, i) => {
                                 const image = product?.featured_img;
                                 const bestseller = product?.bestseller;
                                 const hoverImage = product?.img;
@@ -175,29 +183,34 @@ const Products = ({ id, childCategories }) => {
 
 
             <PopUp isOpen={isOpen}>
-                <div className='w-[90%] mx-auto bg-white/95 h-[90vh] p-4 rounded-[4px] overflow-hidden shadow-xl'>
+                <div className='w-[90%] mx-auto bg-[#F7F7F7] h-auto p-[10px] rounded-[4px] overflow-hidden shadow-xl'>
                     <div className='relative'>
                         <p className='font-medium uppercase text-xs leading-[100%] pb-4 text-[#999] border-gray-300 border-b'>Filters</p>
                         <X className="w-4 h-4 absolute top-0 right-0 text-[#999]" onClick={() => setOpen(!isOpen)} />
                     </div>
-                    <div className='mb-4 mt-4 h-[50%] overflow-y-scroll popup-scroll-bar-1'>
-                        <p className='font-semibold text-base leading-[100%] text-black mb-4'>{a("categories")}</p>
+                    <p className='font-semibold text-base leading-[100%] text-black my-4'>{a("categories")}</p>
+                    <div className='mb-4 mt-4 max-h-[50vh] overflow-y-scroll popup-scroll-bar-1'>
                         {childCategories && childCategories.length > 0
                             ? renderCategories(childCategories)
                             : <p className="text-sm text-gray-500">No {a("categories")}</p>}
                     </div>
                     <div>
-                        {isLoadingAllProducts ? <div>Loading...</div> :
+                        {isLoading ? <div>Loading...</div> :
                             <>
-                                <label className='uppercase text-base font-medium mb-4 block' for="vol">PRIX</label>
-                                <RangeSlider min={minPrice} max={maxPrice} defaultValue={[min || minPrice, max || maxPrice]} onInput={(val) => handleChange(val)} className='my-dashed-slider -ml-2' />
+                                <label className='font-semibold text-base leading-[100%] text-black mb-4 block' for="vol">{t("price")}</label>
+                                <RangeSlider
+                                    min={minPrice}
+                                    max={maxPrice}
+                                    value={priceRange}
+                                    onInput={handleChange}
+                                    className='my-dashed-slider -ml-2'
+                                />
                                 <div className='text-[14px] leading-[15px] font-semibold mt-4'>
-                                    {currencySymbol} {min || minPrice.toFixed(2)} — {currencySymbol} {max || maxPrice.toFixed(2)}
+                                    {currencySymbol}{priceRange[0].toFixed(2)} — {currencySymbol}{priceRange[1].toFixed(2)}
                                 </div>
                             </>
                         }
-                        {/* <FormButton label={"TERMINER"}/> */}
-                        <button type='button' className='text-center bg-black text-white w-full mt-4 text-sm leading-[100%] py-5 font-semibold rounded-4xl cursor-pointer' onClick={() => setOpen(!isOpen)}>
+                        <button type='button' className='text-center bg-black text-white w-full mt-6 text-sm leading-[100%] py-4 font-semibold rounded-4xl cursor-pointer' onClick={() => setOpen(!isOpen)}>
                             {a("finish")}
                         </button>
                     </div>

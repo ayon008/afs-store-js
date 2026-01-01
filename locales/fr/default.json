@@ -1,4 +1,8 @@
 {
+  "404": {
+    "appears": "Il semble que rien n'ait été trouvé à cet endroit.",
+    "notfound": "La page est introuvable."
+  },
   "advance": {
     "aboutTitle": "AFS Advanced est notre façon de concentrer notre savoir-faire et notre expertise dans les conceptions les plus avancées, ce qui constitue l'essence et l'avenir d'AFS.",
     "advanced": "<light>AFS Advanced est notre façon de concentrer notre</light> <bold>savoir-faire</bold> <light>et notre</light> <bold>expertise</bold> <light>dans les conceptions les plus avancées, ce qui est l'essence et l'avenir d'AFS.</light> <underline>l'avenir d'AFS.</underline>",
@@ -100,7 +104,9 @@
   "blog": {
     "blog": "Blog",
     "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues d'équipement pour les riders de tous niveaux.",
-    "read": "Lire la suite"
+    "read": "Lire la suite",
+    "see": "En lire plus",
+    "see-all": "Tout voir"
   },
   "Board": {
     "Board": "Conseil d'administration"
@@ -160,6 +166,7 @@
     "english": "Anglais",
     "euro": "L'euro",
     "french": "Français",
+    "search": "Rechercher...",
     "usDollar": "Dollar américain"
   },
   "DirectSailing": {
@@ -196,7 +203,7 @@
   },
   "filter": {
     "categories": "Catégories",
-    "finish": "FINITION"
+    "finish": "TERMINER"
   },
   "footer": {
     "1st": "Click & Collect",
@@ -284,20 +291,29 @@
     "What are": "Quelles sont les conditions idéales pour naviguer au portant ?"
   },
   "home": {
-    "ambassadors": "L'équipe des ambassadeurs AFS",
-    "category": "Shop by category",
-    "categoryShop": "Shop by category",
+    "ambassadors": "AFS Ambassadors team",
+    "best": "Trouvez le stab qui vous convient par rapport à votre aile avant et votre pratique.",
+    "category": "Acheter par catégories",
+    "categoryShop": "Acheter par catégories",
+    "compare": "Comparer 3 stabs",
+    "compare-des": "Envie de comparer les stabilisateurs par rapport à votre aile avant. \t",
+    "equip": "Reprise matériel",
+    "equip-des": "Nous reprenons votre ancien équipement AFS lorsque vous achetez un nouveau produit chez nous.",
     "featuredTitle": "Meilleures ventes",
-    "homeTitle": "L'esprit du fleuret depuis 2009",
+    "foil": "Configurateur foil",
+    "foil-des": "Trouvez le foil complet qui vous convient parmi la gamme AFS par rapport à votre niveau et gabarit. ",
+    "homeTitle": "The foiling spirit since 2009",
     "more": "En savoir plus sur AFS",
-    "news": "nouvelles",
+    "need": "Besoin d'un conseil ?",
+    "need-des": "Retrouvez les différents moyens de nous contacter : Whatsapp, chat, appel téléphonique un expert AFS,…",
+    "news": "News",
     "playVideo": "LIRE LA VIDÉO",
-    "scrollText": "Lire la suite de la visite",
-    "see-more": "Voir plus d'informations",
-    "service": "Service clientèle AFS",
+    "scrollText": "Scroll pour la visite complète",
+    "see-more": "Voir Plus",
+    "service": "Service client AFS",
     "subText": "La mission d'AFS est de proposer les foils, planches et ailes les plus performants, tout en garantissant une accessibilité et une stabilité de premier ordre. Pour que tous les riders puissent pratiquer leur sport en toute sécurité, quelles que soient les conditions et quel que soit leur style de glisse (freeride, carving, downwind, surf foil, etc.). Ces produits sont conçus et fabriqués en Bretagne par Foil And Co. Une fabrication française utilisant les techniques les plus avancées pour vous offrir la meilleure qualité !",
     "team": "L'équipe",
-    "video": "La mission d'AFS est de proposer les foils, planches et ailes les plus performants, tout en garantissant une accessibilité et une stabilité de premier ordre. Pour que tous les riders puissent pratiquer leur sport en toute sécurité, quelles que soient les conditions et quel que soit leur style de glisse (freeride, carving, downwind, surf foil, etc.). Ces produits sont conçus et fabriqués en Bretagne par Foil And Co. Une fabrication française utilisant les techniques les plus avancées pour vous offrir la meilleure qualité !"
+    "video": "La mission d’AFS est d’offrir les foils, planches et ailes les plus performants, tout en garantissant une accessibilité et une stabilité de premier ordre, afin d’assurer à tous les riders une pratique en toute sécurité, quelles que soient les conditions et leur style de glisse (freeride, carving, downwind, surf foil, etc.). Ces produits sont conçus et fabriqués en Bretagne, en France, par Foil And Co. Une fabrication française utilisant les techniques les plus avancées pour vous offrir la meilleure qualité !"
   },
   "legal": {
     "body": " <p>\n              FOIL AND CO SAS, société de droit français au capital de 110 250,00 €, représentée par M. Tanguy LE BIHAN, et dont le siège social français est situé à Pencran (29800), ZAE Correquer.          </p>\n\n            <p>\n              Coordonnées du vendeur : Foil and co Siège social : ZA DE REUNVENGUEN 29450 LE TREHOU RCS : 822 822 615 R.C.S Brest SIRET : 82282261500016 Tel : 02 98 19 29 03 Email : contact@foilandco.com Nous mettons tout en oeuvre pour vous satisfaire. Sur ce site, nous vous présentons toutes les caractéristiques essentielles des produits. Nous serons attentifs aux remarques que vous nous ferez parvenir. Le client doit se reporter au descriptif de chaque produit vendu sur le site pour en connaître les propriétés et les caractéristiques essentielles. Le client reconnaît avoir pris connaissance, préalablement à la passation de sa commande, de manière lisible et compréhensible, des présentes Conditions Générales de Vente et de l'ensemble des informations énumérées à l'article L. 221-5 du Code de la consommation, et notamment des informations suivantes : </p>",
@@ -312,13 +328,13 @@
     "confirm": "Confirmer le mot de passe",
     "current": "Mot de passe existant",
     "currentP": "Le mot de passe actuel est incorrect",
-    "email": "Email ou nom d'utilisateur",
+    "email": "Identifiant ou e-mail",
     "enter": "Saisissez l'adresse électronique que vous avez utilisée pour créer votre compte et vous recevrez un lien pour réinitialiser votre mot de passe.",
     "exclusive": "Je souhaite recevoir des offres exclusives",
     "first": "Prénom",
-    "forgot": "Vous avez oublié votre mot de passe ?",
+    "forgot": "Mot de passe perdu ?",
     "last": "Nom de famille",
-    "me": "Souvenez-vous de moi",
+    "me": "Se souvenir de moi",
     "new": "Nouveau sur le site ?",
     "new-p": "Nouveau mot de passe",
     "password": "Mot de passe",
@@ -326,7 +342,7 @@
     "required-first": "Le prénom est obligatoire",
     "required-last": "Le nom de famille est obligatoire",
     "reset": "Réinitialiser le mot de passe",
-    "save": "SAUVEGARDE",
+    "save": "ENREGISTRER",
     "secure": "Vous pouvez modifier facilement et en toute sécurité votre mot de passe actuel afin de renforcer la sécurité de votre compte.",
     "set": "Définir un nouveau mot de passe",
     "signin": "Se connecter",
@@ -424,10 +440,20 @@
     "title": "POLITIQUE DE CONFIDENTIALITÉ"
   },
   "product": {
+    "add": "AJOUT EN COURS...",
+    "after-sale": "Après vente",
+    "buy": "AJOUTER AU PANIER",
     "close": "Fermer",
     "delete": "Supprimer tout",
+    "Dimensions": "Dimensions",
     "discover": "DÉCOUVRIR",
+    "duration": "Tous nos produits sont garantis 2 ans",
+    "expert": "Expert produit AFS",
+    "features": "Caractéristiques",
+    "guide": "Guide des tailles",
     "latestSearches": "Dernières recherches :",
+    "less": "Voir moins",
+    "loading": " Chargement du prix...",
     "Loading": {
       "": {
         "": {
@@ -435,9 +461,24 @@
         }
       }
     },
+    "need": "Besoin d'aide pour choisir votre matériel ?",
     "no": "Aucun produit trouvé",
+    "payment_single": "Paiement sécurisé. Simple et rapide. ",
+    "phone": "Prendre un rdv téléphonique",
     "price": "Prix",
-    "searchPlaceholder": "Rechercher..."
+    "recommended": "Produits recommandés",
+    "return": "Retour gratuit sous 15 jours",
+    "reviews": "Commentaires",
+    "searchPlaceholder": "Rechercher...",
+    "select": "Veuillez sélectionner toutes les options",
+    "size": "Guide taille\n",
+    "stock": "En rupture de stock",
+    "stock_fr_acf": "Date prévue de départ",
+    "stock_usd_acf": "Stock",
+    "view": "Voir tous",
+    "warranty": "Garantie",
+    "watch": "Regarder la review",
+    "we": "Nous sommes là pour vous apporter des réponses complètes et des conseils qui vous aideront à faire le bon choix."
   },
   "profile": {
     "account": "Déconnexion de votre compte",
@@ -452,7 +493,7 @@
     "hello": "Bonjour",
     "here": "Ici, vous pouvez saisir ou modifier des informations publiques vous concernant. Ces données seront utilisées ultérieurement pour passer des commandes. Les modifications apportées seront affichées immédiatement après l'enregistrement.",
     "info": "Informations",
-    "logout": "Se déconnecter",
+    "logout": "Déconnecter",
     "order": "Commandes",
     "p": "Nous attendons avec impatience votre retour lorsque vous serez prêt à vous reconnecter. Votre compte est toujours là, avec vous, et vous pouvez y revenir chaque fois que vous en avez besoin.",
     "payment": "Modes de paiement",

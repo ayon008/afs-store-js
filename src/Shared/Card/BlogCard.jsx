@@ -14,7 +14,7 @@ const decodeEntities = (str = "") =>
 export default async function BlogCard({ blog }) {
     const t = await getTranslations("blog");
     return (
-        <div className="w-full">
+        <div className="w-full h-full flex flex-col gap-5">
             {/* Image */}
             <div className="relative w-full aspect-[16/9]">
                 <Image
@@ -26,55 +26,56 @@ export default async function BlogCard({ blog }) {
             </div>
 
             {/* Content */}
-            <div className="mt-5">
-                {/* BLOG Label */}
-                <span
-                    className="inline-block border border-[#1D98FF] text-[#1D98FF] rounded-full w-fit tracking-wide"
-                    style={{
-                        fontFamily: '"alliance no.2", sans-serif',
-                        fontSize: "12px", // Slightly adjusted size for better fit
-                        fontWeight: 700,
-                        lineHeight: "16px", // Increased line-height for vertical spacing
-                        padding: "4px 12px", // Increased vertical padding (4px)
-                    }}
-                >
-                    BLOG
-                </span>
-                {/* Title */}
-                <h2
-                    className="mt-2"
-                    style={{
-                        fontFamily: '"alliance no.2", sans-serif',
-                        fontSize: "18px",
-                        fontWeight: 700,
-                        lineHeight: "19.6px",
-                        color: "rgba(17, 17, 17, 0.75)",
-                    }}
-                >
-                    {decodeEntities(blog.title)}
-                </h2>
+            <div className="flex flex-col justify-between gap-4 h-full">
+                <div className="">
+                    {/* BLOG Label */}
+                    <span
+                        className="inline-block border border-[#1D98FF] text-[#1D98FF] rounded-full w-fit tracking-wide"
+                        style={{
+                            fontFamily: '"alliance no.2", sans-serif',
+                            fontSize: "12px", // Slightly adjusted size for better fit
+                            fontWeight: 700,
+                            lineHeight: "16px", // Increased line-height for vertical spacing
+                            padding: "4px 12px", // Increased vertical padding (4px)
+                        }}
+                    >
+                        BLOG
+                    </span>
+                    {/* Title */}
+                    <h2
+                        className="mt-2"
+                        style={{
+                            fontFamily: '"alliance no.2", sans-serif',
+                            fontSize: "18px",
+                            fontWeight: 700,
+                            lineHeight: "19.6px",
+                            color: "rgba(17, 17, 17, 0.75)",
+                        }}
+                    >
+                        {decodeEntities(blog.title)}
+                    </h2>
 
-                {/* Description (limited to 3 lines with ellipsis) */}
-                <p
-                    className="mt-2 line-clamp-3 overflow-hidden text-ellipsis"
-                    style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontFamily: '"alliance no.2", sans-serif',
-                        fontSize: "18px",
-                        fontWeight: 600,
-                        lineHeight: "19.6px",
-                        color: "rgba(17, 17, 17, 0.75)",
-                    }}
-                >
-                    {blog.description}
-                </p>
-
+                    {/* Description (limited to 3 lines with ellipsis) */}
+                    <p
+                        className="mt-2 line-clamp-3 overflow-hidden text-ellipsis"
+                        style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            fontFamily: '"alliance no.2", sans-serif',
+                            fontSize: "18px",
+                            fontWeight: 600,
+                            lineHeight: "19.6px",
+                            color: "rgba(17, 17, 17, 0.75)",
+                        }}
+                    >
+                        {blog.description}
+                    </p>
+                </div>
                 {/* Footer */}
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between">
                     <p
                         style={{
                             fontFamily: '"alliance no.2", sans-serif',
@@ -98,7 +99,7 @@ export default async function BlogCard({ blog }) {
                             color: "rgb(29, 152, 255)",
                         }}
                     >
-                        {t("read")}
+                        {t("see")}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"

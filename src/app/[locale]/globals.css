@@ -139,7 +139,54 @@ body {
 }
 
 .prose h2 {
-  @apply font-bold text-[36px] md:text-[clamp(2.25rem,1.5078rem+1.5504vw,2.5rem)] lg:text-[clamp(2.5rem,1.3889rem+1.7361vw,3.125rem)] leading-[110%] tracking-[-0.01em] mb-10;
+  @apply font-bold text-[36px] md:text-[clamp(2.25rem,1.5078rem+1.5504vw,2.5rem)] lg:text-[clamp(2.5rem,1.3889rem+1.7361vw,3.125rem)] leading-[110%] tracking-[-0.01em] mb-10 mt-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)];
+}
+
+
+.prose h3 {
+  @apply lg:text-[28px]! font-semibold! leading-[100%]! text-[#111]! md:text-[24px]! text-[20px]! mb-5!;
+}
+
+
+.prose p {
+  @apply lg:text-[22px]! leading-[130%]! font-medium! text-[#111]/75! md:text-[19.6px]! text-base! mb-5!;
+}
+
+.prose h4 {
+  @apply lg:text-[24px]! font-semibold! leading-[100%]! text-[#111]! md:text-[22px]! text-[20px]! mb-5!;
+}
+
+.prose a {
+  @apply text-[#1D98FF]! font-bold!;
+}
+
+.prose p strong {
+  @apply text-[#111]!;
+}
+
+.prose img {
+  @apply mb-10!
+}
+
+.prose ul {
+  @apply list-disc! list-outside! pl-10! mb-5!;
+}
+
+.prose ol {
+  @apply list-decimal! list-outside! pl-10! mb-5!;
+}
+
+.prose table {
+  @apply mb-5! border! border-[#111]/10! rounded-lg! overflow-hidden!;
+}
+.prose table th {
+  @apply bg-[#111]/10! text-[#111]! font-bold! text-left! p-4!;
+}
+.prose table td {
+  @apply text-[#111]! font-medium! text-left! p-4!;
+}
+.prose table tr {
+  @apply border-b! border-[#111]/10!;
 }
 
 /* Spacing utilities */

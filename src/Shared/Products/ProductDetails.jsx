@@ -4,9 +4,9 @@ import { ArrowUpRight, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from 'next/image';
 import PopUp from '../PopUp/PopUp';
-import { getPrice } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
+import { useTranslations } from 'next-intl';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -27,19 +27,19 @@ const updatePriceInHtml = (priceHtml, newPrice) => {
 };
 
 
-const ProductDetails = ({ data }) => {
+const ProductDetails = ({ data, variations }) => {
 
     const [priceLoading, setPriceLoading] = useState(false);
     const [addingToCart, setAddingToCart] = useState(false);
 
     const { register, handleSubmit, watch } = useForm();
     const [variationPrice, setVariationPrice] = useState(null);
-    const [variationTaxAmount, setVariationTaxAmount] = useState(null);
-    const [variationCountry, setVariationCountry] = useState(null);
     const [variationId, setVariationId] = useState(null);
     const [variationInStock, setVariationInStock] = useState(true);
     const [variationAttributes, setVariationAttributes] = useState(null);
-    const productId = data?.id;
+    const [matchedVariation, setMatchedVariation] = useState(null);
+
+    const t = useTranslations("product");
 
     // Check if product is in stock (base product)
     const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
@@ -50,11 +50,13 @@ const ProductDetails = ({ data }) => {
     const { handleAddToCart } = useCart();
 
     const acf = data?.acf;
+
     const compatibilite = acf?.compatibilite;
     const short_description = data?.short_description;
     const priceHtml = data?.price_html;
     const priceWithTax = data?.price_with_tax;
     const attributes = data?.attributes;
+    const productId = data?.id;
 
     // Update the price HTML with calculated tax price
     const price = useMemo(() => {
@@ -78,8 +80,6 @@ const ProductDetails = ({ data }) => {
         if (!allVariationsSelected) {
             // Reset price when selections change
             setVariationPrice(null);
-            setVariationTaxAmount(null);
-            setVariationCountry(null);
             setVariationId(null);
             setVariationInStock(true);
             setVariationAttributes(null);
@@ -89,32 +89,61 @@ const ProductDetails = ({ data }) => {
         const fetchVariationPrice = async () => {
             setPriceLoading(true);
             try {
-                const matchedVariation = await getPrice(productId, watchedValues);
+                const matchedVariation = variations?.find((variation) => {
+                    return variation.attributes.every((attr) => {
+                        // WooCommerce provides english slug → convert to readable name
+                        const attrName = attr.name
+                            .replace("attribute_", "")
+                            .toLowerCase()
+                            .trim();
+
+                        // Convert selectedVariation keys to lower-case comparison form
+                        const selectedEntry = Object.entries(watchedValues).find(
+                            ([key]) => key.toLowerCase().trim() === attrName
+                        );
+
+                        if (!selectedEntry) {
+                            return true;
+                        }
+
+                        const selectedValue = selectedEntry[1];
+
+                        if (!selectedValue) return false;
+
+                        // Compare values
+                        return (
+                            selectedValue.toLowerCase().trim() ===
+                            attr.option.toLowerCase().trim()
+                        );
+                    });
+                });
+
                 if (matchedVariation) {
-                    setVariationPrice(matchedVariation.price);
-                    setVariationTaxAmount(matchedVariation.taxAmount);
-                    setVariationCountry(matchedVariation.userCountry);
+                    const missingAttributes = Object.keys(watchedValues).filter(key => !matchedVariation?.attributes?.some(attr => attr?.name === key));
+                    const missingAttributeData = missingAttributes?.map(attr => {
+                        return { id: 0, name: attr, option: watchedValues[attr]?.replace(/['/]/g, "") || watchedValues[attr] };
+                    });
+
+                    setMatchedVariation(matchedVariation);
+
+                    setVariationPrice(matchedVariation.price_incl_tax);
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
-                    setVariationAttributes(matchedVariation.attributes?.attributes || null);
+                    setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);
                     // Check if the variation is in stock
-                    const stockStatus = matchedVariation.attributes?.stock_status;
+                    const stockStatus = matchedVariation.stock_status;
                     const variationStock = stockStatus
                         ? stockStatus === 'instock'
-                        : (matchedVariation.attributes?.in_stock === true || matchedVariation.attributes?.is_in_stock === true || matchedVariation.attributes?.purchasable !== false);
+                        : (matchedVariation.in_stock === true || matchedVariation.is_in_stock === true || matchedVariation.purchasable !== false);
                     setVariationInStock(variationStock);
                 } else {
                     setVariationPrice(null);
-                    setVariationTaxAmount(null);
-                    setVariationCountry(null);
                     setVariationId(null);
                     setVariationAttributes(null);
                 }
             } catch (error) {
                 console.error('Error fetching variation price:', error);
                 setVariationPrice(null);
-                setVariationTaxAmount(null);
-                setVariationCountry(null);
                 setVariationId(null);
                 setVariationAttributes(null);
             } finally {
@@ -125,9 +154,7 @@ const ProductDetails = ({ data }) => {
         fetchVariationPrice();
     }, [allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
 
-
-    console.log(variationPrice,'variationPrice');
-
+    const a = useTranslations("profile")
 
     // Decode HTML entities
     const decodeHtmlEntities = (text) => {
@@ -182,7 +209,6 @@ const ProductDetails = ({ data }) => {
                 variationId || null,
                 formattedVariations
             );
-            console.log(result, 'result');
 
             if (!result?.success) {
                 alert(decodeHtmlEntities(result?.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
@@ -209,14 +235,14 @@ const ProductDetails = ({ data }) => {
                 <div className='mt-2 mb-3 text-[15px] leading-[22px] font-semibold' dangerouslySetInnerHTML={{ __html: short_description }} />
                 <div className='text-lg leading-[29px] font-bold mb-6' dangerouslySetInnerHTML={{ __html: price }} />
                 {
-                    compatibilite && <button onClick={() => setOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer'>
-                        <span>Guide taille</span>
+                    compatibilite && <button onClick={() => setOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer flex items-center'>
+                        <span>{t("size")}</span>
                         <span className='inline'><ArrowUpRight className='inline ml-1' size={'1.1rem'} strokeWidth={2.5} /></span>
                     </button>
                 }
 
                 {/* Form */}
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-[30px] mt-5">
+                <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5`}>
                     <div className="flex flex-col gap-4">
                         <table>
                             <tbody className="flex flex-col gap-5">
@@ -270,32 +296,42 @@ const ProductDetails = ({ data }) => {
                         {/* Price Loading */}
                         {priceLoading && allVariationsSelected && (
                             <span className='text-[#111] font-bold text-[24px] leading-[110%] block opacity-50'>
-                                Chargement du prix...
+                                {t("loading")}
                             </span>
                         )}
 
                         {/* Price */}
-                        {variationPrice && !priceLoading && (
-                            <div className='space-y-1'>
+                        {variationPrice && !priceLoading && variationInStock && (
+                            <div className='space-y-2'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
                                     {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
+                                </span>
+                                <span className='text-base font-medium text-[#111]'>
+                                    {
+                                        currency === "usd" && matchedVariation?.acf?.USA_Stock ?
+                                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.USA_Stock}</>
+                                            :
+                                            matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
+                                            <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}
+                                            </>
+                                    }
                                 </span>
                             </div>
                         )}
 
                         {/* Select variations message */}
                         {!allVariationsSelected && attributes?.length > 0 && (
-                            <p className='text-gray-500 text-sm'>Veuillez sélectionner toutes les options</p>
+                            <p className='text-gray-500 text-sm'>{t("select")}</p>
                         )}
 
                         {/* Out of Stock Message - for variable products */}
                         {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
-                            <p className='text-red-500 font-semibold text-sm'>Rupture de stock</p>
+                            <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
                         )}
 
                         {/* Out of Stock Message - for simple products */}
                         {!hasVariations && !baseInStock && (
-                            <p className='text-red-500 font-semibold text-sm'>Rupture de stock</p>
+                            <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
                         )}
 
                         {/* Button */}
@@ -305,29 +341,30 @@ const ProductDetails = ({ data }) => {
                             type="submit"
                         >
                             {addingToCart
-                                ? 'AJOUT EN COURS...'
+                                ? t("add")
                                 : (hasVariations ? (!isInStock && allVariationsSelected) : !baseInStock)
-                                    ? 'RUPTURE DE STOCK'
-                                    : 'AJOUTER AU PANIER'
+                                    ? t("buy")
+                                    : t("buy")
                             }
                         </button>
-
                     </div>
                 </form>
 
                 {/* Other Details */}
                 <div className='space-y-10 mt-10'>
                     <div className='space-y-2'>
-                        <p className='text-base leading-[100%] font-bold'>Garantie</p>
-                        <small className='text-[15px] leading-[19px] block'>Tous nos produits sont garantis 2 ans</small>
+                        <p className='text-base leading-[100%] font-bold'>{t('warranty')}</p>
+                        <small className='text-[15px] leading-[19px] block'>
+                            {t("warranty")}
+                        </small>
                     </div>
                     <div className='space-y-2'>
-                        <p className='text-base leading-[100%] font-bold'>Après vente</p>
-                        <small className='text-[15px] leading-[19px] block'>Retour gratuit sous 15 jours</small>
+                        <p className='text-base leading-[100%] font-bold'>{t("after-sale")}</p>
+                        <small className='text-[15px] leading-[19px] block'>{t("return")}</small>
                     </div>
                     <div className='space-y-2'>
-                        <p className='text-base leading-[100%] font-bold'>Modes de paiement</p>
-                        <small className='text-[15px] leading-[19px] block'>Paiement sécurisé. Simple et rapide.</small>
+                        <p className='text-base leading-[100%] font-bold'>{a("payment")}</p>
+                        <small className='text-[15px] leading-[19px] block'>{t("payment_single")}</small>
                         <div className='flex items-center gap-4 mt-4'>
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Layer_1-1.svg'} alt='visa' width={50} height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Group-26.svg'} alt='visa' width={50} height={50} />
@@ -339,11 +376,11 @@ const ProductDetails = ({ data }) => {
                 <div className='flex items-stretch bg-[#F0F0F0] mt-10'>
                     <div className='p-4 2xl:w-[60%] w-full'>
                         <div className="space-y-2">
-                            <p className='text-xs font-semibold text-[#666666]'>Expert produit AFS</p>
-                            <h3 className='font-bold text-base leading-[24px]'>Besoin d'aide pour choisir votre matériel ?</h3>
-                            <p className='text-[15px] leading-4 text-[#666666]/75'>Nous sommes là pour vous apporter des réponses complètes et des conseils qui vous aideront à faire le bon choix.</p>
+                            <p className='text-xs font-semibold text-[#666666]'>{t("expert")}</p>
+                            <h3 className='font-bold text-base leading-6'>{t("need")}</h3>
+                            <p className='text-[15px] leading-4 text-[#666666]/75'>{t("we")}</p>
                         </div>
-                        <p className='text-xs leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>Prendre un rdv téléphonique <ArrowUpRight className='inline w-4 h-4' /></p>
+                        <p className='text-xs leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
                     <div className='2xl:w-[40%] w-0'>
                         <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full' alt='' width={200} height={200} />
@@ -360,8 +397,7 @@ const ProductDetails = ({ data }) => {
                         <button onClick={() => setOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
                             <X className="w-4 h-4" />
                         </button>
-                        <h2 className='text-[clamp(1.375rem,1.1448rem+0.4802vw,1.625rem)] leading-[100%] font-bold'>Guide des tailles</h2>
-
+                        <h2 className='text-[clamp(1.375rem,1.1448rem+0.4802vw,1.625rem)] leading-[100%] font-bold'>{t("guide")}</h2>
                     </div>
                     <div className='lg:mt-4 mt-0'>
                         <div className='font-bold compatibilite' dangerouslySetInnerHTML={{ __html: compatibilite }} />

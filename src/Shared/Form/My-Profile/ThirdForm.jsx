@@ -4,15 +4,13 @@ import Input from '@/Shared/Input/Input';
 import { Pen } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import useAuth from '@/Shared/Hooks/useAuth';
 import { countriesList } from '@/lib/countriesList';
 import { updateBillingInfo } from '@/app/actions/WC/Auth/getAuth';
 import CountrySelect from '@/Shared/Input/DropDown';
 import { useTranslations } from 'next-intl';
 
-const ThirdForm = ({ setMessage }) => {
+const ThirdForm = ({ setMessage , user, loading, refreshUser }) => {
     const [show, setShow] = useState(false);
-    const { user, loading, refreshUser } = useAuth();
     const t = useTranslations("profile");
     const a = useTranslations("login");
     const c = useTranslations("ambassadors");

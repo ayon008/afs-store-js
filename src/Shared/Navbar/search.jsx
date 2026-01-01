@@ -7,8 +7,6 @@ import 'swiper/css/navigation';
 import { Search, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-// import { getRecentProducts, searchProducts } from '../funtions/getWooCommerce';
-// import useGetData from '../funtions/ClientFetch/GetData';
 import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -63,7 +61,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 const searchLower = searchValue.toLowerCase().trim();
                 const matched = Array.isArray(results)
                     ? results.filter((product) =>
-                        product?.name?.toLowerCase().startsWith(searchLower)
+                        product?.name?.toLowerCase().includes(searchLower)
                     )
                     : [];
                 setProducts(matched);
@@ -185,14 +183,13 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 )}
                 {/* Products */}
                 <div className='space-y-4'>
-                    <h2 className="text-[#111] text-sm font-semibold">Recommended products</h2>
+                    <h2 className="text-[#111] text-sm font-semibold">{t("recommended")}</h2>
 
-                    <div className='lg:hidden block grid grid-cols-2 gap-4'>
+                    <div className='lg:hidden grid grid-cols-2 gap-4'>
                         {
                             products && products.length > 0 ? (
                                 products.map((product) => {
                                     const image = product.featured_img || '/images/placeholder.png';
-                                    console.log("image", image);
                                     const name = product?.name || '';
                                     const price = product?.price || product?.regular_price || '0';
                                     const priceHtml = product?.price_html || '';
@@ -217,7 +214,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                             ) : (
                                 !isSearching && (
                                     <div className='text-center py-8 text-[#111] text-sm'>
-                                        {isLoading ? 'Chargement...' : 'Aucun produit trouvé'}
+                                        {isLoading ? t("Loading...") : t("no")}
                                     </div>
                                 )
                             )

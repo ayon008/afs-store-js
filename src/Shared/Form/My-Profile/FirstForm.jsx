@@ -3,17 +3,15 @@
 import { Pen } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import useAuth from "@/Shared/Hooks/useAuth";
 import Input from "@/Shared/Input/Input";
 import FormButton from "@/Shared/Button/FormButton";
 import { updateProfile } from "@/app/actions/WC/Auth/getAuth";
 import { useTranslations } from "next-intl";
 
-const FirstForm = ({ setMessage }) => {
+const FirstForm = ({ setMessage, user, loading, refreshUser }) => {
     const t = useTranslations("login");
     const a = useTranslations("profile");
     const [first, setFirst] = useState(false);
-    const { user, loading } = useAuth();
 
     const { register, reset, handleSubmit, watch, formState: { errors } } = useForm({
         defaultValues: {
@@ -43,6 +41,7 @@ const FirstForm = ({ setMessage }) => {
             if (updatedData.success) {
                 setMessage({ success: true, message: "Your contact details have been updated successfully." });
                 setFirst(!first);
+                await refreshUser();
             } else {
                 setMessage({ success: false, message: updatedData.message || "Something went wrong" });
             }
@@ -54,7 +53,7 @@ const FirstForm = ({ setMessage }) => {
 
 
     return (
-        <div className={`${loading ? "opacity-50" : "opacity-100"}`}>
+        <div className={`${loading ? "opacity-50 pointer-events-none" : "opacity-100 pointer-events-auto"}`}>
             <div className="flex items-center justify-between pb-1 global-b-bottom-d">
                 <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">{a("full")}</h3>
                 <button

@@ -2,12 +2,14 @@ import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getPosts } from "@/app/actions/getBlogs";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 /* ----------------------------- News Card ----------------------------- */
-const NewsCard = async ({ article, locale }) => {
+const NewsCard = async ({ article}) => {
   const category = article.categories?.[0];
-  const t = await getTranslations("home", locale);
+  const t = await getTranslations("home");
+  const b = await getTranslations("blog");
+  const locale = await getLocale();
 
   return (
     <article className="flex flex-col justify-between gap-[24px] lg:gap-10 py-5 border-t-2 border-b-2 border-t-[#00000026] border-b-[#00000026]">
@@ -40,7 +42,7 @@ const NewsCard = async ({ article, locale }) => {
           href={`/blog/${article.slug}`}
           className="flex items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-blue"
         >
-          <span>{t("see-more")}</span>
+          <span>{b("see")}</span>
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
         </Link>
       </div>
@@ -48,8 +50,10 @@ const NewsCard = async ({ article, locale }) => {
   );
 };
 
-const News = async ({ locale }) => {
-  const t = await getTranslations("home", locale);
+const News = async () => {
+  const t = await getTranslations("home");
+  const b = await getTranslations("blog")
+  const locale = await getLocale();
   let blogs = [];
 
   try {
@@ -78,10 +82,10 @@ const News = async ({ locale }) => {
       )}
 
       <Link
-        href="/blogs"
+        href={`/${locale}/blog`}
         className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
       >
-        {t("see-more")}
+        {b("see-all")}
         <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
       </Link>
     </div>

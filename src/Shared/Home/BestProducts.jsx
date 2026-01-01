@@ -1,49 +1,42 @@
 import React from "react";
 import ProductCard from "../Card/ProductCard";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import default_image from "../../../public/assets/images/Team/Group-1-3.png.webp"
 import { getCurrency, getLang } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getAuthenticatedUser } from "@/app/actions/WC/Auth/getAuth";
 
-const consumerKey = process.env.WC_CONSUMER_KEY;
-const consumerSecret = process.env.WC_CONSUMER_SECRET
-const authHeader = Buffer
-    .from(`${consumerKey}:${consumerSecret}`)
-    .toString("base64");
 
-const getBestSellers = async (slug) => {
-    const localeValue = await getLang();
+
+const getProduct = async (slug) => {
+    const locale = await getLocale();
     const currency = await getCurrency();
-    console.log(currency, 'currency');
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&_fields=id,name,acf,images,slug,categories,price,regular_price,sale_price,price_html,type&lang=${localeValue}&currency=${currency}`;
+    const user = await getAuthenticatedUser();
+    const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
     try {
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Basic ${authHeader}`
-            },
-            next: { revalidate: 3600 },
-        })
-        const data = await response.json();
-        return data[0];
+        const res = await fetch(`${process.env.WP_BASE_URL}/wp-json/afs/v1/products?slug=${slug}&per_page=100&lang=${locale}&currency=${currency}&shipping_country=${shippingCountry}`, {
+            cache: 'no-cache'
+        });
+        if (!res.ok) {
+            throw new Error("Something went wrong");
+        }
+        const { data } = await res.json();
+        return data;
     } catch (error) {
-        // console.log(error);
-        return [];
+        console.log(error);
+        return error;
     }
 }
 
-
-
-export default async function BestSellers({ locale }) {
+export default async function BestSellers() {
     const localeValue = await getLang();
     const products = await Promise.all([
-        getBestSellers(localeValue === "en" ? "evo-foil-full-set" : "foil-complet-evo"),
-        getBestSellers(localeValue === "en" ? "enduro-foil-full-set" : "foil-complet-enduro"),
-        getBestSellers(localeValue === "en" ? "blackbird-mid-length" : "planche-blackbird"),
-        getBestSellers("d-lite"),
+        getProduct(localeValue === "en" ? "evo-foil-full-set" : "foil-complet-evo"),
+        getProduct(localeValue === "en" ? "enduro-foil-full-set" : "foil-complet-enduro"),
+        getProduct(localeValue === "en" ? "blackbird-mid-length" : "planche-blackbird"),
+        getProduct("d-lite"),
     ]);
 
-    const t = await getTranslations("home", locale);
-
-
+    const t = await getTranslations("home");
 
     return (
         <section className="global-padding global-margin">
@@ -55,15 +48,13 @@ export default async function BestSellers({ locale }) {
                 {/* Adjust grid gaps and ensure proper alignment */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-8">
                     {
-                        products?.length > 0 && products.map((product, i) => {
-                            const images = product?.images;
-                            const bestseller = product?.acf?.bestseller;
-                            const hoverImage = product?.acf?.img?.url;
-                            const src = Array.isArray(images) && images.length > 0 ? images[0]?.src : null;
-                            console.log(product?.price);
-                            
+                        products?.length > 0 && products.map((singleProduct, i) => {
+                            const product = singleProduct[0];
+                            const image = product?.featured_img;
+                            const bestseller = product?.bestseller;
+                            const hoverImage = product?.img;
                             return (
-                                <ProductCard price={product?.price_html} singlePrice={product?.price} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={src || default_image} key={i} slug={product?.slug} />
+                                <ProductCard price={product?.price_html} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
                             )
                         }
                         )

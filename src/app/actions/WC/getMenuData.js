@@ -9,7 +9,7 @@ export const getMenuItems = async () => {
     const locale = await getLocale();
     const currency = await getCurrency();
     try {
-        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/custom/v1/menus/2118`,
+        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/custom/v1/menus/${locale === 'fr' ? '2118' : '2303'}`,
             {
                 next: { revalidate: 3600 },
                 cache: "force-cache"
