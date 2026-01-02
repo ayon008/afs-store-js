@@ -203,6 +203,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                     const priceHtml = product?.price_html || '';
                                     const slug = product?.slug || '';
 
+                                    console.log(priceHtml);
                                     return (
                                         <div key={product.id} className='h-auto! w-full'>
                                             <Link onClick={onClose} className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' href={`/product/${slug}`}>
@@ -210,11 +211,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                     <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />
                                                     <font className='text-[#111] text-lg uppercase leading-[100%] font-bold'>{name}</font>
                                                 </div>
-                                                {priceHtml ? (
-                                                    <div className='text-[#111] text-sm leading-[100%] text-center' dangerouslySetInnerHTML={{ __html: priceHtml }} />
-                                                ) : (
-                                                    <font className='text-[#111] text-sm leading-[100%] text-center'>{price}{currencySymbol}</font>
-                                                )}
+                                                <div className='text-[#111] text-sm leading-[100%] text-center' dangerouslySetInnerHTML={{ __html: priceHtml }} />
                                             </Link>
                                         </div>
                                     )

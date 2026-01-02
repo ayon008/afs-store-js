@@ -79,53 +79,43 @@ const SingleProduct = ({ data, variations }) => {
     const BreadCums = () => {
         const t = useTranslations("breadcum");
         return (
-            <div className='uppercase mb-3'>
-                <div className='font-bold text-sm text-[#999999] '>
+            <div className='uppercase md:mb-3 md:mx-0 -mx-5 md:bg-white bg-black -mb-1 md:pt-0 pt-5 md:px-0 px-5'>
+                <div className='font-bold text-sm text-[#999999] flex flex-wrap'>
                     <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span>
                     {
                         breadcrumb?.map((item, i) => {
                             return (
                                 <span key={i}>
-                                    {i === breadcrumb.length - 1 ? (
-                                        // LAST ITEM → no link
-                                        <span className="text-black">
-                                            {item?.name}
-                                        </span>
-                                    ) : (
-                                        // OTHER ITEMS → link
-                                        <Link
-                                            href={`/product-category${item?.url}`}
-                                            className="text-[#999999]"
-                                        >
-                                            {item?.name}
-                                        </Link>
-                                    )}
+                                    <Link
+                                        href={`/product-category${item?.url}`}
+                                        className="text-[#999999]"
+                                    >
+                                        {item?.name}
+                                    </Link>
 
-                                    {i < breadcrumb.length - 1 && (
-                                        <span
-                                            className={`mx-1 ${i === breadcrumb.length - 2
-                                                    ? "text-black"
-                                                    : "text-[#999999]"
-                                                }`}
-                                        >
-                                            /
-                                        </span>
-                                    )}
+                                    <span
+                                        className={`mx-1 text-[#999999]`}
+                                    >
+                                        /
+                                    </span>
                                 </span>
                             )
                         })
                     }
+                    <span className='lg:text-black text-white'>
+                        {data?.name}
+                    </span>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className='global-padding lg:pt-4 pt-0 max-w-[1920px] mx-auto w-full'>
+        <div className='global-padding md:pt-4 pt-0 max-w-[1920px] mx-auto w-full relative'>
             <BreadCums />
-            <div className='flex items-start lg:flex-row flex-col justify-between gap-10'>
-                <div className='lg:w-[60%] w-full'>
-                    <div className='lg:grid grid-cols-2 gap-2.5 relative hidden'>
+            <div className='flex items-start md:flex-row flex-col justify-between gap-10'>
+                <div className='md:w-[60%] w-full'>
+                    <div className='md:grid lg:grid-cols-2 md:grid-cols-1 gap-2.5 relative hidden'>
                         {
                             images?.slice(0, sliceLength)?.map((singleImage, i) => {
                                 return (
@@ -161,7 +151,7 @@ const SingleProduct = ({ data, variations }) => {
                             </button>
                         }
                     </div>
-                    <div className='lg:hidden block -mx-5 bg-black'>
+                    <div className='md:hidden block -mx-5 bg-black'>
                         <Swiper
                             modules={[Navigation, Pagination]}
                             slidesPerView={1}
@@ -198,7 +188,7 @@ const SingleProduct = ({ data, variations }) => {
 
 
                 {/* Details */}
-                <div className='lg:w-[40%] w-full'>
+                <div className='md:w-[40%] w-full'>
                     <ProductDetails data={data} variations={variations} />
                 </div>
             </div>
@@ -208,14 +198,16 @@ const SingleProduct = ({ data, variations }) => {
 
 
             {/* Reviews */}
-            <Reviews acf={acf} />
+            <div className='lg:mb-[120px] mb-20'>
+                <Reviews acf={acf} />
 
+            </div>
 
 
             {/* Pop Up for image gallery*/}
             <PopUp isOpen={isOpen}>
                 <div className='w-full h-full overflow-hidden bg-white relative flex items-center justify-center'>
-                    <div className='absolute top-2 right-2 z-10 rounded-full border border-black text-black p-1 cursor-pointer'>
+                    <div className='absolute top-5 right-5 z-10 rounded-full border border-black text-black p-1 cursor-pointer'>
                         <X className='w-5 h-5' onClick={() => setOpen(!isOpen)} />
                     </div>
                     <div className='w-full h-full'>
@@ -273,7 +265,7 @@ const SingleProduct = ({ data, variations }) => {
                                 }
 
                                 {/* Pagination */}
-                                <div className='absolute left-0 right-0 bottom-0 px-3 py-[10px] w-full z-50 backdrop-blur-[4px] border border-gray-200 rounded-[4px] items-center justify-center bg-white/20 gap-2 md:flex hidden'>
+                                <div className='absolute left-0 right-0 bottom-0 px-3 py-[10px] w-full z-50 backdrop-blur-[4px] border border-gray-200 rounded-[4px] items-center justify-center bg-white/20 gap-2 md:flex hidden max-w-fit mx-auto'>
                                     {
                                         images?.map((singleImage, index) => {
                                             const isActive = activeIndex === index || default_slide === index;

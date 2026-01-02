@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
 import { getWooCommerceCookies } from "./Cookies/cookie-handler";
-import { getCart } from "./Shop/Cart/cart";
 import { getLocale, getTranslations } from "next-intl/server";
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
@@ -19,6 +18,7 @@ export const getCurrency = async () => {
     const cookieStore = await cookies();
     const currencyValue = cookieStore.get('currency')?.value;
     const currency = currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
+    console.log(currency);
     return currency;
 }
 
@@ -47,10 +47,135 @@ export async function getLocaleValue() {
     return localeValue === 'en' ? '' : localeValue;
 }
 
-// Helper function to get base URL without locale
-export async function getBaseUrl() {
-    // Remove any existing locale from WP_BASE_URL (e.g., /fr or /en)
-    return process.env.WP_BASE_URL?.replace(/\/[a-z]{2}\/?$/, '') || process.env.WP_BASE_URL || '';
+// Refresh WooCommerce cookies on page load/refresh
+export async function refreshCookies() {
+    try {
+        const localeValue = await getLocaleValue();
+        const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth_token")?.value;
+
+        // Get current cookies from the cookie store
+        const cookieHeader = await getWooCommerceCookies();
+
+        // Build headers for WooCommerce request
+        const headers = {
+            "Accept": "application/json",
+        };
+
+        // If user is logged in, include authentication token
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        // Include cookies for session management
+        if (cookieHeader) {
+            headers["Cookie"] = cookieHeader;
+        }
+
+        // Make request to WooCommerce to refresh cookies
+        const response = await fetch(`${WC_STORE_URL}/cart`, {
+            method: "GET",
+            headers,
+            cache: "no-store",
+        });
+
+        // Get all Set-Cookie headers from WooCommerce response
+        let setCookieHeaders = [];
+        if (typeof response.headers.getSetCookie === 'function') {
+            setCookieHeaders = response.headers.getSetCookie();
+        } else {
+            // Fallback for older implementations
+            const setCookieHeader = response.headers.get("set-cookie");
+            if (setCookieHeader) {
+                setCookieHeaders = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+            }
+        }
+
+        // Parse and set cookies in Next.js cookie store
+        if (setCookieHeaders.length > 0) {
+            const setCookieHeader = setCookieHeaders.join(', ');
+            const parsedCookies = parseSetCookieHeader(setCookieHeader);
+
+            for (const c of parsedCookies) {
+                const cookieOpts = {
+                    path: "/",
+                    sameSite: "lax",
+                    secure: process.env.NODE_ENV === "production",
+                    httpOnly: false,
+                };
+
+                let hasMaxAge = false;
+                let hasExpires = false;
+
+                // Parse cookie options from WooCommerce
+                c.options.forEach(option => {
+                    const [optName, optValue] = option.split("=");
+                    const nameLower = optName?.toLowerCase();
+
+                    switch (nameLower) {
+                        case "httponly":
+                            cookieOpts.httpOnly = true;
+                            break;
+                        case "secure":
+                            cookieOpts.secure = true;
+                            break;
+                        case "samesite":
+                            cookieOpts.sameSite = (optValue || "lax").toLowerCase();
+                            break;
+                        case "path":
+                            cookieOpts.path = optValue || "/";
+                            break;
+                        case "max-age":
+                            const maxAge = parseInt(optValue || "", 10);
+                            if (!isNaN(maxAge) && maxAge > 0) {
+                                cookieOpts.maxAge = maxAge;
+                                hasMaxAge = true;
+                            }
+                            break;
+                        case "expires":
+                            const expiresDate = new Date(optValue || "");
+                            if (!isNaN(expiresDate.getTime())) {
+                                cookieOpts.expires = expiresDate;
+                                hasExpires = true;
+                            }
+                            break;
+                        case "domain":
+                            // Note: domain can't be set via Next.js cookies() API
+                            break;
+                    }
+                });
+
+                // If no expiration is set, set a default maxAge to ensure cookies persist
+                if (!hasMaxAge && !hasExpires) {
+                    cookieOpts.maxAge = 60 * 60 * 48; // 48 hours in seconds
+                }
+
+                // Remove undefined values
+                Object.keys(cookieOpts).forEach(key => {
+                    if (cookieOpts[key] === undefined) {
+                        delete cookieOpts[key];
+                    }
+                });
+
+                // Set the cookie in Next.js cookie store
+                try {
+                    cookieStore.set({
+                        name: c.name,
+                        value: c.value,
+                        ...cookieOpts,
+                    });
+                } catch (cookieError) {
+                    console.error(`Error setting cookie ${c.name}:`, cookieError);
+                }
+            }
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error refreshing cookies:", error);
+        return { success: false, error: error.message };
+    }
 }
 
 export async function getLang(params) {
@@ -351,13 +476,10 @@ export const getPrice = async (productId, selectedVariation) => {
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
-    const baseUrl = await getBaseUrl();
-    const WC_STORE_URL = localeValue 
-        ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
-        : `${baseUrl}/wp-json/wc/store/v1`;
+    const currency = await getCurrency();
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
-        const currency = await getCurrency();
 
         // Build payload for WooCommerce
         const payload = {
@@ -401,6 +523,7 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
                 'Content-Type': 'application/json',
                 'Cookie': cookieHeader,
                 'Accept': 'application/json',
+                'X-WC-Store-API-Currency': currency
             },
             body: JSON.stringify(payload),
             cache: 'no-store',

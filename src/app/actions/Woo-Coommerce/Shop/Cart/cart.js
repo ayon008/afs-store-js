@@ -3,17 +3,15 @@
 
 import { cookies } from "next/headers";
 import { getWooCommerceCookies } from "../../Cookies/cookie-handler";
-import { getCurrency, getLocaleValue, getBaseUrl } from "../../getWooCommerce";
+import { getCurrency, getLocaleValue } from "../../getWooCommerce";
 
 
 
 // Get cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function getCart() {
-    const localeValue = await getLocaleValue();
-    const baseUrl = await getBaseUrl();
-    const WP_URL = localeValue ? `${baseUrl}/${localeValue}` : baseUrl;
-    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const currency = await getCurrency();
+    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     
     try {
         const cookieHeader = await getWooCommerceCookies();
@@ -26,6 +24,7 @@ export async function getCart() {
             headers: {
                 'Cookie': cookieHeader,
                 'Accept': 'application/json',
+                'X-WC-Store-API-Currency': currency
             },
             cache: 'no-store',
         });
