@@ -1,7 +1,7 @@
 // app/api/cart/remove-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue, getCurrency, getBaseUrl } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
@@ -49,10 +49,8 @@ async function getWooCommerceCookies() {
 
 export async function POST(request) {
     const localeValue = await getLocaleValue();
-    const baseUrl = await getBaseUrl();
-    const WC_STORE_URL = localeValue 
-        ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
-        : `${baseUrl}/wp-json/wc/store/v1`;
+    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
     try {
         // Get WooCommerce cookies from browser

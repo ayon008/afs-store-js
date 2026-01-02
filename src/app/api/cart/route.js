@@ -1,7 +1,7 @@
 // app/api/cart/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue, getCurrency, getBaseUrl } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
@@ -23,19 +23,21 @@ function parseSetCookieHeader(header) {
 }
 
 export async function GET(request) {
-    const localeValue = await getLocaleValue();
-    const baseUrl = await getBaseUrl();
-    const WC_STORE_URL = localeValue 
-        ? `${baseUrl}/${localeValue}/wp-json/wc/store/v1`
-        : `${baseUrl}/wp-json/wc/store/v1`;
-    
-    // Get currency from query parameter first, then fallback to cookie
-    const { searchParams } = new URL(request.url);
-    const clientCurrency = searchParams.get('currency');
-    const currency = clientCurrency || await getCurrency();
-    console.log('Cart API - Using currency:', currency, '(from client:', !!clientCurrency, ')');
-    
     try {
+        // Validate environment variable
+        if (!process.env.WP_BASE_URL) {
+            throw new Error('WP_BASE_URL environment variable is not set');
+        }
+
+        const localeValue = await getLocaleValue();
+        const WP_URL = `${process.env.WP_BASE_URL}`;
+        const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+        
+        // Get currency from query parameter first, then fallback to cookie
+        const { searchParams } = new URL(request.url);
+        const clientCurrency = searchParams.get('currency');
+        const currency = clientCurrency || await getCurrency();
+        console.log('Cart API - Using currency:', currency, '(from client:', !!clientCurrency, ')');
         const cookieStore = await cookies();
         const token = cookieStore.get("auth_token")?.value;
 
@@ -197,8 +199,39 @@ export async function GET(request) {
             }
         }
 
+        // Check if response is OK and is JSON
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
         if (!response.ok) {
-            throw new Error(`Failed to get cart: ${response.status}`);
+            const errorText = await response.text().catch(() => '');
+            // If error is HTML, return empty cart
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.warn('Cart API received HTML error page, returning empty cart');
+                return NextResponse.json({ 
+                    items: [], 
+                    items_count: 0, 
+                    totals: {},
+                    _nonce: nonce 
+                }, { 
+                    headers: responseHeaders 
+                });
+            }
+            throw new Error(`Failed to get cart: ${response.status} - ${errorText.substring(0, 200)}`);
+        }
+
+        // Check if response is JSON before parsing
+        if (!isJson) {
+            const text = await response.text();
+            console.warn('Cart API response is not JSON, received:', text.substring(0, 100));
+            return NextResponse.json({ 
+                items: [], 
+                items_count: 0, 
+                totals: {},
+                _nonce: nonce 
+            }, { 
+                headers: responseHeaders 
+            });
         }
 
         const cartData = await response.json();
@@ -211,7 +244,7 @@ export async function GET(request) {
         // Return response with Set-Cookie headers to ensure cookies are sent to browser
         return NextResponse.json(cartData, {
             headers: responseHeaders
-        })
+        });
 
     } catch (error) {
         console.error("Get cart error:", error);

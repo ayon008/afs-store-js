@@ -9,6 +9,8 @@ export default function Hero() {
 
     useEffect(() => {
         const video = videoRef.current;
+        if (!video) return;
+        
         video.muted = true; // Edge needs this explicitly
         const playVideo = async () => {
             if (video) {
@@ -16,7 +18,6 @@ export default function Hero() {
                     await video.play();
                 } catch (err) {
                     console.log(err);
-
                 }
             }
         };

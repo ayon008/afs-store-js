@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
-import { getLocaleValue, getCurrency, getBaseUrl } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 export async function GET(request, { params }) {
     try {
         const { id } = await params;
         const localeValue = await getLocaleValue();
         const currency = await getCurrency();
-        const baseUrl = await getBaseUrl();
+        const WP_URL = `${process.env.WP_BASE_URL}`;
 
         const authHeader = "Basic " + Buffer.from(
             `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
         ).toString("base64");
 
         // Get product details
-        const productUrl = `${baseUrl}/wp-json/wc/v3/products/${id}?currency=${currency}&lang=${localeValue || ''}`;
+        const productUrl = `${WP_URL}/wp-json/wc/v3/products/${id}?currency=${currency}&lang=${localeValue || ''}`;
         const productResponse = await fetch(productUrl, {
             headers: {
                 Authorization: authHeader
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
         // Get variations if it's a variable product
         let variations = [];
         if (product.type === 'variable') {
-            const variationsUrl = `${baseUrl}/wp-json/wc/v3/products/${id}/variations?per_page=100&currency=${currency}&lang=${localeValue || ''}`;
+            const variationsUrl = `${WP_URL}/wp-json/wc/v3/products/${id}/variations?per_page=100&currency=${currency}&lang=${localeValue || ''}`;
             const variationsResponse = await fetch(variationsUrl, {
                 headers: {
                     Authorization: authHeader

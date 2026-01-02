@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import FormButton from '../Button/FormButton';
 import { useTranslations } from 'next-intl';
 import Cookies from 'js-cookie';
@@ -85,10 +85,17 @@ export default function ProductCard({
         return updatePriceInHtml(price, singlePrice);
     }, [price, singlePrice]);
 
-
     const t = useTranslations('product');
 
-    const currencySymbol = Cookies.get('currency') === 'euro' ? '€' : Cookies.get('currency') === 'usd' ? '$' : '£';
+    // Use state to prevent hydration mismatch
+    const [currencySymbol, setCurrencySymbol] = useState('€');
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+        const currency = Cookies.get('currency');
+        setCurrencySymbol(currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£');
+    }, []);
 
 
     return (
@@ -156,7 +163,8 @@ export default function ProductCard({
                         price ? <p
                             className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
                             dangerouslySetInnerHTML={{ __html: changePrice }}
-                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1'>{singlePrice}{currencySymbol}</font>
+                            suppressHydrationWarning
+                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1' suppressHydrationWarning>{singlePrice}{isMounted ? currencySymbol : '€'}</font>
                     }
                 </div>
                 <div className="">
