@@ -11,7 +11,7 @@ import { getMessages } from "next-intl/server";
 import { CartProvider } from "@/Shared/Hooks/useCart";
 import Footer from "@/Shared/footer/Footer";
 import QueryProvider from "@/Shared/Provider/QueryProvider";
-import { refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
+import { getCurrency, refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
 
 
 export const metadata = {
@@ -57,6 +57,7 @@ export const metadata = {
   },
 };
 
+export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children, params }) {
   const NAV_LINKS = await getMenuItems() || [];
@@ -67,9 +68,10 @@ export default async function RootLayout({ children, params }) {
   }
 
   // Refresh cookies on page load/refresh
-  await refreshCookies();
+  await getCurrency();
 
   const messages = await getMessages();
+
 
   return (
     <html lang={locale}>

@@ -18,6 +18,8 @@ export const getCurrency = async () => {
     const cookieStore = await cookies();
     const currencyValue = cookieStore.get('currency')?.value;
     const currency = currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
+    console.log(currency);
+    
     return currency;
 }
 
@@ -53,32 +55,32 @@ export async function refreshCookies() {
         const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
         const cookieStore = await cookies();
         const token = cookieStore.get("auth_token")?.value;
-        
+
         // Get current cookies from the cookie store
         const cookieHeader = await getWooCommerceCookies();
-        
+
         // Build headers for WooCommerce request
         const headers = {
             "Accept": "application/json",
         };
-        
+
         // If user is logged in, include authentication token
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
         }
-        
+
         // Include cookies for session management
         if (cookieHeader) {
             headers["Cookie"] = cookieHeader;
         }
-        
+
         // Make request to WooCommerce to refresh cookies
         const response = await fetch(`${WC_STORE_URL}/cart`, {
             method: "GET",
             headers,
             cache: "no-store",
         });
-        
+
         // Get all Set-Cookie headers from WooCommerce response
         let setCookieHeaders = [];
         if (typeof response.headers.getSetCookie === 'function') {
@@ -90,12 +92,12 @@ export async function refreshCookies() {
                 setCookieHeaders = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
             }
         }
-        
+
         // Parse and set cookies in Next.js cookie store
         if (setCookieHeaders.length > 0) {
             const setCookieHeader = setCookieHeaders.join(', ');
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            
+
             for (const c of parsedCookies) {
                 const cookieOpts = {
                     path: "/",
@@ -103,15 +105,15 @@ export async function refreshCookies() {
                     secure: process.env.NODE_ENV === "production",
                     httpOnly: false,
                 };
-                
+
                 let hasMaxAge = false;
                 let hasExpires = false;
-                
+
                 // Parse cookie options from WooCommerce
                 c.options.forEach(option => {
                     const [optName, optValue] = option.split("=");
                     const nameLower = optName?.toLowerCase();
-                    
+
                     switch (nameLower) {
                         case "httponly":
                             cookieOpts.httpOnly = true;
@@ -144,19 +146,19 @@ export async function refreshCookies() {
                             break;
                     }
                 });
-                
+
                 // If no expiration is set, set a default maxAge to ensure cookies persist
                 if (!hasMaxAge && !hasExpires) {
                     cookieOpts.maxAge = 60 * 60 * 48; // 48 hours in seconds
                 }
-                
+
                 // Remove undefined values
                 Object.keys(cookieOpts).forEach(key => {
                     if (cookieOpts[key] === undefined) {
                         delete cookieOpts[key];
                     }
                 });
-                
+
                 // Set the cookie in Next.js cookie store
                 try {
                     cookieStore.set({
@@ -169,7 +171,7 @@ export async function refreshCookies() {
                 }
             }
         }
-        
+
         return { success: true };
     } catch (error) {
         console.error("Error refreshing cookies:", error);
