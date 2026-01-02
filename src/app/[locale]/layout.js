@@ -63,10 +63,6 @@ export default async function RootLayout({ children, params }) {
   const NAV_LINKS = await getMenuItems() || [];
   const { locale } = await params;
 
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
   // Refresh cookies on page load/refresh
   await getCurrency();
 

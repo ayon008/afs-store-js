@@ -19,7 +19,6 @@ export const getCurrency = async () => {
     const currencyValue = cookieStore.get('currency')?.value;
     const currency = currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
     console.log(currency);
-    
     return currency;
 }
 
