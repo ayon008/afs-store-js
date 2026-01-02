@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from 'next/link';
 import CartWrapper from './CartWrapper';
-import ProgressStepper from '@/Shared/Stepper/ProgressStepper';
 
 const BreadCrumbs = () => {
     return (
@@ -17,12 +16,6 @@ const page = () => {
     return (
         <div className='pt-4 global-padding'>
             <BreadCrumbs />
-
-            {/* Progress Stepper - Step 1: Cart */}
-            <ProgressStepper
-                currentStep={1}
-                steps={['Panier', 'Paiement', 'Confirmation']}
-            />
 
             {/* CartWrapper handles loading cart from client-side API */}
             <CartWrapper />

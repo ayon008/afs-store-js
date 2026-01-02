@@ -119,6 +119,10 @@ export const CartProvider = ({ children }) => {
                 items_count: 0,
                 totals: calculateTotals([], localCart?.currency || 'EUR', localCart?.coupons || []),
                 coupons: localCart?.coupons || [],
+                // Include shipping_rates, billing_address, and shipping_address from localStorage if available
+                shipping_rates: localCart?.shipping_rates || null,
+                billing_address: localCart?.billing_address || null,
+                shipping_address: localCart?.shipping_address || null,
             };
         }
 
@@ -170,6 +174,10 @@ export const CartProvider = ({ children }) => {
             items_count: localCart.items.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0),
             totals,
             coupons: coupons,
+            // Include shipping_rates, billing_address, and shipping_address from localStorage if available
+            shipping_rates: localCart.shipping_rates || null,
+            billing_address: localCart.billing_address || null,
+            shipping_address: localCart.shipping_address || null,
         };
     }, [calculateTotals]);
 

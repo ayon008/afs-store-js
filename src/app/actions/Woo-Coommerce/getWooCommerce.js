@@ -981,27 +981,67 @@ export async function removeCoupon(couponCode) {
 
 
 export const getPaymentMethods = async () => {
-    const localeValue = await getLocaleValue();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/payment_gateways`;
     try {
-        const response = await fetch(url, {
-            headers: { Authorization: `Basic ${authHeader}` },
+        const localeValue = await getLocaleValue();
+        const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '') || '';
+        const localePath = localeValue ? `/${localeValue}` : '';
+        const apiUrl = `${baseUrl}${localePath}/wp-json/wc/v3/payment_gateways`;
+        
+        // Use query parameters for authentication (same as other API calls)
+        const url = new URL(apiUrl);
+        url.searchParams.set('consumer_key', consumerKey);
+        url.searchParams.set('consumer_secret', consumerSecret);
+        
+        console.log('Fetching payment methods from:', url.toString().replace(consumerSecret, '***'));
+        
+        const response = await fetch(url.toString(), {
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${authHeader}` 
+            },
             cache: "no-store",
         });
 
-        console.log(response, 'response');
-
+        console.log('Payment methods response status:', response.status, response.statusText);
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => '');
+            console.error(`Failed to fetch payment methods: ${response.status} - ${errorText.substring(0, 500)}`);
             throw new Error(`Failed to fetch payment methods: ${response.status}`);
         }
+        
         const data = await response.json();
-        const enabledMethods = data.filter((method) => method.enabled);
+        console.log('Payment methods raw data:', Array.isArray(data), data?.length || 'N/A', typeof data);
+        
+        if (!Array.isArray(data)) {
+            console.error('Payment methods response is not an array:', typeof data, data);
+            // If it's an object, try to extract payment methods
+            if (data && typeof data === 'object') {
+                const methodsArray = Object.values(data);
+                if (Array.isArray(methodsArray) && methodsArray.length > 0) {
+                    console.log('Extracted payment methods from object:', methodsArray.length);
+                    const enabledMethods = methodsArray.filter((method) => method?.enabled);
+                    console.log(`Found ${enabledMethods.length} enabled payment methods (from object)`);
+                    return enabledMethods;
+                }
+            }
+            return [];
+        }
+        
+        console.log(`Total payment methods received: ${data.length}`);
+        const enabledMethods = data.filter((method) => method?.enabled);
+        console.log(`Found ${enabledMethods.length} enabled payment methods`);
+        
+        // Log all methods for debugging
+        enabledMethods.forEach(method => {
+            console.log(`  - ${method.id}: ${method.title} (enabled: ${method.enabled})`);
+        });
+        
         return enabledMethods;
     }
     catch (error) {
-        console.log(error);
-        return error;
+        console.error('Error fetching payment methods:', error.message || error);
+        return [];
     }
 }
 
