@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getLocaleValue, getCurrency, getBaseUrl } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
-const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
-
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
     if (!header) return [];
@@ -22,23 +20,6 @@ function parseSetCookieHeader(header) {
             };
         })
         .filter(cookie => cookie.name && cookie.value);
-}
-
-// Extract WooCommerce cookies from cookie header string
-function extractWooCommerceCookies(cookieHeader) {
-    if (!cookieHeader) return '';
-
-    const cookies = cookieHeader.split(';').map(c => c.trim());
-    const wooCookies = cookies.filter(cookie => {
-        const name = cookie.split('=')[0];
-        return name.includes('woocommerce') ||
-            name.includes('wordpress') ||
-            name.includes('wp_') ||
-            name.includes('wc_') ||
-            name === 'PHPSESSID';
-    });
-
-    return wooCookies.join('; ');
 }
 
 export async function GET(request) {
@@ -131,13 +112,15 @@ export async function GET(request) {
             });
         }
 
+        // Get nonce from response for client-side storage
+        const nonce = response.headers.get("x-wc-store-api-nonce") || response.headers.get("nonce");
+
         // Also parse and set cookies in Next.js cookie store for server-side access
         if (setCookieHeaders.length > 0) {
             const setCookieHeader = setCookieHeaders.join(', ');
 
             // Also set cookies in Next.js cookie store for server-side access
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            const cookieStore = await cookies();
 
             for (const c of parsedCookies) {
                 const cookieOpts = {
@@ -219,6 +202,11 @@ export async function GET(request) {
         }
 
         const cartData = await response.json();
+        
+        // Include nonce in response for client-side use
+        if (nonce) {
+            cartData._nonce = nonce;
+        }
 
         // Return response with Set-Cookie headers to ensure cookies are sent to browser
         return NextResponse.json(cartData, {
@@ -233,6 +221,3 @@ export async function GET(request) {
         }, { status: 500 });
     }
 }
-
-
-

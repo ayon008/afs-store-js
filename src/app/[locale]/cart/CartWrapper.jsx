@@ -1,24 +1,14 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Cart from './Cart';
 import EmptyCart from './EmptyCart';
 import useCart from '@/Shared/Hooks/useCart';
 
 const CartWrapper = () => {
-    const { cart, loading, loadCart } = useCart();
-    const [initialLoading, setInitialLoading] = useState(true);
+    const { cart, loading } = useCart();
 
-    useEffect(() => {
-        // Force reload cart from API when component mounts
-        const init = async () => {
-            await loadCart();
-            setInitialLoading(false);
-        };
-        init();
-    }, []);
-
-    // Show loading state while fetching cart
-    if (initialLoading || loading) {
+    // Show loading state only on initial load
+    if (loading && !cart) {
         return (
             <div className="min-h-[400px] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">

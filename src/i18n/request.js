@@ -6,8 +6,14 @@ export default getRequestConfig(async ({ requestLocale }) => {
     const requested = await requestLocale;
     const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
+    const defaultMessages = (await import(`../../locales/${locale}/default.json`)).default;
+    const checkoutMessages = (await import(`../../locales/${locale}/checkout.json`)).default;
+
     return {
         locale,
-        messages: (await import(`../../locales/${locale}/default.json`)).default,
+        messages: {
+            ...defaultMessages,
+            checkout: checkoutMessages.checkout || checkoutMessages,
+        },
     }
 });

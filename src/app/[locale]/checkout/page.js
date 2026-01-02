@@ -48,7 +48,7 @@ const CheckoutPageContent = () => {
     }
 
     // Cart
-    const { cart, loadCart, handleClearCart } = useCart();
+    const { cart, loadCart, handleClearCart, syncCartToWooCommerce } = useCart();
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
@@ -501,15 +501,25 @@ const CheckoutPageContent = () => {
     const [selectedRateId, setSelectedRateId] = useState(null);
     const [notification, setNotification] = useState(null);
 
+    // Get current currency
+    const currencySymbol = cart?.totals?.currency_symbol || '';
+    const currencyCode = cart?.totals?.currency_code || '';
+    const isUSD = currencySymbol === '$' || 
+                 currencySymbol === 'USD' ||
+                 currencySymbol?.toUpperCase() === 'USD' ||
+                 currencyCode?.toUpperCase() === 'USD';
+
     // Extract shipping rates from cart - optimized, no logs
     const allShippingRates = React.useMemo(() => {
         if (!cart?.shipping_rates) {
             return [];
         }
         
+        let rates = [];
+        
         // Handle array of packages
         if (Array.isArray(cart.shipping_rates)) {
-            return cart.shipping_rates.flatMap((pkg, pkgIndex) => {
+            rates = cart.shipping_rates.flatMap((pkg, pkgIndex) => {
                 if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
                     return pkg.shipping_rates.map(rate => ({
                         ...rate,
@@ -524,11 +534,9 @@ const CheckoutPageContent = () => {
                 }
                 return [];
             });
-        }
-        
-        // Handle object structure
-        if (typeof cart.shipping_rates === 'object') {
-            return Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
+        } else if (typeof cart.shipping_rates === 'object') {
+            // Handle object structure
+            rates = Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
                 if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
                     return pkg.shipping_rates.map(rate => ({
                         ...rate,
@@ -539,8 +547,32 @@ const CheckoutPageContent = () => {
             });
         }
         
-        return [];
-    }, [cart?.shipping_rates]);
+        // Filter: If USD currency, only show "authorize" shipping methods
+        if (isUSD && rates.length > 0) {
+            const filteredRates = rates.filter(rate => {
+                const rateName = (rate.name || '').toLowerCase();
+                const rateId = (rate.rate_id || '').toLowerCase();
+                const methodId = (rate.method_id || '').toLowerCase();
+                
+                // Check if rate contains "authorize" or "authnet" in name, id, or method_id
+                return rateName.includes('authorize') || 
+                       rateName.includes('authnet') ||
+                       rateId.includes('authorize') || 
+                       rateId.includes('authnet') ||
+                       methodId.includes('authorize') || 
+                       methodId.includes('authnet');
+            });
+            
+            // If no authorize method found for USD, log a warning
+            if (filteredRates.length === 0 && rates.length > 0) {
+                console.warn('USD currency detected but no "authorize" shipping method found. Available methods:', rates.map(r => ({ name: r.name, method_id: r.method_id, rate_id: r.rate_id })));
+            }
+            
+            return filteredRates;
+        }
+        
+        return rates;
+    }, [cart?.shipping_rates, isUSD]);
 
     // Ref to track user's manual selection (local state takes priority)
     const userSelectedRateRef = React.useRef(null);
@@ -862,6 +894,17 @@ const CheckoutPageContent = () => {
         if (data.payment_method === 'bacs') {
             setIsSubmitting(true);
             try {
+                // Sync localStorage cart to WooCommerce before creating order
+                const syncResult = await syncCartToWooCommerce();
+                if (!syncResult.success) {
+                    alert(`${t("cartSyncError")}: ${syncResult.error || t("unknownError")}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                // Reload cart to get WooCommerce totals
+                await loadCart();
+
                 const customerData = {
                     ...data,
                     billing: {
@@ -932,12 +975,12 @@ const CheckoutPageContent = () => {
                     clearSavedFormData();
                     clearCart();
                     router.push(`/order-success?order_id=${result.orderId}`);
-                } else {
-                    alert(`Erreur lors de la création de la commande : ${result.error || 'Une erreur est survenue'}`);
-                }
-            } catch (error) {
-                console.error('Error creating order:', error);
-                alert('Erreur lors de la création de la commande. Veuillez réessayer.');
+                  } else {
+                      alert(`${t("orderCreationError")}: ${result.error || t("unknownError")}`);
+                  }
+              } catch (error) {
+                  console.error('Error creating order:', error);
+                  alert(t("orderCreationErrorRetry"));
             } finally {
                 setIsSubmitting(false);
             }
@@ -1387,7 +1430,7 @@ const CheckoutPageContent = () => {
                                                 return (
                                                     <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                         {missingFields.length > 0 
-                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${locale === 'fr' ? "pour calculer les méthodes de livraison" : "to calculate shipping methods"}`
+                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${t("calculateShippingMethods")}`
                                                             : t("noShippingMethods")
                                                         }
                                                     </p>
@@ -1431,6 +1474,15 @@ const CheckoutPageContent = () => {
                                             }
                                             
                                             // Address is complete but no shipping methods found
+                                            // Special message for USD currency if no authorize method available
+                                            if (isUSD) {
+                                                return (
+                                                    <p className='text-sm text-orange-600 italic p-4 border border-orange-300 rounded-sm bg-orange-50'>
+                                                        {t("noAuthorizeShippingUSD")}
+                                                    </p>
+                                                );
+                                            }
+                                            
                                             return (
                                                 <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                     {t("noShippingMethods")}

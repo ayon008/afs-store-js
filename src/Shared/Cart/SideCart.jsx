@@ -44,11 +44,9 @@ const SideCart = ({ isOpen, onClose }) => {
     const overlayRef = useRef(null);
 
 
+    // Calculate subtotal using line_total (TTC) for each item
     const sousTotal = cart?.items?.reduce(
-        (acc, item) =>
-            acc +
-            Number(item.totals.line_subtotal) +
-            Number(item.totals.line_subtotal_tax),
+        (acc, item) => acc + Number(item.totals.line_total || 0),
         0
     ) / 100;
 
@@ -121,7 +119,7 @@ const SideCart = ({ isOpen, onClose }) => {
                 <div className='p-5 border-t border-t-[#E6E6E6] flex flex-col items-center justify-center gap-4'>
                     <div className='flex items-end gap-1 flex-wrap'>
                         <span className='text-[15px] uppercase leading-[100%] font-bold'>Sub Total</span>
-                        <span className='text-[28px] uppercase leading-[100%] font-bold'>{currencySymbol}{sousTotal || 0}</span>
+                        <span className='text-[28px] uppercase leading-[100%] font-bold'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
                         <span className='text-[19px] leading-[100%] font-bold'>(incl. VAT)</span>
                     </div>
                     <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer'>

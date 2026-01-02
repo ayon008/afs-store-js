@@ -251,11 +251,15 @@ export async function POST(request) {
         const setCookieHeader = response.headers.get("set-cookie");
         const data = JSON.parse(responseText);
         
+        // Get nonce from response headers for future requests
+        const nonce = response.headers.get("x-wc-store-api-nonce") || response.headers.get("nonce");
+        
         // Create the response
         const jsonResponse = NextResponse.json({
             success: true,
             message: "Added to cart successfully",
             data: data,
+            nonce: nonce, // Include nonce for client-side storage
             // For debugging
             cookiesReceived: allCookies ? true : false
         });

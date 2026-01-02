@@ -108,9 +108,16 @@ const Navbar = ({ NAV_LINKS }) => {
     // Clear cart if language or currency changes
     const languageChanged = selectedLanguage !== locale;
 
-    // Get current currency from cart or default to 'euro'
+    // Get current currency from cart or cookie (handle all 3 currencies: EUR, USD, GBP)
     const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
-    const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+    let currentCurrency = 'euro'; // Default
+    if (currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR') {
+      currentCurrency = 'euro';
+    } else if (currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP') {
+      currentCurrency = 'gbp';
+    } else if (currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD') {
+      currentCurrency = 'usd';
+    }
     const currencyChanged = selectedCurrency !== currentCurrency;
 
     // Clear the cart if language or currency changes

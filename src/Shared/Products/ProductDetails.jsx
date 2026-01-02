@@ -243,11 +243,25 @@ const ProductDetails = ({ data, variations }) => {
                 console.log('Using watchedValues as fallback:', finalVariations);
             }
 
+            // Prepare product data for localStorage cart
+            const productData = {
+                id: productId,
+                name: data?.name || '',
+                price: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price_with_tax) || parseFloat(data?.price) || 0),
+                price_with_tax: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price_with_tax) || parseFloat(data?.price) * 1.2 || 0),
+                images: data?.images || [],
+                image: data?.images?.[0]?.src || data?.image || '',
+                stock_status: hasVariations ? (isInStock ? 'instock' : 'outofstock') : (baseInStock ? 'instock' : 'outofstock'),
+                stock_quantity: hasVariations ? (variations?.find(v => v.id === variationId)?.stock_quantity || null) : (data?.stock_quantity || null),
+                variations: variations || [],
+            };
+
             const result = await handleAddToCart(
                 productId,
                 1,
                 variationId || null,
-                finalVariations
+                finalVariations,
+                productData
             );
 
             // Only show alert if there's an actual error (success is explicitly false)
