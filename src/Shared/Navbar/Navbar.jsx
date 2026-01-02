@@ -14,7 +14,10 @@ import SideCart from "../Cart/SideCart";
 import { useLocale, useTranslations } from "next-intl";
 import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 import Notification from "../Notification/Notification";
+
+
 
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");

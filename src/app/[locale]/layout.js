@@ -11,6 +11,7 @@ import { getMessages } from "next-intl/server";
 import { CartProvider } from "@/Shared/Hooks/useCart";
 import Footer from "@/Shared/footer/Footer";
 import QueryProvider from "@/Shared/Provider/QueryProvider";
+import { refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
 
 
 export const metadata = {
@@ -64,6 +65,9 @@ export default async function RootLayout({ children, params }) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+
+  // Refresh cookies on page load/refresh
+  await refreshCookies();
 
   const messages = await getMessages();
 
