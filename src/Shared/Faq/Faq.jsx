@@ -34,7 +34,7 @@ const Faq = ({ data, headline }) => {
                 className='pb-4 cursor-pointer border-b-2 border-[#D9D9D9] flex items-start justify-between'
                 onClick={() => setOpen(!isOpen)}
             >
-                <h3 className='uppercase text-base leading-[20px] text-[#111111b2] font-bold'>
+                <h3 className={`uppercase text-base leading-[20px] ${isOpen ? "text-[#111]" : "text-[#111111b2]"} font-bold`}>
                     {headline}
                 </h3>
 

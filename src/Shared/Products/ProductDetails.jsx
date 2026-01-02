@@ -27,6 +27,16 @@ const updatePriceInHtml = (priceHtml, newPrice) => {
 };
 
 
+
+
+
+function decodeHtml(html) {
+    if (typeof window === 'undefined') return html;
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+}
+
 const ProductDetails = ({ data, variations }) => {
 
     const [priceLoading, setPriceLoading] = useState(false);
@@ -228,6 +238,84 @@ const ProductDetails = ({ data, variations }) => {
         ? (allVariationsSelected && variationPrice && !priceLoading && isInStock)
         : (baseInStock && !priceLoading);
 
+
+    const variationIndex = useMemo(() => {
+        return variations?.map(v => ({
+            inStock: v.stock_status === 'instock',
+            attrs: v.attributes.reduce((acc, a) => {
+                acc[a.name] = a.option;
+                return acc;
+            }, {})
+        })) || [];
+    }, [variations]);
+
+
+    const variationValueMap = useMemo(() => {
+        const map = {}; // { attributeName: Set(options) }
+
+        variations?.forEach(v => {
+            v.attributes.forEach(attr => {
+                if (!map[attr.name]) {
+                    map[attr.name] = new Set();
+                }
+                map[attr.name].add(attr.option);
+            });
+        });
+
+        return map;
+    }, [variations]);
+
+    const optionAvailability = useMemo(() => {
+        if (!attributes?.length) return {};
+
+        const availability = {};
+
+        attributes.forEach(attr => {
+            availability[attr.name] = {};
+
+            attr.options.forEach(option => {
+
+                // 🔑 find variations that even use this attribute
+                const relevantVariations = variationIndex.filter(v =>
+                    v.attrs[attr.name] !== undefined
+                );
+
+                // 🟢 COMMON OPTION → attribute not used in any variation
+                if (relevantVariations.length === 0) {
+                    availability[attr.name][option] = true;
+                    return;
+                }
+
+                // build selection (ignore common attrs automatically)
+                const testSelection = {
+                    ...Object.fromEntries(
+                        Object.entries(watchedValues).filter(([k]) =>
+                            attributes.some(a => a.name === k)
+                        )
+                    ),
+                    [attr.name]: option
+                };
+
+                // stock check
+                const inStock = relevantVariations.some(v => {
+                    if (!v.inStock) return false;
+
+                    return Object.entries(v.attrs).every(([key, value]) => {
+                        if (!testSelection[key]) return true;
+                        return testSelection[key] === value;
+                    });
+                });
+
+                availability[attr.name][option] = inStock;
+            });
+        });
+
+        return availability;
+    }, [attributes, watchedValues, variationIndex]);
+
+
+
+
     return (
         <>
             <div>
@@ -256,33 +344,40 @@ const ProductDetails = ({ data, variations }) => {
                                                     {singleAttribute?.name}
                                                     {selectedValue && (
                                                         <span className="">
-                                                            {" "} : {selectedValue}
+                                                            {" "} : {decodeHtml(selectedValue)}
                                                         </span>
                                                     )}
                                                 </label>
                                             </th>
                                             <td>
                                                 <ul className="flex flex-wrap gap-1">
-                                                    {singleAttribute.options?.map((singleOption, idx) => (
-                                                        <li key={idx}>
-                                                            <label
-                                                                className={`text-base leading-[130%] border-[2px] border-[#999]! cursor-pointer px-2 py-1 flex items-center justify-center font-semibold rounded-[34px] text-[#111111bf]
-                                                ${watch(fieldName) === singleOption
-                                                                        ? "bg-[#111111bf] text-white"
-                                                                        : "border-black text-[#111111bf]"
-                                                                    }
-                                                `}
-                                                            >
-                                                                <input
-                                                                    type="radio"
-                                                                    value={singleOption}
-                                                                    {...register(fieldName, { required: true })}
-                                                                    className="hidden"
-                                                                />
-                                                                {singleOption}
-                                                            </label>
-                                                        </li>
-                                                    ))}
+                                                    {singleAttribute.options?.map((singleOption, idx) => {
+                                                        const inStock = optionAvailability[singleAttribute.name]?.[singleOption] ?? true;
+                                                        const selected = watch(fieldName) === singleOption;
+
+                                                        return (
+                                                            <li key={idx}>
+                                                                <label
+                                                                    className={`text-base leading-[130%] border-[2px] border-[#111]! cursor-pointer px-2 py-1 flex items-center justify-center font-semibold rounded-[34px]
+                    ${selected
+                                                                            ? "bg-[#111] text-white"
+                                                                            : "border-[#111] text-[#111]"
+                                                                        }
+                    ${!inStock ? "opacity-50 line-through cursor-not-allowed" : ""}
+                `}
+                                                                >
+                                                                    <input
+                                                                        type="radio"
+                                                                        value={singleOption}
+                                                                        {...register(fieldName, { required: true })}
+                                                                        className="hidden"
+                                                                        disabled={!inStock} // prevent selecting unavailable option
+                                                                    />
+                                                                    {decodeHtml(singleOption)}
+                                                                </label>
+                                                            </li>
+                                                        );
+                                                    })}
                                                 </ul>
                                             </td>
                                         </tr>
@@ -302,11 +397,11 @@ const ProductDetails = ({ data, variations }) => {
 
                         {/* Price */}
                         {variationPrice && !priceLoading && variationInStock && (
-                            <div className='space-y-2'>
+                            <div className='space-y-1'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
                                     {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
                                 </span>
-                                <span className='text-base font-medium text-[#111]'>
+                                <span className='text-base font-semibold text-[#111]'>
                                     {
                                         currency === "usd" && matchedVariation?.acf?.USA_Stock ?
                                             <>{t("stock_usd_acf")} : {matchedVariation?.acf?.USA_Stock}</>
@@ -320,9 +415,9 @@ const ProductDetails = ({ data, variations }) => {
                         )}
 
                         {/* Select variations message */}
-                        {!allVariationsSelected && attributes?.length > 0 && (
+                        {/* {!allVariationsSelected && attributes?.length > 0 && (
                             <p className='text-gray-500 text-sm'>{t("select")}</p>
-                        )}
+                        )} */}
 
                         {/* Out of Stock Message - for variable products */}
                         {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
@@ -351,7 +446,7 @@ const ProductDetails = ({ data, variations }) => {
                 </form>
 
                 {/* Other Details */}
-                <div className='space-y-10 mt-10'>
+                <div className='space-y-5 mt-10'>
                     <div className='space-y-2'>
                         <p className='text-base leading-[100%] font-bold'>{t('warranty')}</p>
                         <small className='text-[15px] leading-[19px] block'>
@@ -365,16 +460,16 @@ const ProductDetails = ({ data, variations }) => {
                     <div className='space-y-2'>
                         <p className='text-base leading-[100%] font-bold'>{a("payment")}</p>
                         <small className='text-[15px] leading-[19px] block'>{t("payment_single")}</small>
-                        <div className='flex items-center gap-4 mt-4'>
-                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Layer_1-1.svg'} alt='visa' width={50} height={50} />
-                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Group-26.svg'} alt='visa' width={50} height={50} />
-                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/svg3409-1.svg'} alt='visa' width={50} height={50} />
-                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/image-7.svg'} alt='visa' width={50} height={50} />
+                        <div className='flex items-center gap-[10px]'>
+                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Layer_1-1.svg'} alt='visa' width={40} className='w-[40px] h-auto' height={50} />
+                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Group-26.svg'} alt='paypal;' width={80} className='w-[80px] h-auto' height={50} />
+                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/svg3409-1.svg'} alt='mastercard' width={40} className='w-[40px] h-auto' height={50} />
+                            <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/image-7.svg'} alt='visa' width={80} className='w-[80px] h-auto' height={50} />
                         </div>
                     </div>
                 </div>
                 <div className='flex items-stretch bg-[#F0F0F0] mt-10'>
-                    <div className='p-4 2xl:w-[60%] w-full'>
+                    <div className='p-4 2xl:w-[60%] w-full flex flex-col justify-between h-full'>
                         <div className="space-y-2">
                             <p className='text-xs font-semibold text-[#666666]'>{t("expert")}</p>
                             <h3 className='font-bold text-base leading-6'>{t("need")}</h3>
@@ -382,8 +477,8 @@ const ProductDetails = ({ data, variations }) => {
                         </div>
                         <p className='text-xs leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
-                    <div className='2xl:w-[40%] w-0'>
-                        <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full' alt='' width={200} height={200} />
+                    <div className='2xl:w-[40%] w-0 bg-[url("https://afs-foiling.com/fr/wp-content/uploads/2025/06/bg_img-1.png")] bg-contain bg-center bg-no-repeat'>
+                        <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
                     </div>
                 </div>
             </div>
@@ -391,8 +486,8 @@ const ProductDetails = ({ data, variations }) => {
 
             {/* Pop Up */}
             <PopUp isOpen={isOpen}>
-                <div className='bg-white max-w-[920px] w-[95%] p-5 relative mx-auto rounded-[4px]'>
-                    <div className='global-b-bottom pb-2'>
+                <div className='bg-white max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll p-5 relative mx-auto rounded-[4px]'>
+                    <div className='global-b-bottom-d pb-2'>
                         {/* Absolute Button for closing Pop Up */}
                         <button onClick={() => setOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
                             <X className="w-4 h-4" />
@@ -400,7 +495,10 @@ const ProductDetails = ({ data, variations }) => {
                         <h2 className='text-[clamp(1.375rem,1.1448rem+0.4802vw,1.625rem)] leading-[100%] font-bold'>{t("guide")}</h2>
                     </div>
                     <div className='lg:mt-4 mt-0'>
-                        <div className='font-bold compatibilite' dangerouslySetInnerHTML={{ __html: compatibilite }} />
+                        <div
+                            className="scroll-bar faq"
+                            dangerouslySetInnerHTML={{ __html: compatibilite }}
+                        />
                     </div>
                 </div>
             </PopUp>

@@ -11,7 +11,7 @@ const FaqSection = ({ acf }) => {
     return (
         <div>
             {
-                acf && <div className='global-margin lg:mt-20 mt-10'>
+                acf && <div className='md:my-[60px] my-10'>
                     <h3 className='text-[28px] leading-[28px] font-bold'>{t("features")}</h3>
                     <div className='mt-10 space-y-'>
                         {
