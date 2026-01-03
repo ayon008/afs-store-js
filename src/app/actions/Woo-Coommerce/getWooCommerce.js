@@ -477,7 +477,7 @@ export const getPrice = async (productId, selectedVariation) => {
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
     const currency = await getCurrency();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
 
@@ -523,7 +523,6 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
                 'Content-Type': 'application/json',
                 'Cookie': cookieHeader,
                 'Accept': 'application/json',
-                'X-WC-Store-API-Currency': currency
             },
             body: JSON.stringify(payload),
             cache: 'no-store',

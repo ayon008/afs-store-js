@@ -24,7 +24,6 @@ export async function getCart() {
             headers: {
                 'Cookie': cookieHeader,
                 'Accept': 'application/json',
-                'X-WC-Store-API-Currency': currency
             },
             cache: 'no-store',
         });
@@ -84,7 +83,7 @@ export const updateBillingAndCart = async (billingData) => {
         console.log("Updating billing address with payload:", billingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {
