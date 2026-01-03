@@ -441,7 +441,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className='global-padding'>
-                <p className='text-base font-semibold pt-4 pb-5 global-border-top text-[#111111bf] leading-[100%]'>{t("copy")}</p>
+                <p className='text-base font-semibold pt-4 pb-5 global-border-top text-[#111111bf] leading-[100%]'>Foil and Co., All rights are reserved. ©️2025</p>
             </div>
         </footer>
     );
