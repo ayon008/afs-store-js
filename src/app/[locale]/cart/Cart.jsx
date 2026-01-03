@@ -1,8 +1,8 @@
 "use client"
-import Link from 'next/link';
 import React, { useState } from 'react'
 import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import useCart from '@/Shared/Hooks/useCart';
 import CartList from './CartList';
 
@@ -244,20 +244,34 @@ const Cart = () => {
                     </div>
 
                     {/* Checkout Button */}
-                    <Link
-                        href="/checkout"
-                        className='
-                            p-4 cursor-pointer bg-[#1D98FF] text-white text-center text-base
-                            font-semibold uppercase w-full rounded-xl mt-6 block
-                            hover:bg-[#1585e0] active:scale-[0.98]
-                            shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
-                            transition-all duration-200
-                            flex items-center justify-center gap-2
-                        '
-                    >
-                        <CreditCard className="w-5 h-5" />
-                        Continue to checkout
-                    </Link>
+                    {cartItems.length > 0 ? (
+                        <Link
+                            href="/checkout"
+                            className='
+                                p-4 cursor-pointer bg-[#1D98FF] text-white text-center text-base
+                                font-semibold uppercase w-full rounded-xl mt-6 block
+                                hover:bg-[#1585e0] active:scale-[0.98]
+                                shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                                transition-all duration-200
+                                flex items-center justify-center gap-2
+                            '
+                        >
+                            <CreditCard className="w-5 h-5" />
+                            Continue to checkout
+                        </Link>
+                    ) : (
+                        <div
+                            className='
+                                p-4 bg-gray-300 text-gray-500 text-center text-base
+                                font-semibold uppercase w-full rounded-xl mt-6 block
+                                flex items-center justify-center gap-2
+                                cursor-not-allowed
+                            '
+                        >
+                            <CreditCard className="w-5 h-5" />
+                            Continue to checkout
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile Sticky Cart Summary */}
@@ -273,18 +287,31 @@ const Cart = () => {
                         </div>
                         <span className='text-xl font-bold text-[#111]'>{total || 0}{currencySymbol}</span>
                     </div>
-                    <Link
-                        href="/checkout"
-                        className='
-                            w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-xl
-                            flex items-center justify-center gap-2
-                            shadow-lg shadow-blue-500/25
-                            active:scale-[0.98] transition-all duration-200
-                        '
-                    >
-                        <CreditCard className='w-5 h-5' />
-                        Checkout
-                    </Link>
+                    {cartItems.length > 0 ? (
+                        <Link
+                            href="/checkout"
+                            className='
+                                w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-xl
+                                flex items-center justify-center gap-2
+                                shadow-lg shadow-blue-500/25
+                                active:scale-[0.98] transition-all duration-200
+                            '
+                        >
+                            <CreditCard className='w-5 h-5' />
+                            Checkout
+                        </Link>
+                    ) : (
+                        <div
+                            className='
+                                w-full py-3 bg-gray-300 text-gray-500 font-semibold rounded-xl
+                                flex items-center justify-center gap-2
+                                cursor-not-allowed
+                            '
+                        >
+                            <CreditCard className='w-5 h-5' />
+                            Checkout
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Spacer for mobile sticky */}

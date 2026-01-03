@@ -53,8 +53,18 @@ const CheckoutPageContent = () => {
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
 
-
     const items = cart?.items;
+    
+    // Sync cart to WooCommerce on checkout page load to ensure server-side cart is available
+    // This prevents redirect loops when cart exists in localStorage but not in WooCommerce
+    useEffect(() => {
+        // Only sync if cart has items in localStorage
+        if (cart?.items && cart.items.length > 0) {
+            syncCartToWooCommerce().catch(err => {
+                console.warn('Failed to sync cart on checkout load:', err);
+            });
+        }
+    }, []); // Only run once on mount
 
     // React Hook Form
     const {
@@ -911,9 +921,17 @@ const CheckoutPageContent = () => {
     // Check if cart is empty
     useEffect(() => {
         if (!cart) {
-            setIsCartEmpty(true);
+            // Don't immediately set empty - wait a bit for cart to load
+            const timer = setTimeout(() => {
+                setIsCartEmpty(true);
+            }, 1000);
+            return () => clearTimeout(timer);
         } else if (!cart.items || cart.items.length === 0) {
-            setIsCartEmpty(true);
+            // Only set empty if we've given time for cart to sync
+            const timer = setTimeout(() => {
+                setIsCartEmpty(true);
+            }, 500);
+            return () => clearTimeout(timer);
         } else {
             setIsCartEmpty(false);
         }
