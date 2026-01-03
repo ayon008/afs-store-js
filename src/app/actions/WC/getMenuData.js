@@ -1,54 +1,16 @@
 "use server"
 
-import { getLocale } from "next-intl/server";
-import { getCurrency } from "../Woo-Coommerce/getWooCommerce";
-
-
+import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
 
 export const getMenuItems = async () => {
-    const locale = await getLocale();
-    const currency = await getCurrency();
+    const localeValue = await getLocaleValue();
     try {
-        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/custom/v1/menus/${locale === 'fr' ? '2118' : '2303'}`,
+        const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/custom/v1/menus/2118`,
             {
                 next: { revalidate: 3600 },
                 cache: "force-cache"
             });
-
-        // Check content type first before checking response.ok
-        const contentType = response.headers.get('content-type') || '';
-        const isHTML = contentType.includes('text/html') || !contentType.includes('application/json');
-
-        // Get response text to check if it's HTML
-        let responseText = '';
-        try {
-            responseText = await response.text();
-        } catch (textError) {
-            console.warn("getMenuItems() failed to read response text:", textError);
-            return [];
-        }
-
-        // Check if response is HTML
-        if (isHTML || responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
-            console.warn("getMenuItems() received HTML response (status:", response.status, "), returning empty array");
-            return [];
-        }
-
-        // If response is not OK, return empty array
-        if (!response.ok) {
-            console.warn("getMenuItems() API error:", response.status);
-            return [];
-        }
-
-        // Try to parse as JSON
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.warn("getMenuItems() failed to parse JSON, received:", responseText.substring(0, 100));
-            return [];
-        }
-
+        const data = await response.json();
         const items = data;
         const menuData = items?.map((item) => {
             return (

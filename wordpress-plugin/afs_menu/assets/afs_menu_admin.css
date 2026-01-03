@@ -1,0 +1,49 @@
+/* Conteneur d’une ligne de produit */
+.afs-product-line {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    padding-left: 24px; /* un peu de marge à gauche pour la pseudo-icône */
+    cursor: move;       /* curseur "move" */
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    padding: 5px 8px;
+}
+.afs-product-line span{
+    padding-left: 10px;
+}
+/* Icône de "grip" (⋮⋮) au survol */
+.afs-product-line::before {
+    content: '⋮⋮';       /* deux fois le symbole '⋮' */
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none; /* pour ne pas gêner le drag */
+}
+
+/* Au survol, le handle devient visible */
+.afs-product-line:hover::before {
+    opacity: 1;
+}
+
+/* Bouton de suppression (X) */
+.afs-remove-line-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    line-height: 1;
+    color: #c00;
+    cursor: pointer;
+    padding: 2px 5px;
+}
+
+.afs-remove-line-button:hover {
+    color: red;
+}
