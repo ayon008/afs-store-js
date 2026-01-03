@@ -485,6 +485,7 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
+            currency: currency,
         };
 
         if (variationId) {
@@ -511,6 +512,9 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         }
 
         console.log('Adding to cart with payload:', JSON.stringify(payload, null, 2));
+        console.log('WC_STORE_URL:', WC_STORE_URL);
+        console.log('Cookie header present:', !!cookieHeader);
+        console.log('Cookie header length:', cookieHeader?.length || 0);
 
         // Call WooCommerce API directly
         const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
@@ -523,17 +527,39 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             body: JSON.stringify(payload),
             cache: 'no-store',
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
+        // Check if response is OK and is JSON
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
         if (!response.ok) {
             const errorText = await response.text();
+            
+            // If error is HTML (404 page), provide a more helpful error message
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.error('Add to cart received HTML error page (404). URL:', `${WC_STORE_URL}/cart/add-item`);
+                throw new Error(`L'API WooCommerce n'est pas accessible. Vérifiez que l'URL est correcte: ${WC_STORE_URL}/cart/add-item`);
+            }
+            
             let errorMessage = `Failed to add to cart: ${response.status}`;
             try {
                 const errorData = JSON.parse(errorText);
                 errorMessage = errorData.message || errorData.code || errorMessage;
             } catch {
-                errorMessage = errorText || errorMessage;
+                // If not JSON, use the text (truncated if too long)
+                errorMessage = errorText.length > 200 ? errorText.substring(0, 200) + '...' : errorText || errorMessage;
             }
             throw new Error(errorMessage);
+        }
+
+        // Check if response is JSON before parsing
+        if (!isJson) {
+            const text = await response.text();
+            console.warn('Add to cart response is not JSON, received:', text.substring(0, 100));
+            throw new Error('La réponse de l\'API n\'est pas au format JSON valide');
         }
 
         // Parse and set cookies from WooCommerce response
@@ -592,7 +618,9 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         revalidatePath('/cart');
         revalidatePath('/products');
 
-        return { success: true, ...result };
+        // Ensure success is always true when we reach here (response was ok)
+        // Put success: true after ...result to override any success property from result
+        return { ...result, success: true };
 
     } catch (error) {
         console.error('Add to cart error:', error);
@@ -952,27 +980,67 @@ export async function removeCoupon(couponCode) {
 
 
 export const getPaymentMethods = async () => {
-    const localeValue = await getLocaleValue();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/payment_gateways`;
     try {
-        const response = await fetch(url, {
-            headers: { Authorization: `Basic ${authHeader}` },
+        const localeValue = await getLocaleValue();
+        const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '') || '';
+        const localePath = localeValue ? `/${localeValue}` : '';
+        const apiUrl = `${baseUrl}${localePath}/wp-json/wc/v3/payment_gateways`;
+        
+        // Use query parameters for authentication (same as other API calls)
+        const url = new URL(apiUrl);
+        url.searchParams.set('consumer_key', consumerKey);
+        url.searchParams.set('consumer_secret', consumerSecret);
+        
+        console.log('Fetching payment methods from:', url.toString().replace(consumerSecret, '***'));
+        
+        const response = await fetch(url.toString(), {
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${authHeader}` 
+            },
             cache: "no-store",
         });
 
-        console.log(response, 'response');
-
+        console.log('Payment methods response status:', response.status, response.statusText);
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => '');
+            console.error(`Failed to fetch payment methods: ${response.status} - ${errorText.substring(0, 500)}`);
             throw new Error(`Failed to fetch payment methods: ${response.status}`);
         }
+        
         const data = await response.json();
-        const enabledMethods = data.filter((method) => method.enabled);
+        console.log('Payment methods raw data:', Array.isArray(data), data?.length || 'N/A', typeof data);
+        
+        if (!Array.isArray(data)) {
+            console.error('Payment methods response is not an array:', typeof data, data);
+            // If it's an object, try to extract payment methods
+            if (data && typeof data === 'object') {
+                const methodsArray = Object.values(data);
+                if (Array.isArray(methodsArray) && methodsArray.length > 0) {
+                    console.log('Extracted payment methods from object:', methodsArray.length);
+                    const enabledMethods = methodsArray.filter((method) => method?.enabled);
+                    console.log(`Found ${enabledMethods.length} enabled payment methods (from object)`);
+                    return enabledMethods;
+                }
+            }
+            return [];
+        }
+        
+        console.log(`Total payment methods received: ${data.length}`);
+        const enabledMethods = data.filter((method) => method?.enabled);
+        console.log(`Found ${enabledMethods.length} enabled payment methods`);
+        
+        // Log all methods for debugging
+        enabledMethods.forEach(method => {
+            console.log(`  - ${method.id}: ${method.title} (enabled: ${method.enabled})`);
+        });
+        
         return enabledMethods;
     }
     catch (error) {
-        console.log(error);
-        return error;
+        console.error('Error fetching payment methods:', error.message || error);
+        return [];
     }
 }
 

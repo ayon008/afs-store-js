@@ -12,10 +12,14 @@ export async function getCart() {
     const currency = await getCurrency();
     const WP_URL = `${process.env.WP_BASE_URL}`;
     const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+    
     try {
         const cookieHeader = await getWooCommerceCookies();
 
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
+        // Add currency as query parameter
+        const cartUrl = `${WC_STORE_URL}/cart?currency=${currency}`;
+        
+        const response = await fetch(cartUrl, {
             method: 'GET',
             headers: {
                 'Cookie': cookieHeader,

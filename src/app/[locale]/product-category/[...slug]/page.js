@@ -10,8 +10,15 @@ import NotFound from '@/Shared/NotFound/404';
 const page = async ({ params, searchParams }) => {
     // Catch All Route
     const { slug } = await params;
-    // Getting the Category details by the slug [lase category of the slug]
-    const category = await getParentCategory(slug[slug?.length - 1].toLowerCase());
+    
+    // Getting the Category details by the slug [last category of the slug]
+    let category;
+    try {
+        category = await getParentCategory(slug[slug?.length - 1].toLowerCase());
+    } catch (error) {
+        console.error('Error fetching category:', error);
+        return <NotFound />;
+    }
 
     if (!category) {
         return (

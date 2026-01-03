@@ -1,11 +1,9 @@
 // app/api/cart/update-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
-const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
-
-// Helper to parse set-cookie headers (same as before)
+// Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
     if (!header) return [];
 
@@ -24,7 +22,7 @@ function parseSetCookieHeader(header) {
         .filter(cookie => cookie.name && cookie.value);
 }
 
-// Get WooCommerce cookies from the browser (same as before)
+// Get WooCommerce cookies from the browser
 async function getWooCommerceCookies() {
     try {
         const cookieStore = await cookies();
@@ -51,8 +49,9 @@ async function getWooCommerceCookies() {
 
 export async function POST(request) {
     const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
-    
+    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -65,8 +64,17 @@ export async function POST(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Get the item key and quantity from request body
-        const { key: itemKey, quantity } = await request.json();
+        // Get the item key, quantity, currency and nonce from request body
+        const { key: itemKey, quantity, currency: clientCurrency, nonce: clientNonce } = await request.json();
+        
+        // Use currency from client if provided, otherwise fallback to server cookie
+        const currency = clientCurrency || await getCurrency();
+        
+        // Add WCML currency cookie to the request for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         if (!itemKey) {
             return NextResponse.json({
@@ -75,26 +83,67 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
-        if (!quantity || quantity < 1) {
+        if (quantity === undefined || quantity < 1) {
             return NextResponse.json({
                 success: false,
                 error: "Quantity must be at least 1"
             }, { status: 400 });
         }
 
-        // Make request to WooCommerce to update item
-        const response = await fetch(`${WC_STORE_URL}/cart/update-item`, {
+        console.log('Updating item with key:', itemKey, 'to quantity:', quantity);
+        console.log('Using currency:', currency);
+
+        // Make request to WooCommerce Store API to update item (same pattern as remove-item)
+        const updateItemUrl = `${WC_STORE_URL}/cart/update-item?key=${encodeURIComponent(itemKey)}&quantity=${quantity}&currency=${currency}`;
+        console.log('Update item URL:', updateItemUrl);
+
+        const headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+        };
+        
+        // Add nonce header if provided by client
+        if (clientNonce) {
+            headers["Nonce"] = clientNonce;
+            headers["X-WC-Store-API-Nonce"] = clientNonce;
+        }
+
+        const response = await fetch(updateItemUrl, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
-            },
-            body: JSON.stringify({
-                key: itemKey,
-                quantity: parseInt(quantity)
-            }),
+            headers,
+            body: JSON.stringify({ key: itemKey, quantity: parseInt(quantity) }),
             cache: "no-store",
+        });
+
+        // Get response text for debugging
+        const responseText = await response.text();
+        console.log('WooCommerce response status:', response.status);
+        
+        if (!response.ok) {
+            console.log('WooCommerce response body:', responseText);
+            let errorMessage = `Failed to update item: ${response.status}`;
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } catch {
+                errorMessage = responseText || errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = JSON.parse(responseText);
+
+        // Get new nonce from response for future requests
+        const newNonce = response.headers.get("x-wc-store-api-nonce") || response.headers.get("nonce");
+
+        // Create the response
+        const jsonResponse = NextResponse.json({
+            success: true,
+            message: "Cart updated successfully",
+            data: data,
+            nonce: newNonce,
+            cookiesReceived: allCookies ? true : false
         });
 
         // Parse and set any new cookies from WooCommerce response
@@ -143,27 +192,20 @@ export async function POST(request) {
                     }
                 });
 
-                // Set the cookie in the browser
+                // Set the cookie in Next.js cookie store
                 cookieStore.set({
                     name: c.name,
                     value: c.value,
                     ...cookieOpts,
                 });
+
+                // Also append the cookie to the response headers for browser
+                const cookieValue = `${c.name}=${c.value}; Path=${cookieOpts.path}; SameSite=${cookieOpts.sameSite}${cookieOpts.secure ? '; Secure' : ''}${cookieOpts.maxAge ? `; Max-Age=${cookieOpts.maxAge}` : ''}`;
+                jsonResponse.headers.append('Set-Cookie', cookieValue);
             }
         }
 
-        if (!response.ok) {
-            throw new Error(`Failed to update item: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return NextResponse.json({
-            success: true,
-            message: "Cart updated successfully",
-            data: data,
-            // For debugging
-            cookiesReceived: allCookies ? true : false
-        });
+        return jsonResponse;
 
     } catch (error) {
         console.error("Update cart item error:", error);

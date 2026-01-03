@@ -1,17 +1,15 @@
 "use client"
-import Link from 'next/link';
-import React, { useEffect, useState } from 'react'
-import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag, Package } from 'lucide-react';
+import React, { useState } from 'react'
+import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import useCart from '@/Shared/Hooks/useCart';
 import CartList from './CartList';
-import ShippingMethodCard from '@/Shared/Shipping/ShippingMethodCard';
-import { selectShippingRate } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';
 
 const Cart = () => {
-    // const [shippingData, setShippingData] = useState([]);
-    const [shippingLoading, setShippingLoading] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
-    const [isSelectingRate, setIsSelectingRate] = useState(false); // Flag to prevent useEffect from overriding selection
+    const t = useTranslations("checkout");
+    
+    // Shipping rates will be calculated at checkout
     const [couponCode, setCouponCode] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState('');
@@ -23,9 +21,10 @@ const Cart = () => {
         getAppliedCoupons,
         getDiscountTotal,
         getCurrencySymbol,
-        loadCart,
+        getTotalPrice,
+        getSubtotal,
+        getTotalTax,
         cart,
-        setCart
     } = useCart();
 
     const appliedCoupons = getAppliedCoupons();
@@ -33,109 +32,13 @@ const Cart = () => {
     // const totalPrice = getTotalPrice();
     const currencySymbol = getCurrencySymbol();
 
-    const allShippingRates = cart?.shipping_rates?.flatMap(pkg =>
-        pkg.shipping_rates?.map(rate => ({
-            ...rate,
-            package_id: pkg.package_id
-        })) || []
-    ) || [];
+    // Shipping rates will be handled at checkout after syncing with WooCommerce
+    // For now, we'll show a message that shipping will be calculated at checkout
+    const allShippingRates = [];
 
 
-    useEffect(() => {
-        // Don't override user selection while they're selecting a rate
-        if (isSelectingRate) return;
-
-        const selected = allShippingRates.find(rate => rate.selected);
-
-        if (selected) {
-            setSelectedRateId(selected.rate_id);
-        } else {
-            setSelectedRateId(null);
-        }
-    }, [allShippingRates, isSelectingRate]);
-
-
-    const handleSelectRate = async (value) => {
-        // Handle values like "0:free_shipping:42" or "0:local_pickup:34"
-        const firstColonIndex = value.indexOf(':');
-        const packageId = firstColonIndex !== -1 ? value.substring(0, firstColonIndex) : '0';
-        const rateId = firstColonIndex !== -1 ? value.substring(firstColonIndex + 1) : value;
-        console.log('handleSelectRate called:', { packageId, rateId, currentSelected: selectedRateId });
-        
-        if (rateId === selectedRateId) {
-            console.log('Same rate selected, ignoring');
-            return;
-        }
-
-        setIsSelectingRate(true); // Prevent useEffect from overriding
-        setShippingLoading(true);
-        setSelectedRateId(rateId); // Update immediately for better UX
-        console.log('Setting selectedRateId to:', rateId);
-
-        try {
-            const result = await selectShippingRate(rateId, packageId);
-            console.log('Select shipping rate result:', result);
-
-            if (result.success) {
-                // Use the cart data directly from the response if available
-                // This ensures we have the latest data without waiting for cookie sync
-                if (result.cart && result.cart.success && result.cart.data) {
-                    setCart(result.cart.data);
-                    console.log('Cart updated directly from response', result.cart.data);
-                    
-                    // Verify the shipping rate is actually selected in the updated cart
-                    const updatedRates = result.cart.data?.shipping_rates?.flatMap(pkg =>
-                        pkg.shipping_rates?.map(rate => ({
-                            ...rate,
-                            package_id: pkg.package_id
-                        })) || []
-                    ) || [];
-                    
-                    const selectedInCart = updatedRates.find(rate => rate.selected);
-                    if (selectedInCart && selectedInCart.rate_id === rateId) {
-                        console.log('Shipping rate confirmed selected in cart');
-                    } else {
-                        console.warn('Shipping rate not found as selected in cart, reloading...');
-                        // Wait a bit more and reload if the rate isn't selected
-                        await new Promise(resolve => setTimeout(resolve, 300));
-                        await loadCart();
-                    }
-                } else {
-                    // Fallback: wait a bit longer then reload
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                    await loadCart();
-                }
-            } else {
-                console.error('Failed to select shipping rate:', result.error);
-                // Revert selection on error
-                const selected = allShippingRates.find(rate => rate.selected);
-                if (selected) {
-                    setSelectedRateId(selected.rate_id);
-                } else {
-                    setSelectedRateId(null);
-                }
-            }
-        } catch (error) {
-            console.error('Error selecting shipping rate:', error);
-            // Revert selection on error
-            const selected = allShippingRates.find(rate => rate.selected);
-            if (selected) {
-                setSelectedRateId(selected.rate_id);
-            } else {
-                setSelectedRateId(null);
-            }
-        } finally {
-            setShippingLoading(false);
-            // Allow useEffect to sync again after cart is updated
-            // Wait longer to ensure cart state is fully updated
-            setTimeout(() => {
-                setIsSelectingRate(false);
-            }, 1000);
-        }
-    };
-
-
-    const total = cart?.totals?.total_price / 100;
+    // Use helper functions for totals (they work with localStorage cart)
+    const total = parseFloat(getTotalPrice()) || 0;
 
 
     const handleCouponSubmit = async (e) => {
@@ -175,9 +78,8 @@ const Cart = () => {
 
     // cartItems
     const cartItems = cart?.items || [];
-    // const total = cart?.totals?.total_price / 100;
-    const sub_total = cart?.totals?.total_items / 100 + cart?.totals?.total_items_tax / 100 || 0;
-    const total_tax = cart?.totals?.total_tax / 100;
+    const sub_total = parseFloat(getSubtotal()) || 0;
+    const total_tax = parseFloat(getTotalTax()) || 0;
 
 
 
@@ -317,24 +219,12 @@ const Cart = () => {
                                 <h3 className='text-base font-semibold text-[#111]'>Méthodes de livraison</h3>
                             </div>
 
-                            {allShippingRates && allShippingRates.length > 0 ? (
-                                <div className='space-y-3'>
-                                    {allShippingRates.map((rate, i) => (
-                                        <ShippingMethodCard
-                                            key={`shipping-rate-${rate.rate_id}-${i}`}
-                                            rate={rate}
-                                            selected={selectedRateId === rate.rate_id}
-                                            onSelect={(r) => handleSelectRate(`${r.package_id}:${r.rate_id}`)}
-                                            disabled={shippingLoading}
-                                            freeLabel="Gratuit"
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className='p-4 bg-gray-50 rounded-xl text-sm text-gray-500 italic'>
-                                    Aucune méthode de livraison disponible. Veuillez vérifier votre adresse de livraison.
-                                </div>
-                            )}
+                            <div className='p-4 bg-blue-50 rounded-xl text-sm text-blue-700'>
+                                <p className='font-medium mb-1'>{t("shippingCalculatedAtCheckout")}</p>
+                                <p className='text-blue-600 text-xs'>
+                                    {t("shippingCalculatedAtCheckoutDescription")}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Total */}
@@ -354,20 +244,34 @@ const Cart = () => {
                     </div>
 
                     {/* Checkout Button */}
-                    <Link
-                        href="/checkout"
-                        className='
-                            p-4 cursor-pointer bg-[#1D98FF] text-white text-center text-base
-                            font-semibold uppercase w-full rounded-xl mt-6 block
-                            hover:bg-[#1585e0] active:scale-[0.98]
-                            shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
-                            transition-all duration-200
-                            flex items-center justify-center gap-2
-                        '
-                    >
-                        <CreditCard className="w-5 h-5" />
-                        Continue to checkout
-                    </Link>
+                    {cartItems.length > 0 ? (
+                        <Link
+                            href="/checkout"
+                            className='
+                                p-4 cursor-pointer bg-[#1D98FF] text-white text-center text-base
+                                font-semibold uppercase w-full rounded-xl mt-6 block
+                                hover:bg-[#1585e0] active:scale-[0.98]
+                                shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                                transition-all duration-200
+                                flex items-center justify-center gap-2
+                            '
+                        >
+                            <CreditCard className="w-5 h-5" />
+                            Continue to checkout
+                        </Link>
+                    ) : (
+                        <div
+                            className='
+                                p-4 bg-gray-300 text-gray-500 text-center text-base
+                                font-semibold uppercase w-full rounded-xl mt-6 block
+                                flex items-center justify-center gap-2
+                                cursor-not-allowed
+                            '
+                        >
+                            <CreditCard className="w-5 h-5" />
+                            Continue to checkout
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile Sticky Cart Summary */}
@@ -383,18 +287,31 @@ const Cart = () => {
                         </div>
                         <span className='text-xl font-bold text-[#111]'>{total || 0}{currencySymbol}</span>
                     </div>
-                    <Link
-                        href="/checkout"
-                        className='
-                            w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-xl
-                            flex items-center justify-center gap-2
-                            shadow-lg shadow-blue-500/25
-                            active:scale-[0.98] transition-all duration-200
-                        '
-                    >
-                        <CreditCard className='w-5 h-5' />
-                        Checkout
-                    </Link>
+                    {cartItems.length > 0 ? (
+                        <Link
+                            href="/checkout"
+                            className='
+                                w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-xl
+                                flex items-center justify-center gap-2
+                                shadow-lg shadow-blue-500/25
+                                active:scale-[0.98] transition-all duration-200
+                            '
+                        >
+                            <CreditCard className='w-5 h-5' />
+                            Checkout
+                        </Link>
+                    ) : (
+                        <div
+                            className='
+                                w-full py-3 bg-gray-300 text-gray-500 font-semibold rounded-xl
+                                flex items-center justify-center gap-2
+                                cursor-not-allowed
+                            '
+                        >
+                            <CreditCard className='w-5 h-5' />
+                            Checkout
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Spacer for mobile sticky */}

@@ -1,9 +1,7 @@
 // app/api/cart/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
-
-const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
@@ -24,27 +22,22 @@ function parseSetCookieHeader(header) {
         .filter(cookie => cookie.name && cookie.value);
 }
 
-// Extract WooCommerce cookies from cookie header string
-function extractWooCommerceCookies(cookieHeader) {
-    if (!cookieHeader) return '';
-
-    const cookies = cookieHeader.split(';').map(c => c.trim());
-    const wooCookies = cookies.filter(cookie => {
-        const name = cookie.split('=')[0];
-        return name.includes('woocommerce') ||
-            name.includes('wordpress') ||
-            name.includes('wp_') ||
-            name.includes('wc_') ||
-            name === 'PHPSESSID';
-    });
-
-    return wooCookies.join('; ');
-}
-
 export async function GET(request) {
-    const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
+        // Validate environment variable
+        if (!process.env.WP_BASE_URL) {
+            throw new Error('WP_BASE_URL environment variable is not set');
+        }
+
+        const localeValue = await getLocaleValue();
+        const WP_URL = `${process.env.WP_BASE_URL}`;
+        const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+        
+        // Get currency from query parameter first, then fallback to cookie
+        const { searchParams } = new URL(request.url);
+        const clientCurrency = searchParams.get('currency');
+        const currency = clientCurrency || await getCurrency();
+        console.log('Cart API - Using currency:', currency, '(from client:', !!clientCurrency, ')');
         const cookieStore = await cookies();
         const token = cookieStore.get("auth_token")?.value;
 
@@ -64,6 +57,12 @@ export async function GET(request) {
         // Use the full incoming cookie header - the browser sends all cookies
         // WooCommerce will filter what it needs from the Cookie header
         const allCookies = incomingCookieHeader;
+        
+        // Add WCML currency cookie for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         // Build headers for WooCommerce request
         const headers = {
@@ -75,13 +74,16 @@ export async function GET(request) {
             headers["Authorization"] = `Bearer ${token}`;
         }
 
-        // Always include cookies for session management
-        if (allCookies) {
-            headers["Cookie"] = allCookies;
+        // Always include cookies for session management (with WCML currency)
+        if (cookiesWithWcml) {
+            headers["Cookie"] = cookiesWithWcml;
         }
 
+        // Add currency as query parameter
+        const cartUrl = `${WC_STORE_URL}/cart?currency=${currency}`;
+
         // Make request to WooCommerce
-        const response = await fetch(`${WC_STORE_URL}/cart`, {
+        const response = await fetch(cartUrl, {
             method: "GET",
             headers,
             cache: "no-store",
@@ -112,13 +114,15 @@ export async function GET(request) {
             });
         }
 
+        // Get nonce from response for client-side storage
+        const nonce = response.headers.get("x-wc-store-api-nonce") || response.headers.get("nonce");
+
         // Also parse and set cookies in Next.js cookie store for server-side access
         if (setCookieHeaders.length > 0) {
             const setCookieHeader = setCookieHeaders.join(', ');
 
             // Also set cookies in Next.js cookie store for server-side access
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
-            const cookieStore = await cookies();
 
             for (const c of parsedCookies) {
                 const cookieOpts = {
@@ -195,16 +199,52 @@ export async function GET(request) {
             }
         }
 
+        // Check if response is OK and is JSON
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
         if (!response.ok) {
-            throw new Error(`Failed to get cart: ${response.status}`);
+            const errorText = await response.text().catch(() => '');
+            // If error is HTML, return empty cart
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.warn('Cart API received HTML error page, returning empty cart');
+                return NextResponse.json({ 
+                    items: [], 
+                    items_count: 0, 
+                    totals: {},
+                    _nonce: nonce 
+                }, { 
+                    headers: responseHeaders 
+                });
+            }
+            throw new Error(`Failed to get cart: ${response.status} - ${errorText.substring(0, 200)}`);
+        }
+
+        // Check if response is JSON before parsing
+        if (!isJson) {
+            const text = await response.text();
+            console.warn('Cart API response is not JSON, received:', text.substring(0, 100));
+            return NextResponse.json({ 
+                items: [], 
+                items_count: 0, 
+                totals: {},
+                _nonce: nonce 
+            }, { 
+                headers: responseHeaders 
+            });
         }
 
         const cartData = await response.json();
+        
+        // Include nonce in response for client-side use
+        if (nonce) {
+            cartData._nonce = nonce;
+        }
 
         // Return response with Set-Cookie headers to ensure cookies are sent to browser
         return NextResponse.json(cartData, {
             headers: responseHeaders
-        })
+        });
 
     } catch (error) {
         console.error("Get cart error:", error);
@@ -214,6 +254,3 @@ export async function GET(request) {
         }, { status: 500 });
     }
 }
-
-
-

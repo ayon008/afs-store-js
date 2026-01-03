@@ -1,6 +1,6 @@
 "use client"
 import { Minus, Plus, Trash2Icon } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 
@@ -8,10 +8,9 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
     // const { taxInfo } = useCart();
     const image = item.images?.[0]?.src || item.image;
     const name = item.name || item.title;
-    const line_subtotal = parseInt(item?.totals?.line_subtotal || 0);
-    const line_subtotal_tax = parseInt(item?.totals?.line_subtotal_tax || 0);
-    const total = line_subtotal + line_subtotal_tax;
-    const basePriceWithTax = item?.prices?.price;
+    // Use line_total which is already TTC (HT + tax)
+    const total = parseInt(item?.totals?.line_total || 0);
+    const basePriceWithTax = item?.prices?.price; // Unit price TTC
     const currency_symbol = item?.prices?.currency_symbol || '€';
     const total_Currency_Symbol = item?.totals?.currency_symbol || '€';
     const variations = item?.variation || [];
@@ -25,6 +24,22 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
 
     const [quantity, setQuantity] = useState(parseInt(item.quantity));
     const [updating, setUpdating] = useState(false);
+    const isMountedRef = useRef(true);
+
+    // Sync quantity with props when item.quantity changes
+    useEffect(() => {
+        const itemQuantity = parseInt(item.quantity);
+        if (itemQuantity !== quantity && !updating) {
+            setQuantity(itemQuantity);
+        }
+    }, [item.quantity]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
     // Check if maximum quantity reached
     const isMaxReached = quantity >= maxQuantity;
@@ -32,26 +47,77 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
     const handleIncrement = async () => {
         if (updating || isMaxReached) return;
         setUpdating(true);
+        const oldQuantity = quantity;
         const newQuantity = quantity + 1;
+        
+        // Optimistic update
         setQuantity(newQuantity);
-        await onUpdateQuantity(itemKey, newQuantity);
-        setUpdating(false);
+        
+        try {
+            const result = await onUpdateQuantity(itemKey, newQuantity);
+            if (!result || !result.success) {
+                // Rollback on error
+                if (isMountedRef.current) {
+                    setQuantity(oldQuantity);
+                }
+                console.error('Failed to increment quantity:', result?.error);
+            }
+        } catch (error) {
+            // Rollback on error
+            if (isMountedRef.current) {
+                setQuantity(oldQuantity);
+            }
+            console.error('Failed to increment quantity:', error);
+        } finally {
+            if (isMountedRef.current) {
+                setUpdating(false);
+            }
+        }
     };
 
     const handleDecrement = async () => {
         if (updating || quantity <= 1) return;
         setUpdating(true);
+        const oldQuantity = quantity;
         const newQuantity = quantity - 1;
+        
+        // Optimistic update
         setQuantity(newQuantity);
-        await onUpdateQuantity(itemKey, newQuantity);
-        setUpdating(false);
+        
+        try {
+            const result = await onUpdateQuantity(itemKey, newQuantity);
+            if (!result || !result.success) {
+                // Rollback on error
+                if (isMountedRef.current) {
+                    setQuantity(oldQuantity);
+                }
+                console.error('Failed to decrement quantity:', result?.error);
+            }
+        } catch (error) {
+            // Rollback on error
+            if (isMountedRef.current) {
+                setQuantity(oldQuantity);
+            }
+            console.error('Failed to decrement quantity:', error);
+        } finally {
+            if (isMountedRef.current) {
+                setUpdating(false);
+            }
+        }
     };
 
     const handleRemoveItem = async () => {
         if (updating) return;
         setUpdating(true);
-        await onRemove(itemKey);
-        setUpdating(false);
+        try {
+            await onRemove(itemKey);
+        } catch (error) {
+            console.error('Failed to remove item:', error);
+        } finally {
+            if (isMountedRef.current) {
+                setUpdating(false);
+            }
+        }
     };
 
     // Format price (WooCommerce returns price in cents)

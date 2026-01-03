@@ -26,11 +26,36 @@ export const getParentCategory = async (slug) => {
             next: { revalidate: 3600 }
         });
 
+        // Check if response is OK and is JSON
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
         if (!response.ok) {
             const errorText = await response.text().catch(() => "");
-            throw new Error(
-                `WooCommerce API error: ${response.status} ${response.statusText} — ${errorText}`
-            );
+            
+            // If error is HTML (like 500 error page), truncate it
+            let errorMessage = `WooCommerce API error: ${response.status} ${response.statusText}`;
+            if (errorText) {
+                if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                    // It's HTML, just log a warning
+                    console.warn(`getParentCategory() received HTML error page (${response.status})`);
+                    errorMessage += ' - HTML error page received';
+                } else {
+                    // It's text, include first 200 chars
+                    const truncatedError = errorText.length > 200 
+                        ? errorText.substring(0, 200) + '...' 
+                        : errorText;
+                    errorMessage += ` — ${truncatedError}`;
+                }
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Check if response is JSON before parsing
+        if (!isJson) {
+            const text = await response.text();
+            console.warn('getParentCategory() response is not JSON, received:', text.substring(0, 100));
+            throw new Error("Invalid JSON response received from WooCommerce API.");
         }
 
         const data = await response.json().catch(() => {

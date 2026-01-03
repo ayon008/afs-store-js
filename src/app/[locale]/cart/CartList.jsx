@@ -3,7 +3,7 @@ import useCart from '@/Shared/Hooks/useCart';
 import { Minus, Plus, Trash2Icon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const CartList = ({ item }) => {
 
@@ -12,12 +12,8 @@ const CartList = ({ item }) => {
 
     const basePriceWithTax = parseInt(item?.prices?.price || 0);
 
-    // const line_total = parseInt(item?.totals?.line_total || 0);
-    // const line_total_tax = parseInt(item?.totals?.line_total_tax || 0);
-    // const total = line_total + line_total_tax;
-
-
-    const sub_total = (parseInt(item?.totals?.line_subtotal) + parseInt(item?.totals?.line_subtotal_tax)) || 0;
+    // Use line_total which is already TTC (HT + tax)
+    const sub_total = parseInt(item?.totals?.line_total || 0);
 
     const image = item.images?.[0]?.src || item.image;
     const name = item.name || item.title;
@@ -37,33 +33,135 @@ const CartList = ({ item }) => {
 
     const [quantity, setQuantity] = useState(parseInt(item.quantity));
     const [updating, setUpdating] = useState(false);
+    const isMountedRef = useRef(true); // Ref to track if component is mounted
+    const isUpdatingRef = useRef(false); // Ref to track if we're updating (to avoid useEffect conflicts)
+    const timeoutRef = useRef(null); // Ref to store timeout for cleanup
+
+    // Sync quantity with prop changes (only when not updating to avoid conflicts)
+    useEffect(() => {
+        // Skip sync if we're currently updating
+        if (isUpdatingRef.current || updating) {
+            return;
+        }
+        
+        const itemQuantity = parseInt(item.quantity);
+        const currentQuantity = parseInt(quantity);
+        
+        // Only sync if values differ and itemQuantity is valid
+        if (itemQuantity !== currentQuantity && !isNaN(itemQuantity) && itemQuantity > 0) {
+            setQuantity(itemQuantity);
+        }
+    }, [item.quantity]);
+
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false; // Set to false when component unmounts
+            // Clear any pending timeouts
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
 
     // Check if maximum quantity reached
     const isMaxReached = quantity >= maxQuantity;
 
     const handleIncrement = async () => {
         if (updating || isMaxReached) return;
-        setUpdating(true);
+        
+        const oldQuantity = quantity;
         const newQuantity = quantity + 1;
+        
+        // Set updating state
+        setUpdating(true);
+        isUpdatingRef.current = true;
+        
+        // Optimistic update
         setQuantity(newQuantity);
-        await handleUpdateCartItem(itemKey, newQuantity);
-        setUpdating(false);
+        
+        try {
+            const result = await handleUpdateCartItem(itemKey, newQuantity);
+            if (!result || !result.success) {
+                // Revert on error
+                if (isMountedRef.current) {
+                    setQuantity(oldQuantity);
+                }
+                console.error('Failed to increment quantity:', result?.error);
+            }
+        } catch (error) {
+            console.error('Failed to increment quantity:', error);
+            if (isMountedRef.current) {
+                setQuantity(oldQuantity); // Revert on error
+            }
+        } finally {
+            // Always reset updating state immediately (no need to check isMountedRef)
+            setUpdating(false);
+            // Clear any existing timeout
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            // Reset ref after a brief moment to allow sync
+            timeoutRef.current = setTimeout(() => {
+                isUpdatingRef.current = false;
+                timeoutRef.current = null;
+            }, 150);
+        }
     };
 
     const handleDecrement = async () => {
         if (updating || quantity <= 1) return;
-        setUpdating(true);
+        
+        const oldQuantity = quantity;
         const newQuantity = quantity - 1;
+        
+        // Set updating state
+        setUpdating(true);
+        isUpdatingRef.current = true;
+        
+        // Optimistic update
         setQuantity(newQuantity);
-        await handleUpdateCartItem(itemKey, newQuantity);
-        setUpdating(false);
+        
+        try {
+            const result = await handleUpdateCartItem(itemKey, newQuantity);
+            if (!result || !result.success) {
+                // Revert on error
+                if (isMountedRef.current) {
+                    setQuantity(oldQuantity);
+                }
+                console.error('Failed to decrement quantity:', result?.error);
+            }
+        } catch (error) {
+            console.error('Failed to decrement quantity:', error);
+            if (isMountedRef.current) {
+                setQuantity(oldQuantity); // Revert on error
+            }
+        } finally {
+            // Always reset updating state immediately (no need to check isMountedRef)
+            setUpdating(false);
+            // Clear any existing timeout
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            // Reset ref after a brief moment to allow sync
+            timeoutRef.current = setTimeout(() => {
+                isUpdatingRef.current = false;
+                timeoutRef.current = null;
+            }, 150);
+        }
     };
 
     const handleRemoveItem = async () => {
         if (updating) return;
         setUpdating(true);
-        await handleRemoveCartItem(itemKey);
-        setUpdating(false);
+        try {
+            await handleRemoveCartItem(itemKey);
+        } catch (error) {
+            console.error('Failed to remove item:', error);
+        } finally {
+            if (isMountedRef.current) {
+                setUpdating(false);
+            }
+        }
     };
 
     // Format price (WooCommerce returns price in cents)

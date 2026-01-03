@@ -12,6 +12,7 @@ import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -25,37 +26,53 @@ const Navbar = ({ NAV_LINKS }) => {
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const locale = useLocale();
+  const pathname = usePathname();
   const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart, loadCart } = useCart();
 
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
 
-  const [selectedCurrency, setSelectedCurrency] = useState(() => {
-    const cookieCurrency = Cookies.get('currency');
-    if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
-      return cookieCurrency;
-    }
-    currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD' ? 'usd' : 'euro';
-  });
+  // Initialize with a default value that's the same on server and client to avoid hydration mismatch
+  const [selectedCurrency, setSelectedCurrency] = useState('euro');
+  // Track if the initial cookie has been read to avoid overwriting it
+  const [cookieInitialized, setCookieInitialized] = useState(false);
 
-  // Update selectedCurrency when cart currency changes, but prioritize cookie
+  // Update selectedCurrency from cookie/client-side data after mount to avoid hydration mismatch
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const cookieCurrency = Cookies.get('currency');
     if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
       setSelectedCurrency(cookieCurrency);
     } else {
-      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' ? 'gbp' : 'usd';
+      // Fallback to cart currency symbol if available
+      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' 
+        ? 'euro' 
+        : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' 
+        ? 'gbp' 
+        : 'usd';
       setSelectedCurrency(newCurrency);
     }
+    // Mark cookie as initialized after reading
+    setCookieInitialized(true);
   }, [currentCurrencySymbol]);
 
-  // Set cookie whenever selectedCurrency changes
+  // Set cookie whenever selectedCurrency changes, but only after initial read
   useEffect(() => {
+    // Don't write cookie until we've read the initial value
+    if (!cookieInitialized) return;
+    
     if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
-      Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax' });
+      // Add path: '/' to ensure the cookie is accessible to all routes including server-side
+      Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+      
+      // Also set WCML cookie for WooCommerce Multilingual multi-currency support
+      const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
+      Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     }
-  }, [selectedCurrency]);
+  }, [selectedCurrency, cookieInitialized]);
 
 
   const [shouldRedirect, setShouldRedirect] = useState(false);
@@ -94,9 +111,16 @@ const Navbar = ({ NAV_LINKS }) => {
     // Clear cart if language or currency changes
     const languageChanged = selectedLanguage !== locale;
 
-    // Get current currency from cart or default to 'euro'
+    // Get current currency from cart or cookie (handle all 3 currencies: EUR, USD, GBP)
     const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
-    const currentCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' ? 'euro' : 'usd';
+    let currentCurrency = 'euro'; // Default
+    if (currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR') {
+      currentCurrency = 'euro';
+    } else if (currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP') {
+      currentCurrency = 'gbp';
+    } else if (currentCurrencySymbol === '$' || currentCurrencySymbol === 'USD') {
+      currentCurrency = 'usd';
+    }
     const currencyChanged = selectedCurrency !== currentCurrency;
 
     // Clear the cart if language or currency changes
@@ -124,26 +148,33 @@ const Navbar = ({ NAV_LINKS }) => {
       }
     }
 
+    // Convert to WCML format
+    const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
+    
     if (languageChanged) {
-      const currentPath = '/';
+      const currentPath = pathname || '/';
       const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
+      // Ensure currency cookies are set before redirect
+      Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+      Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       setRedirectPath(newPath);
       setShouldRedirect(true);
     } else {
       // If only currency changed, reload cart to get updated currency
       if (currencyChanged) {
-        // Set cookie with 1 year expiration
-        const currentPath = '/';
-        // Note: Currency change might require locale change in WooCommerce
-        // For now, reload the page to ensure currency is updated
-        const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
-        setRedirectPath(newPath);
-        setShouldRedirect(true);
+        // Set the cookies synchronously before reload to ensure they're available on next page load
+        Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+        Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+        // Small delay to ensure cookies are written before reload
         setTimeout(() => {
-          window.location.reload();
-        }, 500);
+          // Reload the current page to ensure currency is updated
+          const currentPath = pathname || '/';
+          const reloadPath = `/${locale}${currentPath === '/' ? '' : currentPath}`;
+          window.location.href = reloadPath;
+        }, 100);
+      } else {
+        setPopUp(false);
       }
-      setPopUp(false);
     }
     return selectedValues;
   }

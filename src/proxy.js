@@ -136,11 +136,19 @@ export default async function middleware(req) {
     }
 
     // Check if checkout route and cart is empty (checkout is accessible without login)
+    // Only redirect if we're not already coming from cart page (to prevent redirect loops)
     if (pathWithoutLocale === '/checkout') {
-        const cartEmpty = await isCartEmpty(req);
-        if (cartEmpty) {
-            const cartUrl = new URL(`/${locale}/cart`, req.url);
-            return NextResponse.redirect(cartUrl);
+        const referer = req.headers.get('referer') || '';
+        const isComingFromCart = referer.includes('/cart');
+        
+        // Don't redirect if coming from cart page (user just clicked checkout button)
+        // This prevents redirect loops when cart is being synced
+        if (!isComingFromCart) {
+            const cartEmpty = await isCartEmpty(req);
+            if (cartEmpty) {
+                const cartUrl = new URL(`/${locale}/cart`, req.url);
+                return NextResponse.redirect(cartUrl);
+            }
         }
     }
 

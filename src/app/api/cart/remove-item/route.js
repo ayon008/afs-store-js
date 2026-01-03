@@ -1,11 +1,9 @@
 // app/api/cart/remove-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
-
-
-// Helper to parse set-cookie headers (same as before)
+// Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
     if (!header) return [];
 
@@ -24,7 +22,7 @@ function parseSetCookieHeader(header) {
         .filter(cookie => cookie.name && cookie.value);
 }
 
-// Get WooCommerce cookies from the browser (same as before)
+// Get WooCommerce cookies from the browser
 async function getWooCommerceCookies() {
     try {
         const cookieStore = await cookies();
@@ -51,7 +49,9 @@ async function getWooCommerceCookies() {
 
 export async function POST(request) {
     const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
+
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -64,8 +64,17 @@ export async function POST(request) {
             .filter(Boolean)
             .join('; ');
 
-        // Get the item key from request body
-        const { key: itemKey } = await request.json();
+        // Get the item key, currency and nonce from request body
+        const { key: itemKey, currency: clientCurrency, nonce: clientNonce } = await request.json();
+        
+        // Use currency from client if provided, otherwise fallback to server cookie
+        const currency = clientCurrency || await getCurrency();
+        
+        // Add WCML currency cookie to the request for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         if (!itemKey) {
             return NextResponse.json({
@@ -74,16 +83,56 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
-        // Make request to WooCommerce to remove item
-        const response = await fetch(`${WC_STORE_URL}/cart/remove-item`, {
+        console.log('Removing item with key:', itemKey);
+        console.log('Using currency:', currency);
+
+        // Make request to WooCommerce Store API to remove item
+        const removeItemUrl = `${WC_STORE_URL}/cart/remove-item?key=${encodeURIComponent(itemKey)}&currency=${currency}`;
+        console.log('Remove item URL:', removeItemUrl);
+
+        const headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+        };
+        
+        // Add nonce header if provided by client
+        if (clientNonce) {
+            headers["Nonce"] = clientNonce;
+            headers["X-WC-Store-API-Nonce"] = clientNonce;
+        }
+
+        const response = await fetch(removeItemUrl, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
-            },
+            headers,
             body: JSON.stringify({ key: itemKey }),
             cache: "no-store",
+        });
+
+        // Get response text for debugging
+        const responseText = await response.text();
+        console.log('WooCommerce response status:', response.status);
+        
+        if (!response.ok) {
+            console.log('WooCommerce response body:', responseText);
+            let errorMessage = `Failed to remove item: ${response.status}`;
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } catch {
+                errorMessage = responseText || errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = JSON.parse(responseText);
+
+        // Create the response
+        const jsonResponse = NextResponse.json({
+            success: true,
+            message: "Item removed from cart",
+            data: data,
+            cookiesReceived: allCookies ? true : false
         });
 
         // Parse and set any new cookies from WooCommerce response
@@ -132,27 +181,20 @@ export async function POST(request) {
                     }
                 });
 
-                // Set the cookie in the browser
+                // Set the cookie in Next.js cookie store
                 cookieStore.set({
                     name: c.name,
                     value: c.value,
                     ...cookieOpts,
                 });
+
+                // Also append the cookie to the response headers for browser
+                const cookieValue = `${c.name}=${c.value}; Path=${cookieOpts.path}; SameSite=${cookieOpts.sameSite}${cookieOpts.secure ? '; Secure' : ''}${cookieOpts.maxAge ? `; Max-Age=${cookieOpts.maxAge}` : ''}`;
+                jsonResponse.headers.append('Set-Cookie', cookieValue);
             }
         }
 
-        if (!response.ok) {
-            throw new Error(`Failed to remove item: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return NextResponse.json({
-            success: true,
-            message: "Item removed from cart",
-            data: data,
-            // For debugging
-            cookiesReceived: allCookies ? true : false
-        });
+        return jsonResponse;
 
     } catch (error) {
         console.error("Remove cart item error:", error);
@@ -162,3 +204,4 @@ export async function POST(request) {
         }, { status: 500 });
     }
 }
+

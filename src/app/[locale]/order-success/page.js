@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
-import ProgressStepper from '@/Shared/Stepper/ProgressStepper';
 
 const OrderSuccessPage = () => {
     const t = useTranslations('checkout');
@@ -30,12 +29,6 @@ const OrderSuccessPage = () => {
                         <Link className='inline' href='/'>Home</Link> / <span className='text-black'>Order Confirmation</span>
                     </div>
                 </div>
-
-                {/* Progress Stepper - Step 3: Confirmation */}
-                <ProgressStepper
-                    currentStep={3}
-                    steps={[t('basket') || 'Panier', t('securePayment') || 'Paiement', t('summary') || 'Confirmation']}
-                />
 
                 {/* Success Message */}
                 <div className='max-w-2xl mx-auto pb-20'>

@@ -1,7 +1,7 @@
 // app/api/cart/add-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 
 // Helper to parse set-cookie headers (same as before)
@@ -80,7 +80,8 @@ function extractStringValue(value) {
 
 export async function POST(request) {
     const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
+    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -95,7 +96,17 @@ export async function POST(request) {
 
         // Get the payload from request body
         const body = await request.json();
-        const { id: productId, quantity = 1, variation_id: variationId, variation = {} } = body;
+        const { id: productId, quantity = 1, variation_id: variationId, variation = {}, currency: clientCurrency } = body;
+        
+        // Use currency from client if provided, otherwise fallback to server cookie
+        const currency = clientCurrency || await getCurrency();
+        console.log('Using currency:', currency, '(from client:', !!clientCurrency, ')');
+        
+        // Add WCML currency cookie to the request for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currency}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));
@@ -120,6 +131,7 @@ export async function POST(request) {
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
+            currency: currency,
         };
 
         if (variationId) {
@@ -127,11 +139,14 @@ export async function POST(request) {
         }
 
         // Handle variations - FIXED VERSION
-        if (variation) {
-            // Case 1: Variation is already an array (from your log)
+        // For variable products, WooCommerce requires variation attributes even if variation_id is provided
+        let variationArray = [];
+        
+        if (variation && typeof variation === 'object') {
+            // Case 1: Variation is already an array
             if (Array.isArray(variation)) {
-                console.log('Variation is an array');
-                payload.variation = variation.map(item => {
+                console.log('Variation is an array with', variation.length, 'items');
+                variationArray = variation.map(item => {
                     // Extract attribute name
                     let attribute = '';
                     if (item.attribute !== undefined) {
@@ -141,39 +156,73 @@ export async function POST(request) {
                     } else if (item.key !== undefined) {
                         attribute = String(item.key);
                     }
+                    
+                    // Remove 'attribute_' prefix if present - WooCommerce expects just the attribute slug
+                    if (attribute.startsWith('attribute_')) {
+                        attribute = attribute.replace('attribute_', '');
+                    }
 
-                    // Extract value
-                    const value = extractStringValue(item.value);
+                    // Extract value - check both value and option properties
+                    const value = extractStringValue(item.value || item.option);
 
                     console.log(`Processed: attribute="${attribute}", value="${value}"`);
                     return { attribute, value };
                 }).filter(item => item.attribute && item.value);
             }
             // Case 2: Variation is an object with key-value pairs
-            else if (typeof variation === 'object') {
-                console.log('Variation is an object');
-                payload.variation = Object.entries(variation)
+            else if (Object.keys(variation).length > 0) {
+                console.log('Variation is an object with', Object.keys(variation).length, 'keys');
+                variationArray = Object.entries(variation)
                     .map(([attribute, value]) => {
                         const stringValue = extractStringValue(value);
-                        console.log(`Processed: attribute="${attribute}", value="${stringValue}"`);
+                        // Remove 'attribute_' prefix if present - WooCommerce expects just the attribute slug
+                        let cleanAttribute = String(attribute);
+                        if (cleanAttribute.startsWith('attribute_')) {
+                            cleanAttribute = cleanAttribute.replace('attribute_', '');
+                        }
+                        console.log(`Processed: attribute="${cleanAttribute}", value="${stringValue}"`);
                         return {
-                            attribute: String(attribute),
+                            attribute: cleanAttribute,
                             value: stringValue
                         };
                     })
                     .filter(item => item.attribute && item.value);
             }
         }
+        
+        // For variable products, variation attributes are required
+        // But only throw error if variation object was explicitly empty
+        if (variationId && variationArray.length === 0) {
+            console.log('WARNING: Variable product without attributes. Variation object received:', variation);
+            console.log('Variation keys:', Object.keys(variation || {}));
+            // Instead of throwing error, try to proceed without attributes
+            // WooCommerce might be able to resolve the variation from variation_id alone
+            console.log('Attempting to add to cart with just variation_id...');
+        }
+        
+        // Only add variation if we have valid attributes
+        if (variationArray.length > 0) {
+            payload.variation = variationArray;
+        }
+
+        // For variable products, ensure variation attributes are present
+        if (variationId && (!payload.variation || payload.variation.length === 0)) {
+            console.warn('Variation ID provided but no variation attributes found. This may cause an error.');
+        }
 
         console.log('Final payload:', JSON.stringify(payload, null, 2));
+        console.log('Variation attributes count:', payload.variation?.length || 0);
 
-        // Make request to WooCommerce to add item
-        const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+        // Make request to WooCommerce to add item (include currency param for WCML)
+        const addItemUrl = `${WC_STORE_URL}/cart/add-item?currency=${currency}`;
+        console.log('Add item URL:', addItemUrl);
+        
+        const response = await fetch(addItemUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
             },
             body: JSON.stringify(payload),
             cache: "no-store",
@@ -198,6 +247,22 @@ export async function POST(request) {
 
         // Parse and set any new cookies from WooCommerce response
         const setCookieHeader = response.headers.get("set-cookie");
+        const data = JSON.parse(responseText);
+        
+        // Get nonce from response headers for future requests
+        const nonce = response.headers.get("x-wc-store-api-nonce") || response.headers.get("nonce");
+        
+        // Create the response
+        const jsonResponse = NextResponse.json({
+            success: true,
+            message: "Added to cart successfully",
+            data: data,
+            nonce: nonce, // Include nonce for client-side storage
+            // For debugging
+            cookiesReceived: allCookies ? true : false
+        });
+
+        // Forward WooCommerce cookies to the browser
         if (setCookieHeader) {
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
             const cookieStore = await cookies();
@@ -242,23 +307,20 @@ export async function POST(request) {
                     }
                 });
 
-                // Set the cookie in the browser
+                // Set the cookie in Next.js cookie store (for server-side access)
                 cookieStore.set({
                     name: c.name,
                     value: c.value,
                     ...cookieOpts,
                 });
+
+                // Also append the cookie to the response headers for browser
+                const cookieValue = `${c.name}=${c.value}; Path=${cookieOpts.path}; SameSite=${cookieOpts.sameSite}${cookieOpts.secure ? '; Secure' : ''}${cookieOpts.maxAge ? `; Max-Age=${cookieOpts.maxAge}` : ''}`;
+                jsonResponse.headers.append('Set-Cookie', cookieValue);
             }
         }
 
-        const data = JSON.parse(responseText);
-        return NextResponse.json({
-            success: true,
-            message: "Added to cart successfully",
-            data: data,
-            // For debugging
-            cookiesReceived: allCookies ? true : false
-        });
+        return jsonResponse;
 
     } catch (error) {
         console.error("Add to cart error:", error);

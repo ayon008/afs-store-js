@@ -17,9 +17,9 @@ import { useForm } from "react-hook-form";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
-import ProgressStepper from "@/Shared/Stepper/ProgressStepper";
 import PaymentMethodCard from "@/Shared/Payment/PaymentMethodCard";
 import { User, MapPin, CreditCard, Package } from "lucide-react";
+import Cookies from "js-cookie";
 
 // Wrapper component to ensure NextIntl context is available
 const CheckoutPageContent = () => {
@@ -48,13 +48,23 @@ const CheckoutPageContent = () => {
     }
 
     // Cart
-    const { cart, loadCart, handleClearCart } = useCart();
+    const { cart, loadCart, handleClearCart, syncCartToWooCommerce } = useCart();
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
 
-
     const items = cart?.items;
+    
+    // Sync cart to WooCommerce on checkout page load to ensure server-side cart is available
+    // This prevents redirect loops when cart exists in localStorage but not in WooCommerce
+    useEffect(() => {
+        // Only sync if cart has items in localStorage
+        if (cart?.items && cart.items.length > 0) {
+            syncCartToWooCommerce().catch(err => {
+                console.warn('Failed to sync cart on checkout load:', err);
+            });
+        }
+    }, []); // Only run once on mount
 
     // React Hook Form
     const {
@@ -150,7 +160,7 @@ const CheckoutPageContent = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
 
-    // Filter payment methods to show only allowed ones
+    // Filter payment methods to show only allowed ones based on currency
     const filterPaymentMethods = (methods) => {
         // Ensure methods is an array
         if (!methods) return [];
@@ -169,9 +179,11 @@ const CheckoutPageContent = () => {
             }
         }
 
-        // Check if currency is USD and locale is EN
+        // Get currency information from cart
         const currencySymbol = cart?.totals?.currency_symbol || '';
         const currencyCode = cart?.totals?.currency_code || '';
+        
+        // Detect currency type
         const isUSD = currencySymbol === '$' || 
                      currencySymbol === 'USD' ||
                      currencySymbol?.toUpperCase() === 'USD' ||
@@ -180,43 +192,15 @@ const CheckoutPageContent = () => {
                      currencySymbol === 'EUR' ||
                      currencySymbol?.toUpperCase() === 'EUR' ||
                      currencyCode?.toUpperCase() === 'EUR';
-        const isEN = locale === 'en';
+        const isGBP = currencySymbol === '£' || 
+                     currencySymbol === 'GBP' ||
+                     currencySymbol?.toUpperCase() === 'GBP' ||
+                     currencyCode?.toUpperCase() === 'GBP';
 
         // Debug logging
-        console.log('Payment method filter - Currency:', currencySymbol, 'Currency Code:', currencyCode, 'Locale:', locale, 'isUSD:', isUSD, 'isEUR:', isEUR, 'isEN:', isEN);
+        console.log('Payment method filter - Currency Symbol:', currencySymbol, 'Currency Code:', currencyCode, 'isUSD:', isUSD, 'isEUR:', isEUR, 'isGBP:', isGBP);
 
-        // If locale is EN AND currency is USD (not EUR), show only authnet (Authorize.Net) payment method
-        if (isEN && isUSD && !isEUR) {
-            console.log('EN locale and USD currency detected: Filtering for authnet (Authorize.Net) payment method only');
-            const authorizeMethods = methods.filter(method => {
-                // Ensure method is an object
-                if (!method || typeof method !== 'object') return false;
-                
-                const methodId = method.id?.toLowerCase() || '';
-                const methodTitle = method.title?.toLowerCase() || '';
-                
-                // Return only methods that contain "authnet" in ID (Authorize.Net gateway)
-                // or "authorize" in ID/title as fallback
-                const isAuthorize = methodId === 'authnet' || 
-                                   methodId.includes('authnet') ||
-                                   methodId.includes('authorize') || 
-                                   methodTitle.includes('authorize');
-                
-                if (isAuthorize) {
-                    console.log(`Authorize method found - ID: ${method.id}, Title: ${method.title}`);
-                }
-                
-                return isAuthorize;
-            });
-            console.log('Authorize methods found:', authorizeMethods.length, authorizeMethods.map(m => ({ id: m.id, title: m.title })));
-            
-            // Only return authorize methods if we found any, otherwise return empty array
-            if (authorizeMethods.length > 0) {
-                return authorizeMethods;
-            }
-        }
-
-        // Otherwise, use the existing filter logic
+        // Filter based on currency
         return methods.filter(method => {
             // Ensure method is an object
             if (!method || typeof method !== 'object') return false;
@@ -224,37 +208,42 @@ const CheckoutPageContent = () => {
             const methodId = method.id?.toLowerCase() || '';
             const methodTitle = method.title?.toLowerCase() || '';
 
-            // Exclude Credit Card
-            if (methodId === 'credit-card' || methodTitle.includes('credit card')) {
+            // For USD currency: Show only Authorize.Net
+            if (isUSD) {
+                const isAuthorize = methodId === 'authnet' || 
+                                   methodId.includes('authnet') ||
+                                   methodId.includes('authorize') || 
+                                   methodTitle.includes('authorize');
+                
+                if (isAuthorize) {
+                    console.log(`Authorize method found for USD - ID: ${method.id}, Title: ${method.title}`);
+                }
+                
+                return isAuthorize;
+            }
+
+            // For EUR or GBP currency: Show only Monetico + PayPal
+            if (isEUR || isGBP) {
+                // Include PayPal
+                if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
+                    console.log(`PayPal method found for ${isEUR ? 'EUR' : 'GBP'} - ID: ${method.id}, Title: ${method.title}`);
+                    return true;
+                }
+
+                // Include all Monetico variants (Carte Bancaire, Carte bancaire en 2 fois, etc.)
+                if (methodId.includes('monetico') ||
+                    methodTitle.includes('carte bancaire') ||
+                    methodTitle.includes('monetico')) {
+                    console.log(`Monetico method found for ${isEUR ? 'EUR' : 'GBP'} - ID: ${method.id}, Title: ${method.title}`);
+                    return true;
+                }
+
+                // Exclude everything else for EUR/GBP
                 return false;
             }
 
-            // Exclude Authorize.Net - should only show for EN locale with USD currency
-            // If we reach here, it means we're not in EN+USD scenario, so exclude Authorize
-            if (methodId === 'authnet' || 
-                methodId.includes('authnet') ||
-                methodId.includes('authorize') || 
-                methodTitle.includes('authorize')) {
-                return false;
-            }
-
-            // Include PayPal
-            if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
-                return true;
-            }
-
-            // Include all Monetico variants (Carte Bancaire, Carte bancaire en 2 fois, etc.)
-            if (methodId.includes('monetico') ||
-                methodTitle.includes('carte bancaire') ||
-                methodTitle.includes('monetico')) {
-                return true;
-            }
-
-            // Include Bank Transfer (Virement bancaire)
-            if (methodId === 'bacs' || methodTitle.includes('virement bancaire') || methodTitle.includes('virement')) {
-                return true;
-            }
-
+            // For other currencies: Don't show any payment methods
+            console.log(`No payment methods for currency: ${currencyCode || currencySymbol}`);
             return false;
         });
     };
@@ -325,22 +314,54 @@ const CheckoutPageContent = () => {
     useEffect(() => {
         const fetchPaymentMethods = async () => {
             try {
+                // First, try the API route for debugging
+                try {
+                    const apiResponse = await fetch('/api/payment-methods');
+                    const apiData = await apiResponse.json();
+                    console.log('API Route Debug Info:', apiData);
+                    
+                    if (apiData.success && apiData.methods) {
+                        console.log(`API Route found ${apiData.methods.length} payment methods`);
+                        setPaymentMethods(apiData.methods);
+                        return;
+                    } else if (apiData.error) {
+                        console.error('API Route error:', apiData.error, apiData);
+                    }
+                } catch (apiError) {
+                    console.error('API Route fetch error:', apiError);
+                }
+                
+                // Fallback to server action
                 const data = await getPaymentMethods();
                 // Debug: Log all payment methods to identify authorize ID
-                console.log('All payment methods received:', data);
+                console.log('All payment methods received (server action):', data);
+                
+                // Check if data is an Error instance
+                if (data instanceof Error) {
+                    console.error('Payment methods returned an error:', data);
+                    setPaymentMethods([]);
+                    return;
+                }
+                
                 if (Array.isArray(data)) {
                     data.forEach(method => {
                         console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
                     });
                     setPaymentMethods(data);
-                } else if (data && typeof data === 'object') {
-                    // If it's an object, try to convert to array
+                } else if (data && typeof data === 'object' && !(data instanceof Error)) {
+                    // If it's an object (but not an Error), try to convert to array
                     const methodsArray = Object.values(data);
-                    if (Array.isArray(methodsArray)) {
-                        methodsArray.forEach(method => {
-                            console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
-                        });
-                        setPaymentMethods(methodsArray);
+                    if (Array.isArray(methodsArray) && methodsArray.length > 0) {
+                        // Check if the first element looks like a payment method
+                        const firstMethod = methodsArray[0];
+                        if (firstMethod && (firstMethod.id || firstMethod.title)) {
+                            methodsArray.forEach(method => {
+                                console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
+                            });
+                            setPaymentMethods(methodsArray);
+                        } else {
+                            setPaymentMethods([]);
+                        }
                     } else {
                         setPaymentMethods([]);
                     }
@@ -432,12 +453,45 @@ const CheckoutPageContent = () => {
                         pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
                     );
                     
-                    // Only reload cart once, with a single delay if needed
-                    if (hasShippingRatesInResponse || result.hasShippingRates) {
+                    // Load cart from WooCommerce to get shipping rates
+                    // First sync local cart to WooCommerce, then load from WooCommerce
+                    await syncCartToWooCommerce();
+                    
+                    // Wait a bit for WooCommerce to calculate shipping rates if not already available
+                    if (!hasShippingRatesInResponse && !result.hasShippingRates) {
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                    }
+                    
+                    // Load cart from WooCommerce API to get shipping rates
+                    const currency = Cookies.get('currency') === 'euro' ? 'EUR' : Cookies.get('currency') === 'gbp' ? 'GBP' : 'USD';
+                    const cartResponse = await fetch(`/api/cart?currency=${currency}`, {
+                        method: 'GET',
+                        credentials: 'include',
+                    });
+                    
+                    if (cartResponse.ok) {
+                        const wooCart = await cartResponse.json();
+                        // Update local cart with WooCommerce data including shipping_rates
+                        try {
+                            const localCartData = localStorage.getItem('afs_cart_local');
+                            if (localCartData) {
+                                const localCart = JSON.parse(localCartData);
+                                const updatedCart = {
+                                    ...localCart,
+                                    shipping_rates: wooCart.shipping_rates,
+                                    billing_address: wooCart.billing_address,
+                                    shipping_address: wooCart.shipping_address,
+                                    totals: wooCart.totals,
+                                };
+                                localStorage.setItem('afs_cart_local', JSON.stringify(updatedCart));
+                            }
+                        } catch (err) {
+                            console.warn('Failed to update local cart with shipping rates:', err);
+                        }
+                        // Reload cart to update state
                         await loadCart();
                     } else {
-                        // Wait for WooCommerce to calculate shipping rates (single wait)
-                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        // Fallback to regular loadCart
                         await loadCart();
                     }
                 } else {
@@ -487,7 +541,89 @@ const CheckoutPageContent = () => {
 
     const states = countryDetails?.states || [];
 
-    const cartTotal = parseFloat(cart?.totals?.total_price).toFixed(2) / 100;
+    // Declare state variables before using them in useMemo
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [updatingShipping, setUpdatingShipping] = useState(false);
+    const [selectedRateId, setSelectedRateId] = useState(null);
+    const [notification, setNotification] = useState(null);
+
+    // Get current currency (needed for allShippingRates calculation)
+    const currencySymbol = cart?.totals?.currency_symbol || '';
+    const currencyCode = cart?.totals?.currency_code || '';
+    const isUSD = currencySymbol === '$' || 
+                 currencySymbol === 'USD' ||
+                 currencySymbol?.toUpperCase() === 'USD' ||
+                 currencyCode?.toUpperCase() === 'USD';
+
+    // Extract shipping rates from cart - must be declared before use in other useMemo
+    const allShippingRates = React.useMemo(() => {
+        if (!cart?.shipping_rates) {
+            return [];
+        }
+        
+        let rates = [];
+        
+        // Handle array of packages
+        if (Array.isArray(cart.shipping_rates)) {
+            rates = cart.shipping_rates.flatMap((pkg, pkgIndex) => {
+                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map((rate, rateIndex) => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex,
+                        // Create a unique identifier combining package_id, rate_id, and index
+                        uniqueId: `${pkg.package_id || pkgIndex}_${rate.rate_id}_${rateIndex}`
+                    }));
+                }
+                if (Array.isArray(pkg) && pkg.length > 0) {
+                    return pkg.map((rate, rateIndex) => ({
+                        ...rate,
+                        package_id: pkgIndex,
+                        uniqueId: `${pkgIndex}_${rate.rate_id}_${rateIndex}`
+                    }));
+                }
+                return [];
+            });
+        } else if (typeof cart.shipping_rates === 'object') {
+            // Handle object structure
+            rates = Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
+                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map((rate, rateIndex) => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex,
+                        uniqueId: `${pkg.package_id || pkgIndex}_${rate.rate_id}_${rateIndex}`
+                    }));
+                }
+                return [];
+            });
+        }
+        
+        // Filter: If USD currency, only show "authorize" shipping methods
+        if (isUSD && rates.length > 0) {
+            const filteredRates = rates.filter(rate => {
+                const rateName = (rate.name || '').toLowerCase();
+                const rateId = (rate.rate_id || '').toLowerCase();
+                const methodId = (rate.method_id || '').toLowerCase();
+                
+                // Check if rate contains "authorize" or "authnet" in name, id, or method_id
+                return rateName.includes('authorize') || 
+                       rateName.includes('authnet') ||
+                       rateId.includes('authorize') || 
+                       rateId.includes('authnet') ||
+                       methodId.includes('authorize') || 
+                       methodId.includes('authnet');
+            });
+            
+            // If no authorize method found for USD, log a warning
+            if (filteredRates.length === 0 && rates.length > 0) {
+                console.warn('USD currency detected but no "authorize" shipping method found. Available methods:', rates.map(r => ({ name: r.name, method_id: r.method_id, rate_id: r.rate_id })));
+            }
+            
+            return filteredRates;
+        }
+        
+        return rates;
+    }, [cart?.shipping_rates, isUSD]);
+
     const sousTotal = cart?.items?.reduce(
         (acc, item) =>
             acc +
@@ -496,51 +632,38 @@ const CheckoutPageContent = () => {
         0
     ) / 100;
 
-    const [shippingLoading, setShippingLoading] = useState(false);
-    const [updatingShipping, setUpdatingShipping] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
-    const [notification, setNotification] = useState(null);
+    // Calculate shipping cost from selected rate
+    const selectedShippingRate = React.useMemo(() => {
+        if (!selectedRateId || !allShippingRates || allShippingRates.length === 0) {
+            return null;
+        }
+        return allShippingRates.find(rate => rate.uniqueId === selectedRateId);
+    }, [selectedRateId, allShippingRates]);
 
-    // Extract shipping rates from cart - optimized, no logs
-    const allShippingRates = React.useMemo(() => {
-        if (!cart?.shipping_rates) {
-            return [];
+    const shippingCost = React.useMemo(() => {
+        if (!selectedShippingRate) {
+            // If no rate selected, check if cart has shipping total
+            const cartShippingTotal = cart?.totals?.total_shipping || 0;
+            return cartShippingTotal / 100;
+        }
+        // Calculate shipping cost from selected rate (price + taxes in cents)
+        return (selectedShippingRate.price / 100) + (selectedShippingRate.taxes / 100);
+    }, [selectedShippingRate, cart?.totals?.total_shipping]);
+
+    // Calculate total including shipping
+    const cartTotal = React.useMemo(() => {
+        // Calculate base total from items (subtotal + taxes)
+        const baseSubtotal = sousTotal || 0;
+        
+        // If we have a selected shipping rate, add its cost
+        if (selectedShippingRate) {
+            return baseSubtotal + shippingCost;
         }
         
-        // Handle array of packages
-        if (Array.isArray(cart.shipping_rates)) {
-            return cart.shipping_rates.flatMap((pkg, pkgIndex) => {
-                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map(rate => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex
-                    }));
-                }
-                if (Array.isArray(pkg) && pkg.length > 0) {
-                    return pkg.map(rate => ({
-                        ...rate,
-                        package_id: pkgIndex
-                    }));
-                }
-                return [];
-            });
-        }
-        
-        // Handle object structure
-        if (typeof cart.shipping_rates === 'object') {
-            return Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
-                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map(rate => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex
-                    }));
-                }
-                return [];
-            });
-        }
-        
-        return [];
-    }, [cart?.shipping_rates]);
+        // Otherwise, use cart total (which may or may not include shipping)
+        const cartTotalFromWoo = parseFloat(cart?.totals?.total_price || 0) / 100;
+        return cartTotalFromWoo;
+    }, [sousTotal, selectedShippingRate, shippingCost, cart?.totals?.total_price]);
 
     // Ref to track user's manual selection (local state takes priority)
     const userSelectedRateRef = React.useRef(null);
@@ -552,31 +675,38 @@ const CheckoutPageContent = () => {
     useEffect(() => {
         // If user has manually selected a rate, prioritize that over cart state
         if (userSelectedRateRef.current) {
-            const userSelected = allShippingRates.find(rate => rate.rate_id === userSelectedRateRef.current);
+            const userSelected = allShippingRates.find(rate => rate.uniqueId === userSelectedRateRef.current);
             if (userSelected) {
                 // User selection exists in available rates, keep it
-                if (selectedRateId !== userSelectedRateRef.current) {
-                    setSelectedRateId(userSelectedRateRef.current);
-                    setValue('shipping_method', userSelectedRateRef.current);
+                const userSelectedUniqueId = userSelectedRateRef.current;
+                if (String(selectedRateId) !== userSelectedUniqueId) {
+                    setSelectedRateId(userSelectedUniqueId);
+                    setValue('shipping_method', String(userSelected.rate_id));
                 }
-                return;
+                return; // Don't proceed with auto-selection if user has selected
             } else {
-                // User selection no longer available, clear it
-                userSelectedRateRef.current = null;
+                // User selection no longer available, clear it only if rates changed
+                // Don't clear if user just made a selection
+                if (allShippingRates.length > 0) {
+                    userSelectedRateRef.current = null;
+                }
             }
         }
 
         // Only auto-update from cart if no user selection
-        const selected = allShippingRates.find(rate => rate.selected);
-        if (selected && selected.rate_id !== selectedRateId) {
-            setSelectedRateId(selected.rate_id);
-            setValue('shipping_method', selected.rate_id);
-        } else if (!selected && allShippingRates.length > 0 && !selectedRateId && !userSelectedRateRef.current) {
-            // Auto-select first rate if none selected (only on initial load)
-            const firstRate = allShippingRates[0];
-            if (firstRate) {
-                setSelectedRateId(firstRate.rate_id);
-                setValue('shipping_method', firstRate.rate_id);
+        // Don't override user selection
+        if (!userSelectedRateRef.current) {
+            const selected = allShippingRates.find(rate => rate.selected);
+            if (selected && selected.uniqueId !== selectedRateId) {
+                setSelectedRateId(selected.uniqueId);
+                setValue('shipping_method', String(selected.rate_id));
+            } else if (!selected && allShippingRates.length > 0 && !selectedRateId) {
+                // Auto-select first rate if none selected (only on initial load)
+                const firstRate = allShippingRates[0];
+                if (firstRate) {
+                    setSelectedRateId(firstRate.uniqueId);
+                    setValue('shipping_method', String(firstRate.rate_id));
+                }
             }
         }
     }, [allShippingRates, selectedRateId, setValue]);
@@ -712,8 +842,36 @@ const CheckoutPageContent = () => {
         try {
             const result = await selectShippingRate(rateId, packageId);
             if (result.success) {
-                // Reload cart once (no setTimeout, direct call)
-                await loadCart();
+                // Reload cart from WooCommerce to get updated totals with shipping
+                const currency = Cookies.get('currency') === 'euro' ? 'EUR' : Cookies.get('currency') === 'gbp' ? 'GBP' : 'USD';
+                const cartResponse = await fetch(`/api/cart?currency=${currency}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                
+                if (cartResponse.ok) {
+                    const wooCart = await cartResponse.json();
+                    // Update local cart with WooCommerce data including updated totals
+                    try {
+                        const localCartData = localStorage.getItem('afs_cart_local');
+                        if (localCartData) {
+                            const localCart = JSON.parse(localCartData);
+                            const updatedCart = {
+                                ...localCart,
+                                shipping_rates: wooCart.shipping_rates,
+                                totals: wooCart.totals, // Update totals with shipping
+                            };
+                            localStorage.setItem('afs_cart_local', JSON.stringify(updatedCart));
+                        }
+                    } catch (err) {
+                        console.warn('Failed to update local cart with shipping totals:', err);
+                    }
+                    // Reload cart to update state
+                    await loadCart();
+                } else {
+                    // Fallback to regular loadCart
+                    await loadCart();
+                }
             }
         } catch (error) {
             console.error('Error syncing shipping rate:', error);
@@ -725,19 +883,33 @@ const CheckoutPageContent = () => {
         }
     };
 
-    const handleSelectRate = (value) => {
-        const [packageId, rateId] = value.split(':');
-        if (rateId === selectedRateId) {
+    const handleSelectRate = (uniqueId) => {
+        // Find the rate by uniqueId
+        const selectedRate = allShippingRates.find(rate => rate.uniqueId === uniqueId);
+        
+        if (!selectedRate) {
+            console.warn('Selected rate not found:', uniqueId);
             return;
         }
         
-        // Update local state immediately (purely local - no server call, no loading state)
-        userSelectedRateRef.current = rateId;
-        setSelectedRateId(rateId);
-        setValue('shipping_method', rateId);
+        const rateIdStr = String(selectedRate.rate_id);
+        const packageId = String(selectedRate.package_id);
+        
+        // Prevent re-render if already selected (but still allow the event to fire)
+        if (String(selectedRateId) === uniqueId && userSelectedRateRef.current === uniqueId) {
+            return; // Already selected, no need to update
+        }
+        
+        // Update ref first to prevent useEffect from overriding
+        userSelectedRateRef.current = uniqueId;
+        setSelectedRateId(uniqueId);
+        setValue('shipping_method', rateIdStr); // Store actual rate_id for form submission
         
         // Store pending sync info for later (only sync before form submission)
-        pendingSyncRef.current = { rateId, packageId };
+        pendingSyncRef.current = { rateId: rateIdStr, packageId };
+        
+        // Sync shipping rate to server immediately to update cart total
+        syncShippingRateToServer(rateIdStr, packageId, false);
         
         // Clear any existing timer (no automatic sync)
         if (syncTimerRef.current) {
@@ -749,9 +921,17 @@ const CheckoutPageContent = () => {
     // Check if cart is empty
     useEffect(() => {
         if (!cart) {
-            setIsCartEmpty(true);
+            // Don't immediately set empty - wait a bit for cart to load
+            const timer = setTimeout(() => {
+                setIsCartEmpty(true);
+            }, 1000);
+            return () => clearTimeout(timer);
         } else if (!cart.items || cart.items.length === 0) {
-            setIsCartEmpty(true);
+            // Only set empty if we've given time for cart to sync
+            const timer = setTimeout(() => {
+                setIsCartEmpty(true);
+            }, 500);
+            return () => clearTimeout(timer);
         } else {
             setIsCartEmpty(false);
         }
@@ -840,7 +1020,7 @@ const CheckoutPageContent = () => {
             }
             
             // Find packageId for the selected rate
-            const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
+            const selectedRate = allShippingRates.find(rate => rate.uniqueId === selectedRateId);
             if (selectedRate && selectedRate.package_id) {
                 // Sync immediately before submission (with loading state only here)
                 await syncShippingRateToServer(selectedRateId, selectedRate.package_id, true);
@@ -862,6 +1042,17 @@ const CheckoutPageContent = () => {
         if (data.payment_method === 'bacs') {
             setIsSubmitting(true);
             try {
+                // Sync localStorage cart to WooCommerce before creating order
+                const syncResult = await syncCartToWooCommerce();
+                if (!syncResult.success) {
+                    alert(`${t("cartSyncError")}: ${syncResult.error || t("unknownError")}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                // Reload cart to get WooCommerce totals
+                await loadCart();
+
                 const customerData = {
                     ...data,
                     billing: {
@@ -932,12 +1123,12 @@ const CheckoutPageContent = () => {
                     clearSavedFormData();
                     clearCart();
                     router.push(`/order-success?order_id=${result.orderId}`);
-                } else {
-                    alert(`Erreur lors de la création de la commande : ${result.error || 'Une erreur est survenue'}`);
-                }
-            } catch (error) {
-                console.error('Error creating order:', error);
-                alert('Erreur lors de la création de la commande. Veuillez réessayer.');
+                  } else {
+                      alert(`${t("orderCreationError")}: ${result.error || t("unknownError")}`);
+                  }
+              } catch (error) {
+                  console.error('Error creating order:', error);
+                  alert(t("orderCreationErrorRetry"));
             } finally {
                 setIsSubmitting(false);
             }
@@ -988,12 +1179,6 @@ const CheckoutPageContent = () => {
                 />
             )}
             
-            {/* Progress Stepper */}
-            <ProgressStepper
-                currentStep={2}
-                steps={[t("basket"), t("securePayment"), t("summary")]}
-            />
-            {/*  */}
             <div className='global-padding global-margin'>
                 {/* checkout forms */}
                 <form className='space-y-10' onSubmit={handleSubmit(onSubmit)}>
@@ -1350,14 +1535,21 @@ const CheckoutPageContent = () => {
                                                             <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                                                                 {allShippingRates.map((rate, i) => {
                                                                     const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                                    const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                                                                    const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
+                                                                    const isSelected = String(selectedRateId) === String(rate.uniqueId);
                                                                     return (
-                                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                        <li key={`shipping-rate-${rate.uniqueId}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                             <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                                 <input
-                                                                                    checked={selectedRateId === rate.rate_id}
-                                                                                    value={`${rate.package_id}:${rate.rate_id}`}
-                                                                                    onChange={(e) => handleSelectRate(e.target.value)}
+                                                                                    checked={isSelected}
+                                                                                    value={rate.uniqueId}
+                                                                                    onChange={(e) => {
+                                                                                        handleSelectRate(e.target.value);
+                                                                                    }}
+                                                                                    onClick={(e) => {
+                                                                                        // Ensure the radio button is selected on click
+                                                                                        handleSelectRate(e.target.value);
+                                                                                    }}
                                                                                     type="radio"
                                                                                     name="shipping_method"
                                                                                     id={safeId}
@@ -1387,7 +1579,7 @@ const CheckoutPageContent = () => {
                                                 return (
                                                     <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                         {missingFields.length > 0 
-                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${locale === 'fr' ? "pour calculer les méthodes de livraison" : "to calculate shipping methods"}`
+                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${t("calculateShippingMethods")}`
                                                             : t("noShippingMethods")
                                                         }
                                                     </p>
@@ -1401,14 +1593,21 @@ const CheckoutPageContent = () => {
                                                         <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                                                             {allShippingRates.map((rate, i) => {
                                                                 const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                                const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                                                                const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
+                                                                const isSelected = String(selectedRateId) === String(rate.uniqueId);
                                                                 return (
-                                                                    <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                    <li key={`shipping-rate-${rate.uniqueId}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                             <input
-                                                                                checked={selectedRateId === rate.rate_id}
-                                                                                value={`${rate.package_id}:${rate.rate_id}`}
-                                                                                onChange={(e) => handleSelectRate(e.target.value)}
+                                                                                checked={isSelected}
+                                                                                value={rate.uniqueId}
+                                                                                onChange={(e) => {
+                                                                                    handleSelectRate(e.target.value);
+                                                                                }}
+                                                                                onClick={(e) => {
+                                                                                    // Ensure the radio button is selected on click
+                                                                                    handleSelectRate(e.target.value);
+                                                                                }}
                                                                                 type="radio"
                                                                                 name="shipping_method"
                                                                                 id={safeId}
@@ -1431,6 +1630,15 @@ const CheckoutPageContent = () => {
                                             }
                                             
                                             // Address is complete but no shipping methods found
+                                            // Special message for USD currency if no authorize method available
+                                            if (isUSD) {
+                                                return (
+                                                    <p className='text-sm text-orange-600 italic p-4 border border-orange-300 rounded-sm bg-orange-50'>
+                                                        {t("noAuthorizeShippingUSD")}
+                                                    </p>
+                                                );
+                                            }
+                                            
                                             return (
                                                 <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                     {t("noShippingMethods")}
