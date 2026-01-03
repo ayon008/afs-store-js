@@ -1,79 +1,82 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
-import { useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 
-const categories = [
-  {
-    name: "WING FOIL",
-    slug: "foiling/wing-foil",
-    url: "https://afs-foiling.com/product-category/foiling/wing-foil/",
-    image:
-      "https://afs-foiling.com/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
-    alt_text: "wing foil",
-  },
-  {
-    name: "DOWNWIND",
-    slug: "foiling/downwind-foil",
-    url: "https://afs-foiling.com/product-category/foiling/downwind-foil/",
-    image: "https://afs-foiling.com/wp-content/uploads/2023/11/afs-pure-ha.png",
-    alt_text: "downwind",
-  },
-  {
-    name: "DOCKSTART",
-    slug: "foiling/dockstart",
-    url: "https://afs-foiling.com/product-category/foiling/dockstart/",
-    image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
-    alt_text: "dockstart",
-  },
-  {
-    name: "SUP FOIL",
-    slug: "foiling/sup-foil",
-    url: "https://afs-foiling.com/product-category/foiling/sup-foil/",
-    image:
-      "https://afs-foiling.com/wp-content/uploads/2024/01/afs-downwind.jpeg",
-    alt_text: "sup foil",
-  },
-  {
-    name: "SURF FOIL",
-    slug: "foiling/prone-foil",
-    url: "https://afs-foiling.com/product-category/foiling/prone-foil/",
-    image:
-      "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
-    alt_text: "surf foil",
-  },
-  {
-    name: "WINDFOIL",
-    slug: "windfoiling",
-    url: "https://afs-foiling.com/product-category/foiling/windfoiling/",
-    image:
-      "https://afs-foiling.com/wp-content/uploads/2022/07/afs-windfoil.jpg",
-    alt_text: "windfoil",
-  },
-  {
-    name: "WINDSURF",
-    slug: "windsurf-foil",
-    url: "https://afs-foiling.com/product-category/windsurf-foil/",
-    image:
-      "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
-    alt_text: "windsurf",
-  },
-  {
-    name: "SUP",
-    slug: "stand-up-paddle",
-    url: "https://afs-foiling.com/product-category/stand-up-paddle/",
-    image: "https://afs-foiling.com/wp-content/uploads/2025/06/sup.jpg",
-    alt_text: "sup",
-  },
-].map((c) => ({
-  ...c,
-  path: `/product-category/${c.slug}`,
-}));
 
-export default function CategorySection() {
-  const t = useTranslations("home");
+
+export default async function CategorySection() {
+  const t = await getTranslations("home");
+  const locale = await getLocale();
+
+  const categories = [
+    {
+      name: "WING FOIL",
+      slug: locale === "fr" ? "foiling/wing-foil" : "foiling/wing-foil",
+      url: "https://afs-foiling.com/product-category/foiling/wing-foil/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
+      alt_text: "wing foil",
+    },
+    {
+      name: "DOWNWIND",
+      slug: locale === "fr" ? "foiling/downwind" : "foiling/downwind-foil",
+      url: "https://afs-foiling.com/product-category/foiling/downwind-foil/",
+      image: "https://afs-foiling.com/wp-content/uploads/2023/11/afs-pure-ha.png",
+      alt_text: "downwind",
+    },
+    {
+      name: "DOCKSTART",
+      slug: "foiling/dockstart",
+      url: "https://afs-foiling.com/product-category/foiling/dockstart/",
+      image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
+      alt_text: "dockstart",
+    },
+    {
+      name: "SUP FOIL",
+      slug: "foiling/sup-foil-foiling",
+      url: "https://afs-foiling.com/product-category/foiling/sup-foil/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2024/01/afs-downwind.jpeg",
+      alt_text: "sup foil",
+    },
+    {
+      name: "SURF FOIL",
+      slug: locale !== "fr" ? "foiling/prone-foil" : "foiling/surf-foil",
+      url: "https://afs-foiling.com/product-category/foiling/prone-foil/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
+      alt_text: "surf foil",
+    },
+    {
+      name: "WINDFOIL",
+      slug: locale === "fr" ? "windfoil" : "windfoiling",
+      url: "https://afs-foiling.com/product-category/foiling/windfoiling/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2022/07/afs-windfoil.jpg",
+      alt_text: "windfoil",
+    },
+    {
+      name: "WINDSURF",
+      slug: locale === "fr" ? "windsurf" : "windsurf-foil",
+      url: "https://afs-foiling.com/product-category/windsurf-foil/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
+      alt_text: "windsurf",
+    },
+    {
+      name: "SUP",
+      slug: locale === "fr" ? "stand-up-paddle" : "stand-up-paddle",
+      url: "https://afs-foiling.com/product-category/stand-up-paddle/",
+      image: "https://afs-foiling.com/wp-content/uploads/2025/06/sup.jpg",
+      alt_text: "sup",
+    },
+  ].map((c) => ({
+    ...c,
+    path: `/product-category/${c.slug}`,
+  }));
+
+
   return (
     <section className="w-full">
       <div className="max-w-[1920px] mx-auto global-padding global-margin">

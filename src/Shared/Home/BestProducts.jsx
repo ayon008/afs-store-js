@@ -13,7 +13,7 @@ const getProduct = async (slug) => {
     const user = await getAuthenticatedUser();
     const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
     try {
-        const res = await fetch(`${process.env.WP_BASE_URL}/wp-json/afs/v1/products?slug=${slug}&per_page=100&lang=${locale}&currency=${currency}&shipping_country=${shippingCountry}`, {
+        const res = await fetch(`${process.env.WP_BASE_URL}/wp-json/afs/v1/products?slug=${slug}&per_page=100&lang=${locale}&shipping_country=${shippingCountry}&currency=${currency}`, {
             cache: 'no-cache'
         });
         if (!res.ok) {
@@ -30,10 +30,11 @@ const getProduct = async (slug) => {
 export default async function BestSellers() {
     const localeValue = await getLang();
     const products = await Promise.all([
-        getProduct(localeValue === "en" ? "evo-foil-full-set" : "foil-complet-evo"),
+        // getProduct(localeValue === "en" ? "evo-foil-full-set" : "d-lite"),
         getProduct(localeValue === "en" ? "enduro-foil-full-set" : "foil-complet-enduro"),
         getProduct(localeValue === "en" ? "blackbird-mid-length" : "planche-blackbird"),
-        getProduct("d-lite"),
+        getProduct("dock-star"),
+        getProduct("stream"),
     ]);
 
     const t = await getTranslations("home");
