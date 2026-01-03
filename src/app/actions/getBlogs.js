@@ -34,8 +34,11 @@ export async function getPosts(options = {}) {
             }
         }
         const localePath = localeValue === 'en' ? '' : localeValue;
-        const baseUrl = `${WP_BASE_URL.replace(/\/$/, '')}/${localePath ? `/${localePath}` : ''}`;
+        // Construire l'URL de base sans double slash
+        const cleanBaseUrl = WP_BASE_URL.replace(/\/$/, '');
+        const baseUrl = localePath ? `${cleanBaseUrl}/${localePath}` : cleanBaseUrl;
         const apiUrl = `${baseUrl}/wp-json/wp/v2/posts`;
+        console.log(`[getPosts] Constructed API URL: ${apiUrl}`);
 
         // If fetchAll is true, we'll paginate through all posts
         if (fetchAll) {
@@ -74,13 +77,17 @@ export async function getPosts(options = {}) {
                 if (!response.ok) {
                     const errorText = await response.text().catch(() => '');
                     console.error('[getPosts] WordPress API error', response.status, errorText);
-                    // If error is HTML, skip this page
+                    // Si l'erreur est HTML (erreur serveur), arrêter la pagination et retourner ce qui a été récupéré
                     if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-                        console.warn('[getPosts] Received HTML error page, stopping pagination');
+                        console.warn('[getPosts] Received HTML error page (likely 500 error), stopping pagination');
+                        console.warn('[getPosts] URL attempted:', url);
                         hasMorePages = false;
                         break;
                     }
-                    throw new Error(`WordPress API error ${response.status}: ${errorText}`);
+                    // Pour les autres erreurs HTTP, arrêter la pagination et retourner ce qui a été récupéré
+                    console.warn(`[getPosts] HTTP ${response.status} error, stopping pagination`);
+                    hasMorePages = false;
+                    break;
                 }
 
                 // Check if response is JSON before parsing
@@ -137,12 +144,16 @@ export async function getPosts(options = {}) {
         if (!response.ok) {
             const errorText = await response.text().catch(() => '');
             console.error('[getPosts] WordPress API error', response.status, errorText);
-            // If error is HTML, return empty array instead of throwing
+            // Si l'erreur est HTML (erreur serveur), retourner un tableau vide au lieu de lancer une erreur
             if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-                console.warn('[getPosts] Received HTML error page, returning empty array');
+                console.warn('[getPosts] Received HTML error page (likely 500 error), returning empty array');
+                console.warn('[getPosts] URL attempted:', url);
                 return [];
             }
-            throw new Error(`WordPress API error ${response.status}: ${errorText}`);
+            // Pour les autres erreurs HTTP, retourner un tableau vide plutôt que de lancer une erreur
+            // pour éviter de casser l'application
+            console.warn(`[getPosts] HTTP ${response.status} error, returning empty array`);
+            return [];
         }
 
         // Check if response is JSON before parsing
@@ -261,7 +272,13 @@ export async function getPost(identifier, bySlug = false) {
         if (!response.ok) {
             const errorText = await response.text().catch(() => '');
             console.error('[getPost] WordPress API error', response.status, errorText);
-            throw new Error(`WordPress API error ${response.status}: ${errorText}`);
+            // Si l'erreur est HTML (erreur serveur), lancer une erreur descriptive
+            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+                console.warn('[getPost] Received HTML error page (likely 500 error)');
+                console.warn('[getPost] URL attempted:', apiUrl);
+                throw new Error(`WordPress API returned HTML error page (likely server error). Status: ${response.status}`);
+            }
+            throw new Error(`WordPress API error ${response.status}: ${errorText.substring(0, 200)}`);
         }
 
         const data = await response.json();

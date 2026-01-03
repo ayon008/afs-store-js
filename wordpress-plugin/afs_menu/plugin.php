@@ -17,6 +17,14 @@ define( 'AFS_MENU_ADV_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Nom du dossier/fichier pour le cache
 define( 'AFS_MENU_CACHE_DIR', 'cache' );
 
+// React app base URL for URL conversion
+if ( ! defined( 'AFS_REACT_BASE_URL' ) ) {
+    define( 'AFS_REACT_BASE_URL', '' ); // Will use relative paths
+}
+
+// Include REST API class
+require_once AFS_MENU_ADV_PLUGIN_DIR . 'includes/class-afs-menu-rest-api.php';
+
 /**
  * 1) CHARGER ET ENREGISTRER LE WIDGET ELEMENTOR UNIQUEMENT SI ELEMENTOR EST ACTIF
  *
