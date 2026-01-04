@@ -1,7 +1,8 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useTransition } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import FormButton from '../Button/FormButton';
 import { useTranslations } from 'next-intl';
 import Cookies from 'js-cookie';
@@ -86,6 +87,9 @@ export default function ProductCard({
     }, [price, singlePrice]);
 
     const t = useTranslations('product');
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const [isNavigating, setIsNavigating] = useState(false);
 
     // Use state to prevent hydration mismatch
     const [currencySymbol, setCurrencySymbol] = useState('€');
@@ -97,11 +101,32 @@ export default function ProductCard({
         setCurrencySymbol(currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£');
     }, []);
 
+    const handleDiscoverClick = (e) => {
+        e.preventDefault();
+        
+        // Feedback immédiat - déclencher la barre de chargement
+        setIsNavigating(true);
+        window.dispatchEvent(new Event('navigation:start'));
+        
+        // Navigation avec transition pour une meilleure UX
+        startTransition(() => {
+            router.push(`/product/${slug}`);
+        });
+    };
+
 
     return (
         <div className="group w-full bg-[#F7F7F7] flex flex-col justify-between mx-auto rounded-[4px] overflow-hidden h-auto">
             {/* Image Section */}
-            <Link href={productLink} className="block">
+            <Link 
+                href={productLink} 
+                className="block"
+                onClick={() => {
+                    // Déclencher la barre de chargement immédiatement
+                    setIsNavigating(true);
+                    window.dispatchEvent(new Event('navigation:start'));
+                }}
+            >
                 <div className="relative w-full aspect-[1] h-full overflow-hidden flex items-center justify-center group">
 
                     {/* Featured (default) Image */}
@@ -160,9 +185,12 @@ export default function ProductCard({
                     }
                 </div>
                 <div className="">
-                    <Link href={`/product/${slug}`}>
-                        <FormButton label={t('discover')} />
-                    </Link>
+                    <FormButton 
+                        label={isPending || isNavigating ? "..." : t('discover')}
+                        disabled={isPending || isNavigating}
+                        onClick={handleDiscoverClick}
+                        type="button"
+                    />
                 </div>
             </div>
         </div >

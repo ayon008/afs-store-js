@@ -1536,8 +1536,10 @@ const CheckoutPageContent = () => {
                                 {
                                     items?.map((singleItem, i) => {
                                         const totalPrice = parseFloat(singleItem?.totals?.line_subtotal) / 100 + parseFloat(singleItem?.totals?.line_subtotal_tax) / 100;
+                                        // Créer une clé unique en combinant l'ID, la clé et l'index pour éviter les doublons
+                                        const uniqueKey = `${singleItem.id || 'item'}_${singleItem.key || 'key'}_${i}`;
                                         return (
-                                            <tr key={singleItem.id || singleItem.key || i} className='border-b border-[#111]'>
+                                            <tr key={uniqueKey} className='border-b border-[#111]'>
                                                 <td className='!px-3 py-2 text-left'>{singleItem?.name} x {singleItem?.quantity}</td>
                                                 <td className='!px-3 py-2 !border-l text-left border-[#111]'>{totalPrice} {singleItem?.totals?.currency_symbol} (TTC)</td>
                                             </tr>
@@ -1594,8 +1596,10 @@ const CheckoutPageContent = () => {
                                                                     const totalPrice = (rate.price / 100 + rate.taxes / 100);
                                                                     const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
                                                                     const isSelected = String(selectedRateId) === String(rate.uniqueId);
+                                                                    // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
+                                                                    const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
                                                                     return (
-                                                                        <li key={`shipping-rate-${rate.uniqueId}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                        <li key={uniqueKey} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                             <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                                 <input
                                                                                     checked={isSelected}
@@ -1652,8 +1656,10 @@ const CheckoutPageContent = () => {
                                                                 const totalPrice = (rate.price / 100 + rate.taxes / 100);
                                                                 const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
                                                                 const isSelected = String(selectedRateId) === String(rate.uniqueId);
+                                                                // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
+                                                                const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
                                                                 return (
-                                                                    <li key={`shipping-rate-${rate.uniqueId}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                    <li key={uniqueKey} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                             <input
                                                                                 checked={isSelected}
@@ -1741,9 +1747,12 @@ const CheckoutPageContent = () => {
                                 // Get translated title and description
                                 const paymentTranslation = getPaymentMethodTranslation(method);
 
+                                // Créer une clé unique en combinant l'ID et l'index pour éviter les doublons
+                                const uniquePaymentKey = `payment-method-${method.id || 'method'}-${i}`;
+
                                 return (
                                     <PaymentMethodCard
-                                        key={method.id || i}
+                                        key={uniquePaymentKey}
                                         method={method}
                                         selected={isSelected}
                                         onSelect={() => setValue('payment_method', method.id)}
