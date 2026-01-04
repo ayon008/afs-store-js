@@ -28,7 +28,16 @@
     "quantity": "Quantité",
     "subtotalLabel": "Sous-total",
     "includingVAT": "dont",
-    "VAT": "TVA"
+    "VAT": "TVA",
+    "sideCart": {
+      "yourCart": "Votre panier",
+      "close": "Fermer",
+      "subTotal": "Sous-total",
+      "inclVAT": "(TVA incl.)",
+      "continueToBasket": "Continuer vers le panier",
+      "outOfStock": "Rupture",
+      "maxQuantity": "Max"
+    }
   }
 }
 

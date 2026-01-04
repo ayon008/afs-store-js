@@ -1,10 +1,12 @@
 "use client"
 import { Minus, Plus, Trash2Icon } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 
 
 const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
+    const t = useTranslations("cart.sideCart");
     // const { taxInfo } = useCart();
     const image = item.images?.[0]?.src || item.image;
     const name = item.name || item.title;
@@ -172,10 +174,10 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
                             <Plus className='w-4 h-4' />
                         </button>
                         {!isInStock && (
-                            <span className='text-red-500 text-xs font-semibold'>Rupture</span>
+                            <span className='text-red-500 text-xs font-semibold'>{t("outOfStock")}</span>
                         )}
                         {isInStock && isMaxReached && (
-                            <span className='text-orange-500 text-xs font-semibold'>Max</span>
+                            <span className='text-orange-500 text-xs font-semibold'>{t("maxQuantity")}</span>
                         )}
                     </span>
                     <button

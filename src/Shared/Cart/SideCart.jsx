@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import useCart from '../Hooks/useCart'
 import Skeleton from '../Loader/Skeleton'
 import SideCartItems from './SideCartItem'
@@ -32,6 +33,7 @@ const CartItemSkeleton = () => (
 
 
 const SideCart = ({ isOpen, onClose }) => {
+    const t = useTranslations("cart.sideCart");
     const { cart, loading, handleUpdateCartItem, handleRemoveCartItem } = useCart();
 
 
@@ -83,10 +85,10 @@ const SideCart = ({ isOpen, onClose }) => {
             >
                 <div className=''>
                     <div className='p-5 flex items-center justify-between gap-[10px] flex-wrap  border-b border-b-[#E6E6E6]'>
-                        <span className='text-[#111] text-[20px] font-bold uppercase'>Your cart</span>
+                        <span className='text-[#111] text-[20px] font-bold uppercase'>{t("yourCart")}</span>
                         <button onClick={() => onClose()} className='flex cursor-pointer items-center justify-center gap-1 text-[13px] uppercase leading-[100%]'>
                             <X className='w-4 h-4' />
-                            <span>Close</span>
+                            <span>{t("close")}</span>
                         </button>
                     </div>
                 </div>
@@ -118,13 +120,13 @@ const SideCart = ({ isOpen, onClose }) => {
                 </div>
                 <div className='p-5 border-t border-t-[#E6E6E6] flex flex-col items-center justify-center gap-4'>
                     <div className='flex items-end gap-1 flex-wrap'>
-                        <span className='text-[15px] uppercase leading-[100%] font-bold'>Sub Total</span>
+                        <span className='text-[15px] uppercase leading-[100%] font-bold'>{t("subTotal")}</span>
                         <span className='text-[28px] uppercase leading-[100%] font-bold'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
-                        <span className='text-[19px] leading-[100%] font-bold'>(incl. VAT)</span>
+                        <span className='text-[19px] leading-[100%] font-bold'>{t("inclVAT")}</span>
                     </div>
                     <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer'>
                         <button disabled={cartItems?.length === 0} className={`py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-sm text-white ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            Continue to Basket
+                            {t("continueToBasket")}
                             <ArrowUpRight className='w-4 h-4' />
                         </button>
                     </Link>

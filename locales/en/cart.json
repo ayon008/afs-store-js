@@ -28,7 +28,16 @@
     "quantity": "Quantity",
     "subtotalLabel": "Subtotal",
     "includingVAT": "including",
-    "VAT": "VAT"
+    "VAT": "VAT",
+    "sideCart": {
+      "yourCart": "Your cart",
+      "close": "Close",
+      "subTotal": "Sub Total",
+      "inclVAT": "(incl. VAT)",
+      "continueToBasket": "Continue to Basket",
+      "outOfStock": "Out of stock",
+      "maxQuantity": "Max"
+    }
   }
 }
 
