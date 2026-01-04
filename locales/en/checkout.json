@@ -59,11 +59,19 @@
       "paypal": "PayPal",
       "paypalDescription": "Pay securely with your PayPal account",
       "monetico": "Credit Card",
+      "monetico2x": "Credit Card (2 installments)",
+      "monetico3x": "Credit Card (3 installments)",
+      "monetico4x": "Credit Card (4 installments)",
       "cardDescription": "Pay securely with your credit card",
+      "authorize": "Authorize.Net",
+      "authorizeDescription": "Pay securely with your credit card via Authorize.Net",
       "bacs": "Bank Transfer",
       "bankTransferDescription": "Make payment directly from your bank account",
       "bacsInstructions": "Make payment directly from your bank account. Please use your order number as the payment reference. Your order will not be shipped until the transfer is received in our account."
     },
+    "selectCountry": "Select a country",
+    "searchCountry": "Search country...",
+    "noCountryFound": "No country found",
     "calculateShippingMethods": "to calculate shipping methods",
     "noAuthorizeShippingUSD": "No \"Authorize\" shipping method available for USD. Please contact support.",
     "shippingCalculatedAtCheckout": "Shipping calculated at checkout",
@@ -71,7 +79,45 @@
     "cartSyncError": "Error synchronizing cart",
     "orderCreationError": "Error creating order",
     "orderCreationErrorRetry": "Error creating order. Please try again.",
-    "unknownError": "An error occurred"
+    "unknownError": "An error occurred",
+    "authorize": {
+      "cardDetails": "Card Details",
+      "enterNewCardDetails": "Enter New Card Details",
+      "cardNumber": "Card Number",
+      "cardholderName": "Cardholder Name",
+      "month": "Month",
+      "year": "Year",
+      "cvv": "CVV",
+      "cardEncrypted": "Your card information is encrypted and secure",
+      "detected": "detected",
+      "loadingPaymentSystem": "Loading secure payment system...",
+      "saveCard": "Save this card for future purchases",
+      "usingSavedCard": "Using saved card ending in",
+      "paySecurely": "Pay Securely",
+      "sslEncryption": "256-bit SSL Encryption",
+      "pciCompliant": "PCI Compliant",
+      "validationErrors": {
+        "invalidCardNumber": "Please enter a valid card number",
+        "invalidMonth": "Invalid month",
+        "invalidYear": "Invalid year",
+        "cardExpired": "Card has expired",
+        "invalidCvv": "Please enter {count}-digit CVV",
+        "invalidCardName": "Please enter cardholder name",
+        "configNotLoaded": "Payment configuration not loaded. Please refresh the page.",
+        "systemNotLoaded": "Payment system not loaded. Please wait or refresh the page."
+      },
+      "savedMethods": {
+        "title": "Saved Payment Methods",
+        "loading": "Loading saved payment methods...",
+        "default": "Default",
+        "removeConfirm": "Are you sure you want to remove this payment method?",
+        "useNewCard": "Use a new card",
+        "removePaymentMethod": "Remove payment method",
+        "endingIn": "ending in",
+        "failedToDelete": "Failed to delete payment method",
+        "cardType": "Card"
+      }
+    }
   }
 }
 

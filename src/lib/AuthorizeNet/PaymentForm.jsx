@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Script from 'next/script';
+import { useTranslations } from 'next-intl';
 
 /**
  * Detect card type from card number
@@ -143,6 +144,7 @@ const PaymentForm = forwardRef(function PaymentForm({
   disabled = false,
   loading = false,
 }, ref) {
+  const t = useTranslations("checkout.authorize");
   const [config, setConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
   const [configError, setConfigError] = useState(null);
@@ -216,35 +218,35 @@ const PaymentForm = forwardRef(function PaymentForm({
     const cleanCardNumber = cardNumber.replace(/\s/g, '');
 
     if (!cleanCardNumber || cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
-      newErrors.cardNumber = 'Please enter a valid card number';
+      newErrors.cardNumber = t("validationErrors.invalidCardNumber");
     }
 
     if (!expMonth || parseInt(expMonth) < 1 || parseInt(expMonth) > 12) {
-      newErrors.expMonth = 'Invalid month';
+      newErrors.expMonth = t("validationErrors.invalidMonth");
     }
 
     const currentYear = new Date().getFullYear();
     const yearValue = parseInt(expYear);
     if (!expYear || yearValue < currentYear || yearValue > currentYear + 20) {
-      newErrors.expYear = 'Invalid year';
+      newErrors.expYear = t("validationErrors.invalidYear");
     }
 
     // Check if card is expired
     if (expMonth && expYear) {
       const currentMonth = new Date().getMonth() + 1;
       if (yearValue === currentYear && parseInt(expMonth) < currentMonth) {
-        newErrors.expMonth = 'Card has expired';
+        newErrors.expMonth = t("validationErrors.cardExpired");
       }
     }
 
     // CVV length depends on card type (AMEX = 4, others = 3)
     const cvvLength = cardType?.type === 'amex' ? 4 : 3;
     if (!cvv || cvv.length < cvvLength) {
-      newErrors.cvv = `Please enter ${cvvLength}-digit CVV`;
+      newErrors.cvv = t("validationErrors.invalidCvv", { count: cvvLength });
     }
 
     if (!cardName || cardName.trim().length < 2) {
-      newErrors.cardName = 'Please enter cardholder name';
+      newErrors.cardName = t("validationErrors.invalidCardName");
     }
 
     setErrors(newErrors);
@@ -258,14 +260,14 @@ const PaymentForm = forwardRef(function PaymentForm({
     }
 
     if (!config) {
-      const error = 'Payment configuration not loaded. Please refresh the page.';
+      const error = t("validationErrors.configNotLoaded");
       setErrors({ general: error });
       onError?.(new Error(error));
       return;
     }
 
     if (!window.Accept) {
-      const error = 'Payment system not loaded. Please wait or refresh the page.';
+      const error = t("validationErrors.systemNotLoaded");
       setErrors({ general: error });
       onError?.(new Error(error));
       return;
@@ -375,7 +377,7 @@ const PaymentForm = forwardRef(function PaymentForm({
         {/* Card Number with type icon */}
         <div>
           <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
-            Card Number
+            {t("cardNumber")}
           </label>
           <div className="relative">
             <input
@@ -396,7 +398,7 @@ const PaymentForm = forwardRef(function PaymentForm({
             </div>
           </div>
           {cardType && (
-            <p className="mt-1 text-xs text-gray-500">{cardType.name} detected</p>
+            <p className="mt-1 text-xs text-gray-500">{cardType.name} {t("detected")}</p>
           )}
           {errors.cardNumber && (
             <p className="mt-1 text-sm text-red-600">{errors.cardNumber}</p>
@@ -406,7 +408,7 @@ const PaymentForm = forwardRef(function PaymentForm({
         {/* Cardholder Name */}
         <div>
           <label htmlFor="cardName" className="block text-sm font-medium text-gray-700 mb-1">
-            Cardholder Name
+            {t("cardholderName")}
           </label>
           <input
             type="text"
@@ -429,7 +431,7 @@ const PaymentForm = forwardRef(function PaymentForm({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label htmlFor="expMonth" className="block text-sm font-medium text-gray-700 mb-1">
-              Month
+              {t("month")}
             </label>
             <select
               id="expMonth"
@@ -455,7 +457,7 @@ const PaymentForm = forwardRef(function PaymentForm({
 
           <div>
             <label htmlFor="expYear" className="block text-sm font-medium text-gray-700 mb-1">
-              Year
+              {t("year")}
             </label>
             <select
               id="expYear"
@@ -481,7 +483,7 @@ const PaymentForm = forwardRef(function PaymentForm({
 
           <div>
             <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-              CVV
+              {t("cvv")}
             </label>
             <input
               type="text"
@@ -509,7 +511,7 @@ const PaymentForm = forwardRef(function PaymentForm({
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Loading secure payment system...
+            {t("loadingPaymentSystem")}
           </div>
         )}
 
@@ -518,7 +520,7 @@ const PaymentForm = forwardRef(function PaymentForm({
           <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
           </svg>
-          Your card information is encrypted and secure
+          {t("cardEncrypted")}
         </div>
       </div>
     </>

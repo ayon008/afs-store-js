@@ -1,0 +1,141 @@
+/**
+ * Translate country names based on locale
+ * Returns the country name in the specified language
+ */
+export function translateCountry(countryCode, locale = 'en') {
+    const countryTranslations = {
+        en: {
+            AF: "Afghanistan", AL: "Albania", DZ: "Algeria", AS: "American Samoa",
+            AD: "Andorra", AO: "Angola", AI: "Anguilla", AQ: "Antarctica",
+            AG: "Antigua and Barbuda", AR: "Argentina", AM: "Armenia", AW: "Aruba",
+            AU: "Australia", AT: "Austria", AZ: "Azerbaijan", BS: "Bahamas",
+            BH: "Bahrain", BD: "Bangladesh", BB: "Barbados", BY: "Belarus",
+            BE: "Belgium", BZ: "Belize", BJ: "Benin", BM: "Bermuda",
+            BT: "Bhutan", BO: "Bolivia", BA: "Bosnia and Herzegovina", BW: "Botswana",
+            BR: "Brazil", IO: "British Indian Ocean Territory", VG: "British Virgin Islands",
+            BN: "Brunei", BG: "Bulgaria", BF: "Burkina Faso", BI: "Burundi",
+            KH: "Cambodia", CM: "Cameroon", CA: "Canada", CV: "Cape Verde",
+            KY: "Cayman Islands", CF: "Central African Republic", TD: "Chad",
+            CL: "Chile", CN: "China", CX: "Christmas Island", CC: "Cocos (Keeling) Islands",
+            CO: "Colombia", KM: "Comoros", CD: "Congo (DRC)", CG: "Congo (Republic)",
+            CK: "Cook Islands", CR: "Costa Rica", CI: "Côte d'Ivoire", HR: "Croatia",
+            CU: "Cuba", CW: "Curaçao", CY: "Cyprus", CZ: "Czech Republic",
+            DK: "Denmark", DJ: "Djibouti", DM: "Dominica", DO: "Dominican Republic",
+            EC: "Ecuador", EG: "Egypt", SV: "El Salvador", GQ: "Equatorial Guinea",
+            ER: "Eritrea", EE: "Estonia", ET: "Ethiopia", FK: "Falkland Islands",
+            FO: "Faroe Islands", FJ: "Fiji", FI: "Finland", FR: "France",
+            PF: "French Polynesia", GA: "Gabon", GM: "Gambia", GE: "Georgia",
+            DE: "Germany", GH: "Ghana", GI: "Gibraltar", GR: "Greece",
+            GL: "Greenland", GD: "Grenada", GU: "Guam", GT: "Guatemala",
+            GG: "Guernsey", GN: "Guinea", GW: "Guinea-Bissau", GY: "Guyana",
+            HT: "Haiti", HN: "Honduras", HK: "Hong Kong", HU: "Hungary",
+            IS: "Iceland", IN: "India", ID: "Indonesia", IR: "Iran",
+            IQ: "Iraq", IE: "Ireland", IM: "Isle of Man", IL: "Israel",
+            IT: "Italy", JM: "Jamaica", JP: "Japan", JE: "Jersey",
+            JO: "Jordan", KZ: "Kazakhstan", KE: "Kenya", KI: "Kiribati",
+            KW: "Kuwait", KG: "Kyrgyzstan", LA: "Laos", LV: "Latvia",
+            LB: "Lebanon", LS: "Lesotho", LR: "Liberia", LY: "Libya",
+            LI: "Liechtenstein", LT: "Lithuania", LU: "Luxembourg", MO: "Macau",
+            MK: "North Macedonia", MG: "Madagascar", MW: "Malawi", MY: "Malaysia",
+            MV: "Maldives", ML: "Mali", MT: "Malta", MH: "Marshall Islands",
+            MR: "Mauritania", MU: "Mauritius", MX: "Mexico", FM: "Micronesia",
+            MD: "Moldova", MC: "Monaco", MN: "Mongolia", ME: "Montenegro",
+            MA: "Morocco", MZ: "Mozambique", MM: "Myanmar", NA: "Namibia",
+            NR: "Nauru", NP: "Nepal", NL: "Netherlands", NZ: "New Zealand",
+            NI: "Nicaragua", NE: "Niger", NG: "Nigeria", NU: "Niue",
+            KP: "North Korea", MP: "Northern Mariana Islands", NO: "Norway",
+            OM: "Oman", PK: "Pakistan", PW: "Palau", PA: "Panama",
+            PG: "Papua New Guinea", PY: "Paraguay", PE: "Peru", PH: "Philippines",
+            PL: "Poland", PT: "Portugal", PR: "Puerto Rico", QA: "Qatar",
+            RO: "Romania", RU: "Russia", RW: "Rwanda", KN: "Saint Kitts and Nevis",
+            LC: "Saint Lucia", VC: "Saint Vincent and the Grenadines", WS: "Samoa",
+            SM: "San Marino", ST: "Sao Tome and Principe", SA: "Saudi Arabia",
+            SN: "Senegal", RS: "Serbia", SC: "Seychelles", SL: "Sierra Leone",
+            SG: "Singapore", SK: "Slovakia", SI: "Slovenia", SB: "Solomon Islands",
+            SO: "Somalia", ZA: "South Africa", KR: "South Korea", SS: "South Sudan",
+            ES: "Spain", LK: "Sri Lanka", SD: "Sudan", SR: "Suriname",
+            SE: "Sweden", CH: "Switzerland", SY: "Syria", TW: "Taiwan",
+            TJ: "Tajikistan", TZ: "Tanzania", TH: "Thailand", TL: "Timor-Leste",
+            TG: "Togo", TO: "Tonga", TT: "Trinidad and Tobago", TN: "Tunisia",
+            TR: "Turkey", TM: "Turkmenistan", TV: "Tuvalu", UG: "Uganda",
+            UA: "Ukraine", AE: "United Arab Emirates", GB: "United Kingdom",
+            US: "United States", UY: "Uruguay", UZ: "Uzbekistan", VU: "Vanuatu",
+            VA: "Vatican City", VE: "Venezuela", VN: "Vietnam", YE: "Yemen",
+            ZM: "Zambia", ZW: "Zimbabwe"
+        },
+        fr: {
+            AF: "Afghanistan", AL: "Albanie", DZ: "Algérie", AS: "Samoa américaines",
+            AD: "Andorre", AO: "Angola", AI: "Anguilla", AQ: "Antarctique",
+            AG: "Antigua-et-Barbuda", AR: "Argentine", AM: "Arménie", AW: "Aruba",
+            AU: "Australie", AT: "Autriche", AZ: "Azerbaïdjan", BS: "Bahamas",
+            BH: "Bahreïn", BD: "Bangladesh", BB: "Barbade", BY: "Biélorussie",
+            BE: "Belgique", BZ: "Belize", BJ: "Bénin", BM: "Bermudes",
+            BT: "Bhoutan", BO: "Bolivie", BA: "Bosnie-Herzégovine", BW: "Botswana",
+            BR: "Brésil", IO: "Territoire britannique de l'océan Indien", VG: "Îles Vierges britanniques",
+            BN: "Brunei", BG: "Bulgarie", BF: "Burkina Faso", BI: "Burundi",
+            KH: "Cambodge", CM: "Cameroun", CA: "Canada", CV: "Cap-Vert",
+            KY: "Îles Caïmans", CF: "République centrafricaine", TD: "Tchad",
+            CL: "Chili", CN: "Chine", CX: "Île Christmas", CC: "Îles Cocos",
+            CO: "Colombie", KM: "Comores", CD: "Congo (RDC)", CG: "Congo (République)",
+            CK: "Îles Cook", CR: "Costa Rica", CI: "Côte d'Ivoire", HR: "Croatie",
+            CU: "Cuba", CW: "Curaçao", CY: "Chypre", CZ: "République tchèque",
+            DK: "Danemark", DJ: "Djibouti", DM: "Dominique", DO: "République dominicaine",
+            EC: "Équateur", EG: "Égypte", SV: "Salvador", GQ: "Guinée équatoriale",
+            ER: "Érythrée", EE: "Estonie", ET: "Éthiopie", FK: "Îles Malouines",
+            FO: "Îles Féroé", FJ: "Fidji", FI: "Finlande", FR: "France",
+            PF: "Polynésie française", GA: "Gabon", GM: "Gambie", GE: "Géorgie",
+            DE: "Allemagne", GH: "Ghana", GI: "Gibraltar", GR: "Grèce",
+            GL: "Groenland", GD: "Grenade", GU: "Guam", GT: "Guatemala",
+            GG: "Guernesey", GN: "Guinée", GW: "Guinée-Bissau", GY: "Guyane",
+            HT: "Haïti", HN: "Honduras", HK: "Hong Kong", HU: "Hongrie",
+            IS: "Islande", IN: "Inde", ID: "Indonésie", IR: "Iran",
+            IQ: "Irak", IE: "Irlande", IM: "Île de Man", IL: "Israël",
+            IT: "Italie", JM: "Jamaïque", JP: "Japon", JE: "Jersey",
+            JO: "Jordanie", KZ: "Kazakhstan", KE: "Kenya", KI: "Kiribati",
+            KW: "Koweït", KG: "Kirghizistan", LA: "Laos", LV: "Lettonie",
+            LB: "Liban", LS: "Lesotho", LR: "Liberia", LY: "Libye",
+            LI: "Liechtenstein", LT: "Lituanie", LU: "Luxembourg", MO: "Macao",
+            MK: "Macédoine du Nord", MG: "Madagascar", MW: "Malawi", MY: "Malaisie",
+            MV: "Maldives", ML: "Mali", MT: "Malte", MH: "Îles Marshall",
+            MR: "Mauritanie", MU: "Maurice", MX: "Mexique", FM: "Micronésie",
+            MD: "Moldavie", MC: "Monaco", MN: "Mongolie", ME: "Monténégro",
+            MA: "Maroc", MZ: "Mozambique", MM: "Myanmar", NA: "Namibie",
+            NR: "Nauru", NP: "Népal", NL: "Pays-Bas", NZ: "Nouvelle-Zélande",
+            NI: "Nicaragua", NE: "Niger", NG: "Nigeria", NU: "Niue",
+            KP: "Corée du Nord", MP: "Îles Mariannes du Nord", NO: "Norvège",
+            OM: "Oman", PK: "Pakistan", PW: "Palaos", PA: "Panama",
+            PG: "Papouasie-Nouvelle-Guinée", PY: "Paraguay", PE: "Pérou", PH: "Philippines",
+            PL: "Pologne", PT: "Portugal", PR: "Porto Rico", QA: "Qatar",
+            RO: "Roumanie", RU: "Russie", RW: "Rwanda", KN: "Saint-Kitts-et-Nevis",
+            LC: "Sainte-Lucie", VC: "Saint-Vincent-et-les-Grenadines", WS: "Samoa",
+            SM: "Saint-Marin", ST: "São Tomé-et-Príncipe", SA: "Arabie saoudite",
+            SN: "Sénégal", RS: "Serbie", SC: "Seychelles", SL: "Sierra Leone",
+            SG: "Singapour", SK: "Slovaquie", SI: "Slovénie", SB: "Îles Salomon",
+            SO: "Somalie", ZA: "Afrique du Sud", KR: "Corée du Sud", SS: "Soudan du Sud",
+            ES: "Espagne", LK: "Sri Lanka", SD: "Soudan", SR: "Suriname",
+            SE: "Suède", CH: "Suisse", SY: "Syrie", TW: "Taïwan",
+            TJ: "Tadjikistan", TZ: "Tanzanie", TH: "Thaïlande", TL: "Timor oriental",
+            TG: "Togo", TO: "Tonga", TT: "Trinité-et-Tobago", TN: "Tunisie",
+            TR: "Turquie", TM: "Turkménistan", TV: "Tuvalu", UG: "Ouganda",
+            UA: "Ukraine", AE: "Émirats arabes unis", GB: "Royaume-Uni",
+            US: "États-Unis", UY: "Uruguay", UZ: "Ouzbékistan", VU: "Vanuatu",
+            VA: "Vatican", VE: "Venezuela", VN: "Viêt Nam", YE: "Yémen",
+            ZM: "Zambie", ZW: "Zimbabwe"
+        }
+    };
+
+    const translations = countryTranslations[locale] || countryTranslations.en;
+    return translations[countryCode] || countryCode;
+}
+
+/**
+ * Get translated countries list
+ * Note: Import countriesList separately when needed
+ */
+export function getTranslatedCountries(countriesList, locale = 'en') {
+    return countriesList.map(country => ({
+        ...country,
+        name: translateCountry(country.code, locale)
+    }));
+}
+

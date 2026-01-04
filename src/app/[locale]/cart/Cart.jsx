@@ -7,7 +7,7 @@ import useCart from '@/Shared/Hooks/useCart';
 import CartList from './CartList';
 
 const Cart = () => {
-    const t = useTranslations("checkout");
+    const t = useTranslations("cart");
     
     // Shipping rates will be calculated at checkout
     const [couponCode, setCouponCode] = useState('');
@@ -52,10 +52,10 @@ const Cart = () => {
         const result = await handleApplyCoupon(couponCode);
 
         if (result.success) {
-            setCouponSuccess('Code promo appliqué avec succès.');
+            setCouponSuccess(t("couponApplied"));
             setCouponCode('');
         } else {
-            setCouponError(result.error || 'Code promo invalide');
+            setCouponError(result.error || t("invalidCoupon"));
         }
 
         setCouponLoading(false);
@@ -69,7 +69,7 @@ const Cart = () => {
         const result = await handleRemoveCoupon(code);
 
         if (!result.success) {
-            setCouponError(result.error || 'Erreur lors de la suppression du coupon');
+            setCouponError(result.error || t("errorRemovingCoupon"));
         }
         // No success message when removing - just clear the banner
 
@@ -92,7 +92,7 @@ const Cart = () => {
                 couponSuccess && (
                     <div className='py-4 px-6 flex items-center gap-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-md my-8 mx-auto max-w-7xl animate-slideDown'>
                         <CheckCircle className='w-5 h-5 text-green-600' />
-                        <span className='text-green-800 text-lg font-medium'>Coupon applied successfully!</span>
+                        <span className='text-green-800 text-lg font-medium'>{t("couponApplied")}</span>
                     </div>
                 )
             }
@@ -106,17 +106,19 @@ const Cart = () => {
                         <div className='bg-gradient-to-r from-blue-600 to-blue-700 p-5'>
                             <div className='flex items-center gap-3'>
                                 <ShoppingCart className='w-6 h-6 text-white' />
-                                <h2 className='text-2xl font-bold text-white'>Your Cart ({cartItems.length} items)</h2>
+                                <h2 className='text-2xl font-bold text-white'>
+                                    {t("yourCart")} ({cartItems.length} {cartItems.length === 1 ? t("item") : t("items")})
+                                </h2>
                             </div>
                         </div>
 
                         {/* Table Header - Desktop Only */}
                         <div className='hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b font-medium text-gray-700 text-sm'>
                             <span className='col-span-1'></span>
-                            <span className='col-span-5'>Product</span>
-                            <span className='col-span-2 text-center'>Price</span>
-                            <span className='col-span-2 text-center'>Quantity</span>
-                            <span className='col-span-2 text-right'>Subtotal</span>
+                            <span className='col-span-5'>{t("product")}</span>
+                            <span className='col-span-2 text-center'>{t("price")}</span>
+                            <span className='col-span-2 text-center'>{t("quantity")}</span>
+                            <span className='col-span-2 text-right'>{t("subtotalLabel")}</span>
                         </div>
 
                         {/* Cart Items */}
@@ -133,14 +135,14 @@ const Cart = () => {
                     <div className='bg-white rounded-2xl shadow-sm p-6 space-y-4'>
                         <div className='flex items-center gap-2 mb-4'>
                             <Tag className='w-5 h-5 text-blue-600' />
-                            <h3 className='text-lg font-semibold text-gray-800'>Have a coupon?</h3>
+                            <h3 className='text-lg font-semibold text-gray-800'>{t("haveCoupon")}</h3>
                         </div>
 
                         <form onSubmit={handleCouponSubmit} className='flex flex-col sm:flex-row gap-3'>
                             <input
                                 type="text"
                                 name='coupon-code'
-                                placeholder='Enter coupon code'
+                                placeholder={t("enterCouponCode")}
                                 value={couponCode}
                                 onChange={(e) => setCouponCode(e.target.value)}
                                 className='flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all'
@@ -151,7 +153,7 @@ const Cart = () => {
                                 disabled={couponLoading || !couponCode.trim()}
                                 className='px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md'
                             >
-                                {couponLoading ? 'Applying...' : 'Apply Coupon'}
+                                {couponLoading ? t("applying") : t("applyCoupon")}
                             </button>
                         </form>
 
@@ -164,7 +166,7 @@ const Cart = () => {
 
                         {appliedCoupons.length > 0 && (
                             <div className='bg-green-50 rounded-lg p-4'>
-                                <p className='text-sm font-medium text-gray-700 mb-2'>Applied coupons:</p>
+                                <p className='text-sm font-medium text-gray-700 mb-2'>{t("appliedCoupons")}</p>
                                 <div className='flex flex-wrap gap-2'>
                                     {appliedCoupons.map((coupon, index) => (
                                         <div
@@ -194,20 +196,20 @@ const Cart = () => {
                 {/* Right Side - Cart Totals */}
                 <div className='hidden lg:block flex-1 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 lg:p-8 sticky top-24'>
                     <h2 className='text-2xl font-bold text-[#111] pb-5 border-b border-gray-200 mb-6'>
-                        Cart totals
+                        {t("cartTotals")}
                     </h2>
 
                     <div className='space-y-4'>
                         {/* Subtotal */}
                         <div className='flex items-center justify-between'>
-                            <span className='text-base text-gray-600'>Sub total</span>
+                            <span className='text-base text-gray-600'>{t("subtotal")}</span>
                             <span className='text-base text-[#111] font-semibold'>{sub_total}{currencySymbol}</span>
                         </div>
 
                         {/* Discount */}
                         {parseFloat(discountTotal) > 0 && (
                             <div className='flex items-center justify-between'>
-                                <span className='text-base text-gray-600'>Discount</span>
+                                <span className='text-base text-gray-600'>{t("discount")}</span>
                                 <span className='text-base text-green-600 font-semibold'>-{discountTotal}{currencySymbol}</span>
                             </div>
                         )}
@@ -216,7 +218,7 @@ const Cart = () => {
                         <div className='pt-4 border-t border-gray-100'>
                             <div className='flex items-center gap-2 mb-4'>
                                 <Truck className='w-5 h-5 text-[#1D98FF]' />
-                                <h3 className='text-base font-semibold text-[#111]'>Méthodes de livraison</h3>
+                                <h3 className='text-base font-semibold text-[#111]'>{t("shipping")}</h3>
                             </div>
 
                             <div className='p-4 bg-blue-50 rounded-xl text-sm text-blue-700'>
@@ -229,14 +231,14 @@ const Cart = () => {
 
                         {/* Total */}
                         <div className='flex items-center justify-between pt-4 mt-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 -mx-6 lg:-mx-8 px-6 lg:px-8 py-5 rounded-b-2xl overflow-hidden'>
-                            <span className='text-lg font-bold text-[#111]'>Total</span>
+                            <span className='text-lg font-bold text-[#111]'>{t("total")}</span>
                             <div className='text-right'>
                                 <strong className='text-2xl lg:text-3xl text-[#111] font-bold block'>
                                     {total || 0}{currencySymbol}
                                 </strong>
                                 {parseFloat(total_tax) > 0 && (
                                     <small className='text-gray-500 text-sm'>
-                                        (dont <strong>{total_tax || 0}{currencySymbol}</strong> TVA)
+                                        ({t("includingVAT")} <strong>{total_tax || 0}{currencySymbol}</strong> {t("VAT")})
                                     </small>
                                 )}
                             </div>
@@ -257,7 +259,7 @@ const Cart = () => {
                             '
                         >
                             <CreditCard className="w-5 h-5" />
-                            Continue to checkout
+                            {t("continueToCheckout")}
                         </Link>
                     ) : (
                         <div
@@ -269,7 +271,7 @@ const Cart = () => {
                             '
                         >
                             <CreditCard className="w-5 h-5" />
-                            Continue to checkout
+                            {t("continueToCheckout")}
                         </div>
                     )}
                 </div>
@@ -298,7 +300,7 @@ const Cart = () => {
                             '
                         >
                             <CreditCard className='w-5 h-5' />
-                            Checkout
+                            {t("checkout")}
                         </Link>
                     ) : (
                         <div
@@ -309,7 +311,7 @@ const Cart = () => {
                             '
                         >
                             <CreditCard className='w-5 h-5' />
-                            Checkout
+                            {t("checkout")}
                         </div>
                     )}
                 </div>

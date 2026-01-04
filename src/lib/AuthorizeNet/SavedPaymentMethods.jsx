@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 /**
  * Get card brand icon based on card type
@@ -86,6 +87,7 @@ export default function SavedPaymentMethods({
   showAddNew = true,
   onAddNew,
 }) {
+  const t = useTranslations("checkout.authorize.savedMethods");
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [customerProfileId, setCustomerProfileId] = useState(propCustomerProfileId);
   const [loading, setLoading] = useState(true);
@@ -155,7 +157,7 @@ export default function SavedPaymentMethods({
 
   // Handle deletion
   const handleDelete = async (method) => {
-    if (!confirm('Are you sure you want to remove this payment method?')) {
+    if (!confirm(t("removeConfirm"))) {
       return;
     }
 
@@ -170,7 +172,7 @@ export default function SavedPaymentMethods({
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to delete payment method');
+        throw new Error(data.error || t("failedToDelete"));
       }
 
       // Remove from local state
@@ -203,7 +205,7 @@ export default function SavedPaymentMethods({
   if (loading) {
     return (
       <div className="p-4 text-center text-gray-500">
-        Loading saved payment methods...
+        {t("loading")}
       </div>
     );
   }
@@ -224,7 +226,7 @@ export default function SavedPaymentMethods({
     <div className="space-y-3">
       {paymentMethods.length > 0 && (
         <h4 className="text-sm font-medium text-gray-700 mb-2">
-          Saved Payment Methods
+          {t("title")}
         </h4>
       )}
 
@@ -259,7 +261,7 @@ export default function SavedPaymentMethods({
             {/* Card details */}
             <div>
               <div className="text-sm font-medium text-gray-900">
-                {method.cardType || 'Card'} ending in {method.cardNumber?.slice(-4) || '****'}
+                {method.cardType || t("cardType")} {t("endingIn")} {method.cardNumber?.slice(-4) || '****'}
               </div>
               {method.billTo?.firstName && (
                 <div className="text-xs text-gray-500">
@@ -271,7 +273,7 @@ export default function SavedPaymentMethods({
             {/* Default badge */}
             {method.isDefault && (
               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                Default
+                {t("default")}
               </span>
             )}
           </div>
@@ -285,7 +287,7 @@ export default function SavedPaymentMethods({
             }}
             disabled={deletingId === method.paymentProfileId}
             className="text-gray-400 hover:text-red-500 transition-colors p-1"
-            title="Remove payment method"
+            title={t("removePaymentMethod")}
           >
             {deletingId === method.paymentProfileId ? (
               <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -333,7 +335,7 @@ export default function SavedPaymentMethods({
             </div>
 
             <span className="text-sm font-medium text-gray-700">
-              Use a new card
+              {t("useNewCard")}
             </span>
           </div>
         </div>

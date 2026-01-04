@@ -59,11 +59,19 @@
       "paypal": "PayPal",
       "paypalDescription": "Payez en toute sécurité avec votre compte PayPal",
       "monetico": "Carte Bancaire",
+      "monetico2x": "Carte Bancaire (en 2 fois)",
+      "monetico3x": "Carte Bancaire (en 3 fois)",
+      "monetico4x": "Carte Bancaire (en 4 fois)",
       "cardDescription": "Payez en toute sécurité avec votre carte bancaire",
+      "authorize": "Authorize.Net",
+      "authorizeDescription": "Payez en toute sécurité avec votre carte bancaire via Authorize.Net",
       "bacs": "Virement bancaire",
       "bankTransferDescription": "Effectuez le paiement directement depuis votre compte bancaire",
       "bacsInstructions": "Effectuez le paiement directement depuis votre compte bancaire. Veuillez utiliser votre numéro de commande comme référence de paiement. Votre commande ne sera expédiée qu'après réception du virement sur notre compte."
     },
+    "selectCountry": "Sélectionnez un pays",
+    "searchCountry": "Rechercher un pays...",
+    "noCountryFound": "Aucun pays trouvé",
     "calculateShippingMethods": "pour calculer les méthodes de livraison",
     "noAuthorizeShippingUSD": "Aucune méthode d'expédition \"Authorize\" disponible pour USD. Veuillez contacter le support.",
     "shippingCalculatedAtCheckout": "Livraison calculée au checkout",
@@ -71,7 +79,45 @@
     "cartSyncError": "Erreur lors de la synchronisation du panier",
     "orderCreationError": "Erreur lors de la création de la commande",
     "orderCreationErrorRetry": "Erreur lors de la création de la commande. Veuillez réessayer.",
-    "unknownError": "Une erreur est survenue"
+    "unknownError": "Une erreur est survenue",
+    "authorize": {
+      "cardDetails": "Détails de la carte",
+      "enterNewCardDetails": "Saisir les détails d'une nouvelle carte",
+      "cardNumber": "Numéro de carte",
+      "cardholderName": "Nom du titulaire",
+      "month": "Mois",
+      "year": "Année",
+      "cvv": "CVV",
+      "cardEncrypted": "Vos informations de carte sont cryptées et sécurisées",
+      "detected": "détecté",
+      "loadingPaymentSystem": "Chargement du système de paiement sécurisé...",
+      "saveCard": "Enregistrer cette carte pour les achats futurs",
+      "usingSavedCard": "Utilisation de la carte enregistrée se terminant par",
+      "paySecurely": "Payer en toute sécurité",
+      "sslEncryption": "Chiffrement SSL 256 bits",
+      "pciCompliant": "Conforme PCI",
+      "validationErrors": {
+        "invalidCardNumber": "Veuillez saisir un numéro de carte valide",
+        "invalidMonth": "Mois invalide",
+        "invalidYear": "Année invalide",
+        "cardExpired": "La carte a expiré",
+        "invalidCvv": "Veuillez saisir un CVV à {count} chiffres",
+        "invalidCardName": "Veuillez saisir le nom du titulaire",
+        "configNotLoaded": "Configuration de paiement non chargée. Veuillez actualiser la page.",
+        "systemNotLoaded": "Système de paiement non chargé. Veuillez patienter ou actualiser la page."
+      },
+      "savedMethods": {
+        "title": "Moyens de paiement enregistrés",
+        "loading": "Chargement des moyens de paiement enregistrés...",
+        "default": "Par défaut",
+        "removeConfirm": "Êtes-vous sûr de vouloir supprimer ce moyen de paiement ?",
+        "useNewCard": "Utiliser une nouvelle carte",
+        "removePaymentMethod": "Supprimer le moyen de paiement",
+        "endingIn": "se terminant par",
+        "failedToDelete": "Échec de la suppression du moyen de paiement",
+        "cardType": "Carte"
+      }
+    }
   }
 }
 

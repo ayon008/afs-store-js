@@ -1,0 +1,34 @@
+{
+  "cart": {
+    "emptyCart": "Votre panier est vide",
+    "emptyCartMessage": "Il semble que vous n'ayez pas encore ajouté d'articles à votre panier. Commencez vos achats pour le remplir !",
+    "backToShop": "Continuer les achats",
+    "items": "articles",
+    "item": "article",
+    "cartTotals": "Total du panier",
+    "subtotal": "Sous-total",
+    "discount": "Réduction",
+    "total": "Total",
+    "shipping": "Livraison",
+    "shippingCalculatedAtCheckout": "Livraison calculée au checkout",
+    "shippingCalculatedAtCheckoutDescription": "Les options de livraison seront disponibles après avoir renseigné votre adresse.",
+    "continueToCheckout": "Passer à la caisse",
+    "checkout": "Commander",
+    "haveCoupon": "Vous avez un coupon ?",
+    "enterCouponCode": "Saisir le code promo",
+    "applyCoupon": "Appliquer le coupon",
+    "applying": "Application...",
+    "appliedCoupons": "Coupons appliqués :",
+    "couponApplied": "Coupon appliqué avec succès !",
+    "invalidCoupon": "Code promo invalide",
+    "errorRemovingCoupon": "Erreur lors de la suppression du coupon",
+    "yourCart": "Votre panier",
+    "product": "Produit",
+    "price": "Prix",
+    "quantity": "Quantité",
+    "subtotalLabel": "Sous-total",
+    "includingVAT": "dont",
+    "VAT": "TVA"
+  }
+}
+

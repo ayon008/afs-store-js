@@ -11,6 +11,7 @@ import CheckoutPayPal from "@/lib/CheckoutPaypal";
 import CheckoutAuthorize from "@/lib/CheckoutAuthorize";
 import { countriesList } from "@/lib/countriesList";
 import Link from "next/link";
+import { Link as I18nLink } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -18,7 +19,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
 import PaymentMethodCard from "@/Shared/Payment/PaymentMethodCard";
-import { User, MapPin, CreditCard, Package } from "lucide-react";
+import { User, MapPin, CreditCard, Package, ShoppingCart, ArrowRight } from "lucide-react";
 import Cookies from "js-cookie";
 
 // Wrapper component to ensure NextIntl context is available
@@ -265,8 +266,8 @@ const CheckoutPageContent = () => {
         // Check for Authorize
         if (methodId.includes('authorize') || methodTitle.includes('authorize')) {
             return {
-                title: method.title || 'Authorize.Net',
-                description: t("paymentMethods.cardDescription") || 'Pay securely with your credit card'
+                title: t("paymentMethods.authorize"),
+                description: t("paymentMethods.authorizeDescription")
             };
         }
         
@@ -278,8 +279,28 @@ const CheckoutPageContent = () => {
             };
         }
         
-        // Check for Monetico/Carte Bancaire
+        // Check for Monetico/Carte Bancaire variants
         if (methodId.includes('monetico') || methodTitle.includes('carte bancaire')) {
+            // Check for installment variants
+            if (methodTitle.includes('2 fois') || methodTitle.includes('2x') || methodId.includes('2x')) {
+                return {
+                    title: t("paymentMethods.monetico2x"),
+                    description: t("paymentMethods.cardDescription")
+                };
+            }
+            if (methodTitle.includes('3 fois') || methodTitle.includes('3x') || methodId.includes('3x')) {
+                return {
+                    title: t("paymentMethods.monetico3x"),
+                    description: t("paymentMethods.cardDescription")
+                };
+            }
+            if (methodTitle.includes('4 fois') || methodTitle.includes('4x') || methodId.includes('4x')) {
+                return {
+                    title: t("paymentMethods.monetico4x"),
+                    description: t("paymentMethods.cardDescription")
+                };
+            }
+            // Default Monetico
             return {
                 title: t("paymentMethods.monetico"),
                 description: t("paymentMethods.cardDescription")
@@ -291,6 +312,19 @@ const CheckoutPageContent = () => {
             return {
                 title: t("paymentMethods.bacs"),
                 description: t("paymentMethods.bankTransferDescription")
+            };
+        }
+        
+        // Check for generic "Credit Card" (fallback for any card payment method)
+        // This catches "Credit Card", "credit card", "Carte de crédit", etc.
+        if (methodTitle.includes('credit card') || 
+            methodTitle.includes('carte') || 
+            methodId.includes('card') ||
+            method.title === 'Credit Card' ||
+            method.title === 'credit card') {
+            return {
+                title: t("paymentMethods.monetico"),
+                description: t("paymentMethods.cardDescription")
             };
         }
         
@@ -1149,20 +1183,43 @@ const CheckoutPageContent = () => {
                         duration={5000}
                     />
                 )}
-                <div className='global-padding global-margin'>
-                <div className='max-w-[800px] mx-auto py-[80px] lg:py-[100px]'>
-                    <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
-                        <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
-                        <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
-                        <Link 
-                            href="/" 
-                            className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
-                        >
-                            {t("backToShop")}
-                        </Link>
+                <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center py-12 px-4'>
+                    <div className='max-w-2xl w-full'>
+                        <div className='bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden'>
+                            {/* Icon Section */}
+                            <div className='bg-gradient-to-br from-blue-50 to-indigo-50 p-12 text-center'>
+                                <div className='inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg mb-6'>
+                                    <ShoppingCart className='w-12 h-12 text-gray-400' />
+                                </div>
+                                <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-3'>
+                                    {t("emptyCart")}
+                                </h2>
+                                <p className='text-lg text-gray-600 max-w-md mx-auto'>
+                                    {t("emptyCartMessage")}
+                                </p>
+                            </div>
+
+                            {/* Action Section */}
+                            <div className='p-8 text-center bg-gray-50'>
+                                <I18nLink 
+                                    href="/product-category/foiling/wing-foil"
+                                    className='
+                                        inline-flex items-center justify-center gap-3
+                                        bg-[#1D98FF] text-white font-semibold
+                                        px-8 py-4 rounded-xl
+                                        hover:bg-[#1585e0] active:scale-[0.98]
+                                        shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                                        transition-all duration-200
+                                        text-base uppercase tracking-wide
+                                    '
+                                >
+                                    {t("backToShop")}
+                                    <ArrowRight className='w-5 h-5' />
+                                </I18nLink>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
             </>
         );
     }
@@ -1669,7 +1726,7 @@ const CheckoutPageContent = () => {
                                 <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
                                     <CreditCard className='w-5 h-5 text-[#1D98FF]' />
                                 </div>
-                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("paymentMethod") || "Mode de paiement"}</h3>
+                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("paymentMethod")}</h3>
                             </div>
                         </div>
 
@@ -1821,8 +1878,8 @@ const CheckoutPageContent = () => {
                         {/* Terms and Submit */}
                         <div className='bg-gray-50 p-6 space-y-4'>
                             <p className='text-sm text-gray-600'>
-                                Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our{' '}
-                                <Link href="/privacy-policy" className='text-[#1D98FF] hover:underline'>privacy policy</Link>
+                                {t("privacyPolicyText")}{' '}
+                                <Link href="/privacy-policy" className='text-[#1D98FF] hover:underline'>{t("privacyPolicy")}</Link>
                             </p>
 
                             <label className='flex items-center gap-3 cursor-pointer'>

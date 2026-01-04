@@ -1,0 +1,34 @@
+{
+  "cart": {
+    "emptyCart": "Your cart is empty",
+    "emptyCartMessage": "Looks like you haven't added anything to your cart yet. Start shopping to fill it up!",
+    "backToShop": "Continue Shopping",
+    "items": "items",
+    "item": "item",
+    "cartTotals": "Cart totals",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "shipping": "Shipping",
+    "shippingCalculatedAtCheckout": "Shipping calculated at checkout",
+    "shippingCalculatedAtCheckoutDescription": "Shipping options will be available after you provide your address.",
+    "continueToCheckout": "Continue to checkout",
+    "checkout": "Checkout",
+    "haveCoupon": "Have a coupon?",
+    "enterCouponCode": "Enter coupon code",
+    "applyCoupon": "Apply Coupon",
+    "applying": "Applying...",
+    "appliedCoupons": "Applied coupons:",
+    "couponApplied": "Coupon applied successfully!",
+    "invalidCoupon": "Invalid coupon code",
+    "errorRemovingCoupon": "Error removing coupon",
+    "yourCart": "Your Cart",
+    "product": "Product",
+    "price": "Price",
+    "quantity": "Quantity",
+    "subtotalLabel": "Subtotal",
+    "includingVAT": "including",
+    "VAT": "VAT"
+  }
+}
+
