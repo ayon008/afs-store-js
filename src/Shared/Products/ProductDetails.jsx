@@ -507,7 +507,7 @@ const ProductDetails = ({ data, variations }) => {
                     <div className='space-y-2'>
                         <p className='text-base leading-[100%] font-bold'>{t('warranty')}</p>
                         <small className='text-[15px] leading-[19px] block'>
-                            {t("warranty")}
+                            {t("Tous nos produits sont garantis 2 ans.")}
                         </small>
                     </div>
                     <div className='space-y-2'>

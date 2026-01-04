@@ -447,6 +447,63 @@ td {
   text-align: left;
 }
 
+
+
+.criteria-title {
+  font-family: "alliance no.2", sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 55px;
+  color: rgb(17, 17, 17);
+  margin-bottom: 10px;
+}
+.criteria-label {
+  font-family: "alliance no.2", sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 26px;
+  color: rgba(17, 17, 17, 0.75);
+  margin-left: 10px;
+}
+.criteria {
+  margin-bottom: 20px;
+}
+.practice-option, .subpractice-option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.practice-option img, .subpractice-option img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+/* input[type="range"] {
+  width: 100%;
+  margin-bottom: 10px;
+} */
+.output {
+  display: block;
+  margin-top: 5px;
+  font-weight: bold;
+}
+#result {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-family: "alliance no.2", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: rgb(17, 17, 17);
+}
+#subpractice-section {
+  display: none;
+}
+
 .faq p {
   font-size: 16px !important;
   margin-bottom: 8px !important;

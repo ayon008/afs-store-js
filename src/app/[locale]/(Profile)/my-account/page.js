@@ -43,8 +43,8 @@ const Page = () => {
                 }
 
                 <div className='space-y-[clamp(0.875rem,0.5297rem+0.7203vw,1.25rem)]'>
-                    <h2 className='global-h2 capitalize'>{t("user")}</h2>
-                    <p className='profile-p capitalize'>
+                    <h2 className='global-h2'>{t("user")}</h2>
+                    <p className='profile-p'>
                         {t("here")}
                     </p>
                     <div className='space-y-[clamp(2.5rem,1.349rem+2.401vw,3.75rem)]'>

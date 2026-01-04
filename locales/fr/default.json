@@ -164,7 +164,7 @@
     "chooseLocationLanguage": "Choisissez votre lieu et votre langue",
     "currentLanguageCurrency": "Votre langue et votre monnaie actuelles",
     "english": "Anglais",
-    "euro": "L'euro",
+    "euro": "Euro",
     "french": "Français",
     "search": "Rechercher...",
     "usDollar": "Dollar américain"
@@ -475,6 +475,9 @@
     "stock": "En rupture de stock",
     "stock_fr_acf": "Date prévue de départ",
     "stock_usd_acf": "Stock",
+    "Tous nos produits sont garantis 2 ans": {
+      "": "Tous nos produits sont garantis 2 ans."
+    },
     "view": "Voir tous",
     "warranty": "Garantie",
     "watch": "Regarder la review",

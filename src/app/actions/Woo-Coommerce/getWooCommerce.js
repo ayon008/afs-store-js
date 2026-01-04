@@ -450,7 +450,7 @@ export const lostPassword = async (email) => {
 
 
 
-export const getPrice = async (productId, selectedVariation) => {
+export const getPrice = async (productId) => {
     const currency = await getCurrency();
     const locale = await getLocale();
     try {
@@ -527,23 +527,23 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             body: JSON.stringify(payload),
             cache: 'no-store',
         });
-        
+
         console.log('Response status:', response.status);
         console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         // Check if response is OK and is JSON
         const contentType = response.headers.get('content-type') || '';
         const isJson = contentType.includes('application/json');
-        
+
         if (!response.ok) {
             const errorText = await response.text();
-            
+
             // If error is HTML (404 page), provide a more helpful error message
             if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
                 console.error('Add to cart received HTML error page (404). URL:', `${WC_STORE_URL}/cart/add-item`);
                 throw new Error(`L'API WooCommerce n'est pas accessible. Vérifiez que l'URL est correcte: ${WC_STORE_URL}/cart/add-item`);
             }
-            
+
             let errorMessage = `Failed to add to cart: ${response.status}`;
             try {
                 const errorData = JSON.parse(errorText);
@@ -985,18 +985,18 @@ export const getPaymentMethods = async () => {
         const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '') || '';
         const localePath = localeValue ? `/${localeValue}` : '';
         const apiUrl = `${baseUrl}${localePath}/wp-json/wc/v3/payment_gateways`;
-        
+
         // Use query parameters for authentication (same as other API calls)
         const url = new URL(apiUrl);
         url.searchParams.set('consumer_key', consumerKey);
         url.searchParams.set('consumer_secret', consumerSecret);
-        
+
         console.log('Fetching payment methods from:', url.toString().replace(consumerSecret, '***'));
-        
+
         const response = await fetch(url.toString(), {
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Basic ${authHeader}` 
+                'Authorization': `Basic ${authHeader}`
             },
             cache: "no-store",
         });
@@ -1008,10 +1008,10 @@ export const getPaymentMethods = async () => {
             console.error(`Failed to fetch payment methods: ${response.status} - ${errorText.substring(0, 500)}`);
             throw new Error(`Failed to fetch payment methods: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Payment methods raw data:', Array.isArray(data), data?.length || 'N/A', typeof data);
-        
+
         if (!Array.isArray(data)) {
             console.error('Payment methods response is not an array:', typeof data, data);
             // If it's an object, try to extract payment methods
@@ -1026,16 +1026,16 @@ export const getPaymentMethods = async () => {
             }
             return [];
         }
-        
+
         console.log(`Total payment methods received: ${data.length}`);
         const enabledMethods = data.filter((method) => method?.enabled);
         console.log(`Found ${enabledMethods.length} enabled payment methods`);
-        
+
         // Log all methods for debugging
         enabledMethods.forEach(method => {
             console.log(`  - ${method.id}: ${method.title} (enabled: ${method.enabled})`);
         });
-        
+
         return enabledMethods;
     }
     catch (error) {
