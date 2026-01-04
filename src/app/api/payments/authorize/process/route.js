@@ -143,6 +143,7 @@ export async function POST(req) {
       customerProfileId,
       paymentProfileId,
       saveCard = false,
+      cardInfo = {},
     } = data;
 
     // Validate required data
@@ -325,13 +326,19 @@ export async function POST(req) {
         { key: '_authnet_auth_code', value: transactionResult.authCode || '' },
         { key: '_authnet_account_number', value: transactionResult.accountNumber || '' },
         { key: '_authnet_account_type', value: transactionResult.accountType || '' },
+        { key: '_authnet_card_type', value: cardInfo.cardType || cardInfo.cardTypeName || '' },
+        { key: '_authnet_card_last_four', value: cardInfo.lastFour || '' },
       ],
     };
 
     await updateWooCommerceOrder(orderId, updateData, localeValue);
+
+    // Build detailed payment note
+    const cardDetails = cardInfo.cardTypeName || cardInfo.cardType || 'Card';
+    const lastFour = cardInfo.lastFour ? ` ending in ${cardInfo.lastFour}` : '';
     await addOrderNote(
       orderId,
-      `Payment successful via Authorize.Net. Transaction ID: ${transactionResult.transactionId}, Auth Code: ${transactionResult.authCode}`,
+      `Payment successful via Authorize.Net (${cardDetails}${lastFour}). Transaction ID: ${transactionResult.transactionId}, Auth Code: ${transactionResult.authCode}`,
       localeValue
     );
 
@@ -413,6 +420,8 @@ export async function POST(req) {
       orderKey: order.order_key,
       transactionId: transactionResult.transactionId,
       authCode: transactionResult.authCode,
+      cardType: cardInfo.cardType || cardInfo.cardTypeName || transactionResult.accountType || null,
+      cardLastFour: cardInfo.lastFour || transactionResult.accountNumber?.slice(-4) || null,
       savedProfile: savedProfileInfo,
     });
 

@@ -657,7 +657,7 @@ const Navbar = ({ NAV_LINKS }) => {
       <div
         id="mobile-navigation"
         ref={navRef}
-        className="fixed inset-0 transform translate-x-full opacity-0 h-screen text-black/75 overflow-y-scroll z-[60] bg-white md:hidden block pb-[60px]"
+        className="fixed inset-0 transform -translate-x-full opacity-0 h-screen text-black/75 overflow-y-scroll z-[60] bg-white md:hidden block pb-[60px]"
       >
         <div className="pt-[90px] px-6">
           <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">

@@ -57,6 +57,11 @@ export default function CheckoutAuthorize({
    * Handle card tokenization success
    */
   const handleTokenized = useCallback((data) => {
+    console.log('Card tokenized:', {
+      cardType: data.cardType,
+      cardTypeName: data.cardTypeName,
+      lastFour: data.lastFour,
+    })
     setOpaqueData(data)
     setError(null)
   }, [])
@@ -137,10 +142,22 @@ export default function CheckoutAuthorize({
       }
 
       if (useNewCard) {
-        paymentRequest.opaqueData = opaqueData
+        paymentRequest.opaqueData = {
+          dataDescriptor: opaqueData.dataDescriptor,
+          dataValue: opaqueData.dataValue,
+        }
+        paymentRequest.cardInfo = {
+          cardType: opaqueData.cardType,
+          cardTypeName: opaqueData.cardTypeName,
+          lastFour: opaqueData.lastFour,
+        }
       } else {
         paymentRequest.customerProfileId = selectedPaymentProfile.customerProfileId
         paymentRequest.paymentProfileId = selectedPaymentProfile.paymentProfileId
+        paymentRequest.cardInfo = {
+          cardType: selectedPaymentProfile.cardType,
+          lastFour: selectedPaymentProfile.cardNumber?.slice(-4),
+        }
       }
 
       // Call the process endpoint

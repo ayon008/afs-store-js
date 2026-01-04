@@ -63,7 +63,37 @@ WordPress/WooCommerce (staging.afs-foiling.com)
 Three payment providers integrated in `src/lib/`:
 - **PayPal** - `CheckoutPaypal.js`
 - **Monetico** - `CheckoutMonitico.js` (French gateway, supports split payments)
-- **Authorize.net** - `CheckoutAuthorize.js`
+- **Authorize.Net** - Native integration with Accept.js (PCI SAQ A compliant)
+
+### Authorize.Net Integration
+
+Native Authorize.Net CIM integration using Accept.js for PCI-compliant card tokenization:
+
+**Service Layer** (`src/lib/authorize-net/AuthorizeNetService.js`):
+- Transaction processing (auth, capture, void, refund)
+- CIM profile management (customer profiles, payment profiles)
+- Webhook validation
+
+**API Endpoints** (`src/app/api/payments/authorize/`):
+- `POST /process` - Create order and process payment with opaqueData or saved profile
+- `GET/POST/DELETE /cim/profiles` - Customer profile management
+- `GET/POST/DELETE /cim/payment-profiles` - Saved card management
+- `POST /webhook` - Handle Authorize.Net webhook notifications
+- `GET /config` - Get Accept.js public credentials
+
+**Components** (`src/lib/AuthorizeNet/`):
+- `PaymentForm.jsx` - Card input form with Accept.js tokenization
+- `SavedPaymentMethods.jsx` - Display and select saved cards
+
+**Environment Variables**:
+```
+AUTHORIZE_NET_API_LOGIN_ID=...
+AUTHORIZE_NET_TRANSACTION_KEY=...
+AUTHORIZE_NET_CLIENT_KEY=...  # For Accept.js
+AUTHORIZE_NET_ENVIRONMENT=sandbox|production
+AUTHORIZE_NET_VALIDATION_MODE=testMode|liveMode
+AUTHORIZE_NET_WEBHOOK_SECRET=...  # Optional
+```
 
 ### WooCommerce Integration
 

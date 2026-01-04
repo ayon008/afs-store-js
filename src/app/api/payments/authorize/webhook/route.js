@@ -134,8 +134,9 @@ export async function POST(req) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-anet-signature');
 
-    // Validate webhook signature (optional but recommended)
-    if (process.env.AUTHORIZE_NET_WEBHOOK_SECRET && signature) {
+    // Validate webhook signature (optional - only if secret is configured)
+    const webhookSecret = process.env.AUTHORIZE_NET_WEBHOOK_SECRET;
+    if (webhookSecret && webhookSecret !== 'YOUR_WEBHOOK_SECRET' && signature) {
       const isValid = validateWebhookSignature(rawBody, signature);
       if (!isValid) {
         console.error('Invalid webhook signature');
