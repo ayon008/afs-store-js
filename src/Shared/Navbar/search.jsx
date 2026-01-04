@@ -206,7 +206,15 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                     console.log(priceHtml);
                                     return (
                                         <div key={product.id} className='h-auto! w-full'>
-                                            <Link onClick={onClose} className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' href={`/product/${slug}`}>
+                                            <Link 
+                                                onClick={(e) => {
+                                                    onClose();
+                                                    // Déclencher la barre de chargement immédiatement
+                                                    window.dispatchEvent(new Event('navigation:start'));
+                                                }} 
+                                                className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' 
+                                                href={`/product/${slug}`}
+                                            >
                                                 <div className='flex flex-col gap-[10px] text-center'>
                                                     <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />
                                                     <font className='text-[#111] text-lg uppercase leading-[100%] font-bold'>{name}</font>
@@ -247,7 +255,15 @@ const SearchOverlay = ({ isOpen, onClose }) => {
 
                                         return (
                                             <SwiperSlide key={product.id} className='h-auto! max-w-[240px] w-full'>
-                                                <Link onClick={onClose} className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' href={`/product/${slug}`}>
+                                                <Link 
+                                                    onClick={(e) => {
+                                                        onClose();
+                                                        // Déclencher la barre de chargement immédiatement
+                                                        window.dispatchEvent(new Event('navigation:start'));
+                                                    }} 
+                                                    className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' 
+                                                    href={`/product/${slug}`}
+                                                >
                                                     <div className='flex flex-col gap-[10px] text-center'>
                                                         <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />
                                                         <font className='text-[#111] text-lg uppercase leading-[100%] font-bold'>{name}</font>
