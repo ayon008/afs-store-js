@@ -206,6 +206,19 @@ const Navbar = ({ NAV_LINKS }) => {
     setDetailsDiv(null);
   }
 
+  // Close mobile menu and reset states
+  const handleCloseMenu = () => {
+    setIsOpen(false);
+    setHoverId(null);
+    setDetailsDiv(null);
+  }
+
+  // Close desktop menu and reset states
+  const handleCloseDesktopMenu = () => {
+    setHoverId(null);
+    setDetailsDiv(null);
+  }
+
   // GSAP animation for navbar (slide from right)
   useGSAP(() => {
     if (!navRef.current) return;
@@ -247,13 +260,13 @@ const Navbar = ({ NAV_LINKS }) => {
 
   return (
     <>
-      <nav className='sticky left-0 right-0 top-0 z-[99] text-white w-full'>
+      <nav className='sticky left-0 right-0 top-0 z-[120] text-white w-full'>
         {/* Logo and Search Part */}
         <div
-          className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between"
+          className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between relative z-[120]"
           onMouseEnter={() => handleShow(null)}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative z-[120]">
             {/* Menu */}
             <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
 
@@ -371,6 +384,12 @@ const Navbar = ({ NAV_LINKS }) => {
               >
                 <Link
                   href={link.href || ""}
+                  onClick={() => {
+                    // Si le lien n'a pas de sous-menus, fermer le menu desktop
+                    if (!link.sublinks || link.sublinks.length === 0) {
+                      handleCloseDesktopMenu();
+                    }
+                  }}
                   className="text-[16px] font-semibold tracking-wide flex items-center justify-center relative"
                   style={{ padding: "22px 12px 24px" }}
                 >
@@ -403,7 +422,14 @@ const Navbar = ({ NAV_LINKS }) => {
                         const url = children?.url ?? "#";
                         return (
                           <li
-                            onClick={() => setDetailsDiv(children.name)}
+                            onClick={() => {
+                              // Si le lien n'a pas de produits, fermer le menu desktop
+                              if (!children?.products || children.products.length === 0) {
+                                handleCloseDesktopMenu();
+                              } else {
+                                setDetailsDiv(children.name);
+                              }
+                            }}
                             className={`text-[16px] font-semibold tracking-wide cursor-pointer ${detailsDiv === children.name
                               ? "border-b border-b-black"
                               : ""
@@ -411,7 +437,17 @@ const Navbar = ({ NAV_LINKS }) => {
                             style={{ padding: "24px 12px 24px" }}
                             key={i}
                           >
-                            <Link href={url}>{children.name}</Link>
+                            <Link 
+                              href={url}
+                              onClick={() => {
+                                // Si le lien n'a pas de produits, fermer le menu desktop
+                                if (!children?.products || children.products.length === 0) {
+                                  handleCloseDesktopMenu();
+                                }
+                              }}
+                            >
+                              {children.name}
+                            </Link>
                           </li>
                         );
                       })}
@@ -439,7 +475,10 @@ const Navbar = ({ NAV_LINKS }) => {
                                         key={i}
                                         className="max-w-[270px] w-fit"
                                       >
-                                        <Link href={`${product.url}`}>
+                                        <Link 
+                                          href={`${product.url}`}
+                                          onClick={handleCloseDesktopMenu}
+                                        >
                                           <h5
                                             onMouseEnter={() =>
                                               setHoverImageLink(product.image)
@@ -479,6 +518,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                   <button>
                                     <Link
                                       href={`${allProducts?.button_one?.url}`}
+                                      onClick={handleCloseDesktopMenu}
                                       className="text-black/75 font-semibold flex items-center gap-1"
                                     >
                                       <span className="inline-block">
@@ -504,6 +544,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                   <button>
                                     <Link
                                       href={allProducts?.button_two?.url}
+                                      onClick={handleCloseDesktopMenu}
                                       className="text-black/75 font-semibold flex items-center gap-1"
                                     >
                                       <span className="inline-block">
@@ -545,18 +586,18 @@ const Navbar = ({ NAV_LINKS }) => {
                           Choose
                         </p>
                         <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer"><Link href="/">Foil configurator</Link></li>
-                          <li className="cursor-pointer"><Link href="/">Best match stabilizer</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Foil configurator</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Best match stabilizer</Link></li>
                           <li className="cursor-pointer">
-                            <Link href="/">3 stabilizers / front wing comparator</Link>
+                            <Link href="/" onClick={handleCloseDesktopMenu}>3 stabilizers / front wing comparator</Link>
                           </li>
-                          <li className="cursor-pointer"><Link href="/">Mast comparison</Link></li>
-                          <li className="cursor-pointer"><Link href="/">Board construction</Link></li>
-                          <li className="cursor-pointer"><Link href="/">Equipment buyback</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Board construction</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Equipment buyback</Link></li>
                           <li className="cursor-pointer">
-                            <Link href="/">Foil characteristics</Link>
+                            <Link href="/" onClick={handleCloseDesktopMenu}>Foil characteristics</Link>
                           </li>
-                          <li className="cursor-pointer"><Link href="/">Screw sizes</Link></li>
+                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Screw sizes</Link></li>
                         </ul>
                       </div>
                       <div>
@@ -653,7 +694,7 @@ const Navbar = ({ NAV_LINKS }) => {
       <div
         id="mobile-navigation"
         ref={navRef}
-        className="fixed inset-0 transform -translate-x-full opacity-0 h-screen text-black/75 overflow-y-scroll z-[60] bg-white md:hidden block pb-[60px]"
+        className="fixed inset-0 transform -translate-x-full opacity-0 h-screen text-black/75 overflow-y-scroll z-[100] bg-white md:hidden block pb-[60px]"
       >
         <div className="pt-[90px] px-6">
           <p className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]">
@@ -662,12 +703,24 @@ const Navbar = ({ NAV_LINKS }) => {
           <ul className="mt-5 space-y-4 pb-10">
             {NAV_LINKS?.map((link, idx) => (
               <li
-                onClick={() => handleShow(link.name)}
+                onClick={() => {
+                  // Si le lien n'a pas de sous-menus, fermer le menu
+                  if (!link.sublinks || link.sublinks.length === 0) {
+                    handleCloseMenu();
+                  } else {
+                    handleShow(link.name);
+                  }
+                }}
                 key={idx}
                 className="text-[22px] font-semibold leading-[100%] tracking-[-0.01em] flex items-center justify-between pb-[10px] border-b border-b-[#E6E6E6]"
               >
                 <span className="w-fit">
-                  <Link href={`${link.href}`}>{link.name}</Link>
+                  <Link href={`${link.href}`} onClick={(e) => {
+                    // Si le lien n'a pas de sous-menus, fermer le menu
+                    if (!link.sublinks || link.sublinks.length === 0) {
+                      handleCloseMenu();
+                    }
+                  }}>{link.name}</Link>
                 </span>
                 {link.sublinks?.length > 0 && (
                   <svg
@@ -715,7 +768,7 @@ const Navbar = ({ NAV_LINKS }) => {
       {subLinks?.sublinks?.length > 0 && (
         <div
           ref={secondRef}
-          className="fixed inset-0 transform translate-x-full opacity-0 h-screen text-black/75 z-[70] bg-white px-6 pb-6 pt-[90px] block md:hidden overflow-y-scroll"
+          className="fixed inset-0 transform translate-x-full opacity-0 h-screen text-black/75 z-[110] bg-white px-6 pb-6 pt-[90px] block md:hidden overflow-y-scroll"
         >
           <p
             onClick={() => handleShow(null)}
@@ -730,13 +783,20 @@ const Navbar = ({ NAV_LINKS }) => {
                 {subLinks?.sublinks?.map((children, i) => {
                   return (
                     <li
-                      onClick={() => setDetailsDiv(children.name)}
+                      onClick={() => {
+                        // Si le lien n'a pas de produits, fermer le menu
+                        if (!children?.products || children.products.length === 0) {
+                          handleCloseMenu();
+                        } else {
+                          setDetailsDiv(children.name);
+                        }
+                      }}
                       key={i}
                       className="text-[22px] font-semibold leading-[100%] tracking-[-0.01em] flex items-center justify-between pb-[10px] border-b border-b-[#E6E6E6]"
                     >
                       {
                         children?.products.length === 0 && children?.url ? <span className="w-fit">
-                          <Link href={children?.url}>{children.name}</Link>
+                          <Link href={children?.url} onClick={handleCloseMenu}>{children.name}</Link>
                         </span> : <span className="w-fit">{children.name}</span>
                       }
                       {
@@ -867,7 +927,7 @@ const Navbar = ({ NAV_LINKS }) => {
       {productList?.length > 0 && (
         <div
           ref={thirdRef}
-          className="fixed inset-0 transform -translate-x-full opacity-0 h-screen text-black/75 z-[70] bg-white block md:hidden pt-[90px] overflow-y-scroll"
+          className="fixed inset-0 transform -translate-x-full opacity-0 h-screen text-black/75 z-[110] bg-white block md:hidden pt-[90px] overflow-y-scroll"
         >
           <div className="p-6">
             <p
@@ -887,7 +947,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </div>
             <ul className="mt-5 flex flex-col gap-4">
               {productList?.map((product, i) => (
-                <Link href={`${product.url}`} key={i}>
+                <Link href={`${product.url}`} key={i} onClick={handleCloseMenu}>
                   <li>
                     <div className="text-[22px] font-semibold leading-[100%] tracking-[-0.01em] flex items-center justify-between">
                       <span>{product.name}</span>

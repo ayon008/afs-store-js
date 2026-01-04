@@ -30,9 +30,9 @@ export default function Menu({ isOpen, setIsOpen }) {
     }, [isOpen]);
 
     return (
-        <div className="max-[1280px]:block hidden cursor-pointer">
+        <div className="max-[1280px]:block hidden cursor-pointer relative z-[120]">
             <button
-                className="w-8 flex flex-col justify-between h-5 cursor-pointer"
+                className="w-8 flex flex-col justify-between h-5 cursor-pointer relative z-[120]"
                 type="button"
                 aria-label="Toggle navigation menu"
                 aria-controls="mobile-navigation"
