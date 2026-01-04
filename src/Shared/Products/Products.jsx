@@ -6,6 +6,7 @@ import { Filter, X } from 'lucide-react';
 import ProductCard from '../Card/ProductCard';
 import PopUp from '../PopUp/PopUp';
 import SkeletonProjectCard from '../Loader/SkeletonLoader';
+import PriceFilterShimmer from '../Loader/PriceFilterShimmer';
 import { getProductsByCategoryId } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
@@ -127,7 +128,7 @@ const Products = ({ id, childCategories }) => {
                             }
                         </div>
                         {
-                            isLoading ? <div>Loading...</div> : <>
+                            isLoading ? <PriceFilterShimmer /> : <>
                                 <div>
                                     <label className='uppercase text-base font-medium mb-4 block' htmlFor="vol">{t("price")}</label>
                                     <RangeSlider
@@ -195,9 +196,9 @@ const Products = ({ id, childCategories }) => {
                             : <p className="text-sm text-gray-500">No {a("categories")}</p>}
                     </div>
                     <div>
-                        {isLoading ? <div>Loading...</div> :
+                        {isLoading ? <PriceFilterShimmer /> :
                             <>
-                                <label className='font-semibold text-base leading-[100%] text-black mb-4 block' for="vol">{t("price")}</label>
+                                <label className='font-semibold text-base leading-[100%] text-black mb-4 block' htmlFor="vol">{t("price")}</label>
                                 <RangeSlider
                                     min={minPrice}
                                     max={maxPrice}

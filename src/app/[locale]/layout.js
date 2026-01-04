@@ -13,6 +13,7 @@ import Footer from "@/Shared/footer/Footer";
 import QueryProvider from "@/Shared/Provider/QueryProvider";
 import { getCurrency, refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
 import ScrollToTop from "@/Shared/ScrollToTop/ScrollToTop";
+import RouteLoadingBar from "@/Shared/Loader/RouteLoadingBar";
 
 
 export const metadata = {
@@ -78,6 +79,7 @@ export default async function RootLayout({ children, params }) {
             <AuthProvider>
               <CartProvider>
                 <ScrollToTop />
+                <RouteLoadingBar />
                 <div>
                   <Navbar NAV_LINKS={NAV_LINKS} />
                   {children}
