@@ -20,7 +20,7 @@ const page = async ({ locale }) => {
                 <div className='space-y-[clamp(0.875rem,0.5297rem+0.7203vw,1.25rem)]'>
                     {t.rich("p", {
                         title: (chunks) => (
-                            <div className="flex items-center justify-between pb-1 global-b-bottom">
+                            <div className="flex items-center justify-between pb-1 global-b-bottom-d">
                                 <h3 className="text-[28px] leading-[100%] font-semibold text-[#111]">
                                     {chunks}
                                 </h3>
