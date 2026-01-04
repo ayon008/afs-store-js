@@ -58,7 +58,53 @@ class AFS_WCML_REST_API {
 			$this->register_routes();
 		}
 
+		// Clear cache when product is updated
+		add_action( 'save_post_product', array( $this, 'clear_slug_translation_cache' ), 10, 1 );
+		add_action( 'wpml_pro_translation_completed', array( $this, 'clear_slug_translation_cache_on_translation' ), 10, 3 );
+
 		// Authentication is handled via Bearer token in check_permission() method.
+	}
+
+	/**
+	 * Clear slug translation cache when product is updated.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function clear_slug_translation_cache( $post_id ) {
+		if ( get_post_type( $post_id ) !== 'product' ) {
+			return;
+		}
+
+		// Clear cache for all languages
+		$languages = array( 'en', 'fr' );
+		$product = wc_get_product( $post_id );
+		
+		if ( $product ) {
+			$slug = $product->get_slug();
+			foreach ( $languages as $lang ) {
+				delete_transient( 'afs_slug_trans_' . md5( $post_id . '_' . $lang ) );
+				if ( $slug ) {
+					delete_transient( 'afs_slug_trans_' . md5( $slug . '_' . $lang ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Clear cache when translation is completed.
+	 *
+	 * @param int    $new_post_id New post ID.
+	 * @param array  $fields      Translation fields.
+	 * @param object $job         Translation job.
+	 */
+	public function clear_slug_translation_cache_on_translation( $new_post_id, $fields, $job ) {
+		if ( isset( $job->original_post_type ) && $job->original_post_type === 'product' ) {
+			$this->clear_slug_translation_cache( $new_post_id );
+			// Also clear cache for original product
+			if ( isset( $job->original_doc_id ) ) {
+				$this->clear_slug_translation_cache( $job->original_doc_id );
+			}
+		}
 	}
 
 
@@ -187,6 +233,34 @@ class AFS_WCML_REST_API {
 					'id' => array(
 						'required'          => true,
 						'validate_callback' => array( $this, 'validate_product_id_for_variable' ),
+					),
+				),
+			)
+		);
+
+		// Translate product slug to another language.
+		register_rest_route(
+			$this->namespace,
+			'/products/translate-slug',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'translate_product_slug' ),
+				'permission_callback' => '__return_true', // Public endpoint for frontend use
+				'args'                => array(
+					'slug' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'validate_callback' => 'sanitize_text_field',
+					),
+					'product_id' => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'validate_callback' => 'absint',
+					),
+					'target_lang' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'validate_callback' => 'sanitize_text_field',
 					),
 				),
 			)
@@ -670,6 +744,162 @@ class AFS_WCML_REST_API {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Translate product slug to another language.
+	 * Optimized with caching and improved SQL queries.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function translate_product_slug( $request ) {
+		$slug = $request->get_param( 'slug' );
+		$product_id = $request->get_param( 'product_id' );
+		$target_lang = $request->get_param( 'target_lang' );
+
+		// Validate target language.
+		if ( ! in_array( $target_lang, array( 'en', 'fr' ), true ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				__( 'Langue cible invalide. Utilisez "en" ou "fr".', 'afs-wcml-api' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Build cache key
+		$cache_key = 'afs_slug_trans_' . md5( ( $product_id ? $product_id : $slug ) . '_' . $target_lang );
+		$cached = get_transient( $cache_key );
+		
+		if ( false !== $cached ) {
+			// Return cached result with proper headers for browser caching
+			$response = new WP_REST_Response( $cached, 200 );
+			$response->header( 'Cache-Control', 'public, max-age=3600' );
+			return $response;
+		}
+
+		// Get product ID from slug if not provided.
+		if ( ! $product_id && $slug ) {
+			global $wpdb;
+			
+			// Optimized query: try to find product by slug with WPML join in one query
+			if ( function_exists( 'apply_filters' ) ) {
+				// Use WPML optimized query
+				$product_id = $wpdb->get_var( $wpdb->prepare(
+					"SELECT p.ID FROM {$wpdb->posts} p
+					LEFT JOIN {$wpdb->prefix}icl_translations t ON p.ID = t.element_id AND t.element_type = 'post_product'
+					WHERE p.post_name = %s 
+					AND p.post_type = 'product' 
+					AND p.post_status = 'publish'
+					LIMIT 1",
+					$slug
+				) );
+			} else {
+				// Fallback: simple query without WPML
+				$product_id = $wpdb->get_var( $wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'product' AND post_status = 'publish' LIMIT 1",
+					$slug
+				) );
+			}
+			
+			// If still not found, try WP_Query as last resort (slower but respects all filters)
+			if ( ! $product_id ) {
+				$args = array(
+					'post_type'        => 'product',
+					'posts_per_page'   => 1,
+					'post_status'      => 'publish',
+					'name'             => $slug,
+					'suppress_filters' => false,
+					'fields'           => 'ids', // Only get IDs for performance
+				);
+				$query = new WP_Query( $args );
+				if ( $query->have_posts() ) {
+					$product_id = $query->posts[0];
+				}
+				wp_reset_postdata();
+			}
+		}
+
+		if ( ! $product_id ) {
+			$error_response = array(
+				'slug'        => null,
+				'exists'      => false,
+				'product_id'  => null,
+				'target_lang' => $target_lang,
+				'message'     => __( 'Produit introuvable avec le slug ou l\'ID fourni.', 'afs-wcml-api' ),
+			);
+			// Cache negative result for shorter time (5 minutes)
+			set_transient( $cache_key, $error_response, 300 );
+			return new WP_Error(
+				'rest_not_found',
+				__( 'Produit introuvable avec le slug ou l\'ID fourni.', 'afs-wcml-api' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Get translated product ID using WPML (optimized).
+		$translated_product_id = $product_id;
+		if ( function_exists( 'apply_filters' ) ) {
+			$translated_product_id = apply_filters( 'wpml_object_id', $product_id, 'product', true, $target_lang );
+		}
+
+		// If no translation found, return error.
+		if ( ! $translated_product_id || $translated_product_id === $product_id ) {
+			// Check if we're already in the target language.
+			$current_lang = apply_filters( 'wpml_current_language', null );
+			if ( $current_lang === $target_lang ) {
+				// We're already in the target language, return current slug.
+				$product = wc_get_product( $product_id );
+				if ( $product ) {
+					$response_data = array(
+						'slug'        => $product->get_slug(),
+						'exists'      => true,
+						'product_id'  => $product_id,
+						'target_lang' => $target_lang,
+					);
+					// Cache for 1 hour
+					set_transient( $cache_key, $response_data, 3600 );
+					$response = new WP_REST_Response( $response_data, 200 );
+					$response->header( 'Cache-Control', 'public, max-age=3600' );
+					return $response;
+				}
+			}
+
+			$error_response = array(
+				'slug'        => null,
+				'exists'      => false,
+				'product_id'  => null,
+				'target_lang' => $target_lang,
+				'message'     => __( 'Aucune traduction trouvée pour ce produit dans la langue cible.', 'afs-wcml-api' ),
+			);
+			// Cache negative result for 5 minutes
+			set_transient( $cache_key, $error_response, 300 );
+			return new WP_REST_Response( $error_response, 200 );
+		}
+
+		// Get translated product.
+		$translated_product = wc_get_product( $translated_product_id );
+		if ( ! $translated_product ) {
+			return new WP_Error(
+				'rest_not_found',
+				__( 'Produit traduit introuvable.', 'afs-wcml-api' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$response_data = array(
+			'slug'        => $translated_product->get_slug(),
+			'exists'      => true,
+			'product_id'  => $translated_product_id,
+			'target_lang' => $target_lang,
+		);
+		
+		// Cache successful result for 1 hour
+		set_transient( $cache_key, $response_data, 3600 );
+		
+		$response = new WP_REST_Response( $response_data, 200 );
+		$response->header( 'Cache-Control', 'public, max-age=3600' );
+		return $response;
 	}
 }
 

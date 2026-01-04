@@ -4,10 +4,12 @@ import { Minus, Plus, Trash2Icon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react'
+import { useLocale } from 'next-intl';
+import { getProductRoute } from '@/lib/product-routes';
 
 const CartList = ({ item }) => {
 
-
+    const locale = useLocale();
     const { handleUpdateCartItem, handleRemoveCartItem } = useCart();
 
     const basePriceWithTax = parseInt(item?.prices?.price || 0);
@@ -23,7 +25,8 @@ const CartList = ({ item }) => {
     const total_Currency_Symbol = item?.totals?.currency_symbol || '€';
     const variations = item?.variation || [];
     const itemKey = item?.key;
-    const slug = item?.permalink?.split('/product/')?.[1]?.replace(/\/$/, '') || '';
+    // Extract slug from permalink (can be /product/ or /fr/produit/ or /produit/)
+    const slug = item?.permalink?.match(/\/(?:product|produit)\/([^\/]+)/)?.[1]?.replace(/\/$/, '') || '';
 
     // Check if product is in stock
     const isInStock = item?.stock_status === 'instock' || item?.is_in_stock === true || item?.catalog_visibility !== 'hidden';
@@ -204,7 +207,7 @@ const CartList = ({ item }) => {
                     {/* Product Info */}
                     <div className='flex-1 min-w-0'>
                         <Link
-                            href={`/product/${slug}`}
+                            href={getProductRoute(locale, slug)}
                             className='font-semibold text-[#1D98FF] text-sm line-clamp-2 hover:underline'
                         >
                             {name}
@@ -271,7 +274,7 @@ const CartList = ({ item }) => {
                     <Image src={image} alt={name} width={60} height={60} className='rounded-lg' />
                 </span>
                 <span className='flex-2 text-[15px] font-bold leading-[100%] text-[#1D98FF] flex-col flex gap-2'>
-                    <Link href={`/product/${slug}`} className='hover:underline'>{name}</Link>
+                    <Link href={getProductRoute(locale, slug)} className='hover:underline'>{name}</Link>
                     {
                         variations?.map((variation, i) => {
                             return (

@@ -13,8 +13,9 @@ import gsap from 'gsap';
 import { useForm } from 'react-hook-form';
 import { getRecentProducts, searchProducts } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import useGetData from "../../Shared/FetchFn/getData"
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';
+import { getProductRoute } from '@/lib/product-routes';
 const SEARCH_HISTORY_KEY = 'search_history';
 const MAX_HISTORY_ITEMS = 10;
 
@@ -24,6 +25,7 @@ const MAX_HISTORY_ITEMS = 10;
 const SearchOverlay = ({ isOpen, onClose }) => {
 
     const t = useTranslations('product')
+    const locale = useLocale();
 
     // React Hook Form
     const { register, handleSubmit, watch, reset, setValue } = useForm();
@@ -213,7 +215,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                     window.dispatchEvent(new Event('navigation:start'));
                                                 }} 
                                                 className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' 
-                                                href={`/product/${slug}`}
+                                                href={getProductRoute(locale, slug)}
                                             >
                                                 <div className='flex flex-col gap-[10px] text-center'>
                                                     <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />

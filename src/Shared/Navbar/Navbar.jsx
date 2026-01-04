@@ -2,7 +2,6 @@
 "use client";
 import { ArrowLeft, DollarSign, Euro, Search, X, PoundSterling } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useRef, useState, useEffect } from "react";
 import "flag-icons/css/flag-icons.min.css";
 import gsap from "gsap";
@@ -12,10 +11,9 @@ import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
 import Notification from "../Notification/Notification";
 
 
@@ -27,6 +25,7 @@ const Navbar = ({ NAV_LINKS }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart, loadCart } = useCart();
 
   // États pour la langue et la devise sélectionnées
@@ -160,13 +159,31 @@ const Navbar = ({ NAV_LINKS }) => {
     const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
     
     if (languageChanged) {
-      const currentPath = pathname || '/';
-      const newPath = `/${selectedLanguage}${currentPath === '/' ? '' : currentPath}`;
-      // Ensure currency cookies are set before redirect
+      // Set cookies first
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
-      setRedirectPath(newPath);
-      setShouldRedirect(true);
+      
+      // Handle product pages with slug translation
+      const productMatch = pathname?.match(/\/(?:product|produit)\/([^\/]+)/);
+      
+      if (productMatch) {
+        const currentSlug = productMatch[1];
+        // For product pages, use ?lang= parameter to let middleware handle the translation
+        const currentPath = pathname || '/';
+        const basePath = currentPath.split('?')[0]; // Remove existing query params
+        const newPath = `${basePath}?lang=${selectedLanguage}`;
+        // Use window.location for immediate redirect
+        window.location.href = newPath;
+        return selectedValues;
+      } else {
+        // For non-product pages, use ?lang= parameter to let middleware handle it
+        const currentPath = pathname || '/';
+        const basePath = currentPath.split('?')[0]; // Remove existing query params
+        const newPath = `${basePath}?lang=${selectedLanguage}`;
+        // Use window.location for immediate redirect
+        window.location.href = newPath;
+        return selectedValues;
+      }
     } else {
       // If only currency changed, reload cart to get updated currency
       if (currencyChanged) {
@@ -291,7 +308,7 @@ const Navbar = ({ NAV_LINKS }) => {
             <div className="relative mr-4 hidden md:block">
               <input
                 onClick={() => setIsSearchOpen(true)}
-                className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 px-3 placeholder:text-white placeholder:text-sm placeholder:pl-8 placeholder:font-semibold"
+                className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 pl-10 pr-3 placeholder:text-white placeholder:text-sm placeholder:font-semibold"
                 placeholder={t("search")}
               />
               <Search className="w-6 h-6 mr-2 text-white opacity-90 absolute -translate-y-1/2 left-3 top-1/2" />

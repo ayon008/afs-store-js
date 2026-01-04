@@ -23,14 +23,22 @@ export function getProductRoute(locale, slug) {
     return `${prefix}${slug}`;
 }
 
+import { getCachedTranslation, setCachedTranslation } from './product-slug-cache';
+
 /**
- * Get translated product slug from WordPress API
+ * Get translated product slug from WordPress API with caching
  * @param {string|number} identifier - Product slug or product ID
  * @param {string} targetLocale - Target locale ('en' or 'fr')
  * @param {string} currentLocale - Current locale (optional, for optimization)
  * @returns {Promise<{slug: string|null, exists: boolean, product_id: number|null}>}
  */
 export async function getTranslatedProductSlug(identifier, targetLocale, currentLocale = null) {
+    // Check cache first
+    const cached = getCachedTranslation(identifier, targetLocale);
+    if (cached) {
+        return cached;
+    }
+
     try {
         const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_WP_BASE_URL;
         if (!WP_BASE_URL) {
@@ -54,8 +62,9 @@ export async function getTranslatedProductSlug(identifier, targetLocale, current
 
         const url = `${WP_BASE_URL}/wp-json/afs-wcml/v1/products/translate-slug?${params.toString()}`;
         
+        // Use cache with revalidation for better performance
         const response = await fetch(url, {
-            cache: 'no-store',
+            next: { revalidate: 3600 }, // Cache for 1 hour
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -68,11 +77,16 @@ export async function getTranslatedProductSlug(identifier, targetLocale, current
 
         const data = await response.json();
         
-        return {
+        const result = {
             slug: data.slug || null,
             exists: data.exists || false,
             product_id: data.product_id || null,
         };
+
+        // Cache the result
+        setCachedTranslation(identifier, targetLocale, result);
+        
+        return result;
     } catch (error) {
         console.error('Error fetching translated product slug:', error);
         return { slug: null, exists: false, product_id: null };

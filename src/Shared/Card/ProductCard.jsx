@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { useMemo, useState, useEffect, useTransition } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import FormButton from '../Button/FormButton';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';
+import { getProductRoute } from '@/lib/product-routes';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -55,7 +56,9 @@ export default function ProductCard({
     alt,
     type = "simple"
 }) {
-    const productLink = `/product/${slug || name.toLowerCase().replace(/\s+/g, '-')}`;
+    const locale = useLocale();
+    const productSlug = slug || name.toLowerCase().replace(/\s+/g, '-');
+    const productLink = getProductRoute(locale, productSlug);
 
     const cleanTitle = name
         .replace(/ - Duplicate/g, "")
@@ -110,7 +113,7 @@ export default function ProductCard({
         
         // Navigation avec transition pour une meilleure UX
         startTransition(() => {
-            router.push(`/product/${slug}`);
+            router.push(productLink);
         });
     };
 
