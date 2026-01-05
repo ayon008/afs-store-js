@@ -787,7 +787,7 @@ position: relative;
 
 /* Card Modern */
 .card-modern {
-  @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+  @apply bg-white rounded-lg shadow-sm border border-gray-100;
   transition: box-shadow 0.3s ease;
 }
 

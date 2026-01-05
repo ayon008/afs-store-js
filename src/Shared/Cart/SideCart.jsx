@@ -1,5 +1,5 @@
 "use client"
-import { ArrowUpRight, X } from 'lucide-react'
+import { ArrowUpRight, X, ShoppingCart } from 'lucide-react'
 import React from 'react'
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
@@ -79,14 +79,19 @@ const SideCart = ({ isOpen, onClose }) => {
             className={`fixed inset-0 backdrop-blur-sm z-[999] h-screen w-screen bg-black/75 ${isOpen ? '' : 'pointer-events-none'}`}
         >
             <div
-                className='bg-white h-full max-w-[580px] w-full ml-auto flex flex-col justify-between'
+                className='bg-white h-full max-w-[580px] w-full ml-auto flex flex-col justify-between shadow-2xl'
                 ref={sideCartRef}
                 style={{ transform: 'translateX(100%)' }}
             >
                 <div className=''>
-                    <div className='p-5 flex items-center justify-between gap-[10px] flex-wrap  border-b border-b-[#E6E6E6]'>
-                        <span className='text-[#111] text-[20px] font-bold uppercase'>{t("yourCart")}</span>
-                        <button onClick={() => onClose()} className='flex cursor-pointer items-center justify-center gap-1 text-[13px] uppercase leading-[100%]'>
+                    <div className='p-6 flex items-center justify-between gap-[10px] flex-wrap bg-[#000000] border-b border-gray-700'>
+                        <div className='flex items-center gap-3'>
+                            <div className='w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
+                                <ShoppingCart className='w-5 h-5 text-white' />
+                            </div>
+                            <span className='text-white text-[20px] font-bold uppercase'>{t("yourCart")}</span>
+                        </div>
+                        <button onClick={() => onClose()} className='flex cursor-pointer items-center justify-center gap-1 text-[13px] uppercase leading-[100%] text-white hover:text-gray-300 transition-colors'>
                             <X className='w-4 h-4' />
                             <span>{t("close")}</span>
                         </button>
@@ -118,14 +123,14 @@ const SideCart = ({ isOpen, onClose }) => {
                         )
                     }
                 </div>
-                <div className='p-5 border-t border-t-[#E6E6E6] flex flex-col items-center justify-center gap-4'>
+                <div className='p-6 border-t border-t-gray-200 flex flex-col items-center justify-center gap-4 bg-gray-50'>
                     <div className='flex items-end gap-1 flex-wrap'>
-                        <span className='text-[15px] uppercase leading-[100%] font-bold'>{t("subTotal")}</span>
-                        <span className='text-[28px] uppercase leading-[100%] font-bold'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
-                        <span className='text-[19px] leading-[100%] font-bold'>{t("inclVAT")}</span>
+                        <span className='text-[15px] uppercase leading-[100%] font-bold text-gray-700'>{t("subTotal")}</span>
+                        <span className='text-[28px] uppercase leading-[100%] font-bold text-gray-900'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
+                        <span className='text-[19px] leading-[100%] font-bold text-gray-600'>{t("inclVAT")}</span>
                     </div>
-                    <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer'>
-                        <button disabled={cartItems?.length === 0} className={`py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-sm text-white ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer w-full'>
+                        <button disabled={cartItems?.length === 0} className={`w-full py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-lg text-white shadow-lg hover:bg-[#1585e0] transition-all ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {t("continueToBasket")}
                             <ArrowUpRight className='w-4 h-4' />
                         </button>

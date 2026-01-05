@@ -17,9 +17,7 @@ const BreadCrumbs = () => {
 
 const page = () => {
     return (
-        <div className='pt-4 global-padding'>
-            <BreadCrumbs />
-
+        <div>
             {/* CartWrapper handles loading cart from client-side API */}
             <CartWrapper />
         </div>

@@ -1236,19 +1236,23 @@ const CheckoutPageContent = () => {
                 />
             )}
             
-            <div className='global-padding global-margin'>
+            <div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                 {/* checkout forms */}
-                <form className='space-y-10' onSubmit={handleSubmit(onSubmit)}>
-
+                <form className='flex flex-col lg:flex-row gap-8 items-start' onSubmit={handleSubmit(onSubmit)}>
+                    
+                    {/* Left Column - Forms */}
+                    <div className='w-full lg:flex-[2] space-y-8'>
                     {/* 1st section */}
-                    <div className='grid grid-cols-1 gap-10 lg:grid-cols-2'>
+                    <div className='grid grid-cols-1 gap-8'>
                         {/* Billing address */}
-                        <div className='card-modern p-6 lg:p-8'>
-                            <div className='flex items-center gap-3 mb-6'>
-                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
-                                    <User className='w-5 h-5 text-[#1D98FF]' />
+                        <div className='card-modern p-6 lg:p-8 border border-gray-100 shadow-lg'>
+                            <div className='bg-[#000000] -mx-6 lg:-mx-8 -mt-6 lg:-mt-8 px-6 lg:px-8 pt-6 lg:pt-8 pb-4 mb-6 rounded-t-lg'>
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
+                                        <User className='w-5 h-5 text-white' />
+                                    </div>
+                                    <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("billingDetails")}</h3>
                                 </div>
-                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("billingDetails")}</h3>
                             </div>
                             <div className='grid grid-cols-1 gap-5'>
                                 <div className='grid grid-cols-2 gap-5'>
@@ -1392,21 +1396,23 @@ const CheckoutPageContent = () => {
                             </div>
                         </div>
                         {/* Shipping address */}
-                        <div className='card-modern p-6 lg:p-8'>
-                            <div className='flex items-center gap-3 mb-6'>
-                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
-                                    <MapPin className='w-5 h-5 text-[#1D98FF]' />
+                        <div className='card-modern p-6 lg:p-8 border border-gray-100 shadow-lg'>
+                            <div className='bg-[#000000] -mx-6 lg:-mx-8 -mt-6 lg:-mt-8 px-6 lg:px-8 pt-6 lg:pt-8 pb-4 mb-6 rounded-t-lg'>
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
+                                        <MapPin className='w-5 h-5 text-white' />
+                                    </div>
+                                    <label htmlFor='shipping_address' className='flex items-center gap-3 cursor-pointer'>
+                                        <input
+                                            onChange={handleShow}
+                                            type="checkbox"
+                                            id='shipping_address'
+                                            checked={shippingAddress}
+                                            className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
+                                        />
+                                        <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("shippingDetails")}</h3>
+                                    </label>
                                 </div>
-                                <label htmlFor='shipping_address' className='flex items-center gap-3 cursor-pointer'>
-                                    <input
-                                        onChange={handleShow}
-                                        type="checkbox"
-                                        id='shipping_address'
-                                        checked={shippingAddress}
-                                        className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
-                                    />
-                                    <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("shippingDetails")}</h3>
-                                </label>
                             </div>
                             {
                                 shippingAddress && (
@@ -1522,8 +1528,8 @@ const CheckoutPageContent = () => {
                         </div>
                     </div>
 
-                    {/* 2nd section */}
-                    <div className=''>
+                    {/* 2nd section - Order Summary - Hidden, moved to sidebar */}
+                    <div className='hidden'>
                         <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111] block mb-6'>{t("yourOrder")}</h3>
                         <table className='w-full border border-[#111]'>
                             <thead>
@@ -1599,7 +1605,7 @@ const CheckoutPageContent = () => {
                                                                     // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
                                                                     const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
                                                                     return (
-                                                                        <li key={uniqueKey} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                        <li key={uniqueKey} className='border border-gray-300 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-gray-900 hover:bg-gray-50 transition-all'>
                                                                             <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                                 <input
                                                                                     checked={isSelected}
@@ -1659,7 +1665,7 @@ const CheckoutPageContent = () => {
                                                                 // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
                                                                 const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
                                                                 return (
-                                                                    <li key={uniqueKey} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
+                                                                    <li key={uniqueKey} className='border border-gray-300 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-gray-900 hover:bg-gray-50 transition-all'>
                                                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                             <input
                                                                                 checked={isSelected}
@@ -1726,13 +1732,13 @@ const CheckoutPageContent = () => {
                     </div>
 
                     {/* 3rd section - Payment Methods */}
-                    <div className='card-modern overflow-hidden'>
-                        <div className='p-6 border-b border-gray-100'>
+                    <div className='card-modern overflow-hidden border border-gray-100 shadow-lg rounded-lg'>
+                        <div className='bg-[#000000] p-6 border-b border-gray-700'>
                             <div className='flex items-center gap-3'>
-                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
-                                    <CreditCard className='w-5 h-5 text-[#1D98FF]' />
+                                <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
+                                    <CreditCard className='w-5 h-5 text-white' />
                                 </div>
-                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("paymentMethod")}</h3>
+                                <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("paymentMethod")}</h3>
                             </div>
                         </div>
 
@@ -1761,7 +1767,7 @@ const CheckoutPageContent = () => {
                                     >
                                         {/* Payment Instructions */}
                                         {PAYMENT_INSTRUCTIONS[method.id] && (
-                                            <div className='bg-blue-50 border-l-4 border-[#1D98FF] rounded-lg p-4 text-sm text-gray-700 mb-4'>
+                                            <div className='bg-gray-50 border-l-4 border-gray-900 rounded-lg p-4 text-sm text-gray-700 mb-4'>
                                                 <p>{PAYMENT_INSTRUCTIONS[method.id]}</p>
                                             </div>
                                         )}
@@ -1888,7 +1894,7 @@ const CheckoutPageContent = () => {
                         <div className='bg-gray-50 p-6 space-y-4'>
                             <p className='text-sm text-gray-600'>
                                 {t("privacyPolicyText")}{' '}
-                                <Link href="/privacy-policy" className='text-[#1D98FF] hover:underline'>{t("privacyPolicy")}</Link>
+                                <Link href="/privacy-policy" className='text-gray-900 hover:underline font-semibold'>{t("privacyPolicy")}</Link>
                             </p>
 
                             <label className='flex items-center gap-3 cursor-pointer'>
@@ -1896,7 +1902,7 @@ const CheckoutPageContent = () => {
                                     {...register("terms", { required: t("termsRequired") })}
                                     type="checkbox"
                                     id="terms"
-                                    className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
+                                    className='w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900'
                                 />
                                 <span className='text-sm text-gray-700'>{t("terms")}</span>
                             </label>
@@ -1904,15 +1910,23 @@ const CheckoutPageContent = () => {
                                 <p className="text-red-500 text-xs animate-slideDown">{errors.terms.message}</p>
                             )}
 
-                            {!watchFields.payment_method?.toLowerCase().includes('monetico') &&
-                                watchFields.payment_method !== 'paypal' &&
-                                watchFields.payment_method !== 'ppcp-gateway' &&
-                                watchFields.payment_method !== 'authnet' ? (
+                            {(() => {
+                                const selectedMethod = filteredPaymentMethods?.find(m => m.id === watchFields.payment_method);
+                                if (!selectedMethod || !watchFields.payment_method) return false;
+                                
+                                const isMonetico = selectedMethod.id?.toLowerCase().includes('monetico') ||
+                                    selectedMethod.title?.toLowerCase().includes('carte bancaire');
+                                const isPayPal = selectedMethod.id === 'paypal' || selectedMethod.id === 'ppcp-gateway';
+                                const isAuthorize = selectedMethod.id === 'authnet' || selectedMethod.id?.toLowerCase().includes('authnet');
+                                
+                                // Afficher le bouton seulement si la méthode sélectionnée n'a pas son propre bouton intégré
+                                return !isMonetico && !isPayPal && !isAuthorize;
+                            })() ? (
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || !watchFields.terms}
                                     className='
-                                        w-full lg:w-auto lg:ml-auto text-white bg-[#1D98FF] rounded-xl
+                                        w-full lg:w-auto lg:ml-auto text-white bg-[#1D98FF] rounded-lg
                                         px-8 py-4 uppercase font-semibold
                                         disabled:opacity-50 disabled:cursor-not-allowed
                                         hover:bg-[#1585e0] active:scale-[0.98]
@@ -1924,6 +1938,90 @@ const CheckoutPageContent = () => {
                                     {isSubmitting ? t("processing") : watchFields.payment_method === 'bacs' ? t("placeOrder") : t("continue")}
                                 </button>
                             ) : null}
+                        </div>
+                    </div>
+                    </div>
+                    
+                    {/* Right Column - Sticky Order Summary */}
+                    <div className='w-full lg:w-[400px] lg:flex-shrink-0'>
+                        <div className='bg-white rounded-lg shadow-xl border border-gray-100 sticky top-24 max-h-[calc(100vh-120px)] flex flex-col overflow-hidden'>
+                            <div className='bg-[#000000] p-6 lg:p-8 rounded-t-lg flex-shrink-0'>
+                                <h3 className='lg:text-2xl text-xl leading-[100%] font-bold text-white flex items-center gap-3'>
+                                    <ShoppingCart className='w-6 h-6' />
+                                    {t("yourOrder")}
+                                </h3>
+                            </div>
+                            
+                            <div className='flex-1 overflow-y-auto p-6 lg:p-8 space-y-4 min-h-0'>
+                                {items?.map((singleItem, i) => {
+                                    const totalPrice = parseFloat(singleItem?.totals?.line_subtotal) / 100 + parseFloat(singleItem?.totals?.line_subtotal_tax) / 100;
+                                    const uniqueKey = `${singleItem.id || 'item'}_${singleItem.key || 'key'}_${i}`;
+                                    return (
+                                        <div key={uniqueKey} className='flex items-start justify-between gap-4 pb-4 border-b border-gray-200'>
+                                            <div className='flex-1'>
+                                                <p className='text-sm font-semibold text-gray-900'>{singleItem?.name}</p>
+                                                <p className='text-xs text-gray-500 mt-1'>x {singleItem?.quantity}</p>
+                                            </div>
+                                            <p className='text-sm font-bold text-gray-900'>{totalPrice.toFixed(2)} {singleItem?.totals?.currency_symbol}</p>
+                                        </div>
+                                    )
+                                })}
+                                
+                                <div className='space-y-3 border-t border-gray-200 pt-4'>
+                                    <div className='flex items-center justify-between'>
+                                        <span className='text-sm text-gray-600'>{t("subtotal")}</span>
+                                        <span className='text-sm font-semibold text-gray-900'>{sousTotal.toFixed(2)} {cart?.totals?.currency_symbol}</span>
+                                    </div>
+                                    
+                                    <div className='flex items-center justify-between'>
+                                        <span className='text-sm text-gray-600'>{t("shippingMethods")}</span>
+                                        <div className='text-sm font-semibold text-gray-900'>
+                                            {(() => {
+                                                const hasCountry = !!watchFields.billing_country;
+                                                const hasCompleteAddress = watchFields.billing_country && 
+                                                                          watchFields.billing_postcode && 
+                                                                          watchFields.billing_city && 
+                                                                          watchFields.billing_address_1;
+                                                
+                                                if (updatingShipping || shippingLoading) {
+                                                    return <span className='text-gray-400'>{t("processing")}</span>;
+                                                }
+                                                
+                                                if (!hasCountry) {
+                                                    return <span className='text-gray-400'>{t("shippingMethods")}</span>;
+                                                }
+                                                
+                                                if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
+                                                    const selectedRate = allShippingRates.find(rate => String(rate.uniqueId) === String(selectedRateId));
+                                                    if (selectedRate) {
+                                                        const totalPrice = (selectedRate.price / 100 + selectedRate.taxes / 100);
+                                                        return totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${selectedRate.currency_symbol || cart?.totals?.currency_symbol || '€'}`;
+                                                    }
+                                                    return <span className='text-gray-400'>{t("selectShippingMethod")}</span>;
+                                                }
+                                                
+                                                return <span className='text-gray-400'>{t("noShippingMethods")}</span>;
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className='border-t-2 border-gray-200 bg-white p-6 lg:p-8 flex-shrink-0'>
+                                <div className='flex items-center justify-between bg-[#000000] -mx-6 lg:-mx-8 px-6 lg:px-8 py-4 rounded-lg'>
+                                    <span className='text-base font-bold text-white'>{t("total")}</span>
+                                    <div className='text-right'>
+                                        <strong className='text-xl text-white font-bold block'>
+                                            {cartTotal.toFixed(2)}{cart?.totals?.currency_symbol}
+                                        </strong>
+                                        {parseFloat(cart?.totals?.total_tax) > 0 && (
+                                            <small className='text-gray-300 text-xs'>
+                                                ({t("includingVAT")} {(Number(cart?.totals?.total_tax) / 100).toFixed(2)} {cart?.totals?.currency_symbol} {t("VAT")})
+                                            </small>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
