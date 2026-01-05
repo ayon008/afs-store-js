@@ -28,6 +28,17 @@ const Navbar = ({ NAV_LINKS }) => {
   const router = useRouter();
   const { cart, sideCartOpen, openSideCart, closeSideCart, handleClearCart, loadCart } = useCart();
 
+  // Normalize URL by removing locale prefix (next-intl will add it automatically)
+  const normalizeUrl = (url) => {
+    if (!url || typeof url !== 'string') return url || '';
+    // Don't modify external URLs (http/https) or anchor links
+    if (url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+      return url;
+    }
+    // Remove /fr/ or /en/ prefix if present
+    return url.replace(/^\/(fr|en)\//, '/');
+  };
+
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
@@ -163,25 +174,39 @@ const Navbar = ({ NAV_LINKS }) => {
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       
+      // Get the actual full pathname from window.location (includes locale prefix)
+      const fullPathname = typeof window !== 'undefined' ? window.location.pathname : pathname;
+      
       // Handle product pages with slug translation
-      const productMatch = pathname?.match(/\/(?:product|produit)\/([^\/]+)/);
+      const productMatch = fullPathname?.match(/\/(?:product|produit)\/([^\/]+)/) || pathname?.match(/\/(?:product|produit)\/([^\/]+)/);
       
       if (productMatch) {
         const currentSlug = productMatch[1];
         // For product pages, use ?lang= parameter to let middleware handle the translation
-        const currentPath = pathname || '/';
+        // Use the full pathname from window.location to preserve locale prefix
+        const currentPath = fullPathname || pathname || '/';
         const basePath = currentPath.split('?')[0]; // Remove existing query params
         const newPath = `${basePath}?lang=${selectedLanguage}`;
         // Use window.location for immediate redirect
+        // The middleware will handle the translation and remove ?lang= from final URL
         window.location.href = newPath;
         return selectedValues;
       } else {
-        // For non-product pages, use ?lang= parameter to let middleware handle it
-        const currentPath = pathname || '/';
-        const basePath = currentPath.split('?')[0]; // Remove existing query params
-        const newPath = `${basePath}?lang=${selectedLanguage}`;
-        // Use window.location for immediate redirect
-        window.location.href = newPath;
+        // For non-product pages, use router to navigate with proper locale
+        // Remove /fr prefix from current path if switching to English
+        let targetPath = pathname || '/';
+        if (selectedLanguage === 'en') {
+          // Remove /fr prefix for English (default locale)
+          targetPath = targetPath.replace(/^\/fr/, '') || '/';
+          // Use router to navigate without locale prefix
+          router.push(targetPath);
+        } else {
+          // For French, ensure /fr prefix is present
+          if (!targetPath.startsWith('/fr')) {
+            targetPath = `/fr${targetPath === '/' ? '' : targetPath}`;
+          }
+          router.push(targetPath);
+        }
         return selectedValues;
       }
     } else {
@@ -400,7 +425,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 onMouseEnter={() => handleShow(link.name)}
               >
                 <Link
-                  href={link.href || ""}
+                  href={normalizeUrl(link.href) || ""}
                   onClick={() => {
                     // Si le lien n'a pas de sous-menus, fermer le menu desktop
                     if (!link.sublinks || link.sublinks.length === 0) {
@@ -436,7 +461,7 @@ const Navbar = ({ NAV_LINKS }) => {
                   <div className="text-black bg-transparent h-fit md:block hidden">
                     <ul className="flex items-center justify-center bg-white">
                       {subLinks?.sublinks?.map((children, i) => {
-                        const url = children?.url ?? "#";
+                        const url = normalizeUrl(children?.url) ?? "#";
                         return (
                           <li
                             onClick={() => {
@@ -493,7 +518,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                         className="max-w-[270px] w-fit"
                                       >
                                         <Link 
-                                          href={`${product.url}`}
+                                          href={normalizeUrl(product.url)}
                                           onClick={handleCloseDesktopMenu}
                                         >
                                           <h5
@@ -534,7 +559,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                 {allProducts?.button_one?.label && (
                                   <button>
                                     <Link
-                                      href={`${allProducts?.button_one?.url}`}
+                                      href={normalizeUrl(allProducts?.button_one?.url)}
                                       onClick={handleCloseDesktopMenu}
                                       className="text-black/75 font-semibold flex items-center gap-1"
                                     >
@@ -560,7 +585,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                 {allProducts?.button_two?.label && (
                                   <button>
                                     <Link
-                                      href={allProducts?.button_two?.url}
+                                      href={normalizeUrl(allProducts?.button_two?.url)}
                                       onClick={handleCloseDesktopMenu}
                                       className="text-black/75 font-semibold flex items-center gap-1"
                                     >
@@ -732,7 +757,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 className="text-[22px] font-semibold leading-[100%] tracking-[-0.01em] flex items-center justify-between pb-[10px] border-b border-b-[#E6E6E6]"
               >
                 <span className="w-fit">
-                  <Link href={`${link.href}`} onClick={(e) => {
+                  <Link href={normalizeUrl(link.href)} onClick={(e) => {
                     // Si le lien n'a pas de sous-menus, fermer le menu
                     if (!link.sublinks || link.sublinks.length === 0) {
                       handleCloseMenu();
@@ -813,7 +838,7 @@ const Navbar = ({ NAV_LINKS }) => {
                     >
                       {
                         children?.products.length === 0 && children?.url ? <span className="w-fit">
-                          <Link href={children?.url} onClick={handleCloseMenu}>{children.name}</Link>
+                          <Link href={normalizeUrl(children?.url)} onClick={handleCloseMenu}>{children.name}</Link>
                         </span> : <span className="w-fit">{children.name}</span>
                       }
                       {
@@ -964,7 +989,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </div>
             <ul className="mt-5 flex flex-col gap-4">
               {productList?.map((product, i) => (
-                <Link href={`${product.url}`} key={i} onClick={handleCloseMenu}>
+                <Link href={normalizeUrl(product.url)} key={i} onClick={handleCloseMenu}>
                   <li>
                     <div className="text-[22px] font-semibold leading-[100%] tracking-[-0.01em] flex items-center justify-between">
                       <span>{product.name}</span>
@@ -984,7 +1009,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 {allProducts?.button_one?.label && (
                   <button>
                     <Link
-                      href={`${allProducts?.button_one?.url}`}
+                      href={normalizeUrl(allProducts?.button_one?.url)}
                       className="text-black/75 font-semibold flex items-center gap-1"
                     >
                       <span className="inline-block">
@@ -1009,7 +1034,7 @@ const Navbar = ({ NAV_LINKS }) => {
                 {allProducts?.button_two?.label && (
                   <button>
                     <Link
-                      href={`${allProducts?.button_two?.url}`}
+                      href={normalizeUrl(allProducts?.button_two?.url)}
                       className="text-black/75 font-semibold flex items-center gap-1"
                     >
                       <span className="inline-block">

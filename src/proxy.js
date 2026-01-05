@@ -183,7 +183,7 @@ export default async function middleware(req) {
                     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout (increased for reliability)
                     
                     const translateResponse = await fetch(translateUrl, {
-                        next: { revalidate: 3600 }, // Cache for 1 hour
+                        cache: 'no-store', // Don't cache in middleware
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -197,7 +197,7 @@ export default async function middleware(req) {
                         console.log(`[Language Switch] API Response:`, JSON.stringify(translation, null, 2));
                         
                         // Check if translation exists and has a slug
-                        if (translation && translation.exists === true && translation.slug) {
+                        if (translation && translation.exists === true && translation.slug && translation.slug.trim() !== '') {
                             // Redirect to translated product with correct route
                             const baseUrl = new URL(req.url);
                             let targetPath;
@@ -219,32 +219,23 @@ export default async function middleware(req) {
                             return NextResponse.redirect(redirectUrl, 307);
                         } else {
                             // Translation doesn't exist - log for debugging
-                            console.warn(`[Language Switch] Translation not found for slug ${currentSlug} to ${langParam}:`, translation);
-                            // Don't redirect to home, try to use the same slug (fallback)
+                            console.warn(`[Language Switch] Translation not found or invalid for slug ${currentSlug} to ${langParam}:`, translation);
+                            // Redirect to home page if translation doesn't exist
                             const baseUrl = new URL(req.url);
-                            let targetPath;
-                            if (langParam === 'fr') {
-                                targetPath = `/fr/produit/${currentSlug}`;
-                            } else {
-                                targetPath = `/product/${currentSlug}`;
-                            }
-                            const redirectUrl = new URL(targetPath, baseUrl.origin);
+                            const homePath = langParam === 'fr' ? '/fr' : '/';
+                            const redirectUrl = new URL(homePath, baseUrl.origin);
                             redirectUrl.searchParams.delete('lang');
                             return NextResponse.redirect(redirectUrl, 307);
                         }
                     } else {
                         // Log error for debugging
+                        const status = translateResponse?.status || 'unknown';
                         const errorText = translateResponse ? await translateResponse.text().catch(() => '') : 'No response';
-                        console.error(`Translation API error: ${translateResponse?.status} for slug ${currentSlug} to ${langParam}. Response: ${errorText}`);
-                        // Fallback: try to use the same slug
+                        console.error(`[Language Switch] API error: ${status} for slug ${currentSlug} to ${langParam}. Response: ${errorText}`);
+                        // Redirect to home page on API error
                         const baseUrl = new URL(req.url);
-                        let targetPath;
-                        if (langParam === 'fr') {
-                            targetPath = `/fr/produit/${currentSlug}`;
-                        } else {
-                            targetPath = `/product/${currentSlug}`;
-                        }
-                        const redirectUrl = new URL(targetPath, baseUrl.origin);
+                        const homePath = langParam === 'fr' ? '/fr' : '/';
+                        const redirectUrl = new URL(homePath, baseUrl.origin);
                         redirectUrl.searchParams.delete('lang');
                         return NextResponse.redirect(redirectUrl, 307);
                     }
