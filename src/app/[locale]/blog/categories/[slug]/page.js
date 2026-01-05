@@ -2,9 +2,9 @@ import React from 'react';
 import { getCategoriesBySlug } from '../../[slug]/page';
 import { getCategories as getCategoriesFromWP } from '@/lib/wp';
 import Image from 'next/image';
-import Link from 'next/link';
 import BlogCard from '@/Shared/Card/BlogCard';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 
 
 

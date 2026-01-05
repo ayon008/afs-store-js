@@ -1,8 +1,7 @@
 'use client';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useMemo, useState, useEffect, useTransition } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import FormButton from '../Button/FormButton';
 import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';

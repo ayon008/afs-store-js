@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import React from 'react';
 import Login from '@/Shared/Form/Auth/Login';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 
 export const metadata = {
     title: "My Account | AFS Store",

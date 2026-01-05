@@ -266,6 +266,7 @@ export default async function middleware(req) {
             return NextResponse.redirect(redirectUrl, 307);
         } else {
             // For non-product pages, redirect to same path with new locale
+            // NO API CALL - just redirect with locale change
             const pathWithoutLocaleClean = pathWithoutLocale === '/' ? '' : pathWithoutLocale;
             let newPathname;
             if (langParam === 'en') {

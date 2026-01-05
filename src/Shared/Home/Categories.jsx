@@ -1,7 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 
 

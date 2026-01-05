@@ -2,8 +2,8 @@ import Image from 'next/image';
 import React from 'react';
 import moment from "moment";
 import BlogContent from "@/Shared/Blog/BlogContent"
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { getPosts } from '@/lib/wp';
 import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';

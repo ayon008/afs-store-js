@@ -2,10 +2,10 @@
 import useCart from '@/Shared/Hooks/useCart';
 import { Minus, Plus, Trash2Icon, X } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocale } from 'next-intl';
 import { getProductRoute } from '@/lib/product-routes';
+import { Link } from '@/i18n/navigation';
 
 const CartList = ({ item }) => {
 

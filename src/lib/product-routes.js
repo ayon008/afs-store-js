@@ -3,19 +3,19 @@
  */
 
 /**
- * Get the product route prefix based on locale
+ * Get the product route prefix based on locale (without locale prefix, next-intl will add it)
  * @param {string} locale - The locale ('en' or 'fr')
- * @returns {string} The route prefix ('/product/' or '/fr/produit/')
+ * @returns {string} The route prefix ('/product/' or '/produit/')
  */
 export function getProductRoutePrefix(locale) {
-    return locale === 'fr' ? '/fr/produit/' : '/product/';
+    return locale === 'fr' ? '/produit/' : '/product/';
 }
 
 /**
- * Get the full product route URL
+ * Get the full product route URL (without locale prefix, next-intl will add it automatically)
  * @param {string} locale - The locale ('en' or 'fr')
  * @param {string} slug - The product slug
- * @returns {string} The full product route URL
+ * @returns {string} The full product route URL without locale prefix
  */
 export function getProductRoute(locale, slug) {
     if (!slug) return '/';

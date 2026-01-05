@@ -192,21 +192,14 @@ const Navbar = ({ NAV_LINKS }) => {
         window.location.href = newPath;
         return selectedValues;
       } else {
-        // For non-product pages, use router to navigate with proper locale
-        // Remove /fr prefix from current path if switching to English
-        let targetPath = pathname || '/';
-        if (selectedLanguage === 'en') {
-          // Remove /fr prefix for English (default locale)
-          targetPath = targetPath.replace(/^\/fr/, '') || '/';
-          // Use router to navigate without locale prefix
-          router.push(targetPath);
-        } else {
-          // For French, ensure /fr prefix is present
-          if (!targetPath.startsWith('/fr')) {
-            targetPath = `/fr${targetPath === '/' ? '' : targetPath}`;
-          }
-          router.push(targetPath);
-        }
+        // For non-product pages, use ?lang= parameter to let middleware handle the locale change
+        // Use the full pathname from window.location to preserve locale prefix
+        const currentPath = fullPathname || pathname || '/';
+        const basePath = currentPath.split('?')[0]; // Remove existing query params
+        const newPath = `${basePath}?lang=${selectedLanguage}`;
+        // Use window.location for immediate redirect
+        // The middleware will handle the locale change and remove ?lang= from final URL
+        window.location.href = newPath;
         return selectedValues;
       }
     } else {

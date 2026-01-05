@@ -13,8 +13,8 @@ import default_image from "../../../public/assets/images/Team/Group-1-3.png.webp
 import FaqSection from './FaqSection';
 import PopUp from '../PopUp/PopUp';
 import ProductDetails from './ProductDetails';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 // For youtube link in review and pop up section
 function extractYouTubeID(url) {

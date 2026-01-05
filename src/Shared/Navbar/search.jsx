@@ -5,8 +5,8 @@ import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Search, X } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
+import { Link } from '@/i18n/navigation';
 import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
@@ -264,7 +264,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                         window.dispatchEvent(new Event('navigation:start'));
                                                     }} 
                                                     className='h-full p-5 flex flex-col justify-between gap-6 bg-[#f7F7F7] rounded-sm' 
-                                                    href={`/product/${slug}`}
+                                                    href={getProductRoute(locale, slug)}
                                                 >
                                                     <div className='flex flex-col gap-[10px] text-center'>
                                                         <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />

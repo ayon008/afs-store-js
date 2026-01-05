@@ -23,9 +23,10 @@ export async function generateMetadata({ params }) {
     // Get translated slugs for hreflang
     const alternateLinks = [];
     
-    // Current language link
+    // Current language link (add locale prefix for French)
     const currentPrefix = getProductRoutePrefix(locale);
-    const currentUrl = `${baseUrl}${currentPrefix}${slug}`;
+    const currentPath = locale === 'fr' ? `/fr${currentPrefix}${slug}` : `${currentPrefix}${slug}`;
+    const currentUrl = `${baseUrl}${currentPath}`;
     
     // Get other language slug
     const otherLocale = locale === 'fr' ? 'en' : 'fr';
@@ -33,7 +34,8 @@ export async function generateMetadata({ params }) {
     
     if (translation.exists && translation.slug) {
         const otherPrefix = getProductRoutePrefix(otherLocale);
-        const otherUrl = `${baseUrl}${otherPrefix}${translation.slug}`;
+        const otherPath = otherLocale === 'fr' ? `/fr${otherPrefix}${translation.slug}` : `${otherPrefix}${translation.slug}`;
+        const otherUrl = `${baseUrl}${otherPath}`;
         alternateLinks.push({
             hreflang: otherLocale,
             url: otherUrl,

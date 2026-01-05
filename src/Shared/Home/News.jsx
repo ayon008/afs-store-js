@@ -1,8 +1,8 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { getPosts } from "@/app/actions/getBlogs";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 /* ----------------------------- News Card ----------------------------- */
 const NewsCard = async ({ article}) => {
@@ -20,7 +20,7 @@ const NewsCard = async ({ article}) => {
       )}
 
       <div>
-        <Link href={`/blogs/${article.slug}`} className="space-y-4">
+        <Link href={`/blog/${article.slug}`} className="space-y-4">
           <h4
             className="text-lg font-semibold leading-[110%] text-[#111]"
             dangerouslySetInnerHTML={{ __html: article.title }}
@@ -81,13 +81,13 @@ const News = async () => {
         </div>
       )}
 
-      <Link
-        href={`/${locale}/blog`}
-        className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
-      >
-        {b("see-all")}
-        <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
-      </Link>
+        <Link
+          href="/blog"
+          className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
+        >
+          {b("see-all")}
+          <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
+        </Link>
     </div>
   );
 };

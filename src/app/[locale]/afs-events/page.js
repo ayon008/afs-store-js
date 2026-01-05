@@ -1,7 +1,7 @@
 import Events from '@/Shared/Afs-Events/Events';
-import Link from 'next/link';
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 
 export const metadata = {
     title: 'AFS EVENTS - FRANCE US UK EU - AFS',

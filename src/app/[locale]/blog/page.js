@@ -1,8 +1,8 @@
 import BlogCard from "@/Shared/Card/BlogCard";
 import { getPosts } from "@/app/actions/getBlogs";
 import Image from "next/image";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 export const metadata = {
     title: "Blog - Foiling Tips & Gear Reviews",

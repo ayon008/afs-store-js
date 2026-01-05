@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import React from 'react';
 
 import Ambassedor from '@/Shared/Ambessadurs/Ambessadurs';
+import { Link } from '@/i18n/navigation';
 import getAmbessedor from '@/app/actions/WC/getAmbessadurs';
 import getCountries from '@/app/actions/WC/getCountries';
 import { getTranslations } from 'next-intl/server';

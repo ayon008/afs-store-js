@@ -1,11 +1,11 @@
 import React from 'react';
 const default_image = "/assets/images/GWEN-WB-D-lite-1024x573.png.webp"
-import Link from 'next/link';
 import Products from '@/Shared/Products/Products';
 import { getParentCategory } from '@/app/actions/WC/getParentCategory';
 import { getChildCategories } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
+import { Link } from "@/i18n/navigation";
 
 const page = async ({ params, searchParams }) => {
     // Catch All Route

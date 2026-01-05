@@ -2,7 +2,7 @@ import '../globals.css';
 import NavItems from './Navitem';
 import { getAuthenticatedUser } from '../../actions/WC/Auth/getAuth';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 
 export const metadata = {
