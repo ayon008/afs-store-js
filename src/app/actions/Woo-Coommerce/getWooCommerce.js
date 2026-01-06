@@ -462,6 +462,8 @@ export const getPrice = async (productId) => {
     const currency = await getCurrency();
     const locale = await getLocale();
     const location = await getLocation();
+    console.log(location);
+    
     try {
         const user = await getAuthenticatedUser();
         const shippingCountry = user?.shipping?.country || user?.billing?.country || "";

@@ -16,8 +16,6 @@ import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
 import Notification from "../Notification/Notification";
 
-
-
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
 
@@ -157,7 +155,7 @@ const Navbar = ({ NAV_LINKS }) => {
     // Get current location from cookie
     const cookieLocation = Cookies.get('location') || '2682';
     const locationChanged = true;
-    
+
     // Clear the cart if language, currency, or location changes
     if (languageChanged || currencyChanged || locationChanged) {
       try {
@@ -1145,10 +1143,10 @@ const Navbar = ({ NAV_LINKS }) => {
                   </li>
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <span className={`fi fi-${selectedLocation === '2682' ? 'fr' : 'us'} mr-2 scale-125`}></span>
-                      {selectedLocation === '2682' ? 'France' : 'USA'}
+                      {/* <span className={`fi fi-${selectedLocation === '2682' ? 'fr' : 'us'} mr-2 scale-125`}></span> */}
+                      {selectedLocation === '2682' ? 'Delivery to Europe + UK' : 'Delivery to US'}
                     </span>
-                    <span className="font-bold">{selectedLocation === '2682' ? 'France' : 'USA'}</span>
+                    {/* <span className="font-bold">{selectedLocation === '2682' ? 'France' : 'USA'}</span> */}
                   </li>
                 </ul>
               </div>
@@ -1290,10 +1288,10 @@ const Navbar = ({ NAV_LINKS }) => {
                         onChange={() => setSelectedLocation('2683')}
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <span className="fi fi-us mr-2 scale-125"></span>
-                        USA
+                        {/* <span className="fi fi-us mr-2 scale-125"></span> */}
+                        Delivery to US
                       </span>
-                      <span className="font-bold">USA</span>
+                      {/* <span className="font-bold">USA</span> */}
                     </label>
                   </li>
                   <li
@@ -1311,10 +1309,10 @@ const Navbar = ({ NAV_LINKS }) => {
                         onChange={() => setSelectedLocation('2682')}
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <span className="fi fi-fr mr-2 scale-125"></span>
-                        France
+                        {/* <span className="fi fi-fr mr-2 scale-125"></span> */}
+                        Delivery to Europe + UK
                       </span>
-                      <span className="font-bold">France</span>
+                      {/* <span className="font-bold">France</span> */}
                     </label>
                   </li>
                 </ul>

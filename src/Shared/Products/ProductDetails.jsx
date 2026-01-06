@@ -58,7 +58,7 @@ const ProductDetails = ({ data, variations }) => {
     // const isInStock = baseInStock && variationInStock;
     const isInStock = variationInStock;
 
-    const { handleAddToCart } = useCart();
+    const { handleAddToCart, getItemQuantity, cart } = useCart();
 
     const acf = data?.acf;
 
@@ -68,6 +68,9 @@ const ProductDetails = ({ data, variations }) => {
     const priceWithTax = data?.price_with_tax;
     const attributes = data?.attributes;
     const productId = data?.id;
+
+    console.log(matchedVariation?.stock_quantity);
+    
 
     // Update the price HTML with calculated tax price
     const price = useMemo(() => {
@@ -142,10 +145,10 @@ const ProductDetails = ({ data, variations }) => {
                     }));
                     const missingAttributeData = missingAttributes?.map(attrName => {
                         const slug = getAttributeSlug(attrName);
-                        return { 
-                            id: 0, 
-                            name: `attribute_${slug}`, 
-                            option: watchedValues[attrName]?.replace(/['/]/g, "") || watchedValues[attrName] 
+                        return {
+                            id: 0,
+                            name: `attribute_${slug}`,
+                            option: watchedValues[attrName]?.replace(/['/]/g, "") || watchedValues[attrName]
                         };
                     });
 
@@ -221,6 +224,22 @@ const ProductDetails = ({ data, variations }) => {
             if (!baseInStock) return;
         }
 
+        // Check stock quantity before adding to cart
+        const stockQuantity = hasVariations 
+            ? (matchedVariation?.stock_quantity ?? null)
+            : (data?.stock_quantity ?? null);
+        
+        // Get current quantity in cart for this product/variation
+        const currentQuantityInCart = getItemQuantity(productId, variationId || null);
+        
+        // Check if adding 1 more would exceed stock
+        if (stockQuantity !== null && stockQuantity !== undefined) {
+            if (currentQuantityInCart >= stockQuantity) {
+                alert(t("stockLimitReached") || `Vous ne pouvez pas ajouter plus de ${stockQuantity} exemplaire(s) de ce produit. Quantité disponible : ${stockQuantity}.`);
+                return;
+            }
+        }
+
         setAddingToCart(true);
         try {
             // Use variation attributes from the matched variation (already in correct WooCommerce format)
@@ -291,10 +310,27 @@ const ProductDetails = ({ data, variations }) => {
 
     const [isOpen, setOpen] = useState(false);
 
-    // Button is ready only when: all variations selected + price loaded + in stock
+    // Get current quantity in cart for this product/variation (recalculate when variationId changes)
+    const currentQuantityInCart = useMemo(() => {
+        return getItemQuantity(productId, variationId || null);
+    }, [productId, variationId, getItemQuantity]);
+    
+    // Get stock quantity (recalculate when matchedVariation changes)
+    const stockQuantity = useMemo(() => {
+        return hasVariations 
+            ? (matchedVariation?.stock_quantity ?? null)
+            : (data?.stock_quantity ?? null);
+    }, [hasVariations, matchedVariation?.stock_quantity, data?.stock_quantity]);
+    
+    // Check if stock limit is reached (recalculate when currentQuantityInCart or stockQuantity changes)
+    const isStockLimitReached = useMemo(() => {
+        return stockQuantity !== null && stockQuantity !== undefined && currentQuantityInCart >= stockQuantity;
+    }, [stockQuantity, currentQuantityInCart]);
+
+    // Button is ready only when: all variations selected + price loaded + in stock + stock limit not reached
     const isButtonReady = hasVariations
-        ? (allVariationsSelected && variationPrice && !priceLoading && isInStock)
-        : (baseInStock && !priceLoading);
+        ? (allVariationsSelected && variationPrice && !priceLoading && isInStock && !isStockLimitReached)
+        : (baseInStock && !priceLoading && !isStockLimitReached);
 
 
     const variationIndex = useMemo(() => {
@@ -487,6 +523,13 @@ const ProductDetails = ({ data, variations }) => {
                             <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
                         )}
 
+                        {/* Stock Limit Reached Message */}
+                        {/* {isStockLimitReached && isInStock && (
+                            <p className='text-red-500 font-semibold text-sm'>
+                                {t("stockLimitReached") || `Quantité maximale atteinte (${stockQuantity} disponible${stockQuantity > 1 ? 's' : ''})`}
+                            </p>
+                        )} */}
+
                         {/* Button */}
                         <button
                             disabled={!isButtonReady || addingToCart}
@@ -494,10 +537,8 @@ const ProductDetails = ({ data, variations }) => {
                             type="submit"
                         >
                             {addingToCart
-                                ? t("add")
-                                : (hasVariations ? (!isInStock && allVariationsSelected) : !baseInStock)
-                                    ? t("buy")
-                                    : t("buy")
+                                ? t("buy")
+                                : t("buy")
                             }
                         </button>
                     </div>
