@@ -16,8 +16,6 @@ import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
 import Notification from "../Notification/Notification";
 
-
-
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
 
@@ -42,6 +40,7 @@ const Navbar = ({ NAV_LINKS }) => {
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
+  const [selectedLocation, setSelectedLocation] = useState('2682');
 
   // Initialize with a default value that's the same on server and client to avoid hydration mismatch
   const [selectedCurrency, setSelectedCurrency] = useState('euro');
@@ -58,12 +57,19 @@ const Navbar = ({ NAV_LINKS }) => {
       setSelectedCurrency(cookieCurrency);
     } else {
       // Fallback to cart currency symbol if available
-      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR' 
-        ? 'euro' 
-        : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP' 
-        ? 'gbp' 
-        : 'usd';
+      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR'
+        ? 'euro'
+        : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP'
+          ? 'gbp'
+          : 'usd';
       setSelectedCurrency(newCurrency);
+    }
+
+    const cookieLocation = Cookies.get('location');
+    if (cookieLocation === '2682' || cookieLocation === '2683') {
+      setSelectedLocation(cookieLocation);
+    } else {
+      setSelectedLocation('2682');
     }
     // Mark cookie as initialized after reading
     setCookieInitialized(true);
@@ -73,23 +79,27 @@ const Navbar = ({ NAV_LINKS }) => {
   useEffect(() => {
     // Don't write cookie until we've read the initial value
     if (!cookieInitialized) return;
-    
+
     if (selectedCurrency === 'euro' || selectedCurrency === 'usd' || selectedCurrency === 'gbp') {
       // Add path: '/' to ensure the cookie is accessible to all routes including server-side
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
-      
+
       // Also set WCML cookie for WooCommerce Multilingual multi-currency support
       const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
       Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     }
-  }, [selectedCurrency, cookieInitialized]);
+
+    if (selectedLocation === '2682' || selectedLocation === '2683') {
+      Cookies.set('location', selectedLocation, { expires: 365, sameSite: 'Lax', path: '/' });
+    }
+
+  }, [selectedCurrency, selectedLocation, cookieInitialized]);
 
 
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
   const [notification, setNotification] = useState(null);
   const [showPopUp, setPopUp] = useState(false);
-
   const totalQty = cart?.items_count;
 
   // Effet pour gérer la redirection après la soumission du formulaire
@@ -124,6 +134,7 @@ const Navbar = ({ NAV_LINKS }) => {
     const selectedValues = {
       language: selectedLanguage, // "en" ou "fr"
       currency: selectedCurrency, // "usd" ou "euro"
+      location: selectedLocation, // "2682" ou "2683"
     };
 
     // Clear cart if language or currency changes
@@ -141,8 +152,12 @@ const Navbar = ({ NAV_LINKS }) => {
     }
     const currencyChanged = selectedCurrency !== currentCurrency;
 
-    // Clear the cart if language or currency changes
-    if (languageChanged || currencyChanged) {
+    // Get current location from cookie
+    const cookieLocation = Cookies.get('location') || '2682';
+    const locationChanged = true;
+
+    // Clear the cart if language, currency, or location changes
+    if (languageChanged || currencyChanged || locationChanged) {
       try {
         // Check if cart has items before clearing
         const hasItems = cart && cart.items && cart.items.length > 0;
@@ -156,6 +171,8 @@ const Navbar = ({ NAV_LINKS }) => {
               setNotification(t("cartClearedLanguage"));
             } else if (currencyChanged) {
               setNotification(t("cartClearedCurrency"));
+            } else if (locationChanged) {
+              setNotification(t("cartClearedLocation") || "Panier vidé en raison du changement de localisation");
             }
           } else {
             console.error('Failed to clear cart:', result?.error);
@@ -168,18 +185,19 @@ const Navbar = ({ NAV_LINKS }) => {
 
     // Convert to WCML format
     const wcmlCurrency = selectedCurrency === 'euro' ? 'EUR' : selectedCurrency === 'gbp' ? 'GBP' : 'USD';
-    
+
     if (languageChanged) {
       // Set cookies first
       Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
       Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
-      
+      Cookies.set('location', selectedLocation, { expires: 365, sameSite: 'Lax', path: '/' });
+
       // Get the actual full pathname from window.location (includes locale prefix)
       const fullPathname = typeof window !== 'undefined' ? window.location.pathname : pathname;
-      
+
       // Handle product pages with slug translation
       const productMatch = fullPathname?.match(/\/(?:product|produit)\/([^\/]+)/) || pathname?.match(/\/(?:product|produit)\/([^\/]+)/);
-      
+
       if (productMatch) {
         const currentSlug = productMatch[1];
         // For product pages, use ?lang= parameter to let middleware handle the translation
@@ -203,14 +221,17 @@ const Navbar = ({ NAV_LINKS }) => {
         return selectedValues;
       }
     } else {
-      // If only currency changed, reload cart to get updated currency
-      if (currencyChanged) {
+      // If currency or location changed, reload page to get updated values
+      if (currencyChanged || locationChanged) {
         // Set the cookies synchronously before reload to ensure they're available on next page load
         Cookies.set('currency', selectedCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
         Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+        if (locationChanged) {
+          Cookies.set('location', selectedLocation, { expires: 365, sameSite: 'Lax', path: '/' });
+        }
         // Small delay to ensure cookies are written before reload
         setTimeout(() => {
-          // Reload the current page to ensure currency is updated
+          // Reload the current page to ensure currency and location are updated
           const currentPath = pathname || '/';
           const reloadPath = `/${locale}${currentPath === '/' ? '' : currentPath}`;
           window.location.href = reloadPath;
@@ -472,7 +493,7 @@ const Navbar = ({ NAV_LINKS }) => {
                             style={{ padding: "24px 12px 24px" }}
                             key={i}
                           >
-                            <Link 
+                            <Link
                               href={url}
                               onClick={() => {
                                 // Si le lien n'a pas de produits, fermer le menu desktop
@@ -490,7 +511,7 @@ const Navbar = ({ NAV_LINKS }) => {
                     {detailsDiv && productList?.length > 0 && (
                       <div className="h-[calc(100vh-230px)] max-h-[500px] overflow-y-auto scroll-smooth hide-scrollbar-y overscroll-contain bg-transparent">
                         <div
-                          className="h-fit bg-white"
+                          className="h-fit bg-white border-b border-b-[#111]"
                         >
                           <div className="text-black/75 global-padding flex items-start justify-center gap-10 pb-6">
                             <div className="space-y-5">
@@ -510,7 +531,7 @@ const Navbar = ({ NAV_LINKS }) => {
                                         key={i}
                                         className="max-w-[270px] w-fit"
                                       >
-                                        <Link 
+                                        <Link
                                           href={normalizeUrl(product.url)}
                                           onClick={handleCloseDesktopMenu}
                                         >
@@ -1058,7 +1079,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
       {hoverId && (
         <div
-          className="absolute inset-0 z-30 backdrop-blur-[10px] md:block hidden"
+          className="absolute inset-0 z-30 backdrop-blur-[10px] bg-black/40 md:block hidden"
           onMouseEnter={() => handleShow(null)}
         ></div>
       )}
@@ -1119,6 +1140,13 @@ const Navbar = ({ NAV_LINKS }) => {
                       {selectedCurrency === 'euro' ? t("euro") : t("usDollar")}
                     </span>
                     <span className="font-bold">{selectedCurrency === 'euro' ? 'EUR' : 'USD'}</span>
+                  </li>
+                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
+                    <span className="flex gap-2 flex-1 items-center flex-wrap">
+                      {/* <span className={`fi fi-${selectedLocation === '2682' ? 'fr' : 'us'} mr-2 scale-125`}></span> */}
+                      {selectedLocation === '2682' ? t("uk") : t("usa")}
+                    </span>
+                    {/* <span className="font-bold">{selectedLocation === '2682' ? 'France' : 'USA'}</span> */}
                   </li>
                 </ul>
               </div>
@@ -1241,14 +1269,60 @@ const Navbar = ({ NAV_LINKS }) => {
                   </li>
                 </ul>
               </div>
+              {/* location Switcher */}
+              <div className="flex flex-col items-stretch gap-4">
+                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Store Location</h4>
+                <ul className="flex flex-col gap-3">
+                  <li
+                    onClick={() => setSelectedLocation('2683')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLocation === '2683' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="language"
+                        value="en"
+                        className="hidden"
+                        checked={selectedLocation === '2683'}
+                        onChange={() => setSelectedLocation('2683')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        {/* <span className="fi fi-us mr-2 scale-125"></span> */}
+                        {t("usa")}
+                      </span>
+                      {/* <span className="font-bold">USA</span> */}
+                    </label>
+                  </li>
+                  <li
+                    onClick={() => setSelectedLocation('2682')}
+                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLocation === '2682' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
+                      }`}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="radio"
+                        name="language"
+                        value="fr"
+                        className="hidden"
+                        checked={selectedLocation === '2682'}
+                        onChange={() => setSelectedLocation('2682')}
+                      />
+                      <span className="flex gap-2 flex-1 items-center flex-wrap">
+                        {/* <span className="fi fi-fr mr-2 scale-125"></span> */}
+                        {t("uk")}
+                      </span>
+                      {/* <span className="font-bold">France</span> */}
+                    </label>
+                  </li>
+                </ul>
+              </div>
               {/* Submit Button */}
               <button type="submit" className="bg-[#000] text-white font-semibold rounded-[10px] py-[10px] px-2 w-full cursor-pointer">Change</button>
             </form>
           </div>
         </div >
       </PopUp >
-
-
     </>
   );
 };

@@ -79,7 +79,7 @@ const SingleProduct = ({ data, variations }) => {
     const BreadCums = () => {
         const t = useTranslations("breadcum");
         return (
-            <div className='uppercase md:mb-3 md:mx-0 -mx-5 md:bg-white bg-black -mb-1 md:pt-0 pt-5 md:px-0 px-5'>
+            <div className='uppercase md:mb-3 md:mx-0 -mx-5 md:bg-white bg-black -mb-1 md:pt-0 pt-5 md:px-0 px-5 md:pb-0 pb-5'>
                 <div className='font-bold text-sm text-[#999999] flex flex-wrap'>
                     <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span>
                     {
@@ -203,7 +203,7 @@ const SingleProduct = ({ data, variations }) => {
                                             setOpen(true)
                                             setSlide(i)
                                         }} key={i}>
-                                            <div className=''>
+                                            <div className='pb-14'>
                                                 <Image src={singleImage?.src || default_image} width={649} height={649} className='w-full h-full object-cover aspect-[1]' alt={singleImage?.alt} />
                                                 {
                                                     singleImage?.video &&
