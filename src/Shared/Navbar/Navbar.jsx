@@ -511,7 +511,7 @@ const Navbar = ({ NAV_LINKS }) => {
                     {detailsDiv && productList?.length > 0 && (
                       <div className="h-[calc(100vh-230px)] max-h-[500px] overflow-y-auto scroll-smooth hide-scrollbar-y overscroll-contain bg-transparent">
                         <div
-                          className="h-fit bg-white"
+                          className="h-fit bg-white border-b border-b-[#111]"
                         >
                           <div className="text-black/75 global-padding flex items-start justify-center gap-10 pb-6">
                             <div className="space-y-5">
@@ -1079,7 +1079,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
       {hoverId && (
         <div
-          className="absolute inset-0 z-30 backdrop-blur-[10px] md:block hidden"
+          className="absolute inset-0 z-30 backdrop-blur-[10px] bg-black/40 md:block hidden"
           onMouseEnter={() => handleShow(null)}
         ></div>
       )}
@@ -1144,7 +1144,7 @@ const Navbar = ({ NAV_LINKS }) => {
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
                       {/* <span className={`fi fi-${selectedLocation === '2682' ? 'fr' : 'us'} mr-2 scale-125`}></span> */}
-                      {selectedLocation === '2682' ? 'Delivery to Europe + UK' : 'Delivery to US'}
+                      {selectedLocation === '2682' ? t("uk") : t("usa")}
                     </span>
                     {/* <span className="font-bold">{selectedLocation === '2682' ? 'France' : 'USA'}</span> */}
                   </li>
@@ -1289,7 +1289,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         {/* <span className="fi fi-us mr-2 scale-125"></span> */}
-                        Delivery to US
+                        {t("usa")}
                       </span>
                       {/* <span className="font-bold">USA</span> */}
                     </label>
@@ -1310,7 +1310,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         {/* <span className="fi fi-fr mr-2 scale-125"></span> */}
-                        Delivery to Europe + UK
+                        {t("uk")}
                       </span>
                       {/* <span className="font-bold">France</span> */}
                     </label>

@@ -70,7 +70,7 @@ const ProductDetails = ({ data, variations }) => {
     const productId = data?.id;
 
     console.log(matchedVariation?.stock_quantity);
-    
+
 
     // Update the price HTML with calculated tax price
     const price = useMemo(() => {
@@ -213,6 +213,9 @@ const ProductDetails = ({ data, variations }) => {
 
     const currency = Cookies.get('currency');
     const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+    const location = Cookies.get('location');
+    console.log(location);
+
 
     // Handle add to cart
     const onSubmit = async (formData) => {
@@ -225,13 +228,13 @@ const ProductDetails = ({ data, variations }) => {
         }
 
         // Check stock quantity before adding to cart
-        const stockQuantity = hasVariations 
+        const stockQuantity = hasVariations
             ? (matchedVariation?.stock_quantity ?? null)
             : (data?.stock_quantity ?? null);
-        
+
         // Get current quantity in cart for this product/variation
         const currentQuantityInCart = getItemQuantity(productId, variationId || null);
-        
+
         // Check if adding 1 more would exceed stock
         if (stockQuantity !== null && stockQuantity !== undefined) {
             if (currentQuantityInCart >= stockQuantity) {
@@ -314,14 +317,14 @@ const ProductDetails = ({ data, variations }) => {
     const currentQuantityInCart = useMemo(() => {
         return getItemQuantity(productId, variationId || null);
     }, [productId, variationId, getItemQuantity]);
-    
+
     // Get stock quantity (recalculate when matchedVariation changes)
     const stockQuantity = useMemo(() => {
-        return hasVariations 
+        return hasVariations
             ? (matchedVariation?.stock_quantity ?? null)
             : (data?.stock_quantity ?? null);
     }, [hasVariations, matchedVariation?.stock_quantity, data?.stock_quantity]);
-    
+
     // Check if stock limit is reached (recalculate when currentQuantityInCart or stockQuantity changes)
     const isStockLimitReached = useMemo(() => {
         return stockQuantity !== null && stockQuantity !== undefined && currentQuantityInCart >= stockQuantity;
@@ -497,7 +500,7 @@ const ProductDetails = ({ data, variations }) => {
                                 </span>
                                 <span className='text-base font-semibold text-[#111]'>
                                     {
-                                        currency === "usd" && matchedVariation?.acf?.USA_Stock ?
+                                        location === '2683' && matchedVariation?.acf?.USA_Stock ?
                                             <>{t("stock_usd_acf")} : {matchedVariation?.acf?.USA_Stock}</>
                                             :
                                             matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&

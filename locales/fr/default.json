@@ -166,7 +166,10 @@
     "english": "Anglais",
     "euro": "Euro",
     "french": "Français",
+    "location": "Emplacement du magasin disponible",
     "search": "Rechercher...",
+    "uk": "Livraison en Europe et au Royaume-Uni",
+    "usa": "Livraison aux États-Unis",
     "usDollar": "Dollar américain"
   },
   "DirectSailing": {
