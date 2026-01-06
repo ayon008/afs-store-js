@@ -4,6 +4,7 @@ import {
   getCustomerProfile,
   getCustomerProfileByMerchantId,
   deleteCustomerProfile,
+  generateMerchantCustomerId,
 } from '@/lib/authorize-net/AuthorizeNetService';
 
 /**
@@ -33,8 +34,8 @@ export async function GET(req) {
       result = await getCustomerProfile(customerProfileId);
     } else {
       // Search by merchant customer ID (derived from email)
-      // Try multiple possible merchant customer ID formats
-      const merchantCustomerIdBase = `cust_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      // Use the same generation function to ensure consistency
+      const merchantCustomerIdBase = generateMerchantCustomerId(email);
 
       result = await getCustomerProfileByMerchantId(merchantCustomerIdBase);
 
@@ -94,8 +95,8 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
-    // Generate merchant customer ID from email
-    const merchantCustomerId = `cust_${email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+    // Generate merchant customer ID from email (max 20 chars for Authorize.Net)
+    const merchantCustomerId = generateMerchantCustomerId(email);
 
     const result = await createCustomerProfile({
       merchantCustomerId,

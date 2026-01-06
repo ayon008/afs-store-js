@@ -3,23 +3,20 @@
 
 import { cookies } from "next/headers";
 import { getWooCommerceCookies } from "../../Cookies/cookie-handler";
-import { getCurrency, getLocaleValue } from "../../getWooCommerce";
+import { getLocaleValue } from "../../getWooCommerce";
+
 
 
 
 // Get cart - calls WooCommerce API directly to ensure cookies are synchronized
 export async function getCart() {
-    const currency = await getCurrency();
-    const WP_URL = `${process.env.WP_BASE_URL}`;
+    const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
     const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
-    
     try {
         const cookieHeader = await getWooCommerceCookies();
 
-        // Add currency as query parameter
-        const cartUrl = `${WC_STORE_URL}/cart?currency=${currency}`;
-        
-        const response = await fetch(cartUrl, {
+        const response = await fetch(`${WC_STORE_URL}/cart`, {
             method: 'GET',
             headers: {
                 'Cookie': cookieHeader,
@@ -29,21 +26,7 @@ export async function getCart() {
         });
 
         if (!response.ok) {
-            const errorText = await response.text().catch(() => '');
-            // If error is HTML, return empty cart
-            if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
-                console.warn('getCart() received HTML error page, returning empty cart');
-                return { success: true, data: { items: [], items_count: 0, totals: {} } };
-            }
             throw new Error(`Failed to get cart: ${response.status}`);
-        }
-
-        // Check if response is JSON before parsing
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            console.warn('getCart() response is not JSON, received:', text.substring(0, 100));
-            return { success: true, data: { items: [], items_count: 0, totals: {} } };
         }
 
         const data = await response.json();
@@ -83,7 +66,7 @@ export const updateBillingAndCart = async (billingData) => {
         console.log("Updating billing address with payload:", billingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {
@@ -123,6 +106,8 @@ export const updateBillingAndCart = async (billingData) => {
 
 export const updateShippingAndCart = async (shippingData) => {
     const localeValue = await getLocaleValue();
+    const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
     if (!token) {
@@ -175,7 +160,7 @@ export const updateShippingAndCart = async (shippingData) => {
         console.log("Updating shipping address with payload:", shippingPayload);
 
         const cartRes = await fetch(
-            `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1/cart/update-customer`,
+            `${process.env.WP_BASE_URL}/wp-json/wc/store/v1/cart/update-customer`,
             {
                 method: "POST",
                 headers: {
@@ -218,7 +203,7 @@ export async function selectShippingRate(rateId, packageId = 0) {
     const localeValue = await getLocaleValue();
     const WP_URL = `${process.env.WP_BASE_URL}/${localeValue}`;
     const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
-
+    
     try {
         if (!rateId) {
             return { success: false, error: 'Shipping rate ID is required' };

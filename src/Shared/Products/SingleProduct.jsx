@@ -84,10 +84,47 @@ const SingleProduct = ({ data, variations }) => {
                     <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span>
                     {
                         breadcrumb?.map((item, i) => {
+                            // Nouvelle stratégie simple : extraire le dernier segment valide de chaque URL
+                            // et accumuler progressivement pour construire le chemin
+                            
+                            // Fonction helper pour extraire le dernier slug valide d'une URL
+                            const getLastValidSlug = (url) => {
+                                if (!url) return null;
+                                const segments = url.split('/').filter(seg => seg && seg.trim() !== '');
+                                // Parcourir de la fin vers le début pour trouver le premier slug valide
+                                for (let k = segments.length - 1; k >= 0; k--) {
+                                    const seg = segments[k];
+                                    const lower = seg.toLowerCase();
+                                    // Ignorer les segments problématiques
+                                    if (lower !== 'product-category' && 
+                                        lower !== 'oduct-category' &&
+                                        !lower.includes('product-category') &&
+                                        !lower.includes('oduct-category') &&
+                                        seg.length > 0) {
+                                        return seg;
+                                    }
+                                }
+                                return null;
+                            };
+                            
+                            // Accumuler les slugs jusqu'à l'index actuel
+                            const pathParts = [];
+                            for (let j = 0; j <= i; j++) {
+                                const slug = getLastValidSlug(breadcrumb[j]?.url);
+                                if (slug && !pathParts.includes(slug)) {
+                                    pathParts.push(slug);
+                                }
+                            }
+                            
+                            // Construire l'URL finale
+                            const finalUrl = pathParts.length > 0 
+                                ? `/product-category/${pathParts.join('/')}`
+                                : '/product-category';
+                            
                             return (
                                 <span key={i}>
                                     <Link
-                                        href={`/product-category${item?.url}`}
+                                        href={finalUrl}
                                         className="text-[#999999]"
                                     >
                                         {item?.name}

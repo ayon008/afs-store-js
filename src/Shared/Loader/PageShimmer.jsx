@@ -57,4 +57,5 @@ const PageShimmer = () => {
 };
 
 export default PageShimmer;
+export { PageShimmer };
 

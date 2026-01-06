@@ -8,6 +8,7 @@ import {
   createPaymentProfile,
   parseResponseCode,
   AuthorizeNetError,
+  generateMerchantCustomerId,
 } from '@/lib/authorize-net/AuthorizeNetService';
 
 const WP_BASE_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
@@ -347,8 +348,8 @@ export async function POST(req) {
 
     if (saveCard && opaqueData && !customerProfileId) {
       try {
-        // Generate a unique merchant customer ID based on email
-        const merchantCustomerId = `cust_${billingEmail.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+        // Generate a unique merchant customer ID based on email (max 20 chars for Authorize.Net)
+        const merchantCustomerId = generateMerchantCustomerId(billingEmail);
 
         // Check if customer already has a profile
         const existingProfile = await getCustomerProfileByMerchantId(merchantCustomerId);
