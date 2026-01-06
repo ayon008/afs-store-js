@@ -279,10 +279,48 @@ export async function refundTransaction(transactionId, amount, cardNumber) {
 // ==================== CIM PROFILE MANAGEMENT ====================
 
 /**
+ * Generate a merchant customer ID that respects Authorize.Net's 20 character limit
+ * Format: cust_<hash> where hash is derived from email
+ * 
+ * @param {string} email - Customer email
+ * @returns {string} merchantCustomerId (max 20 characters)
+ */
+export function generateMerchantCustomerId(email) {
+  if (!email) {
+    // Fallback: use timestamp-based ID (max 20 chars)
+    const timestamp = Date.now().toString().slice(-12); // Last 12 digits
+    return `cust_${timestamp}`.substring(0, 20);
+  }
+  
+  // Create a simple hash from email
+  const emailPart = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  
+  // Create a hash from the full email (djb2 hash algorithm)
+  let hash = 5381;
+  for (let i = 0; i < email.length; i++) {
+    hash = ((hash << 5) + hash) + email.charCodeAt(i);
+    hash = hash & 0x7fffffff; // Ensure positive 32-bit integer
+  }
+  
+  // Convert to base36 and pad to ensure consistent length
+  const hashStr = hash.toString(36).padStart(8, '0').substring(0, 8);
+  
+  // Limit email part to fit within 20 chars: "cust_" (5) + hash (8) + "_" (1) + emailPart (max 6)
+  const maxEmailLength = 6;
+  const truncatedEmail = emailPart.substring(0, maxEmailLength);
+  
+  // Format: cust_<hash>_<emailPart> (max 20 chars: 5 + 8 + 1 + 6 = 20)
+  const merchantId = `cust_${hashStr}_${truncatedEmail}`;
+  
+  // Ensure it doesn't exceed 20 characters (Authorize.Net limit)
+  return merchantId.substring(0, 20);
+}
+
+/**
  * Create a customer profile
  *
  * @param {object} params
- * @param {string} params.merchantCustomerId - Unique customer ID
+ * @param {string} params.merchantCustomerId - Unique customer ID (max 20 chars)
  * @param {string} params.email - Customer email
  * @param {string} params.description - Customer description (optional)
  * @returns {Promise<object>}
