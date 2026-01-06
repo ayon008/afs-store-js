@@ -40,7 +40,14 @@ const Navbar = ({ NAV_LINKS }) => {
   // États pour la langue et la devise sélectionnées
   const [selectedLanguage, setSelectedLanguage] = useState(locale || 'fr');
   const currentCurrencySymbol = cart?.totals?.currency_symbol || '€';
-  const [selectedLocation, setSelectedLocation] = useState('2682');
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    const cookieLocation = Cookies.get('location');
+    if (cookieLocation === '2682' || cookieLocation === '2683') {
+      return cookieLocation;
+    } else {
+      return Cookies.set('location', '2682', { expires: 365, sameSite: 'Lax', path: '/' });
+    }
+  });
 
   // Initialize with a default value that's the same on server and client to avoid hydration mismatch
   const [selectedCurrency, setSelectedCurrency] = useState('euro');
