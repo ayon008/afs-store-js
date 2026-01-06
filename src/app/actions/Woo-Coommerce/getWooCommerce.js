@@ -22,6 +22,13 @@ export const getCurrency = async () => {
     return currency;
 }
 
+export const getLocation = async () => {
+    const cookieStore = await cookies();
+    const locationValue = cookieStore.get('location')?.value;
+    console.log(locationValue);
+    return locationValue;
+}
+
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
     if (!header) return [];
@@ -297,7 +304,8 @@ export const getChildCategories = async (parentId) => {
 export const getProductBySlug = async (slug) => {
     const locale = await getLocale();
     const currency = await getCurrency();
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}&currency=${currency}`;
+    const location = await getLocation();
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}&currency=${currency}&location=${location}`;
     try {
         const response = await fetch(url, {
             headers: {
@@ -453,11 +461,11 @@ export const lostPassword = async (email) => {
 export const getPrice = async (productId) => {
     const currency = await getCurrency();
     const locale = await getLocale();
+    const location = await getLocation();
     try {
         const user = await getAuthenticatedUser();
         const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
-        const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}`;
-
+        const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}&location=${location}`;
         const response = await fetch(url, {
             headers: {
                 Authorization: `Basic ${authHeader}`,

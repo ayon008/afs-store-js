@@ -55,7 +55,8 @@ const ProductDetails = ({ data, variations }) => {
     const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
 
     // Final stock check: base product AND selected variation must be in stock
-    const isInStock = baseInStock && variationInStock;
+    // const isInStock = baseInStock && variationInStock;
+    const isInStock = variationInStock;
 
     const { handleAddToCart } = useCart();
 
