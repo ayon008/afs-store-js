@@ -205,7 +205,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                     const priceHtml = product?.price_html || '';
                                     const slug = product?.slug || '';
 
-                                    console.log(priceHtml);
+                                    // console.log(priceHtml);
                                     return (
                                         <div key={product.id} className='h-auto! w-full'>
                                             <Link 
