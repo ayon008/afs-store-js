@@ -130,7 +130,7 @@ const Products = ({ id, childCategories }) => {
                         {
                             isLoading ? <PriceFilterShimmer /> : <>
                                 <div>
-                                    <label className='uppercase text-base font-medium mb-4 block' htmlFor="vol">{t("price")}</label>
+                                    <label className='font-semibold text-base leading-[100%] text-black mb-4 uppercase' htmlFor="vol">{t("price")}</label>
                                     <RangeSlider
                                         min={minPrice}
                                         max={maxPrice}
@@ -198,7 +198,7 @@ const Products = ({ id, childCategories }) => {
                     <div>
                         {isLoading ? <PriceFilterShimmer /> :
                             <>
-                                <label className='font-semibold text-base leading-[100%] text-black mb-4 block' htmlFor="vol">{t("price")}</label>
+                                <label className='font-semibold text-base leading-[100%] text-black mb-4 uppercase' htmlFor="vol">{t("price")}</label>
                                 <RangeSlider
                                     min={minPrice}
                                     max={maxPrice}
