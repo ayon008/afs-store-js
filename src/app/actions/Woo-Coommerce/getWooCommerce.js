@@ -462,8 +462,6 @@ export const getPrice = async (productId) => {
     const currency = await getCurrency();
     const locale = await getLocale();
     const location = await getLocation();
-    console.log(location);
-    
     try {
         const user = await getAuthenticatedUser();
         const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
@@ -487,6 +485,7 @@ export const getPrice = async (productId) => {
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
     const currency = await getCurrency();
+    const location = await getLocation();
     const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();

@@ -1179,6 +1179,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       />
                       <span className="flex gap-2 flex-1 items-center flex-wrap">
                         <span className="fi fi-us mr-2 scale-125"></span>
+                        <span className="fi fi-gb mr-2 scale-125"></span>
                         {t("english")}
                       </span>
                       <span className="font-bold">{t("english")}</span>

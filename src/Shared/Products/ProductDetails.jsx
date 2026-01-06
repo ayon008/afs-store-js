@@ -1,12 +1,16 @@
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
-import { ArrowUpRight, X } from "lucide-react";
+import { ArrowUpRight, Diamond, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from 'next/image';
 import PopUp from '../PopUp/PopUp';
 import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -59,7 +63,6 @@ const ProductDetails = ({ data, variations }) => {
     const isInStock = variationInStock;
 
     const { handleAddToCart, getItemQuantity, cart } = useCart();
-
     const acf = data?.acf;
 
     const compatibilite = acf?.compatibilite;
@@ -68,8 +71,30 @@ const ProductDetails = ({ data, variations }) => {
     const priceWithTax = data?.price_with_tax;
     const attributes = data?.attributes;
     const productId = data?.id;
+    const location = Cookies.get('location');
+    const [gradeOpen, setGradeOpen] = useState(false);
+    const [selectedGrade, setSelectedGrade] = useState("A");
+    const [telephonePopUp, setTelephonePopUp] = useState(false);
 
-    console.log(matchedVariation?.stock_quantity);
+    const gradeImage = [
+        { grade: "A", images: ["https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont@2x.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-6.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-8.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-11.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-12.png"] },
+        { grade: "B", images: ["https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-14-e1730759964574.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-15-e1730760041494.png", , "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-16-e1730760102909.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-17-e1730760192264.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-18-e1730760254642.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-19-e1730760323713.png"] },
+        {
+            grade: "C", images: [
+                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-1-11-e1730761608511.png",
+                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-2-9-e1730761695455.png",
+                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-3-5-e1730761755539.png",
+                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-4-1-e1730761801550.png",
+                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-5-1-e1730761843118.png"
+            ]
+        }
+    ]
+
+    const sliderImage = gradeImage.find((item) => item.grade === selectedGrade)?.images;
+
+
+    const used = attributes?.find((item) => item?.name === "Grade") ? true : false;
+
 
 
     // Update the price HTML with calculated tax price
@@ -213,9 +238,6 @@ const ProductDetails = ({ data, variations }) => {
 
     const currency = Cookies.get('currency');
     const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
-    const location = Cookies.get('location');
-    console.log(location);
-
 
     // Handle add to cart
     const onSubmit = async (formData) => {
@@ -234,6 +256,9 @@ const ProductDetails = ({ data, variations }) => {
 
         // Get current quantity in cart for this product/variation
         const currentQuantityInCart = getItemQuantity(productId, variationId || null);
+
+        console.log(currentQuantityInCart, 'currentQuantityInCart');
+
 
         // Check if adding 1 more would exceed stock
         if (stockQuantity !== null && stockQuantity !== undefined) {
@@ -297,6 +322,8 @@ const ProductDetails = ({ data, variations }) => {
                 productData
             );
 
+            console.log(result, 'result');
+
             // Only show alert if there's an actual error (success is explicitly false)
             // Don't show alert if success is true or if result is undefined/null
             if (result && result.success === false && result.error) {
@@ -305,6 +332,7 @@ const ProductDetails = ({ data, variations }) => {
             // If success is true, the cart should open automatically via useCart hook
         } catch (error) {
             console.error('Error adding to cart:', error);
+            console.log(error);
             alert(decodeHtmlEntities(error?.message) || 'Une erreur est survenue lors de l\'ajout au panier.');
         } finally {
             setAddingToCart(false);
@@ -437,6 +465,12 @@ const ProductDetails = ({ data, variations }) => {
                                     return (
                                         <tr key={index} className="flex flex-col gap-[6px]">
                                             <th className="font-bold text-left p-0!">
+                                                {fieldName === "Grade" &&
+                                                    <button onClick={() => setGradeOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer flex items-center mb-5'>
+                                                        <span>{t("Grade")}</span>
+                                                        <span className='inline'><ArrowUpRight className='inline ml-1' size={'1.1rem'} strokeWidth={2.5} /></span>
+                                                    </button>
+                                                }
                                                 <label className='font-semibold text-base leading-[100%] text-left'>
                                                     {singleAttribute?.name}
                                                     {selectedValue && (
@@ -451,7 +485,6 @@ const ProductDetails = ({ data, variations }) => {
                                                     {singleAttribute.options?.map((singleOption, idx) => {
                                                         const inStock = optionAvailability[singleAttribute.name]?.[singleOption] ?? true;
                                                         const selected = watch(fieldName) === singleOption;
-
                                                         return (
                                                             <li key={idx}>
                                                                 <label
@@ -559,7 +592,7 @@ const ProductDetails = ({ data, variations }) => {
                         <p className='text-base leading-[100%] font-bold'>{t("after-sale")}</p>
                         <small className='text-[15px] leading-[19px] block'>{t("return")}</small>
                     </div>
-                    <div className='space-y-2'>
+                    {/* <div className='space-y-2'>
                         <p className='text-base leading-[100%] font-bold'>{a("payment")}</p>
                         <small className='text-[15px] leading-[19px] block'>{t("payment_single")}</small>
                         <div className='flex items-center gap-[10px]'>
@@ -568,7 +601,7 @@ const ProductDetails = ({ data, variations }) => {
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/svg3409-1.svg'} alt='mastercard' width={40} className='w-[40px] h-auto' height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/image-7.svg'} alt='visa' width={80} className='w-[80px] h-auto' height={50} />
                         </div>
-                    </div>
+                    </div> */}
                 </div>
                 <div className='flex items-stretch bg-[#F0F0F0] mt-10'>
                     <div className='p-4 2xl:w-[60%] w-full flex flex-col justify-between h-full'>
@@ -577,7 +610,7 @@ const ProductDetails = ({ data, variations }) => {
                             <h3 className='font-bold text-base leading-6'>{t("need")}</h3>
                             <p className='text-[15px] leading-4 text-[#666666]/75'>{t("we")}</p>
                         </div>
-                        <p className='text-xs leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
+                        <p onClick={() => setTelephonePopUp(true)} className='text- cursor-pointer leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
                     <div className='2xl:w-[40%] w-0 bg-[url("https://afs-foiling.com/fr/wp-content/uploads/2025/06/bg_img-1.png")] bg-contain bg-center bg-no-repeat'>
                         <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
@@ -601,6 +634,154 @@ const ProductDetails = ({ data, variations }) => {
                             className="scroll-bar faq"
                             dangerouslySetInnerHTML={{ __html: compatibilite }}
                         />
+                    </div>
+                </div>
+            </PopUp>
+            {/* Guide PopUp */}
+
+            {
+                used && (
+                    <PopUp isOpen={gradeOpen}>
+                        <div className='max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll relative mx-auto rounded-[4px] bg-white -z-20'>
+                            <button onClick={() => setGradeOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer'>
+                                <X className="w-4 h-4 lg:text-black text-white z-10" />
+                            </button>
+                            {/* Content */}
+                            <div className='flex items-stretch gap-1 lg:flex-row flex-col'>
+                                {/* Slider */}
+                                <div className='flex-1 lg:w-1/2 w-full bg-[#111] -z-10'>
+                                    <Swiper
+                                        modules={[Navigation]}
+                                        navigation
+                                        slidesPerView={1}
+                                        spaceBetween={0}
+                                        className="swiper-grade w-full h-full"
+                                    >
+                                        {
+                                            sliderImage?.map((item, index) => {
+                                                return (
+                                                    <SwiperSlide key={index} className='w-full h-full'>
+                                                        <div className="w-full h-full">
+                                                            <Image src={item} className='w-full h-full object-contain' alt={`Grade ${selectedGrade}`} width={100} height={100} />
+                                                        </div>
+                                                    </SwiperSlide>
+                                                )
+                                            })
+                                        }
+                                    </Swiper>
+                                </div>
+                                {/* Content */}
+                                <div className='flex-1 space-y-[30px] p-5 bg-white'>
+                                    <div className='space-y-[10px]'>
+                                        <h2 className='global-h2'>{t("Our grades")}</h2>
+                                        <p className='lg:text-lg text-base leading-[110%] font-semibold text-[#111111bf]'>
+                                            {t("Grade-p")}
+                                        </p>
+                                    </div>
+
+                                    <div className='flex flex-col gap-[10px]'>
+
+                                        {/* Grade A */}
+                                        <label className="cursor-pointer block">
+                                            <input
+                                                type="radio"
+                                                name="grade"
+                                                value="A"
+                                                checked={selectedGrade === "A"}
+                                                onChange={() => setSelectedGrade("A")}
+                                                className="peer hidden"
+                                            />
+
+                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-2
+                      peer-checked:bg-[#1D98FF] peer-checked:text-white transition">
+                                                <svg className='flex-[20px_0_0]' xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M10 12.5L8 10.3L8.6 9.29999M6 5.5H18L21 10.5L12.5 20C12.4348 20.0665 12.357 20.1194 12.2712 20.1554C12.1853 20.1915 12.0931 20.2101 12 20.2101C11.9069 20.2101 11.8147 20.1915 11.7288 20.1554C11.643 20.1194 11.5652 20.0665 11.5 20L3 10.5L6 5.5Z" stroke={selectedGrade === "A" ? "#fff" : "#1D98FF"} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+
+                                                <div className="space-y-1">
+                                                    <h3 className="text-lg font-bold leading-[100%]">Grade A</h3>
+                                                    <p className="text-base leading-[110%] opacity-80">
+                                                        {t("grade_a_p")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                        {/* Grade B */}
+                                        <label className="cursor-pointer block">
+                                            <input
+                                                type="radio"
+                                                name="grade"
+                                                value="B"
+                                                checked={selectedGrade === "B"}
+                                                onChange={() => setSelectedGrade("B")}
+                                                className="peer sr-only"
+                                            />
+
+                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-3
+                      peer-checked:bg-[#111] peer-checked:text-white transition">
+                                                <input
+                                                    type="radio"
+                                                    tabIndex={-1}
+                                                    checked={selectedGrade === "B"}
+                                                    readOnly
+                                                    className="mt-1 accent-[#1D98FF] pointer-events-none"
+                                                />
+
+                                                <div className="space-y-1">
+                                                    <h3 className="text-lg font-bold leading-[100%]">Grade B</h3>
+                                                    <p className="text-base leading-[110%] opacity-80">
+                                                        {t("grade_b_p")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                        {/* Grade C */}
+                                        <label className="cursor-pointer block">
+                                            <input
+                                                type="radio"
+                                                name="grade"
+                                                value="C"
+                                                checked={selectedGrade === "C"}
+                                                onChange={() => setSelectedGrade("C")}
+                                                className="peer sr-only"
+                                            />
+
+                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-3
+                      peer-checked:bg-[#111] peer-checked:text-white transition">
+                                                <input
+                                                    type="radio"
+                                                    tabIndex={-1}
+                                                    checked={selectedGrade === "C"}
+                                                    readOnly
+                                                    className="mt-1 accent-[#1D98FF] pointer-events-none"
+                                                />
+
+                                                <div className="space-y-1">
+                                                    <h3 className="text-lg font-bold leading-[100%]">Grade C</h3>
+                                                    <p className="text-base leading-[110%] opacity-80">
+                                                        {t("grade_c_p")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </PopUp>
+                    // Telephone PopUp
+                )
+            }
+            <PopUp isOpen={telephonePopUp}>
+                <div className='bg-white max-w-[649px] w-[95%] h-fit overflow-x-hidden  p-5 relative mx-auto rounded-[4px] overflow-hidden'>
+                    <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
+                        <X className="w-4 h-4" />
+                    </button>
+                    <div className='pt-6 h-[80vh]'>
+                        <div className="calendly-inline-widget" data-url="https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs" style={{ minWidth: "320px", height: "100%" }}></div>
+                        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
                     </div>
                 </div>
             </PopUp>

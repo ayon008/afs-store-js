@@ -736,7 +736,7 @@ export default function AfsSupport({ locale }) {
               for="acc1"
               class="flex justify-between items-start py-[16px] border-y-2 border-[#d5d8dc] font-bold cursor-pointer transition-colors relative text-[clamp(1.125rem,1.0887rem+0.1613vw,1.25rem)] uppercase"
             >
-              Mon foil siffle ?
+              {t("Is my foil whistling?")}
               <span class="transform rotate-0 transition-transform duration-300 peer-checked:rotate-180">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

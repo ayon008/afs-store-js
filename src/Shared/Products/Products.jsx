@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
-import { Filter, X } from 'lucide-react';
+import { ArrowUpRight, Filter, X } from 'lucide-react';
 import ProductCard from '../Card/ProductCard';
 import PopUp from '../PopUp/PopUp';
 import SkeletonProjectCard from '../Loader/SkeletonLoader';
@@ -21,6 +21,7 @@ const Products = ({ id, childCategories }) => {
     const [isOpen, setOpen] = useState(false);
     const [ids, setIds] = useState([id]);
     const [priceRange, setPriceRange] = useState([0, 0]);
+    const [telephonePopUp, setTelephonePopUp] = useState(false);
 
     // Products
     const { isLoading, isError, data: allProductsData } = useQuery({
@@ -130,13 +131,13 @@ const Products = ({ id, childCategories }) => {
                         {
                             isLoading ? <PriceFilterShimmer /> : <>
                                 <div>
-                                    <label className='font-semibold text-base leading-[100%] text-black mb-4 uppercase' htmlFor="vol">{t("price")}</label>
+                                    <label className='font-semibold text-base leading-[100%] text-black uppercase' htmlFor="vol">{t("price")}</label>
                                     <RangeSlider
                                         min={minPrice}
                                         max={maxPrice}
                                         value={priceRange}
                                         onInput={handleChange}
-                                        className='my-dashed-slider -ml-2'
+                                        className='my-dashed-slider -ml-2 mt-4'
                                     />
                                     <div className='text-[14px] leading-[15px] font-semibold mt-4'>
                                         {currencySymbol}{priceRange[0].toFixed(2)} — {currencySymbol}{priceRange[1].toFixed(2)}
@@ -144,6 +145,14 @@ const Products = ({ id, childCategories }) => {
                                 </div>
                             </>
                         }
+                        <div className='flex bg-[#f7f7f7] p-[10px] mt-4 rounded-sm gap-2'>
+                            <svg className='flex-[30px_0_0]' xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38" fill="none"><path d="M32.2166 14.239C29.3667 11.7865 24.3568 9.5 19 9.5C13.6432 9.5 8.63327 11.7865 5.7834 14.239C3.58063 16.1346 5.29389 19.2939 7.25191 18.978C10.1889 18.5041 16.7972 18.0302 19 18.978C21.2028 18.0302 27.8111 18.5041 30.7481 18.978C32.7061 19.2939 34.4194 16.1346 32.2166 14.239Z" stroke="#111111" stroke-width="2.375" stroke-linecap="square"></path><path d="M19 28.5007L11.875 28.5007M19 28.5007L26.125 28.5007M19 28.5007L19 25.334M11.875 28.5007L4.75 28.5007L4.75 25.334M11.875 28.5007L11.875 25.334M26.125 28.5007L33.25 28.5006L33.25 25.334M26.125 28.5007L26.125 25.334" stroke="#111111" stroke-width="2.375" stroke-linecap="square"></path></svg>
+                            <div className=''>
+                                <h3 className='text-base leading-[100%]'>{t("chat_h")}</h3>
+                                <p className='text-sm mt-2 mb-3'>{t("chat_p")}</p>
+                                <button onClick={() => setTelephonePopUp(true)} className='text-sm flex items-center border p-3 font-bold rounded-sm cursor-pointer'>{t("chat_btn")} <ArrowUpRight className='inline w-4 h-4' /></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -214,6 +223,92 @@ const Products = ({ id, childCategories }) => {
                         <button type='button' className='text-center bg-black text-white w-full mt-6 text-sm leading-[100%] py-4 font-semibold rounded-4xl cursor-pointer' onClick={() => setOpen(!isOpen)}>
                             {a("finish")}
                         </button>
+                    </div>
+                </div>
+            </PopUp>
+
+            <PopUp isOpen={telephonePopUp}>
+                <div className='bg-white max-w-[1180px] w-[95%] max-h-[80vh] overflow-x-hidden lg:p-20 p-5 relative mx-auto rounded-[4px] overflow-y-scroll scroll-bar'>
+                    <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
+                        <X className="w-4 h-4" />
+                    </button>
+                    <div>
+                        <h2 className='global-h2 mb-10'>{t("chat_pop_h")}</h2>
+                        <div className='grid lg:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-5'>
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_one_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_one_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_one_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_two_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_two_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_two_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_three_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_three_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_three_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_four_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_four_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_four_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_five_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_five_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_five_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+                            <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
+                                <div className='space-y-[10px]'>
+                                    <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_six_h")}</h3>
+                                    <p className='text-[#111111bf] text-base leading-[110%]'>
+                                        {t("chat_pop_div_six_p")}
+                                    </p>
+                                </div>
+                                <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
+                                    {t("chat_pop_div_six_btn")}
+                                    <ArrowUpRight className='inline w-4 h-4' />
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </PopUp>
