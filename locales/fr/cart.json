@@ -37,7 +37,9 @@
       "continueToBasket": "Continuer vers le panier",
       "outOfStock": "Rupture",
       "maxQuantity": "Max"
-    }
+    },
+    "clearedOnLocationChange": "Votre panier a été vidé en raison du changement de localisation",
+    "clearedOnCurrencyChange": "Votre panier a été vidé en raison du changement de devise"
   }
 }
 

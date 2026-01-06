@@ -1,21 +1,140 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-
-// import {
-//     getCart as getCartAction, addToCart as addToCartAction, updateCartItem,
-//     removeCartItem,
-//     clearCart,
-//     applyCoupon,
-//     removeCoupon
-// } from '../../app/actions/Woo-Coommerce/getWooCommerce';
-// import { getUserTaxRate } from '../funtions/getWooCommerce';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import Cookies from 'js-cookie';
+import { useLocale } from 'next-intl';
 
 import {
-    addToCart as addToCartAction, updateCartItem, removeCartItem, clearCart, applyCoupon, removeCoupon
+    updateCartItem, removeCartItem, clearCart, applyCoupon, removeCoupon
 } from "../../app/actions/Woo-Coommerce/getWooCommerce"
 
 import { getCart as getCartAction, } from '@/app/actions/Woo-Coommerce/Shop/Cart/cart';
+
+// LocalStorage key
+const CART_STORAGE_KEY = 'afs_cart';
+
+// Helper functions for localStorage
+const getLocalStorageCart = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const cartData = localStorage.getItem(CART_STORAGE_KEY);
+        return cartData ? JSON.parse(cartData) : null;
+    } catch (error) {
+        console.error('Error reading cart from localStorage:', error);
+        return null;
+    }
+};
+
+const saveLocalStorageCart = (cart) => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+    }
+};
+
+const clearLocalStorageCart = () => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.removeItem(CART_STORAGE_KEY);
+    } catch (error) {
+        console.error('Error clearing cart from localStorage:', error);
+    }
+};
+
+// Get current metadata from cookies
+const getCurrentMetadata = (locale) => {
+    const currency = Cookies.get('currency') || 'euro';
+    const location = Cookies.get('location') || '2682';
+    
+    // Convert currency to format used in cart
+    let currencyCode = 'EUR';
+    if (currency === 'usd') currencyCode = 'USD';
+    else if (currency === 'gbp') currencyCode = 'GBP';
+    
+    return {
+        locale: locale || 'fr',
+        currency: currencyCode,
+        location: location
+    };
+};
+
+// Validate cart metadata against current cookies
+const validateCartMetadata = (cart, currentMetadata) => {
+    if (!cart || !cart.metadata) return false;
+    
+    return (
+        cart.metadata.locale === currentMetadata.locale &&
+        cart.metadata.currency === currentMetadata.currency &&
+        cart.metadata.location === currentMetadata.location
+    );
+};
+
+// Convert localStorage cart to WooCommerce format for display
+const convertLocalStorageCartToDisplay = (localCart) => {
+    if (!localCart || !localCart.items || localCart.items.length === 0) {
+        return null;
+    }
+    
+    // Calculate totals
+    let items_count = 0;
+    let subtotal = 0;
+    
+    const items = localCart.items.map((item, index) => {
+        const quantity = item.quantity || 1;
+        items_count += quantity;
+        
+        const price = item.productData?.price_with_tax || item.productData?.price || 0;
+        const lineSubtotal = price * quantity;
+        subtotal += lineSubtotal;
+        
+        return {
+            id: item.id,
+            name: item.productData?.name || '',
+            quantity: quantity,
+            variation_id: item.variation_id || null,
+            prices: {
+                price: Math.round(price * 100), // Convert to cents
+                regular_price: Math.round(price * 100),
+            },
+            totals: {
+                line_subtotal: Math.round(lineSubtotal * 100),
+                line_total: Math.round(lineSubtotal * 100),
+            },
+            images: item.productData?.images || [],
+            image: item.productData?.image || null,
+            key: `local_${item.id}_${item.variation_id || 'simple'}_${index}`,
+            productData: item.productData
+        };
+    });
+    
+    // Get currency symbol
+    const currencySymbol = localCart.metadata.currency === 'USD' ? '$' : 
+                          localCart.metadata.currency === 'GBP' ? '£' : '€';
+    
+    return {
+        items: items,
+        items_count: items_count,
+        totals: {
+            total_items: Math.round(subtotal * 100),
+            total_items_tax: 0,
+            total_fees: 0,
+            total_tax: 0,
+            total_price: Math.round(subtotal * 100),
+            total_shipping: 0,
+            total_discount: 0,
+            currency_symbol: currencySymbol,
+            currency_code: localCart.metadata.currency
+        },
+        coupons: [],
+        shipping_address: null,
+        billing_address: null,
+        needs_payment: true,
+        needs_shipping: true,
+        _localStorage: true // Flag to indicate this is from localStorage
+    };
+};
 
 // Create the Cart Context
 const CartContext = createContext(null);
@@ -26,30 +145,39 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [sideCartOpen, setSideCartOpen] = useState(false);
-    // const [taxInfo, setTaxInfo] = useState({ rate: 20, country: 'FR' }); // Default France 20%
+    const locale = useLocale();
 
     // Open/Close side cart
     const openSideCart = () => setSideCartOpen(true);
     const closeSideCart = () => setSideCartOpen(false);
 
-
+    // Load cart from localStorage on mount
     useEffect(() => {
-        const load = async () => {
+        const load = () => {
             try {
-                // Use API route instead of Server Action for better cookie synchronization
-                const data = await getCartAction();
-                console.log(data, 'data');
-                // const data = await response.json();
-                setCart(data.data);
+                const currentMetadata = getCurrentMetadata(locale);
+                const localCart = getLocalStorageCart();
+                
+                // Validate metadata
+                if (localCart && validateCartMetadata(localCart, currentMetadata)) {
+                    const displayCart = convertLocalStorageCartToDisplay(localCart);
+                    setCart(displayCart);
+                } else {
+                    // Clear invalid cart
+                    if (localCart) {
+                        clearLocalStorageCart();
+                    }
+                    setCart(null);
+                }
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
                 console.error('Failed to load cart:', err);
                 setLoading(false);
             }
-        }
+        };
         load();
-    }, []);
+    }, [locale]);
 
 
     // // Load tax rate based on user country
@@ -63,16 +191,99 @@ export const CartProvider = ({ children }) => {
     //     }
     // };
 
-    // Load cart data
-    const loadCart = async () => {
+    // Load cart data from localStorage
+    const loadCart = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Use API route instead of Server Action for better cookie synchronization
+            const currentMetadata = getCurrentMetadata(locale);
+            const localCart = getLocalStorageCart();
+            
+            // Validate metadata
+            if (localCart && validateCartMetadata(localCart, currentMetadata)) {
+                const displayCart = convertLocalStorageCartToDisplay(localCart);
+                setCart(displayCart);
+            } else {
+                // Clear invalid cart
+                if (localCart) {
+                    clearLocalStorageCart();
+                }
+                setCart(null);
+            }
+        } catch (err) {
+            setError(err.message);
+            console.error('Cart loading error:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [locale]);
+
+    // Sync cart to WooCommerce API (called at checkout)
+    const syncCartToAPI = useCallback(async (country) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const currentMetadata = getCurrentMetadata(locale);
+            const localCart = getLocalStorageCart();
+            
+            if (!localCart || !localCart.items || localCart.items.length === 0) {
+                return { success: false, error: 'Cart is empty' };
+            }
+
+            // Validate metadata before sync
+            if (!validateCartMetadata(localCart, currentMetadata)) {
+                return { success: false, error: 'Cart metadata mismatch' };
+            }
+
+            // Clear existing WooCommerce cart first
+            await clearCart();
+
+            // Add each item to WooCommerce cart
+            for (const item of localCart.items) {
+                const response = await fetch('/api/cart/add-item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        id: item.id,
+                        quantity: item.quantity || 1,
+                        variation_id: item.variation_id || null,
+                        variation: item.variation || {}
+                    }),
+                    cache: 'no-store',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to sync item' }));
+                    throw new Error(errorData.error || `Failed to sync item: ${response.status}`);
+                }
+            }
+
+            // Update billing address with country for shipping calculation
+            if (country) {
+                await fetch('/api/cart/update-billing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        billing_address: {
+                            country: country
+                        }
+                    }),
+                    cache: 'no-store',
+                }).catch(err => console.error('Error updating billing address:', err));
+            }
+
+            // Load cart from API to get updated data
             const response = await fetch('/api/cart', {
                 method: 'GET',
-                credentials: 'include', // Important: include cookies
+                credentials: 'include',
                 cache: 'no-store',
             });
 
@@ -80,16 +291,18 @@ export const CartProvider = ({ children }) => {
                 throw new Error(`Failed to load cart: ${response.status}`);
             }
 
-            const data = await response.json();
-            console.log(data, 'resultFromLoadCart');
-            setCart(data);
+            const apiCart = await response.json();
+            setCart(apiCart);
+
+            return { success: true, data: apiCart };
         } catch (err) {
             setError(err.message);
-            console.error('Cart loading error:', err);
+            console.error('Cart sync error:', err);
+            return { success: false, error: err.message };
         } finally {
             setLoading(false);
         }
-    };
+    }, [locale]);
 
     // Initial cart and tax rate load
     // useEffect(() => {
@@ -97,37 +310,74 @@ export const CartProvider = ({ children }) => {
     //     loadTaxRate();
     // }, []);
 
-    // Add item to cart
-    const handleAddToCart = async (productId, quantity = 1, variationId = null, attributes = {}) => {
+    // Add item to cart (localStorage only)
+    const handleAddToCart = useCallback(async (productId, quantity = 1, variationId = null, attributes = {}, productData = null) => {
         try {
             setLoading(true);
             setError(null);
-            const result = await addToCartAction(productId, quantity, variationId, attributes);
 
-            if (result.success) {
-                // Small delay to ensure cookies are synchronized
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Update items_count immediately for better UX
-                setCart(prev => {
-                    if (!prev) return prev;
-                    return {
-                        ...prev,
-                        items_count: (prev.items_count || 0) + quantity
-                    };
-                });
-
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
-                await loadCart();
-
-                // Open side cart on successful add
-                openSideCart();
-            } else {
-                setError(result.error);
-                console.error('Add to cart error:', result.error);
+            const currentMetadata = getCurrentMetadata(locale);
+            
+            // Get existing cart or create new one
+            let localCart = getLocalStorageCart();
+            
+            // Validate existing cart metadata
+            if (localCart && !validateCartMetadata(localCart, currentMetadata)) {
+                // Clear invalid cart
+                localCart = null;
+                clearLocalStorageCart();
             }
 
-            return result;
+            // Initialize cart if needed
+            if (!localCart) {
+                localCart = {
+                    locale: currentMetadata.locale,
+                    currency: currentMetadata.currency,
+                    location: currentMetadata.location,
+                    items: [],
+                    metadata: {
+                        ...currentMetadata,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }
+                };
+            }
+
+            // Check if item already exists
+            const existingItemIndex = localCart.items.findIndex(item => 
+                item.id === productId && 
+                (item.variation_id || null) === (variationId || null) &&
+                JSON.stringify(item.variation || {}) === JSON.stringify(attributes || {})
+            );
+
+            if (existingItemIndex >= 0) {
+                // Update quantity
+                localCart.items[existingItemIndex].quantity += quantity;
+            } else {
+                // Add new item
+                localCart.items.push({
+                    id: productId,
+                    variation_id: variationId || null,
+                    quantity: quantity,
+                    variation: attributes || {},
+                    productData: productData || {}
+                });
+            }
+
+            // Update metadata
+            localCart.metadata.updated_at = new Date().toISOString();
+
+            // Save to localStorage
+            saveLocalStorageCart(localCart);
+
+            // Update state
+            const displayCart = convertLocalStorageCartToDisplay(localCart);
+            setCart(displayCart);
+
+            // Open side cart on successful add
+            openSideCart();
+
+            return { success: true };
         } catch (err) {
             setError(err.message);
             console.error('Add to cart error:', err);
@@ -135,101 +385,114 @@ export const CartProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [locale]);
 
-    // Update cart item quantity
-    const handleUpdateCartItem = async (itemKey, quantity) => {
+    // Update cart item quantity (localStorage)
+    const handleUpdateCartItem = useCallback(async (itemKey, quantity) => {
         try {
             setError(null);
-            const result = await updateCartItem(itemKey, quantity);
-
-            if (result.success) {
-                // Small delay to ensure cookies are synchronized
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Update local cart state immediately for better UX
-                setCart(prev => {
-                    if (!prev || !prev.items) return prev;
-
-                    return {
-                        ...prev,
-                        items: prev.items.map(item =>
-                            item.key === itemKey
-                                ? { ...item, quantity: quantity }
-                                : item
-                        )
-                    };
-                });
-
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
-                await loadCart();
-            } else {
-                setError(result.error);
-                console.error('Update cart error:', result.error);
+            
+            const currentMetadata = getCurrentMetadata(locale);
+            const localCart = getLocalStorageCart();
+            
+            if (!localCart || !validateCartMetadata(localCart, currentMetadata)) {
+                return { success: false, error: 'Cart not found or invalid' };
             }
 
-            return result;
+            // Extract index from itemKey (format: local_productId_variationId_index)
+            const keyParts = itemKey.split('_');
+            if (keyParts.length < 4 || keyParts[0] !== 'local') {
+                return { success: false, error: 'Invalid item key' };
+            }
+
+            const itemIndex = parseInt(keyParts[3], 10);
+            if (isNaN(itemIndex) || itemIndex < 0 || itemIndex >= localCart.items.length) {
+                return { success: false, error: 'Item not found' };
+            }
+
+            // Update quantity
+            if (quantity <= 0) {
+                localCart.items.splice(itemIndex, 1);
+            } else {
+                localCart.items[itemIndex].quantity = quantity;
+            }
+
+            // Update metadata
+            localCart.metadata.updated_at = new Date().toISOString();
+
+            // Save to localStorage
+            saveLocalStorageCart(localCart);
+
+            // Update state
+            const displayCart = convertLocalStorageCartToDisplay(localCart);
+            setCart(displayCart);
+
+            return { success: true };
         } catch (err) {
             setError(err.message);
             console.error('Update cart error:', err);
             return { success: false, error: err.message };
         }
-    };
+    }, [locale]);
 
-    // Remove item from cart
-    const handleRemoveCartItem = async (itemKey) => {
+    // Remove item from cart (localStorage)
+    const handleRemoveCartItem = useCallback(async (itemKey) => {
         try {
             setError(null);
-            const result = await removeCartItem(itemKey);
-
-            if (result.success) {
-                // Small delay to ensure cookies are synchronized
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Update local cart state immediately
-                setCart(prev => {
-                    if (!prev || !prev.items) return prev;
-
-                    const removedItem = prev.items.find(item => item.key === itemKey);
-                    const removedQty = removedItem?.quantity || 1;
-
-                    return {
-                        ...prev,
-                        items: prev.items.filter(item => item.key !== itemKey),
-                        items_count: (prev.items_count || 0) - removedQty
-                    };
-                });
-
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
-                await loadCart();
-            } else {
-                setError(result.error);
-                console.error('Remove from cart error:', result.error);
+            
+            const currentMetadata = getCurrentMetadata(locale);
+            const localCart = getLocalStorageCart();
+            
+            if (!localCart || !validateCartMetadata(localCart, currentMetadata)) {
+                return { success: false, error: 'Cart not found or invalid' };
             }
 
-            return result;
+            // Extract index from itemKey (format: local_productId_variationId_index)
+            const keyParts = itemKey.split('_');
+            if (keyParts.length < 4 || keyParts[0] !== 'local') {
+                return { success: false, error: 'Invalid item key' };
+            }
+
+            const itemIndex = parseInt(keyParts[3], 10);
+            if (isNaN(itemIndex) || itemIndex < 0 || itemIndex >= localCart.items.length) {
+                return { success: false, error: 'Item not found' };
+            }
+
+            // Remove item
+            localCart.items.splice(itemIndex, 1);
+
+            // Update metadata
+            localCart.metadata.updated_at = new Date().toISOString();
+
+            // Save to localStorage
+            if (localCart.items.length === 0) {
+                clearLocalStorageCart();
+                setCart(null);
+            } else {
+                saveLocalStorageCart(localCart);
+                const displayCart = convertLocalStorageCartToDisplay(localCart);
+                setCart(displayCart);
+            }
+
+            return { success: true };
         } catch (err) {
             setError(err.message);
             console.error('Remove from cart error:', err);
             return { success: false, error: err.message };
         }
-    };
+    }, [locale]);
 
-    // Clear entire cart
-    const handleClearCart = async () => {
+    // Clear entire cart (localStorage)
+    const handleClearCart = useCallback(async () => {
         try {
-            const result = await clearCart();
-
-            if (result.success) {
-                setCart(null);
-            }
-
-            return result;
+            clearLocalStorageCart();
+            setCart(null);
+            return { success: true };
         } catch (err) {
             console.error('Clear cart error:', err);
             return { success: false, error: err.message };
         }
-    };
+    }, []);
 
     // Apply coupon code
     const handleApplyCoupon = async (couponCode) => {
@@ -323,28 +586,21 @@ export const CartProvider = ({ children }) => {
     // Get subtotal (items total with tax)
     const getSubtotal = () => {
         if (!cart || !cart.items) return '0.00';
-        // Calculate subtotal with tax from cart items
-        let subtotalWithTax = 0;
+        // Calculate subtotal from cart items (prices already include tax for localStorage cart)
+        let subtotal = 0;
         cart.items.forEach(item => {
-            const unitTotalPrice = parseFloat(item?.totals?.line_subtotal) / 100 || 0;
-            // Price + Tax = Price * (1 + rate/100)
-            subtotalWithTax += unitTotalPrice * (1 + taxInfo.rate / 100);
+            const unitPrice = parseFloat(item.prices?.price) / 100 || 0;
+            subtotal += unitPrice * item.quantity;
         });
-
-        return subtotalWithTax.toFixed(2);
+        return subtotal.toFixed(2);
     };
 
     // Get total tax/VAT
     const getTotalTax = () => {
         if (!cart || !cart.items) return '0.00';
-        let totalTax = 0;
-        cart.items.forEach(item => {
-            const unitTotalPrice = parseFloat(item?.totals?.line_subtotal) / 100 || 0;
-            // TVA = Prix HT * (taux / 100)
-            totalTax += unitTotalPrice * (taxInfo.rate / 100);
-        });
-
-        return totalTax.toFixed(2);
+        // For localStorage cart, tax is included in price
+        // This is a simplified calculation - actual tax will be calculated by WooCommerce at checkout
+        return '0.00';
     };
 
     // Get currency symbol
@@ -401,8 +657,6 @@ export const CartProvider = ({ children }) => {
         sideCartOpen,
         openSideCart,
         closeSideCart,
-        // taxInfo,
-        // loadTaxRate,
         handleAddToCart,
         handleUpdateCartItem,
         handleRemoveCartItem,
@@ -410,6 +664,7 @@ export const CartProvider = ({ children }) => {
         handleApplyCoupon,
         handleRemoveCoupon,
         loadCart,
+        syncCartToAPI,
         getTotalPrice,
         getSubtotal,
         getTotalTax,

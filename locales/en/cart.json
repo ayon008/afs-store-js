@@ -37,7 +37,9 @@
       "continueToBasket": "Continue to Basket",
       "outOfStock": "Out of stock",
       "maxQuantity": "Max"
-    }
+    },
+    "clearedOnLocationChange": "Your cart has been cleared due to location change",
+    "clearedOnCurrencyChange": "Your cart has been cleared due to currency change"
   }
 }
 
