@@ -263,18 +263,20 @@ const CartList = ({ item }) => {
             </div>
 
             {/* Desktop View */}
-            <div className={`items-center justify-between gap-[10px] hidden md:flex px-6 py-3 ${updating ? 'opacity-50 pointer-events-none' : ''}`}>
-                <span className='flex items-center gap-2 flex-[1_0_0]'>
-                    <button
-                        onClick={handleRemoveItem}
-                        className='cursor-pointer text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-lg'
-                    >
-                        <Trash2Icon className='w-4 h-4' />
-                    </button>
-                    <Image src={image} alt={name} width={60} height={60} className='rounded-lg' />
+            <div className={`hidden md:grid grid-cols-12 gap-4 items-center px-6 py-3 ${updating ? 'opacity-50 pointer-events-none' : ''}`}>
+                <span className='col-span-1 flex items-center justify-center'>
+                    <Image src={image} alt={name} width={60} height={60} className='rounded-lg object-cover' />
                 </span>
-                <span className='flex-2 text-[15px] font-bold leading-[100%] text-[#1D98FF] flex-col flex gap-2'>
-                    <Link href={getProductRoute(locale, slug)} className='hover:underline'>{name}</Link>
+                <span className='col-span-5 text-[15px] font-bold leading-[100%] text-[#1D98FF] flex-col flex gap-2 pr-2'>
+                    <div className='flex items-start gap-2'>
+                        <Link href={getProductRoute(locale, slug)} className='hover:underline flex-1'>{name}</Link>
+                        <button
+                            onClick={handleRemoveItem}
+                            className='cursor-pointer text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-lg flex-shrink-0'
+                        >
+                            <Trash2Icon className='w-4 h-4' />
+                        </button>
+                    </div>
                     {
                         variations?.map((variation, i) => {
                             return (
@@ -292,10 +294,10 @@ const CartList = ({ item }) => {
                         })
                     }
                 </span>
-                <span className='flex-[1_0_0] text-sm text-[#111] leading-[100%] font-medium'>
+                <span className='col-span-2 text-center text-sm text-[#111] leading-[100%] font-medium'>
                     {`${formatPrice(basePriceWithTax)} ${currency_symbol}`}
                 </span>
-                <span className='flex-[1_0_0] flex items-center gap-1'>
+                <span className='col-span-2 flex items-center justify-center gap-1'>
                     <button
                         onClick={handleDecrement}
                         disabled={quantity <= 1 || updating || !isInStock}
@@ -314,7 +316,7 @@ const CartList = ({ item }) => {
                         <Plus className='w-4 h-4' />
                     </button>
                 </span>
-                <span className='flex-[1_0_0] text-sm text-[#111] leading-[100%] font-medium'>
+                <span className='col-span-2 text-right text-sm text-[#111] leading-[100%] font-medium'>
                     {`${formatPrice(sub_total)} ${total_Currency_Symbol}`}
                 </span>
             </div>
