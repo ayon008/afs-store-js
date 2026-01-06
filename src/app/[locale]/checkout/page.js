@@ -11,16 +11,15 @@ import CheckoutPayPal from "@/lib/CheckoutPaypal";
 import CheckoutAuthorize from "@/lib/CheckoutAuthorize";
 import { countriesList } from "@/lib/countriesList";
 import Link from "next/link";
-import { Link as I18nLink } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
+import ProgressStepper from "@/Shared/Stepper/ProgressStepper";
 import PaymentMethodCard from "@/Shared/Payment/PaymentMethodCard";
-import { User, MapPin, CreditCard, Package, ShoppingCart, ArrowRight } from "lucide-react";
-import Cookies from "js-cookie";
+import { User, MapPin, CreditCard, Package } from "lucide-react";
 
 // Wrapper component to ensure NextIntl context is available
 const CheckoutPageContent = () => {
@@ -49,23 +48,13 @@ const CheckoutPageContent = () => {
     }
 
     // Cart
-    const { cart, loadCart, handleClearCart, syncCartToWooCommerce } = useCart();
+    const { cart, loadCart, handleClearCart } = useCart();
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
 
+
     const items = cart?.items;
-    
-    // Sync cart to WooCommerce on checkout page load to ensure server-side cart is available
-    // This prevents redirect loops when cart exists in localStorage but not in WooCommerce
-    useEffect(() => {
-        // Only sync if cart has items in localStorage
-        if (cart?.items && cart.items.length > 0) {
-            syncCartToWooCommerce().catch(err => {
-                console.warn('Failed to sync cart on checkout load:', err);
-            });
-        }
-    }, []); // Only run once on mount
 
     // React Hook Form
     const {
@@ -161,7 +150,7 @@ const CheckoutPageContent = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
 
-    // Filter payment methods to show only allowed ones based on currency
+    // Filter payment methods to show only allowed ones
     const filterPaymentMethods = (methods) => {
         // Ensure methods is an array
         if (!methods) return [];
@@ -180,11 +169,9 @@ const CheckoutPageContent = () => {
             }
         }
 
-        // Get currency information from cart
+        // Check if currency is USD and locale is EN
         const currencySymbol = cart?.totals?.currency_symbol || '';
         const currencyCode = cart?.totals?.currency_code || '';
-        
-        // Detect currency type
         const isUSD = currencySymbol === '$' || 
                      currencySymbol === 'USD' ||
                      currencySymbol?.toUpperCase() === 'USD' ||
@@ -193,15 +180,43 @@ const CheckoutPageContent = () => {
                      currencySymbol === 'EUR' ||
                      currencySymbol?.toUpperCase() === 'EUR' ||
                      currencyCode?.toUpperCase() === 'EUR';
-        const isGBP = currencySymbol === '£' || 
-                     currencySymbol === 'GBP' ||
-                     currencySymbol?.toUpperCase() === 'GBP' ||
-                     currencyCode?.toUpperCase() === 'GBP';
+        const isEN = locale === 'en';
 
         // Debug logging
-        console.log('Payment method filter - Currency Symbol:', currencySymbol, 'Currency Code:', currencyCode, 'isUSD:', isUSD, 'isEUR:', isEUR, 'isGBP:', isGBP);
+        console.log('Payment method filter - Currency:', currencySymbol, 'Currency Code:', currencyCode, 'Locale:', locale, 'isUSD:', isUSD, 'isEUR:', isEUR, 'isEN:', isEN);
 
-        // Filter based on currency
+        // If locale is EN AND currency is USD (not EUR), show only authnet (Authorize.Net) payment method
+        if (isEN && isUSD && !isEUR) {
+            console.log('EN locale and USD currency detected: Filtering for authnet (Authorize.Net) payment method only');
+            const authorizeMethods = methods.filter(method => {
+                // Ensure method is an object
+                if (!method || typeof method !== 'object') return false;
+                
+                const methodId = method.id?.toLowerCase() || '';
+                const methodTitle = method.title?.toLowerCase() || '';
+                
+                // Return only methods that contain "authnet" in ID (Authorize.Net gateway)
+                // or "authorize" in ID/title as fallback
+                const isAuthorize = methodId === 'authnet' || 
+                                   methodId.includes('authnet') ||
+                                   methodId.includes('authorize') || 
+                                   methodTitle.includes('authorize');
+                
+                if (isAuthorize) {
+                    console.log(`Authorize method found - ID: ${method.id}, Title: ${method.title}`);
+                }
+                
+                return isAuthorize;
+            });
+            console.log('Authorize methods found:', authorizeMethods.length, authorizeMethods.map(m => ({ id: m.id, title: m.title })));
+            
+            // Only return authorize methods if we found any, otherwise return empty array
+            if (authorizeMethods.length > 0) {
+                return authorizeMethods;
+            }
+        }
+
+        // Otherwise, use the existing filter logic
         return methods.filter(method => {
             // Ensure method is an object
             if (!method || typeof method !== 'object') return false;
@@ -209,42 +224,37 @@ const CheckoutPageContent = () => {
             const methodId = method.id?.toLowerCase() || '';
             const methodTitle = method.title?.toLowerCase() || '';
 
-            // For USD currency: Show only Authorize.Net
-            if (isUSD) {
-                const isAuthorize = methodId === 'authnet' || 
-                                   methodId.includes('authnet') ||
-                                   methodId.includes('authorize') || 
-                                   methodTitle.includes('authorize');
-                
-                if (isAuthorize) {
-                    console.log(`Authorize method found for USD - ID: ${method.id}, Title: ${method.title}`);
-                }
-                
-                return isAuthorize;
-            }
-
-            // For EUR or GBP currency: Show only Monetico + PayPal
-            if (isEUR || isGBP) {
-                // Include PayPal
-                if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
-                    console.log(`PayPal method found for ${isEUR ? 'EUR' : 'GBP'} - ID: ${method.id}, Title: ${method.title}`);
-                    return true;
-                }
-
-                // Include all Monetico variants (Carte Bancaire, Carte bancaire en 2 fois, etc.)
-                if (methodId.includes('monetico') ||
-                    methodTitle.includes('carte bancaire') ||
-                    methodTitle.includes('monetico')) {
-                    console.log(`Monetico method found for ${isEUR ? 'EUR' : 'GBP'} - ID: ${method.id}, Title: ${method.title}`);
-                    return true;
-                }
-
-                // Exclude everything else for EUR/GBP
+            // Exclude Credit Card
+            if (methodId === 'credit-card' || methodTitle.includes('credit card')) {
                 return false;
             }
 
-            // For other currencies: Don't show any payment methods
-            console.log(`No payment methods for currency: ${currencyCode || currencySymbol}`);
+            // Exclude Authorize.Net - should only show for EN locale with USD currency
+            // If we reach here, it means we're not in EN+USD scenario, so exclude Authorize
+            if (methodId === 'authnet' || 
+                methodId.includes('authnet') ||
+                methodId.includes('authorize') || 
+                methodTitle.includes('authorize')) {
+                return false;
+            }
+
+            // Include PayPal
+            if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
+                return true;
+            }
+
+            // Include all Monetico variants (Carte Bancaire, Carte bancaire en 2 fois, etc.)
+            if (methodId.includes('monetico') ||
+                methodTitle.includes('carte bancaire') ||
+                methodTitle.includes('monetico')) {
+                return true;
+            }
+
+            // Include Bank Transfer (Virement bancaire)
+            if (methodId === 'bacs' || methodTitle.includes('virement bancaire') || methodTitle.includes('virement')) {
+                return true;
+            }
+
             return false;
         });
     };
@@ -266,8 +276,8 @@ const CheckoutPageContent = () => {
         // Check for Authorize
         if (methodId.includes('authorize') || methodTitle.includes('authorize')) {
             return {
-                title: t("paymentMethods.authorize"),
-                description: t("paymentMethods.authorizeDescription")
+                title: method.title || 'Authorize.Net',
+                description: t("paymentMethods.cardDescription") || 'Pay securely with your credit card'
             };
         }
         
@@ -279,28 +289,8 @@ const CheckoutPageContent = () => {
             };
         }
         
-        // Check for Monetico/Carte Bancaire variants
+        // Check for Monetico/Carte Bancaire
         if (methodId.includes('monetico') || methodTitle.includes('carte bancaire')) {
-            // Check for installment variants
-            if (methodTitle.includes('2 fois') || methodTitle.includes('2x') || methodId.includes('2x')) {
-                return {
-                    title: t("paymentMethods.monetico2x"),
-                    description: t("paymentMethods.cardDescription")
-                };
-            }
-            if (methodTitle.includes('3 fois') || methodTitle.includes('3x') || methodId.includes('3x')) {
-                return {
-                    title: t("paymentMethods.monetico3x"),
-                    description: t("paymentMethods.cardDescription")
-                };
-            }
-            if (methodTitle.includes('4 fois') || methodTitle.includes('4x') || methodId.includes('4x')) {
-                return {
-                    title: t("paymentMethods.monetico4x"),
-                    description: t("paymentMethods.cardDescription")
-                };
-            }
-            // Default Monetico
             return {
                 title: t("paymentMethods.monetico"),
                 description: t("paymentMethods.cardDescription")
@@ -312,19 +302,6 @@ const CheckoutPageContent = () => {
             return {
                 title: t("paymentMethods.bacs"),
                 description: t("paymentMethods.bankTransferDescription")
-            };
-        }
-        
-        // Check for generic "Credit Card" (fallback for any card payment method)
-        // This catches "Credit Card", "credit card", "Carte de crédit", etc.
-        if (methodTitle.includes('credit card') || 
-            methodTitle.includes('carte') || 
-            methodId.includes('card') ||
-            method.title === 'Credit Card' ||
-            method.title === 'credit card') {
-            return {
-                title: t("paymentMethods.monetico"),
-                description: t("paymentMethods.cardDescription")
             };
         }
         
@@ -348,54 +325,22 @@ const CheckoutPageContent = () => {
     useEffect(() => {
         const fetchPaymentMethods = async () => {
             try {
-                // First, try the API route for debugging
-                try {
-                    const apiResponse = await fetch('/api/payment-methods');
-                    const apiData = await apiResponse.json();
-                    console.log('API Route Debug Info:', apiData);
-                    
-                    if (apiData.success && apiData.methods) {
-                        console.log(`API Route found ${apiData.methods.length} payment methods`);
-                        setPaymentMethods(apiData.methods);
-                        return;
-                    } else if (apiData.error) {
-                        console.error('API Route error:', apiData.error, apiData);
-                    }
-                } catch (apiError) {
-                    console.error('API Route fetch error:', apiError);
-                }
-                
-                // Fallback to server action
                 const data = await getPaymentMethods();
                 // Debug: Log all payment methods to identify authorize ID
-                console.log('All payment methods received (server action):', data);
-                
-                // Check if data is an Error instance
-                if (data instanceof Error) {
-                    console.error('Payment methods returned an error:', data);
-                    setPaymentMethods([]);
-                    return;
-                }
-                
+                console.log('All payment methods received:', data);
                 if (Array.isArray(data)) {
                     data.forEach(method => {
                         console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
                     });
                     setPaymentMethods(data);
-                } else if (data && typeof data === 'object' && !(data instanceof Error)) {
-                    // If it's an object (but not an Error), try to convert to array
+                } else if (data && typeof data === 'object') {
+                    // If it's an object, try to convert to array
                     const methodsArray = Object.values(data);
-                    if (Array.isArray(methodsArray) && methodsArray.length > 0) {
-                        // Check if the first element looks like a payment method
-                        const firstMethod = methodsArray[0];
-                        if (firstMethod && (firstMethod.id || firstMethod.title)) {
-                            methodsArray.forEach(method => {
-                                console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
-                            });
-                            setPaymentMethods(methodsArray);
-                        } else {
-                            setPaymentMethods([]);
-                        }
+                    if (Array.isArray(methodsArray)) {
+                        methodsArray.forEach(method => {
+                            console.log(`Payment method - ID: ${method.id}, Title: ${method.title}, Enabled: ${method.enabled}`);
+                        });
+                        setPaymentMethods(methodsArray);
                     } else {
                         setPaymentMethods([]);
                     }
@@ -487,45 +432,12 @@ const CheckoutPageContent = () => {
                         pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
                     );
                     
-                    // Load cart from WooCommerce to get shipping rates
-                    // First sync local cart to WooCommerce, then load from WooCommerce
-                    await syncCartToWooCommerce();
-                    
-                    // Wait a bit for WooCommerce to calculate shipping rates if not already available
-                    if (!hasShippingRatesInResponse && !result.hasShippingRates) {
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                    }
-                    
-                    // Load cart from WooCommerce API to get shipping rates
-                    const currency = Cookies.get('currency') === 'euro' ? 'EUR' : Cookies.get('currency') === 'gbp' ? 'GBP' : 'USD';
-                    const cartResponse = await fetch(`/api/cart?currency=${currency}`, {
-                        method: 'GET',
-                        credentials: 'include',
-                    });
-                    
-                    if (cartResponse.ok) {
-                        const wooCart = await cartResponse.json();
-                        // Update local cart with WooCommerce data including shipping_rates
-                        try {
-                            const localCartData = localStorage.getItem('afs_cart_local');
-                            if (localCartData) {
-                                const localCart = JSON.parse(localCartData);
-                                const updatedCart = {
-                                    ...localCart,
-                                    shipping_rates: wooCart.shipping_rates,
-                                    billing_address: wooCart.billing_address,
-                                    shipping_address: wooCart.shipping_address,
-                                    totals: wooCart.totals,
-                                };
-                                localStorage.setItem('afs_cart_local', JSON.stringify(updatedCart));
-                            }
-                        } catch (err) {
-                            console.warn('Failed to update local cart with shipping rates:', err);
-                        }
-                        // Reload cart to update state
+                    // Only reload cart once, with a single delay if needed
+                    if (hasShippingRatesInResponse || result.hasShippingRates) {
                         await loadCart();
                     } else {
-                        // Fallback to regular loadCart
+                        // Wait for WooCommerce to calculate shipping rates (single wait)
+                        await new Promise(resolve => setTimeout(resolve, 1500));
                         await loadCart();
                     }
                 } else {
@@ -575,89 +487,7 @@ const CheckoutPageContent = () => {
 
     const states = countryDetails?.states || [];
 
-    // Declare state variables before using them in useMemo
-    const [shippingLoading, setShippingLoading] = useState(false);
-    const [updatingShipping, setUpdatingShipping] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
-    const [notification, setNotification] = useState(null);
-
-    // Get current currency (needed for allShippingRates calculation)
-    const currencySymbol = cart?.totals?.currency_symbol || '';
-    const currencyCode = cart?.totals?.currency_code || '';
-    const isUSD = currencySymbol === '$' || 
-                 currencySymbol === 'USD' ||
-                 currencySymbol?.toUpperCase() === 'USD' ||
-                 currencyCode?.toUpperCase() === 'USD';
-
-    // Extract shipping rates from cart - must be declared before use in other useMemo
-    const allShippingRates = React.useMemo(() => {
-        if (!cart?.shipping_rates) {
-            return [];
-        }
-        
-        let rates = [];
-        
-        // Handle array of packages
-        if (Array.isArray(cart.shipping_rates)) {
-            rates = cart.shipping_rates.flatMap((pkg, pkgIndex) => {
-                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map((rate, rateIndex) => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex,
-                        // Create a unique identifier combining package_id, rate_id, and index
-                        uniqueId: `${pkg.package_id || pkgIndex}_${rate.rate_id}_${rateIndex}`
-                    }));
-                }
-                if (Array.isArray(pkg) && pkg.length > 0) {
-                    return pkg.map((rate, rateIndex) => ({
-                        ...rate,
-                        package_id: pkgIndex,
-                        uniqueId: `${pkgIndex}_${rate.rate_id}_${rateIndex}`
-                    }));
-                }
-                return [];
-            });
-        } else if (typeof cart.shipping_rates === 'object') {
-            // Handle object structure
-            rates = Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
-                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map((rate, rateIndex) => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex,
-                        uniqueId: `${pkg.package_id || pkgIndex}_${rate.rate_id}_${rateIndex}`
-                    }));
-                }
-                return [];
-            });
-        }
-        
-        // Filter: If USD currency, only show "authorize" shipping methods
-        if (isUSD && rates.length > 0) {
-            const filteredRates = rates.filter(rate => {
-                const rateName = (rate.name || '').toLowerCase();
-                const rateId = (rate.rate_id || '').toLowerCase();
-                const methodId = (rate.method_id || '').toLowerCase();
-                
-                // Check if rate contains "authorize" or "authnet" in name, id, or method_id
-                return rateName.includes('authorize') || 
-                       rateName.includes('authnet') ||
-                       rateId.includes('authorize') || 
-                       rateId.includes('authnet') ||
-                       methodId.includes('authorize') || 
-                       methodId.includes('authnet');
-            });
-            
-            // If no authorize method found for USD, log a warning
-            if (filteredRates.length === 0 && rates.length > 0) {
-                console.warn('USD currency detected but no "authorize" shipping method found. Available methods:', rates.map(r => ({ name: r.name, method_id: r.method_id, rate_id: r.rate_id })));
-            }
-            
-            return filteredRates;
-        }
-        
-        return rates;
-    }, [cart?.shipping_rates, isUSD]);
-
+    const cartTotal = parseFloat(cart?.totals?.total_price).toFixed(2) / 100;
     const sousTotal = cart?.items?.reduce(
         (acc, item) =>
             acc +
@@ -666,38 +496,51 @@ const CheckoutPageContent = () => {
         0
     ) / 100;
 
-    // Calculate shipping cost from selected rate
-    const selectedShippingRate = React.useMemo(() => {
-        if (!selectedRateId || !allShippingRates || allShippingRates.length === 0) {
-            return null;
-        }
-        return allShippingRates.find(rate => rate.uniqueId === selectedRateId);
-    }, [selectedRateId, allShippingRates]);
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [updatingShipping, setUpdatingShipping] = useState(false);
+    const [selectedRateId, setSelectedRateId] = useState(null);
+    const [notification, setNotification] = useState(null);
 
-    const shippingCost = React.useMemo(() => {
-        if (!selectedShippingRate) {
-            // If no rate selected, check if cart has shipping total
-            const cartShippingTotal = cart?.totals?.total_shipping || 0;
-            return cartShippingTotal / 100;
-        }
-        // Calculate shipping cost from selected rate (price + taxes in cents)
-        return (selectedShippingRate.price / 100) + (selectedShippingRate.taxes / 100);
-    }, [selectedShippingRate, cart?.totals?.total_shipping]);
-
-    // Calculate total including shipping
-    const cartTotal = React.useMemo(() => {
-        // Calculate base total from items (subtotal + taxes)
-        const baseSubtotal = sousTotal || 0;
-        
-        // If we have a selected shipping rate, add its cost
-        if (selectedShippingRate) {
-            return baseSubtotal + shippingCost;
+    // Extract shipping rates from cart - optimized, no logs
+    const allShippingRates = React.useMemo(() => {
+        if (!cart?.shipping_rates) {
+            return [];
         }
         
-        // Otherwise, use cart total (which may or may not include shipping)
-        const cartTotalFromWoo = parseFloat(cart?.totals?.total_price || 0) / 100;
-        return cartTotalFromWoo;
-    }, [sousTotal, selectedShippingRate, shippingCost, cart?.totals?.total_price]);
+        // Handle array of packages
+        if (Array.isArray(cart.shipping_rates)) {
+            return cart.shipping_rates.flatMap((pkg, pkgIndex) => {
+                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map(rate => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex
+                    }));
+                }
+                if (Array.isArray(pkg) && pkg.length > 0) {
+                    return pkg.map(rate => ({
+                        ...rate,
+                        package_id: pkgIndex
+                    }));
+                }
+                return [];
+            });
+        }
+        
+        // Handle object structure
+        if (typeof cart.shipping_rates === 'object') {
+            return Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
+                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                    return pkg.shipping_rates.map(rate => ({
+                        ...rate,
+                        package_id: pkg.package_id || pkgIndex
+                    }));
+                }
+                return [];
+            });
+        }
+        
+        return [];
+    }, [cart?.shipping_rates]);
 
     // Ref to track user's manual selection (local state takes priority)
     const userSelectedRateRef = React.useRef(null);
@@ -709,38 +552,31 @@ const CheckoutPageContent = () => {
     useEffect(() => {
         // If user has manually selected a rate, prioritize that over cart state
         if (userSelectedRateRef.current) {
-            const userSelected = allShippingRates.find(rate => rate.uniqueId === userSelectedRateRef.current);
+            const userSelected = allShippingRates.find(rate => rate.rate_id === userSelectedRateRef.current);
             if (userSelected) {
                 // User selection exists in available rates, keep it
-                const userSelectedUniqueId = userSelectedRateRef.current;
-                if (String(selectedRateId) !== userSelectedUniqueId) {
-                    setSelectedRateId(userSelectedUniqueId);
-                    setValue('shipping_method', String(userSelected.rate_id));
+                if (selectedRateId !== userSelectedRateRef.current) {
+                    setSelectedRateId(userSelectedRateRef.current);
+                    setValue('shipping_method', userSelectedRateRef.current);
                 }
-                return; // Don't proceed with auto-selection if user has selected
+                return;
             } else {
-                // User selection no longer available, clear it only if rates changed
-                // Don't clear if user just made a selection
-                if (allShippingRates.length > 0) {
-                    userSelectedRateRef.current = null;
-                }
+                // User selection no longer available, clear it
+                userSelectedRateRef.current = null;
             }
         }
 
         // Only auto-update from cart if no user selection
-        // Don't override user selection
-        if (!userSelectedRateRef.current) {
-            const selected = allShippingRates.find(rate => rate.selected);
-            if (selected && selected.uniqueId !== selectedRateId) {
-                setSelectedRateId(selected.uniqueId);
-                setValue('shipping_method', String(selected.rate_id));
-            } else if (!selected && allShippingRates.length > 0 && !selectedRateId) {
-                // Auto-select first rate if none selected (only on initial load)
-                const firstRate = allShippingRates[0];
-                if (firstRate) {
-                    setSelectedRateId(firstRate.uniqueId);
-                    setValue('shipping_method', String(firstRate.rate_id));
-                }
+        const selected = allShippingRates.find(rate => rate.selected);
+        if (selected && selected.rate_id !== selectedRateId) {
+            setSelectedRateId(selected.rate_id);
+            setValue('shipping_method', selected.rate_id);
+        } else if (!selected && allShippingRates.length > 0 && !selectedRateId && !userSelectedRateRef.current) {
+            // Auto-select first rate if none selected (only on initial load)
+            const firstRate = allShippingRates[0];
+            if (firstRate) {
+                setSelectedRateId(firstRate.rate_id);
+                setValue('shipping_method', firstRate.rate_id);
             }
         }
     }, [allShippingRates, selectedRateId, setValue]);
@@ -876,36 +712,8 @@ const CheckoutPageContent = () => {
         try {
             const result = await selectShippingRate(rateId, packageId);
             if (result.success) {
-                // Reload cart from WooCommerce to get updated totals with shipping
-                const currency = Cookies.get('currency') === 'euro' ? 'EUR' : Cookies.get('currency') === 'gbp' ? 'GBP' : 'USD';
-                const cartResponse = await fetch(`/api/cart?currency=${currency}`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                
-                if (cartResponse.ok) {
-                    const wooCart = await cartResponse.json();
-                    // Update local cart with WooCommerce data including updated totals
-                    try {
-                        const localCartData = localStorage.getItem('afs_cart_local');
-                        if (localCartData) {
-                            const localCart = JSON.parse(localCartData);
-                            const updatedCart = {
-                                ...localCart,
-                                shipping_rates: wooCart.shipping_rates,
-                                totals: wooCart.totals, // Update totals with shipping
-                            };
-                            localStorage.setItem('afs_cart_local', JSON.stringify(updatedCart));
-                        }
-                    } catch (err) {
-                        console.warn('Failed to update local cart with shipping totals:', err);
-                    }
-                    // Reload cart to update state
-                    await loadCart();
-                } else {
-                    // Fallback to regular loadCart
-                    await loadCart();
-                }
+                // Reload cart once (no setTimeout, direct call)
+                await loadCart();
             }
         } catch (error) {
             console.error('Error syncing shipping rate:', error);
@@ -917,33 +725,19 @@ const CheckoutPageContent = () => {
         }
     };
 
-    const handleSelectRate = (uniqueId) => {
-        // Find the rate by uniqueId
-        const selectedRate = allShippingRates.find(rate => rate.uniqueId === uniqueId);
-        
-        if (!selectedRate) {
-            console.warn('Selected rate not found:', uniqueId);
+    const handleSelectRate = (value) => {
+        const [packageId, rateId] = value.split(':');
+        if (rateId === selectedRateId) {
             return;
         }
         
-        const rateIdStr = String(selectedRate.rate_id);
-        const packageId = String(selectedRate.package_id);
-        
-        // Prevent re-render if already selected (but still allow the event to fire)
-        if (String(selectedRateId) === uniqueId && userSelectedRateRef.current === uniqueId) {
-            return; // Already selected, no need to update
-        }
-        
-        // Update ref first to prevent useEffect from overriding
-        userSelectedRateRef.current = uniqueId;
-        setSelectedRateId(uniqueId);
-        setValue('shipping_method', rateIdStr); // Store actual rate_id for form submission
+        // Update local state immediately (purely local - no server call, no loading state)
+        userSelectedRateRef.current = rateId;
+        setSelectedRateId(rateId);
+        setValue('shipping_method', rateId);
         
         // Store pending sync info for later (only sync before form submission)
-        pendingSyncRef.current = { rateId: rateIdStr, packageId };
-        
-        // Sync shipping rate to server immediately to update cart total
-        syncShippingRateToServer(rateIdStr, packageId, false);
+        pendingSyncRef.current = { rateId, packageId };
         
         // Clear any existing timer (no automatic sync)
         if (syncTimerRef.current) {
@@ -955,17 +749,9 @@ const CheckoutPageContent = () => {
     // Check if cart is empty
     useEffect(() => {
         if (!cart) {
-            // Don't immediately set empty - wait a bit for cart to load
-            const timer = setTimeout(() => {
-                setIsCartEmpty(true);
-            }, 1000);
-            return () => clearTimeout(timer);
+            setIsCartEmpty(true);
         } else if (!cart.items || cart.items.length === 0) {
-            // Only set empty if we've given time for cart to sync
-            const timer = setTimeout(() => {
-                setIsCartEmpty(true);
-            }, 500);
-            return () => clearTimeout(timer);
+            setIsCartEmpty(true);
         } else {
             setIsCartEmpty(false);
         }
@@ -1054,7 +840,7 @@ const CheckoutPageContent = () => {
             }
             
             // Find packageId for the selected rate
-            const selectedRate = allShippingRates.find(rate => rate.uniqueId === selectedRateId);
+            const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
             if (selectedRate && selectedRate.package_id) {
                 // Sync immediately before submission (with loading state only here)
                 await syncShippingRateToServer(selectedRateId, selectedRate.package_id, true);
@@ -1076,17 +862,6 @@ const CheckoutPageContent = () => {
         if (data.payment_method === 'bacs') {
             setIsSubmitting(true);
             try {
-                // Sync localStorage cart to WooCommerce before creating order
-                const syncResult = await syncCartToWooCommerce();
-                if (!syncResult.success) {
-                    alert(`${t("cartSyncError")}: ${syncResult.error || t("unknownError")}`);
-                    setIsSubmitting(false);
-                    return;
-                }
-
-                // Reload cart to get WooCommerce totals
-                await loadCart();
-
                 const customerData = {
                     ...data,
                     billing: {
@@ -1157,12 +932,12 @@ const CheckoutPageContent = () => {
                     clearSavedFormData();
                     clearCart();
                     router.push(`/order-success?order_id=${result.orderId}`);
-                  } else {
-                      alert(`${t("orderCreationError")}: ${result.error || t("unknownError")}`);
-                  }
-              } catch (error) {
-                  console.error('Error creating order:', error);
-                  alert(t("orderCreationErrorRetry"));
+                } else {
+                    alert(`Erreur lors de la création de la commande : ${result.error || 'Une erreur est survenue'}`);
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert('Erreur lors de la création de la commande. Veuillez réessayer.');
             } finally {
                 setIsSubmitting(false);
             }
@@ -1183,43 +958,20 @@ const CheckoutPageContent = () => {
                         duration={5000}
                     />
                 )}
-                <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center py-12 px-4'>
-                    <div className='max-w-2xl w-full'>
-                        <div className='bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden'>
-                            {/* Icon Section */}
-                            <div className='bg-gradient-to-br from-blue-50 to-indigo-50 p-12 text-center'>
-                                <div className='inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg mb-6'>
-                                    <ShoppingCart className='w-12 h-12 text-gray-400' />
-                                </div>
-                                <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-3'>
-                                    {t("emptyCart")}
-                                </h2>
-                                <p className='text-lg text-gray-600 max-w-md mx-auto'>
-                                    {t("emptyCartMessage")}
-                                </p>
-                            </div>
-
-                            {/* Action Section */}
-                            <div className='p-8 text-center bg-gray-50'>
-                                <I18nLink 
-                                    href="/product-category/foiling/wing-foil"
-                                    className='
-                                        inline-flex items-center justify-center gap-3
-                                        bg-[#1D98FF] text-white font-semibold
-                                        px-8 py-4 rounded-xl
-                                        hover:bg-[#1585e0] active:scale-[0.98]
-                                        shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
-                                        transition-all duration-200
-                                        text-base uppercase tracking-wide
-                                    '
-                                >
-                                    {t("backToShop")}
-                                    <ArrowRight className='w-5 h-5' />
-                                </I18nLink>
-                            </div>
-                        </div>
+                <div className='global-padding global-margin'>
+                <div className='max-w-[800px] mx-auto py-[80px] lg:py-[100px]'>
+                    <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
+                        <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
+                        <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
+                        <Link 
+                            href="/" 
+                            className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
+                        >
+                            {t("backToShop")}
+                        </Link>
                     </div>
                 </div>
+            </div>
             </>
         );
     }
@@ -1236,23 +988,25 @@ const CheckoutPageContent = () => {
                 />
             )}
             
-            <div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+            {/* Progress Stepper */}
+            <ProgressStepper
+                currentStep={2}
+                steps={[t("basket"), t("securePayment"), t("summary")]}
+            />
+            {/*  */}
+            <div className='global-padding global-margin'>
                 {/* checkout forms */}
-                <form className='flex flex-col lg:flex-row gap-8 items-start' onSubmit={handleSubmit(onSubmit)}>
-                    
-                    {/* Left Column - Forms */}
-                    <div className='w-full lg:flex-[2] space-y-8'>
+                <form className='space-y-10' onSubmit={handleSubmit(onSubmit)}>
+
                     {/* 1st section */}
-                    <div className='grid grid-cols-1 gap-8'>
+                    <div className='grid grid-cols-1 gap-10 lg:grid-cols-2'>
                         {/* Billing address */}
-                        <div className='card-modern p-6 lg:p-8 border border-gray-100 shadow-lg'>
-                            <div className='bg-[#000000] -mx-6 lg:-mx-8 -mt-6 lg:-mt-8 px-6 lg:px-8 pt-6 lg:pt-8 pb-4 mb-6 rounded-t-lg'>
-                                <div className='flex items-center gap-3'>
-                                    <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
-                                        <User className='w-5 h-5 text-white' />
-                                    </div>
-                                    <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("billingDetails")}</h3>
+                        <div className='card-modern p-6 lg:p-8'>
+                            <div className='flex items-center gap-3 mb-6'>
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <User className='w-5 h-5 text-[#1D98FF]' />
                                 </div>
+                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("billingDetails")}</h3>
                             </div>
                             <div className='grid grid-cols-1 gap-5'>
                                 <div className='grid grid-cols-2 gap-5'>
@@ -1396,23 +1150,21 @@ const CheckoutPageContent = () => {
                             </div>
                         </div>
                         {/* Shipping address */}
-                        <div className='card-modern p-6 lg:p-8 border border-gray-100 shadow-lg'>
-                            <div className='bg-[#000000] -mx-6 lg:-mx-8 -mt-6 lg:-mt-8 px-6 lg:px-8 pt-6 lg:pt-8 pb-4 mb-6 rounded-t-lg'>
-                                <div className='flex items-center gap-3'>
-                                    <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
-                                        <MapPin className='w-5 h-5 text-white' />
-                                    </div>
-                                    <label htmlFor='shipping_address' className='flex items-center gap-3 cursor-pointer'>
-                                        <input
-                                            onChange={handleShow}
-                                            type="checkbox"
-                                            id='shipping_address'
-                                            checked={shippingAddress}
-                                            className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
-                                        />
-                                        <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("shippingDetails")}</h3>
-                                    </label>
+                        <div className='card-modern p-6 lg:p-8'>
+                            <div className='flex items-center gap-3 mb-6'>
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <MapPin className='w-5 h-5 text-[#1D98FF]' />
                                 </div>
+                                <label htmlFor='shipping_address' className='flex items-center gap-3 cursor-pointer'>
+                                    <input
+                                        onChange={handleShow}
+                                        type="checkbox"
+                                        id='shipping_address'
+                                        checked={shippingAddress}
+                                        className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
+                                    />
+                                    <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("shippingDetails")}</h3>
+                                </label>
                             </div>
                             {
                                 shippingAddress && (
@@ -1528,8 +1280,8 @@ const CheckoutPageContent = () => {
                         </div>
                     </div>
 
-                    {/* 2nd section - Order Summary - Hidden, moved to sidebar */}
-                    <div className='hidden'>
+                    {/* 2nd section */}
+                    <div className=''>
                         <h3 className='lg:text-[28px] text-[22px] leading-[100%] font-semibold text-[#111] block mb-6'>{t("yourOrder")}</h3>
                         <table className='w-full border border-[#111]'>
                             <thead>
@@ -1542,10 +1294,8 @@ const CheckoutPageContent = () => {
                                 {
                                     items?.map((singleItem, i) => {
                                         const totalPrice = parseFloat(singleItem?.totals?.line_subtotal) / 100 + parseFloat(singleItem?.totals?.line_subtotal_tax) / 100;
-                                        // Créer une clé unique en combinant l'ID, la clé et l'index pour éviter les doublons
-                                        const uniqueKey = `${singleItem.id || 'item'}_${singleItem.key || 'key'}_${i}`;
                                         return (
-                                            <tr key={uniqueKey} className='border-b border-[#111]'>
+                                            <tr key={singleItem.id || singleItem.key || i} className='border-b border-[#111]'>
                                                 <td className='!px-3 py-2 text-left'>{singleItem?.name} x {singleItem?.quantity}</td>
                                                 <td className='!px-3 py-2 !border-l text-left border-[#111]'>{totalPrice} {singleItem?.totals?.currency_symbol} (TTC)</td>
                                             </tr>
@@ -1600,23 +1350,14 @@ const CheckoutPageContent = () => {
                                                             <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                                                                 {allShippingRates.map((rate, i) => {
                                                                     const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                                    const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
-                                                                    const isSelected = String(selectedRateId) === String(rate.uniqueId);
-                                                                    // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
-                                                                    const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
+                                                                    const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
                                                                     return (
-                                                                        <li key={uniqueKey} className='border border-gray-300 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-gray-900 hover:bg-gray-50 transition-all'>
+                                                                        <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                             <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                                 <input
-                                                                                    checked={isSelected}
-                                                                                    value={rate.uniqueId}
-                                                                                    onChange={(e) => {
-                                                                                        handleSelectRate(e.target.value);
-                                                                                    }}
-                                                                                    onClick={(e) => {
-                                                                                        // Ensure the radio button is selected on click
-                                                                                        handleSelectRate(e.target.value);
-                                                                                    }}
+                                                                                    checked={selectedRateId === rate.rate_id}
+                                                                                    value={`${rate.package_id}:${rate.rate_id}`}
+                                                                                    onChange={(e) => handleSelectRate(e.target.value)}
                                                                                     type="radio"
                                                                                     name="shipping_method"
                                                                                     id={safeId}
@@ -1646,7 +1387,7 @@ const CheckoutPageContent = () => {
                                                 return (
                                                     <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                         {missingFields.length > 0 
-                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${t("calculateShippingMethods")}`
+                                                            ? `${t("pleaseSpecify")} ${missingFields.join(", ")} ${locale === 'fr' ? "pour calculer les méthodes de livraison" : "to calculate shipping methods"}`
                                                             : t("noShippingMethods")
                                                         }
                                                     </p>
@@ -1660,23 +1401,14 @@ const CheckoutPageContent = () => {
                                                         <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                                                             {allShippingRates.map((rate, i) => {
                                                                 const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                                                                const safeId = `shipping_rate_${rate.uniqueId.replace(/[:]/g, '_')}`;
-                                                                const isSelected = String(selectedRateId) === String(rate.uniqueId);
-                                                                // Créer une clé unique en combinant uniqueId et l'index pour éviter les doublons
-                                                                const uniqueKey = `shipping-rate-${rate.uniqueId}-${i}`;
+                                                                const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
                                                                 return (
-                                                                    <li key={uniqueKey} className='border border-gray-300 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-gray-900 hover:bg-gray-50 transition-all'>
+                                                                    <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-[#ccc] rounded-sm p-[15px] flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors'>
                                                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
                                                                             <input
-                                                                                checked={isSelected}
-                                                                                value={rate.uniqueId}
-                                                                                onChange={(e) => {
-                                                                                    handleSelectRate(e.target.value);
-                                                                                }}
-                                                                                onClick={(e) => {
-                                                                                    // Ensure the radio button is selected on click
-                                                                                    handleSelectRate(e.target.value);
-                                                                                }}
+                                                                                checked={selectedRateId === rate.rate_id}
+                                                                                value={`${rate.package_id}:${rate.rate_id}`}
+                                                                                onChange={(e) => handleSelectRate(e.target.value)}
                                                                                 type="radio"
                                                                                 name="shipping_method"
                                                                                 id={safeId}
@@ -1699,15 +1431,6 @@ const CheckoutPageContent = () => {
                                             }
                                             
                                             // Address is complete but no shipping methods found
-                                            // Special message for USD currency if no authorize method available
-                                            if (isUSD) {
-                                                return (
-                                                    <p className='text-sm text-orange-600 italic p-4 border border-orange-300 rounded-sm bg-orange-50'>
-                                                        {t("noAuthorizeShippingUSD")}
-                                                    </p>
-                                                );
-                                            }
-                                            
                                             return (
                                                 <p className='text-sm text-gray-500 italic p-4 border border-[#ccc] rounded-sm bg-[#F9F9F9]'>
                                                     {t("noShippingMethods")}
@@ -1732,13 +1455,13 @@ const CheckoutPageContent = () => {
                     </div>
 
                     {/* 3rd section - Payment Methods */}
-                    <div className='card-modern overflow-hidden border border-gray-100 shadow-lg rounded-lg'>
-                        <div className='bg-[#000000] p-6 border-b border-gray-700'>
+                    <div className='card-modern overflow-hidden'>
+                        <div className='p-6 border-b border-gray-100'>
                             <div className='flex items-center gap-3'>
-                                <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
-                                    <CreditCard className='w-5 h-5 text-white' />
+                                <div className='w-10 h-10 bg-[#1D98FF]/10 rounded-full flex items-center justify-center'>
+                                    <CreditCard className='w-5 h-5 text-[#1D98FF]' />
                                 </div>
-                                <h3 className='text-xl lg:text-2xl font-bold text-white'>{t("paymentMethod")}</h3>
+                                <h3 className='text-xl lg:text-2xl font-bold text-[#111]'>{t("paymentMethod") || "Mode de paiement"}</h3>
                             </div>
                         </div>
 
@@ -1753,12 +1476,9 @@ const CheckoutPageContent = () => {
                                 // Get translated title and description
                                 const paymentTranslation = getPaymentMethodTranslation(method);
 
-                                // Créer une clé unique en combinant l'ID et l'index pour éviter les doublons
-                                const uniquePaymentKey = `payment-method-${method.id || 'method'}-${i}`;
-
                                 return (
                                     <PaymentMethodCard
-                                        key={uniquePaymentKey}
+                                        key={method.id || i}
                                         method={method}
                                         selected={isSelected}
                                         onSelect={() => setValue('payment_method', method.id)}
@@ -1767,7 +1487,7 @@ const CheckoutPageContent = () => {
                                     >
                                         {/* Payment Instructions */}
                                         {PAYMENT_INSTRUCTIONS[method.id] && (
-                                            <div className='bg-gray-50 border-l-4 border-gray-900 rounded-lg p-4 text-sm text-gray-700 mb-4'>
+                                            <div className='bg-blue-50 border-l-4 border-[#1D98FF] rounded-lg p-4 text-sm text-gray-700 mb-4'>
                                                 <p>{PAYMENT_INSTRUCTIONS[method.id]}</p>
                                             </div>
                                         )}
@@ -1893,8 +1613,8 @@ const CheckoutPageContent = () => {
                         {/* Terms and Submit */}
                         <div className='bg-gray-50 p-6 space-y-4'>
                             <p className='text-sm text-gray-600'>
-                                {t("privacyPolicyText")}{' '}
-                                <Link href="/privacy-policy" className='text-gray-900 hover:underline font-semibold'>{t("privacyPolicy")}</Link>
+                                Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our{' '}
+                                <Link href="/privacy-policy" className='text-[#1D98FF] hover:underline'>privacy policy</Link>
                             </p>
 
                             <label className='flex items-center gap-3 cursor-pointer'>
@@ -1902,7 +1622,7 @@ const CheckoutPageContent = () => {
                                     {...register("terms", { required: t("termsRequired") })}
                                     type="checkbox"
                                     id="terms"
-                                    className='w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900'
+                                    className='w-5 h-5 rounded border-gray-300 text-[#1D98FF] focus:ring-[#1D98FF]'
                                 />
                                 <span className='text-sm text-gray-700'>{t("terms")}</span>
                             </label>
@@ -1910,23 +1630,15 @@ const CheckoutPageContent = () => {
                                 <p className="text-red-500 text-xs animate-slideDown">{errors.terms.message}</p>
                             )}
 
-                            {(() => {
-                                const selectedMethod = filteredPaymentMethods?.find(m => m.id === watchFields.payment_method);
-                                if (!selectedMethod || !watchFields.payment_method) return false;
-                                
-                                const isMonetico = selectedMethod.id?.toLowerCase().includes('monetico') ||
-                                    selectedMethod.title?.toLowerCase().includes('carte bancaire');
-                                const isPayPal = selectedMethod.id === 'paypal' || selectedMethod.id === 'ppcp-gateway';
-                                const isAuthorize = selectedMethod.id === 'authnet' || selectedMethod.id?.toLowerCase().includes('authnet');
-                                
-                                // Afficher le bouton seulement si la méthode sélectionnée n'a pas son propre bouton intégré
-                                return !isMonetico && !isPayPal && !isAuthorize;
-                            })() ? (
+                            {!watchFields.payment_method?.toLowerCase().includes('monetico') &&
+                                watchFields.payment_method !== 'paypal' &&
+                                watchFields.payment_method !== 'ppcp-gateway' &&
+                                watchFields.payment_method !== 'authnet' ? (
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || !watchFields.terms}
                                     className='
-                                        w-full lg:w-auto lg:ml-auto text-white bg-[#1D98FF] rounded-lg
+                                        w-full lg:w-auto lg:ml-auto text-white bg-[#1D98FF] rounded-xl
                                         px-8 py-4 uppercase font-semibold
                                         disabled:opacity-50 disabled:cursor-not-allowed
                                         hover:bg-[#1585e0] active:scale-[0.98]
@@ -1938,90 +1650,6 @@ const CheckoutPageContent = () => {
                                     {isSubmitting ? t("processing") : watchFields.payment_method === 'bacs' ? t("placeOrder") : t("continue")}
                                 </button>
                             ) : null}
-                        </div>
-                    </div>
-                    </div>
-                    
-                    {/* Right Column - Sticky Order Summary */}
-                    <div className='w-full lg:w-[400px] lg:flex-shrink-0'>
-                        <div className='bg-white rounded-lg shadow-xl border border-gray-100 sticky top-24 max-h-[calc(100vh-120px)] flex flex-col overflow-hidden'>
-                            <div className='bg-[#000000] p-6 lg:p-8 rounded-t-lg flex-shrink-0'>
-                                <h3 className='lg:text-2xl text-xl leading-[100%] font-bold text-white flex items-center gap-3'>
-                                    <ShoppingCart className='w-6 h-6' />
-                                    {t("yourOrder")}
-                                </h3>
-                            </div>
-                            
-                            <div className='flex-1 overflow-y-auto p-6 lg:p-8 space-y-4 min-h-0'>
-                                {items?.map((singleItem, i) => {
-                                    const totalPrice = parseFloat(singleItem?.totals?.line_subtotal) / 100 + parseFloat(singleItem?.totals?.line_subtotal_tax) / 100;
-                                    const uniqueKey = `${singleItem.id || 'item'}_${singleItem.key || 'key'}_${i}`;
-                                    return (
-                                        <div key={uniqueKey} className='flex items-start justify-between gap-4 pb-4 border-b border-gray-200'>
-                                            <div className='flex-1'>
-                                                <p className='text-sm font-semibold text-gray-900'>{singleItem?.name}</p>
-                                                <p className='text-xs text-gray-500 mt-1'>x {singleItem?.quantity}</p>
-                                            </div>
-                                            <p className='text-sm font-bold text-gray-900'>{totalPrice.toFixed(2)} {singleItem?.totals?.currency_symbol}</p>
-                                        </div>
-                                    )
-                                })}
-                                
-                                <div className='space-y-3 border-t border-gray-200 pt-4'>
-                                    <div className='flex items-center justify-between'>
-                                        <span className='text-sm text-gray-600'>{t("subtotal")}</span>
-                                        <span className='text-sm font-semibold text-gray-900'>{sousTotal.toFixed(2)} {cart?.totals?.currency_symbol}</span>
-                                    </div>
-                                    
-                                    <div className='flex items-center justify-between'>
-                                        <span className='text-sm text-gray-600'>{t("shippingMethods")}</span>
-                                        <div className='text-sm font-semibold text-gray-900'>
-                                            {(() => {
-                                                const hasCountry = !!watchFields.billing_country;
-                                                const hasCompleteAddress = watchFields.billing_country && 
-                                                                          watchFields.billing_postcode && 
-                                                                          watchFields.billing_city && 
-                                                                          watchFields.billing_address_1;
-                                                
-                                                if (updatingShipping || shippingLoading) {
-                                                    return <span className='text-gray-400'>{t("processing")}</span>;
-                                                }
-                                                
-                                                if (!hasCountry) {
-                                                    return <span className='text-gray-400'>{t("shippingMethods")}</span>;
-                                                }
-                                                
-                                                if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
-                                                    const selectedRate = allShippingRates.find(rate => String(rate.uniqueId) === String(selectedRateId));
-                                                    if (selectedRate) {
-                                                        const totalPrice = (selectedRate.price / 100 + selectedRate.taxes / 100);
-                                                        return totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${selectedRate.currency_symbol || cart?.totals?.currency_symbol || '€'}`;
-                                                    }
-                                                    return <span className='text-gray-400'>{t("selectShippingMethod")}</span>;
-                                                }
-                                                
-                                                return <span className='text-gray-400'>{t("noShippingMethods")}</span>;
-                                            })()}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className='border-t-2 border-gray-200 bg-white p-6 lg:p-8 flex-shrink-0'>
-                                <div className='flex items-center justify-between bg-[#000000] -mx-6 lg:-mx-8 px-6 lg:px-8 py-4 rounded-lg'>
-                                    <span className='text-base font-bold text-white'>{t("total")}</span>
-                                    <div className='text-right'>
-                                        <strong className='text-xl text-white font-bold block'>
-                                            {cartTotal.toFixed(2)}{cart?.totals?.currency_symbol}
-                                        </strong>
-                                        {parseFloat(cart?.totals?.total_tax) > 0 && (
-                                            <small className='text-gray-300 text-xs'>
-                                                ({t("includingVAT")} {(Number(cart?.totals?.total_tax) / 100).toFixed(2)} {cart?.totals?.currency_symbol} {t("VAT")})
-                                            </small>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
