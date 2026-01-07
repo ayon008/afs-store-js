@@ -30,7 +30,7 @@ const Products = ({ id, childCategories }) => {
             const data = await getProductsByCategoryId(ids);
             return data;
         },
-        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+        staleTime: 60 * 60 * 1000, // Cache for 1 hour
     });
 
     const { minPrice, maxPrice } = useMemo(() => {
@@ -115,10 +115,10 @@ const Products = ({ id, childCategories }) => {
     };
 
     return (
-        <div className='flex items-start justify-center gap-10 lg:flex-row flex-col global-padding max-w-[1920px] mx-auto relative'>
-            <div className='lg:w-[20%] w-full md:sticky md:top-[170px]'>
-                <div className='hidden lg:block'>
-                    <div className='lg:h-[calc(90vh-140px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
+        <div className='flex items-stretch justify-center gap-10 lg:flex-row flex-col global-padding max-w-[1920px] mx-auto'>
+            <div className='lg:w-[20%] w-full relative'>
+                <div className='hidden lg:block md:sticky md:top-[170px]'>
+                    <div className='lg:h-auto lg:max-h-[calc(100vh-170px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
                         <div className='mb-6'>
                             {childCategories && childCategories.length > 0 &&
 
@@ -182,7 +182,7 @@ const Products = ({ id, childCategories }) => {
                                 const bestseller = product?.bestseller;
                                 const hoverImage = product?.img;
                                 return (
-                                    <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
+                                    <ProductCard key={i} price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} slug={product?.slug} />
                                 )
                             })
                         }
@@ -191,18 +191,21 @@ const Products = ({ id, childCategories }) => {
 
             {/* PopUp */}
 
-
-            <PopUp isOpen={isOpen}>
-                <div className='w-[90%] mx-auto bg-[#F7F7F7] h-auto p-[10px] rounded-[4px] overflow-hidden shadow-xl'>
+            <PopUp isOpen={isOpen} fn={setOpen}>
+                <div onClick={(e) => e.stopPropagation()} className='w-[90%] mx-auto bg-[#F7F7F7] h-auto p-[10px] rounded-[4px] overflow-hidden shadow-xl'>
                     <div className='relative'>
                         <p className='font-medium uppercase text-xs leading-[100%] pb-4 text-[#999] border-gray-300 border-b'>Filters</p>
                         <X className="w-4 h-4 absolute top-0 right-0 text-[#999]" onClick={() => setOpen(!isOpen)} />
                     </div>
-                    <p className='font-semibold text-base leading-[100%] text-black my-4'>{a("categories")}</p>
+                    {
+                        childCategories && childCategories.length > 0 && (
+                            <p className='font-semibold text-base leading-[100%] text-black my-4'>{a("categories")}</p>
+                        )
+                    }
                     <div className='mb-4 mt-4 max-h-[50vh] overflow-y-scroll popup-scroll-bar-1'>
-                        {childCategories && childCategories.length > 0
-                            ? renderCategories(childCategories)
-                            : <p className="text-sm text-gray-500">No {a("categories")}</p>}
+                        {
+                            childCategories && childCategories.length > 0 && renderCategories(childCategories)
+                        }
                     </div>
                     <div>
                         {isLoading ? <PriceFilterShimmer /> :
@@ -227,8 +230,8 @@ const Products = ({ id, childCategories }) => {
                 </div>
             </PopUp>
 
-            <PopUp isOpen={telephonePopUp}>
-                <div className='bg-white max-w-[1180px] w-[95%] max-h-[80vh] overflow-x-hidden lg:p-20 p-5 relative mx-auto rounded-[4px] overflow-y-scroll scroll-bar'>
+            <PopUp isOpen={telephonePopUp} fn={setTelephonePopUp}>
+                <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[1180px] w-[95%] max-h-[80vh] overflow-x-hidden lg:p-20 p-5 relative mx-auto rounded-[4px] overflow-y-scroll scroll-bar'>
                     <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
                         <X className="w-4 h-4" />
                     </button>

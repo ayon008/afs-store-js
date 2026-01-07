@@ -1,22 +1,30 @@
-import { getLocale, getTranslations } from 'next-intl/server';
+"use client"
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react'
+import React, { useState } from 'react'
 
-const page = () => {
-    const BreadCums = async () => {
-        const t = await getTranslations("breadcum");
-        const locale = await getLocale();
-        return (
-            <div className='uppercase'>
-                <div className='font-bold text-sm text-[#999999]'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={locale === "en" ? "/blog/categories/dockstart-en" : "/blog/categories/dockstart"}>DOCKSTAR</Link> / <span className='text-black'>Foil Configurator</span>
-                </div>
+
+const BreadCums = () => {
+    const t = useTranslations("breadcum");
+    const locale = useLocale();
+    return (
+        <div className='uppercase'>
+            <div className='font-bold text-sm text-[#999999]'>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <Link className='inline' href={locale === "en" ? "/blog/categories/dockstart-en" : "/blog/categories/dockstart"}>DOCKSTAR</Link> / <span className='text-black'>Foil Configurator</span>
             </div>
-        )
-    }
+        </div>
+    )
+}
 
+
+const Page = () => {
+    const [weight, setWeight] = useState(75);
     // onchange="updatePractice()"
+
+    const updateWeightOutput = (e) => {
+        setWeight(e.target.value);
+    }
 
     return (
         <div className='global-padding pt-4'>
@@ -153,8 +161,14 @@ const page = () => {
                     <label htmlFor="unknown" class="criteria-label">C&apos;est quoi ces mots barbares ?</label>
                 </div>
             </div>
+            {/*  */}
+            <div className="criteria w-full">
+                <div className="criteria-title">Poids du pratiquant :</div>
+                <input type="range" id="weight" min="40" max="150" value={weight} className="w-full" step="1" onChange={updateWeightOutput} />
+                <output className='font-bold' id="weightOutput">{weight} kg</output>
+            </div>
         </div>
     )
 }
 
-export default page;
+export default Page;

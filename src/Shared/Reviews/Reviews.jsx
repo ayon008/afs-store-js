@@ -48,6 +48,7 @@ const Reviews = ({ acf }) => {
 
 
 
+
     return (
         <div>
             <h2 className='text-[28px] leading-[28px] font-bold mb-6'>{t("reviews")}</h2>
@@ -67,12 +68,12 @@ const Reviews = ({ acf }) => {
                         swiperRef.current = swiper;
                         setActiveIndex(swiper.realIndex);
                     }}
-                    className="max-h-[545px]!"
+                    className=""
                 >
                     <SwiperSlide className="">
-                        <div className="relative">
-                            <div className="relative block">
-                                <Image src={thumbnail_one} width={1080} height={545} className="object-cover" alt={review_title} />
+                        <div className="relative h-full">
+                            <div className="relative block h-full">
+                                <Image src={thumbnail_one} width={1080} height={545} className="object-contain w-full h-full" alt={review_title} />
                                 <span onClick={() => {
                                     setShow(true)
                                     setLink(video_url)
@@ -93,10 +94,10 @@ const Reviews = ({ acf }) => {
                         </div>
                     </SwiperSlide>
                     {
-                        thumbnail_tow && <SwiperSlide className="flex flex-col">
-                            <div className="relative">
-                                <div className="relative block">
-                                    <Image src={thumbnail_tow} width={1080} height={545} alt={review_title} className="" />
+                        thumbnail_tow && <SwiperSlide className="flex flex-col ">
+                            <div className="relative h-full">
+                                <div className="relative block h-full">
+                                    <Image src={thumbnail_tow} width={1080} height={545} alt={review_title} className="object-contain w-full h-full" />
                                     <span onClick={() => {
                                         setShow(true)
                                         setLink(video_url_if_has_tow)
@@ -132,7 +133,7 @@ const Reviews = ({ acf }) => {
                     >
                         <ArrowRight className='w-4 h-4' />
                     </button>
-                    <div className="w-[92%] mx-auto h-full flex items-center gap-2 mt-4">
+                    <div className="lg:w-[92%] w-[80%] mx-auto h-full flex items-center gap-2 mt-4">
                         <div
                             className="rounded-[4px] overflow-hidden relative cursor-pointer transition-opacity duration-200"
                             style={{ opacity: activeIndex === 0 ? 1 : 0.5 }}
@@ -151,7 +152,13 @@ const Reviews = ({ acf }) => {
                                 style={{ opacity: activeIndex === 1 ? 1 : 0.5 }}
                                 onClick={() => swiperRef.current?.slideToLoop(1)}
                             >
-                                <Image className="lg:w-[120px] lg:h-[80px] w-[80px] h-[50px]" src={thumbnail_tow} alt={review_heading_tow} width={120} height={80} />
+                                <Image
+                                    className="lg:w-[120px] lg:h-[80px] w-[80px] h-[50px]"
+                                    src={thumbnail_tow}
+                                    alt={review_heading_tow}
+                                    width={120}
+                                    height={80}
+                                />
                                 <svg className="video_indicator absolute top-0 left-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect width="24" height="24" rx="4" fill="#1F1F1F"></rect>
                                     <path d="M14.25 10.5001L17.6647 8.79309C17.7791 8.73597 17.9061 8.709 18.0337 8.71475C18.1614 8.7205 18.2855 8.75877 18.3942 8.82594C18.5029 8.89311 18.5927 8.98695 18.6549 9.09854C18.7172 9.21014 18.7499 9.3358 18.75 9.46359V14.5366C18.7499 14.6644 18.7172 14.79 18.6549 14.9016C18.5927 15.0132 18.5029 15.1071 18.3942 15.1742C18.2855 15.2414 18.1614 15.2797 18.0337 15.2854C17.9061 15.2912 17.7791 15.2642 17.6647 15.2071L14.25 13.5001V10.5001Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -165,16 +172,16 @@ const Reviews = ({ acf }) => {
 
 
             {/* Pop Up for review */}
-            <PopUp isOpen={show}>
+            <PopUp isOpen={show} fn={setShow}>
                 <div className="w-full bg-black/70 h-full relative flex items-center justify-center">
                     <div className="bg-white rounded-full cursor-pointer p-2 absolute top-4 right-4" onClick={() => setShow(!show)}>
                         <X className="w-4 h-4 text-black" />
                     </div>
-                    <div className="max-w-[1024px] w-full h-[80%] mx-auto">
+                    <div className="max-w-[1024px] w-full h-[80%] mx-auto" onClick={(e) => e.stopPropagation()}>
                         {show &&
                             <iframe
                                 width="100%"
-                                height="80%"
+                                height="100%"
                                 src={`https://www.youtube.com/embed/${extractYouTubeID(link)}?autoplay=1&mute=0`}
                                 title="YouTube video"
                                 frameBorder="0"
@@ -215,7 +222,11 @@ const Reviews = ({ acf }) => {
                                 <ArrowLeft className='w-4 h-4' />
                             </button>
                             <button
-                                onClick={() => setLink(video_url_if_has_tow)}
+                                onClick={() => {
+                                    if (thumbnail_tow) {
+                                        setLink(video_url_if_has_tow)
+                                    }
+                                }}
                                 id="customNext"
                                 className="absolute top-1/2 right-4 -translate-y-1/2 z-50 bg-gray-100 text-gray-400 font-semibold p-2 rounded-full shadow cursor-pointer"
                             >

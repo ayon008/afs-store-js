@@ -1092,9 +1092,9 @@ const Navbar = ({ NAV_LINKS }) => {
       )}
 
 
-      <PopUp isOpen={showPopUp}>
+      <PopUp isOpen={showPopUp} fn={setPopUp} >
         {/* Parent Div */}
-        <div className="flex flex-col rounded-sm overflow-hidden bg-[#f0f0f0] max-w-[540px] w-full">
+        <div onClick={(e) => e.stopPropagation()} className="flex flex-col rounded-sm overflow-hidden bg-[#f0f0f0] max-w-[540px] w-[95%] mx-auto">
           {/* 1st div */}
           <div className="py-4 lg:px-10 px-5 shadow-[0_6px_8px_rgba(91,104,113,0.1)]">
             <div className="flex items-center gap-5">
@@ -1108,7 +1108,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </div>
           </div>
           {/* 2nd div */}
-          <div className="py-4 lg:px-10 px-5 max-h-[calc(100vh-140px)] overflow-y-scroll popup-scroll-bar">
+          <div className="py-4 lg:px-10 px-5 max-h-[calc(90vh-140px)] overflow-y-scroll popup-scroll-bar">
             {/* Notification inside modal */}
             {notification && (
               <div className="mb-4 animate-slideDown">

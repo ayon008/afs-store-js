@@ -74,8 +74,8 @@ const TeamCard = ({ member }) => {
             </div>
 
 
-            <PopUp isOpen={isOpen}>
-                <div className='w-[90%] mx-auto bg-white/95 max-w-[1280px] lg:h-[80%] h-fit flex lg:flex-row flex-col items-stretch justify-center rounded-3xl overflow-hidden shadow-xl'>
+            <PopUp isOpen={isOpen} fn={setOpen}>
+                <div onClick={(e) => e.stopPropagation()} className='w-[90%] mx-auto bg-white/95 max-w-[1280px] lg:h-[80%] h-fit flex lg:flex-row flex-col items-stretch justify-center rounded-3xl overflow-hidden shadow-xl'>
                     <div className='lg:w-1/2 w-full h-full lg:py-10 py-5 lg:px-5 px-5 relative'>
                         <h2 className='global-h2 uppercase'>
                             <span>{first_name} </span>

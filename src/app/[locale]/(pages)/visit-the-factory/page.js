@@ -76,7 +76,7 @@ const Page = () => {
 
 
 
-            <PopUp isOpen={isOpen}>
+            <PopUp isOpen={isOpen} fn={setIsOpen}>
                 <div className="w-full h-full bg-black/50 flex items-center justify-center relative">
                     <button
                         onClick={() => setIsOpen(false)}
@@ -84,7 +84,7 @@ const Page = () => {
                     >
                         <X className="w-4 h-4 text-black" />
                     </button>
-                    <div className="mx-auto flex items-center justify-center max-w-[90vw] w-[90%] sm:w-[80%] aspect-video">
+                    <div onClick={(e) => e.stopPropagation()} className="mx-auto flex items-center justify-center max-w-[90vw] w-[90%] sm:w-[80%] aspect-video">
                         <iframe
                             src="https://www.youtube.com/embed/Du02h7xfe8s?si=QxG1YTe8dBxcvrgN"
                             title="YouTube video player"

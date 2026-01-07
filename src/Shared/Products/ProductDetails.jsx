@@ -620,8 +620,8 @@ const ProductDetails = ({ data, variations }) => {
 
 
             {/* Pop Up */}
-            <PopUp isOpen={isOpen}>
-                <div className='bg-white max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll p-5 relative mx-auto rounded-[4px]'>
+            <PopUp isOpen={isOpen} fn={setOpen}>
+                <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll p-5 relative mx-auto rounded-[4px]'>
                     <div className='global-b-bottom-d pb-2'>
                         {/* Absolute Button for closing Pop Up */}
                         <button onClick={() => setOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
@@ -641,15 +641,15 @@ const ProductDetails = ({ data, variations }) => {
 
             {
                 used && (
-                    <PopUp isOpen={gradeOpen}>
-                        <div className='max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll relative mx-auto rounded-[4px] bg-white -z-20'>
+                    <PopUp isOpen={gradeOpen} fn={setGradeOpen}>
+                        <div onClick={(e) => e.stopPropagation()} className='max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll scroll-bar relative mx-auto rounded-[4px] bg-white -z-20'>
                             <button onClick={() => setGradeOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer'>
                                 <X className="w-4 h-4 lg:text-black text-white z-10" />
                             </button>
                             {/* Content */}
                             <div className='flex items-stretch gap-1 lg:flex-row flex-col'>
                                 {/* Slider */}
-                                <div className='flex-1 lg:w-1/2 w-full bg-[#111] -z-10'>
+                                <div className='flex-1 lg:w-1/2 w-full bg-[#111]'>
                                     <Swiper
                                         modules={[Navigation]}
                                         navigation
@@ -774,8 +774,8 @@ const ProductDetails = ({ data, variations }) => {
                     // Telephone PopUp
                 )
             }
-            <PopUp isOpen={telephonePopUp}>
-                <div className='bg-white max-w-[649px] w-[95%] h-fit overflow-x-hidden  p-5 relative mx-auto rounded-[4px] overflow-hidden'>
+            <PopUp isOpen={telephonePopUp} fn={setTelephonePopUp}>
+                <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[649px] w-[95%] h-fit overflow-x-hidden  p-5 relative mx-auto rounded-[4px] overflow-hidden'>
                     <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
                         <X className="w-4 h-4" />
                     </button>
