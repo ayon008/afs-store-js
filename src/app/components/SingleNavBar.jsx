@@ -1,15 +1,29 @@
 "use client"
+import { useGSAP } from '@gsap/react';
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
-import React, { useRef } from 'react'
+import React from 'react'
+import { gsap } from 'gsap';
 
-const SingleNavBar = ({ setIsLanding, data }) => {
+const SingleNavBar = ({ setIsLanding, data, isLanding }) => {
     const title = data?.name;
     const acf = data?.acf;
     const caracteristiques = acf?.caracteristiques;
     const compatibilite = acf?.compatibilite;
     const programme = acf?.programme;
     const thumbnail_one = acf?.thumbnail_one;
+    console.log(!!acf && !!caracteristiques || !!compatibilite || !!programme);
+
+    useGSAP(() => {
+        const ctx = gsap.context(() => {
+            gsap.to('.navbar', {
+                position: 'relative',
+                duration: 0.5,
+                ease: 'power2.inOut',
+            })
+        })
+        return () => ctx.revert();
+    }, [])
 
     return (
         <div className='bg-black sticky top-0 z-[1000]'>
@@ -20,9 +34,12 @@ const SingleNavBar = ({ setIsLanding, data }) => {
                         !!acf && !!thumbnail_one && <Link onClick={() => setIsLanding(false)} href={'#reviews'} className='text-white md:block hidden'>Reviews</Link>
                     }
                     {
-                        !!acf && !!caracteristiques || !!compatibilite || !!programme && <Link onClick={() => setIsLanding(false)} href={'#characteristics'} className='text-white md:block hidden'>Characteristics</Link>
+                        !!caracteristiques && <Link onClick={() => setIsLanding(false)} href={'#characteristics'} className='text-white md:block hidden'>Characteristics</Link>
                     }
-                    <button onClick={() => setIsLanding(false)} className='text-white bg-[#1D98FF] uppercase p-3 text-sm flex items-center gap-1 font-bold rounded-sm cursor-pointer'>
+                    <button onClick={() => {
+                        setIsLanding(!isLanding)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }} className='text-white bg-[#1D98FF] uppercase p-3 text-sm flex items-center gap-1 font-bold rounded-sm cursor-pointer'>
                         Buy Now <ArrowUpRight strokeWidth={3} className='w-4 h-4' />
                     </button>
                 </div>

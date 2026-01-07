@@ -480,6 +480,11 @@ td {
   margin-right: 10px;
   border-radius: 5px;
 }
+
+.smooth {
+  transition: cubic-bezier(.17,.67,.83,.67) !important;
+  overflow-x: clip;
+}
 /* input[type="range"] {
   width: 100%;
   margin-bottom: 10px;

@@ -152,7 +152,7 @@ const SingleProduct = ({ data, variations }) => {
     return (
         <div>
             {
-                !!LandingPage && <SingleNavBar setIsLanding={setIsLanding} data={data} />
+                !!LandingPage && <SingleNavBar setIsLanding={setIsLanding} data={data} isLanding={isLanding} />
             }
             <div className={`global-padding md:pt-4 pt-0 max-w-[1920px] mx-auto w-full relative ${isLanding ? 'hidden' : 'block'}`}>
                 <BreadCums />

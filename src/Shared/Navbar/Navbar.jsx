@@ -324,7 +324,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
   return (
     <>
-      <nav className='sticky left-0 right-0 top-0 z-[120] text-white w-full'>
+      <nav className='sticky left-0 right-0 top-0 z-[120] text-white w-full navbar'>
         {/* Logo and Search Part */}
         <div
           className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between relative z-[120]"
