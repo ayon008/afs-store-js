@@ -18,6 +18,7 @@ import Notification from "../Notification/Notification";
 
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
+  const tCart = useTranslations("cart");
 
   // Search Open
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -161,12 +162,12 @@ const Navbar = ({ NAV_LINKS }) => {
 
     // Get current location from cookie
     const cookieLocation = Cookies.get('location') || '2682';
-    const locationChanged = true;
+    const locationChanged = selectedLocation !== cookieLocation;
 
     // Clear the cart if language, currency, or location changes
     if (languageChanged || currencyChanged || locationChanged) {
       try {
-        // Check if cart has items before clearing
+        // Check if cart has items before clearing (check localStorage directly)
         const hasItems = cart && cart.items && cart.items.length > 0;
 
         if (hasItems) {
@@ -177,9 +178,9 @@ const Navbar = ({ NAV_LINKS }) => {
             if (languageChanged) {
               setNotification(t("cartClearedLanguage"));
             } else if (currencyChanged) {
-              setNotification(t("cartClearedCurrency"));
+              setNotification(tCart("clearedOnCurrencyChange"));
             } else if (locationChanged) {
-              setNotification(t("cartClearedLocation") || "Panier vidé en raison du changement de localisation");
+              setNotification(tCart("clearedOnLocationChange"));
             }
           } else {
             console.error('Failed to clear cart:', result?.error);
