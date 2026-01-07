@@ -16,6 +16,7 @@ import ProductDetails from './ProductDetails';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { getProductLanding } from '@/lib/getProductLanding';
+import SingleNavBar from '@/app/components/SingleNavBar';
 
 // For youtube link in review and pop up section
 function extractYouTubeID(url) {
@@ -150,7 +151,9 @@ const SingleProduct = ({ data, variations }) => {
 
     return (
         <div>
-            {isLanding && <LandingPage setIsLanding={setIsLanding} />}
+            {
+                !!LandingPage && <SingleNavBar setIsLanding={setIsLanding} data={data} />
+            }
             <div className={`global-padding md:pt-4 pt-0 max-w-[1920px] mx-auto w-full relative ${isLanding ? 'hidden' : 'block'}`}>
                 <BreadCums />
                 <div className='flex items-start md:flex-row flex-col justify-between gap-10'>
@@ -233,10 +236,12 @@ const SingleProduct = ({ data, variations }) => {
                 </div>
 
                 {/* Characteristics */}
-                <FaqSection acf={acf} />
+                <div id='characteristics'>
+                    <FaqSection acf={acf} />
+                </div>
 
                 {/* Reviews */}
-                <div className='lg:mb-[120px] mb-20'>
+                <div id='reviews' className='lg:mb-[120px] mb-20'>
                     <Reviews acf={acf} />
                 </div>
 
@@ -346,6 +351,9 @@ const SingleProduct = ({ data, variations }) => {
                     </div>
                 </PopUp>
             </div>
+            {
+                !!LandingPage && <LandingPage data={data} setIsLanding={setIsLanding} />
+            }
         </div>
     );
 };
