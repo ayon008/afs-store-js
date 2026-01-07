@@ -352,7 +352,7 @@ const SingleProduct = ({ data, variations }) => {
                 </PopUp>
             </div>
             {
-                !!LandingPage && <LandingPage data={data} setIsLanding={setIsLanding} />
+                !!LandingPage && <div id="stream-landing"><LandingPage data={data} setIsLanding={setIsLanding} /></div>
             }
         </div>
     );
