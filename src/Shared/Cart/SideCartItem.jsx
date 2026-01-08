@@ -13,8 +13,11 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
     // Use line_total which is already TTC (HT + tax)
     const total = parseInt(item?.totals?.line_total || 0);
     const basePriceWithTax = item?.prices?.price; // Unit price TTC
-    const currency_symbol = item?.prices?.currency_symbol || '€';
-    const total_Currency_Symbol = item?.totals?.currency_symbol || '€';
+    // Use cart currency (from totals) as primary, fallback to item currency
+    // This ensures consistency - all items use the same currency as the cart total
+    const cartCurrencySymbol = item?.totals?.currency_symbol || item?.prices?.currency_symbol || '€';
+    const currency_symbol = cartCurrencySymbol;
+    const total_Currency_Symbol = cartCurrencySymbol;
     const variations = item?.variation || [];
     const itemKey = item?.key;
 

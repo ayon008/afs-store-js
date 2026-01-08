@@ -43,6 +43,9 @@ export async function GET(request, { params }) {
             }
         }
 
+        // Convert currency from cookie format (euro/usd/gbp) to currency code (EUR/USD/GBP)
+        const currencyCode = currency === 'euro' ? 'EUR' : currency === 'usd' ? 'USD' : currency === 'gbp' ? 'GBP' : 'EUR';
+
         // Format response
         const response = {
             id: product.id,
@@ -56,6 +59,7 @@ export async function GET(request, { params }) {
             stock_status: product.stock_status || 'instock',
             stock_quantity: product.stock_quantity || null,
             type: product.type,
+            currency: currencyCode, // Include currency in response
             variations: variations.map(v => ({
                 id: v.id,
                 price: parseFloat(v.price) || 0,

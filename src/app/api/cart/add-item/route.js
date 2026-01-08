@@ -1,7 +1,7 @@
 // app/api/cart/add-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 
 // Helper to parse set-cookie headers (same as before)
@@ -95,12 +95,13 @@ export async function POST(request) {
 
         // Get the payload from request body
         const body = await request.json();
-        const { id: productId, quantity = 1, variation_id: variationId, variation = {} } = body;
+        const { id: productId, quantity = 1, variation_id: variationId, variation = {}, currency: productCurrency } = body;
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));
         console.log('Variation raw:', variation);
         console.log('Variation type:', typeof variation);
+        console.log('Product currency:', productCurrency);
 
         if (!productId) {
             return NextResponse.json({
@@ -116,10 +117,24 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
+        // Always use the site currency (from cookie) to ensure consistency
+        // If productCurrency is provided, we still use site currency to keep all items in the same currency
+        const cookieCurrency = await getCurrency();
+        // Convert cookie currency format (euro/usd/gbp) to currency code (EUR/USD/GBP)
+        let currencyToUse = cookieCurrency;
+        if (currencyToUse === 'euro') currencyToUse = 'EUR';
+        else if (currencyToUse === 'usd') currencyToUse = 'USD';
+        else if (currencyToUse === 'gbp') currencyToUse = 'GBP';
+        else currencyToUse = 'EUR'; // Default to EUR
+        
+        // Ensure currency is in uppercase format
+        currencyToUse = currencyToUse.toUpperCase();
+
         // Build payload for WooCommerce
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
+            currency: currencyToUse, // Include currency in payload
         };
 
         if (variationId) {
@@ -167,13 +182,19 @@ export async function POST(request) {
 
         console.log('Final payload:', JSON.stringify(payload, null, 2));
 
+        // Add WCML currency cookie for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currencyToUse}`;
+        const cookiesWithWcml = allCookies 
+            ? `${allCookies}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
+
         // Make request to WooCommerce to add item
         const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
             },
             body: JSON.stringify(payload),
             cache: "no-store",
