@@ -445,11 +445,13 @@ const CheckoutPageContent = () => {
             lastUpdateRef.current.key = currentKey;
             setUpdatingShipping(true);
 
-            // Prepare items from localStorage cart
+            // Prepare items from localStorage cart (include variation attributes for variable products)
+            // Use _variationRaw which has the original object format { "Taille": "3.0m2" }
             const items = cart.items.map(item => ({
                 id: item.id,
                 quantity: item.quantity,
-                variation_id: item.variation_id || null
+                variation_id: item.variation_id || null,
+                variation: item._variationRaw || item.variation || null
             }));
 
             // Call the shipping calculation API

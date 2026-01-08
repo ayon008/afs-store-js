@@ -93,11 +93,26 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         const lineSubtotal = price * quantity;
         subtotal += lineSubtotal;
         
+        // Convert variation object to array format for display
+        // From: { "Taille": "3.0m2", "Color": "Blue" }
+        // To: [{ attribute: "Taille", value: "3.0m2" }, { attribute: "Color", value: "Blue" }]
+        let variationArray = [];
+        if (item.variation && typeof item.variation === 'object' && !Array.isArray(item.variation)) {
+            variationArray = Object.entries(item.variation).map(([attr, value]) => ({
+                attribute: attr,
+                value: String(value)
+            }));
+        } else if (Array.isArray(item.variation)) {
+            variationArray = item.variation;
+        }
+
         return {
             id: item.id,
             name: item.productData?.name || '',
             quantity: quantity,
             variation_id: item.variation_id || null,
+            variation: variationArray, // Array format for display components
+            _variationRaw: item.variation || {}, // Keep raw format for API calls
             prices: {
                 price: Math.round(price * 100), // Convert to cents
                 regular_price: Math.round(price * 100),
