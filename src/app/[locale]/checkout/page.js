@@ -488,7 +488,8 @@ const CheckoutPageContent = () => {
 
                     // Auto-select first rate if none selected
                     if (rates.length > 0 && !selectedRateId) {
-                        setSelectedRateId(rates[0].rate_id);
+                        const firstRateValue = `${rates[0].package_id || 0}:${rates[0].rate_id}`;
+                        setSelectedRateId(firstRateValue);
                         setValue('shipping_method', rates[0].rate_id);
                     }
                 } else {
@@ -573,7 +574,11 @@ const CheckoutPageContent = () => {
     // Calculate selected shipping cost
     const selectedShippingCost = React.useMemo(() => {
         if (!selectedRateId || allShippingRates.length === 0) return 0;
-        const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
+        // selectedRateId is now in format "package_id:rate_id"
+        const [packageId, rateId] = selectedRateId.split(':');
+        const selectedRate = allShippingRates.find(rate => 
+            rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+        );
         if (!selectedRate) return 0;
         // Price is in cents
         return parseFloat(selectedRate.price || 0) / 100;
@@ -589,11 +594,15 @@ const CheckoutPageContent = () => {
     useEffect(() => {
         // If user has manually selected a rate, prioritize that
         if (userSelectedRateRef.current) {
-            const userSelected = allShippingRates.find(rate => rate.rate_id === userSelectedRateRef.current);
+            // userSelectedRateRef.current is now in format "package_id:rate_id"
+            const [packageId, rateId] = userSelectedRateRef.current.split(':');
+            const userSelected = allShippingRates.find(rate => 
+                rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+            );
             if (userSelected) {
                 if (selectedRateId !== userSelectedRateRef.current) {
                     setSelectedRateId(userSelectedRateRef.current);
-                    setValue('shipping_method', userSelectedRateRef.current);
+                    setValue('shipping_method', rateId);
                 }
                 return;
             } else {
@@ -606,7 +615,8 @@ const CheckoutPageContent = () => {
         if (allShippingRates.length > 0 && !selectedRateId) {
             const firstRate = allShippingRates[0];
             if (firstRate) {
-                setSelectedRateId(firstRate.rate_id);
+                const firstRateValue = `${firstRate.package_id || 0}:${firstRate.rate_id}`;
+                setSelectedRateId(firstRateValue);
                 setValue('shipping_method', firstRate.rate_id);
             }
         }
@@ -709,15 +719,16 @@ const CheckoutPageContent = () => {
 
     // Handle shipping rate selection (local state only, sync happens at order submission)
     const handleSelectRate = (value) => {
-        const [packageId, rateId] = value.split(':');
-        if (rateId === selectedRateId) {
+        // value is already in format "package_id:rate_id"
+        if (value === selectedRateId) {
             return;
         }
 
-        // Update local state only
-        userSelectedRateRef.current = rateId;
-        setSelectedRateId(rateId);
-        setValue('shipping_method', rateId);
+        // Update local state only - store the full value "package_id:rate_id"
+        const [packageId, rateId] = value.split(':');
+        userSelectedRateRef.current = value; // Store full value
+        setSelectedRateId(value); // Store full value "package_id:rate_id"
+        setValue('shipping_method', rateId); // Form still uses just rate_id
     };
 
     // Check if cart is empty
@@ -818,9 +829,13 @@ const CheckoutPageContent = () => {
                 }
 
                 // Step 2: Select shipping rate if available
-                const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
+                // selectedRateId is now in format "package_id:rate_id"
+                const [packageId, rateId] = selectedRateId.split(':');
+                const selectedRate = allShippingRates.find(rate => 
+                    rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+                );
                 if (selectedRate) {
-                    await selectShippingRate(selectedRateId, selectedRate.package_id || 0);
+                    await selectShippingRate(rateId, selectedRate.package_id || 0);
                 }
 
                 // Step 3: Create order with synced cart data

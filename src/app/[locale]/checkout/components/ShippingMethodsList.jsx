@@ -51,13 +51,14 @@ const ShippingMethodsList = ({
                     <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                         {allShippingRates.map((rate, i) => {
                             const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                            const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                            const safeId = `shipping_rate_${String(rate.package_id).replace(/[:]/g, '_')}_${String(rate.rate_id).replace(/[:]/g, '_')}_${i}`;
+                            const rateValue = `${rate.package_id || 0}:${rate.rate_id}`;
                             return (
                                 <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-gray-200 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors bg-white'>
                                     <div className='flex items-center gap-3 flex-1 min-w-0'>
                                         <input
-                                            checked={selectedRateId === rate.rate_id}
-                                            value={`${rate.package_id}:${rate.rate_id}`}
+                                            checked={selectedRateId === rateValue}
+                                            value={rateValue}
                                             onChange={(e) => handleSelectRate(e.target.value)}
                                             type="radio"
                                             name="shipping_method"
@@ -102,13 +103,14 @@ const ShippingMethodsList = ({
                 <ul className={`space-y-2 ${shippingLoading || updatingShipping ? 'opacity-50' : 'opacity-100'}`}>
                     {allShippingRates.map((rate, i) => {
                         const totalPrice = (rate.price / 100 + rate.taxes / 100);
-                        const safeId = `shipping_rate_${String(rate.rate_id).replace(/[:]/g, '_')}`;
+                        const safeId = `shipping_rate_${String(rate.package_id).replace(/[:]/g, '_')}_${String(rate.rate_id).replace(/[:]/g, '_')}_${i}`;
+                        const rateValue = `${rate.package_id || 0}:${rate.rate_id}`;
                         return (
                             <li key={`shipping-rate-${rate.rate_id}-${i}`} className='border border-gray-200 rounded-lg p-4 flex items-center gap-3 flex-wrap justify-between hover:border-[#1D98FF] transition-colors bg-white'>
                                 <div className='flex items-center gap-3 flex-1 min-w-0'>
                                     <input
-                                        checked={selectedRateId === rate.rate_id}
-                                        value={`${rate.package_id}:${rate.rate_id}`}
+                                        checked={selectedRateId === rateValue}
+                                        value={rateValue}
                                         onChange={(e) => handleSelectRate(e.target.value)}
                                         type="radio"
                                         name="shipping_method"

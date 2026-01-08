@@ -77,13 +77,21 @@ const PaymentMethods = ({
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
                                             })) || [],
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
@@ -117,13 +125,21 @@ const PaymentMethods = ({
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
                                             })) || [],
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
@@ -157,13 +173,21 @@ const PaymentMethods = ({
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
                                             })) || [],
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
