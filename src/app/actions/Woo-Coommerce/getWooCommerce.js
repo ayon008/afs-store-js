@@ -482,10 +482,9 @@ export const getPrice = async (productId) => {
 
 
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
-export async function addToCart(productId, quantity = 1, variationId = null, variation = {}, productCurrency = null) {
+export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
     // Always use site currency (from cookie) to ensure consistency across all cart items
-    // productCurrency parameter is ignored to keep all items in the same currency
     const cookieCurrency = await getCurrency();
     const location = await getLocation();
     const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
@@ -535,7 +534,7 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         console.log('WC_STORE_URL:', WC_STORE_URL);
         console.log('Cookie header present:', !!cookieHeader);
         console.log('Cookie header length:', cookieHeader?.length || 0);
-        console.log('Using currency:', currencyToUse, '(from product:', !!productCurrency, ')');
+        console.log('Using currency:', currencyToUse);
 
         // Add WCML currency cookie for multi-currency support
         const wcmlCurrencyCookie = `wcml_client_currency=${currencyToUse}`;

@@ -301,10 +301,6 @@ const ProductDetails = ({ data, variations }) => {
                 console.log('Using watchedValues as fallback:', finalVariations);
             }
 
-            // Get product currency - use the currency from the product data if available, otherwise use current cookie currency
-            // Convert cookie currency format (euro/usd/gbp) to currency code (EUR/USD/GBP)
-            const productCurrency = data?.currency || (currency === 'euro' ? 'EUR' : currency === 'usd' ? 'USD' : currency === 'gbp' ? 'GBP' : 'EUR');
-            
             // Prepare product data for localStorage cart
             const productData = {
                 id: productId,
@@ -316,7 +312,6 @@ const ProductDetails = ({ data, variations }) => {
                 stock_status: hasVariations ? (isInStock ? 'instock' : 'outofstock') : (baseInStock ? 'instock' : 'outofstock'),
                 stock_quantity: hasVariations ? (variations?.find(v => v.id === variationId)?.stock_quantity || null) : (data?.stock_quantity || null),
                 variations: variations || [],
-                currency: productCurrency, // Store the product's currency
             };
 
             const result = await handleAddToCart(

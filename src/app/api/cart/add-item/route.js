@@ -95,13 +95,12 @@ export async function POST(request) {
 
         // Get the payload from request body
         const body = await request.json();
-        const { id: productId, quantity = 1, variation_id: variationId, variation = {}, currency: productCurrency } = body;
+        const { id: productId, quantity = 1, variation_id: variationId, variation = {} } = body;
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));
         console.log('Variation raw:', variation);
         console.log('Variation type:', typeof variation);
-        console.log('Product currency:', productCurrency);
 
         if (!productId) {
             return NextResponse.json({
@@ -118,7 +117,6 @@ export async function POST(request) {
         }
 
         // Always use the site currency (from cookie) to ensure consistency
-        // If productCurrency is provided, we still use site currency to keep all items in the same currency
         const cookieCurrency = await getCurrency();
         // Convert cookie currency format (euro/usd/gbp) to currency code (EUR/USD/GBP)
         let currencyToUse = cookieCurrency;
