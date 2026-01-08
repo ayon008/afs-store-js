@@ -821,70 +821,53 @@ const CheckoutPageContent = () => {
                     await selectShippingRate(selectedRateId, selectedRate.package_id || 0);
                 }
 
-                // Step 3: Prepare customer data
-                const customerData = {
-                    ...data,
+                // Step 3: Create order with synced cart data
+                // Format data according to /api/orders expectations
+                const orderPayload = {
+                    // Billing info at root level
                     billing_email: data.billing_email,
-                    billing: {
-                        first_name: data.billing_first_name,
-                        last_name: data.billing_last_name,
-                        company: data.billing_company || '',
-                        address_1: data.billing_address_1,
-                        address_2: '',
-                        city: data.billing_city,
-                        state: data.billing_state || '',
-                        postcode: data.billing_postcode,
-                        country: data.billing_country,
-                        email: data.billing_email,
-                        phone: data.billing_phone || ''
-                    },
-                    // Use shipping address only if checkbox is checked, otherwise use billing address
-                    shipping: shippingAddress ? {
-                        first_name: data.shipping_first_name,
-                        last_name: data.shipping_last_name,
-                        company: data.shipping_company || '',
-                        address_1: data.shipping_address_1,
-                        address_2: '',
-                        city: data.shipping_city,
-                        state: data.shipping_state || '',
-                        postcode: data.shipping_postcode,
-                        country: data.shipping_country || data.billing_country
-                    } : {
-                        first_name: data.billing_first_name,
-                        last_name: data.billing_last_name,
-                        company: data.billing_company || '',
-                        address_1: data.billing_address_1,
-                        address_2: '',
-                        city: data.billing_city,
-                        state: data.billing_state || '',
-                        postcode: data.billing_postcode,
-                        country: data.billing_country
-                    }
+                    billing_first_name: data.billing_first_name,
+                    billing_last_name: data.billing_last_name,
+                    billing_company: data.billing_company || '',
+                    billing_address_1: data.billing_address_1,
+                    billing_city: data.billing_city,
+                    billing_state: data.billing_state || '',
+                    billing_postcode: data.billing_postcode,
+                    billing_country: data.billing_country,
+                    billing_phone: data.billing_phone || '',
+                    // Shipping info
+                    shipping_first_name: shippingAddress ? data.shipping_first_name : data.billing_first_name,
+                    shipping_last_name: shippingAddress ? data.shipping_last_name : data.billing_last_name,
+                    shipping_company: shippingAddress ? (data.shipping_company || '') : (data.billing_company || ''),
+                    shipping_address_1: shippingAddress ? data.shipping_address_1 : data.billing_address_1,
+                    shipping_city: shippingAddress ? data.shipping_city : data.billing_city,
+                    shipping_state: shippingAddress ? (data.shipping_state || '') : (data.billing_state || ''),
+                    shipping_postcode: shippingAddress ? data.shipping_postcode : data.billing_postcode,
+                    shipping_country: shippingAddress ? (data.shipping_country || data.billing_country) : data.billing_country,
+                    // Payment
+                    payment_method: 'bacs',
+                    payment_method_title: 'Virement bancaire',
+                    // Line items
+                    line_items: cart.items.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        variation_id: item.variation_id || 0
+                    })),
+                    // Shipping lines
+                    shipping_lines: selectedRate ? [{
+                        method_id: selectedRate.method_id,
+                        method_title: selectedRate.name,
+                        total: (parseFloat(selectedRate.price || 0) / 100).toString()
+                    }] : [],
+                    // Order notes
+                    order_comments: data.order_comments || ''
                 };
 
-                // Step 4: Create order with synced cart data
                 const response = await fetch('/api/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({
-                        cartData: {
-                            // Use synced cart data
-                            totals: syncResult.data?.totals || {},
-                            lineItems: items.map(item => ({
-                                product_id: item.id,
-                                quantity: item.quantity,
-                                variation_id: item.variation_id || 0
-                            })),
-                            shippingLines: selectedRate ? [{
-                                method_id: selectedRate.method_id,
-                                method_title: selectedRate.name,
-                                total: (parseFloat(selectedRate.price || 0) / 100).toString()
-                            }] : []
-                        },
-                        customerData,
-                        paymentMethod: 'bacs'
-                    })
+                    body: JSON.stringify(orderPayload)
                 });
 
                 const result = await response.json();

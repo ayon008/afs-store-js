@@ -224,12 +224,25 @@ export async function POST(request) {
             sessionCookiesList.push(cookie);
         }
 
-        if (!updateResponse.ok) {
-            const errorText = await updateResponse.text();
-            console.error('[Shipping Calculate] Failed to update address:', errorText);
-        }
+        // Read response body once
+        const updateResponseText = await updateResponse.text();
+        let updateResult;
 
-        const updateResult = await updateResponse.json();
+        if (!updateResponse.ok) {
+            console.error('[Shipping Calculate] Failed to update address:', updateResponseText);
+            // Try to parse as JSON anyway to get partial data
+            try {
+                updateResult = JSON.parse(updateResponseText);
+            } catch {
+                updateResult = { shipping_rates: [] };
+            }
+        } else {
+            try {
+                updateResult = JSON.parse(updateResponseText);
+            } catch {
+                updateResult = { shipping_rates: [] };
+            }
+        }
         console.log('[Shipping Calculate] Address updated, shipping_rates:', updateResult.shipping_rates?.length);
 
         // The update-customer response already contains shipping rates
