@@ -1,11 +1,11 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
-import { getPosts } from "@/app/actions/getBlogs";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getPosts } from "@/lib/wp";
 
 /* ----------------------------- News Card ----------------------------- */
-const NewsCard = async ({ article}) => {
+const NewsCard = async ({ article }) => {
   const category = article.categories?.[0];
   const t = await getTranslations("home");
   const b = await getTranslations("blog");
@@ -62,6 +62,7 @@ const News = async () => {
       orderby: "date",
       order: "desc",
       per_page: 3,
+      locale: locale,
       page: 1,
     });
   } catch (error) {
@@ -81,13 +82,13 @@ const News = async () => {
         </div>
       )}
 
-        <Link
-          href="/blog"
-          className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
-        >
-          {b("see-all")}
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
-        </Link>
+      <Link
+        href="/blog"
+        className="mx-auto mt-8 flex w-fit items-center gap-1 text-sm font-semibold uppercase leading-[100%] text-[#111111b2]"
+      >
+        {b("see-all")}
+        <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
+      </Link>
     </div>
   );
 };

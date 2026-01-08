@@ -63,11 +63,12 @@ export async function getPosts(options = {}) {
                     params.append('search', search);
                 }
 
-                const url = `${apiUrl}?${params.toString()}`;
+                const url = `${apiUrl}&${params.toString()}`;
                 console.log(`[getPosts] Fetching page ${currentPage}: ${url}`);
 
                 const response = await fetch(url, {
-                    cache: 'no-store',
+                    cache: 'force-cache',
+                    next: { revalidate: 3600 },
                     headers: {
                         'Content-Type': 'application/json',
                     }
@@ -131,10 +132,11 @@ export async function getPosts(options = {}) {
             params.append('search', search);
         }
 
-        const url = `${apiUrl}?${params.toString()}`;
+        const url = `${apiUrl}&${params.toString()}`;
 
         const response = await fetch(url, {
-            cache: 'no-store',
+            cache: 'force-cache',
+            next: { revalidate: 3600 },
             headers: {
                 'Content-Type': 'application/json',
             }

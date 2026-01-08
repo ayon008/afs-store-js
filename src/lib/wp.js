@@ -67,7 +67,7 @@ export async function getPosts(options = {}) {
                     params.append('search', search);
                 }
 
-                const url = `${apiUrl}?${params.toString()}`;
+                const url = `${apiUrl}&${params.toString()}`;
                 console.log(`[getPosts] Fetching page ${currentPage}: ${url}`);
 
                 const response = await fetch(url, {
@@ -116,11 +116,12 @@ export async function getPosts(options = {}) {
             params.append('search', search);
         }
 
-        const url = `${apiUrl}?${params.toString()}`;
+        const url = `${apiUrl}&${params.toString()}`;
         console.log(`[getPosts] Fetching: ${url}`);
 
         const response = await fetch(url, {
-            cache: 'no-store',
+            cache: 'force-cache',
+            next: { revalidate: 3600 },
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -329,7 +330,7 @@ export async function getCategories(options = {}, fetchOpts = { next: { revalida
             order: 'asc',
             ...otherOptions
         });
-        
+
         if (locale) {
             params.append('lang', locale);
         }
