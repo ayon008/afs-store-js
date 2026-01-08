@@ -31,13 +31,9 @@ const SingleProduct = ({ data, variations }) => {
     const swiperRef = useRef(null); // Swiper instance
     const [activeIndex, setActiveIndex] = useState(0); // track active slide
     const [default_slide, setSlide] = useState(1);
-    const params = useParams();
-    const { slug, locale } = params;
-
     const [images, setImages] = useState([]);
     const [sliceLength, setLength] = useState(0);
     const [isOpen, setOpen] = useState(false);
-
     const a = useTranslations("product");
     const breadcrumb = data?.breadcrumb;
 

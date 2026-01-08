@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { getPosts } from '@/lib/wp';
 import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
-
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
     const { slug, locale } = await params;
@@ -59,36 +59,22 @@ export async function generateMetadata({ params }) {
     };
 }
 
-export const revalidate = 60;
-
-// export async function generateStaticParams() {
-//     const locales = ["en", "fr"];
-//     const params = [];
-
-//     // Fetch posts for each locale separately to avoid getLocale() issues
-//     for (const locale of locales) {
-//         try {
-//             const blogs = await getPosts({
-//                 fetchAll: true,
-//                 orderby: "date",
-//                 order: "desc",
-//                 locale: locale, // Pass locale explicitly to avoid getLocale() call
-//             });
-
-//             for (const blog of blogs) {
-//                 params.push({
-//                     locale,
-//                     slug: blog.slug,
-//                 });
-//             }
-//         } catch (error) {
-//             console.error(`Error fetching posts for locale ${locale}:`, error);
-//             // Continue with other locales even if one fails
-//         }
-//     }
-
-//     return params;
-// }
+export async function generateStaticParams() {
+    const locales = ["en", "fr"];
+    let blogs = [];
+    for (const locale of locales) {
+        blogs = await getPosts({
+            fetchAll: true, // This will fetch all posts using pagination
+            orderby: 'date',
+            order: 'desc',
+            locale: locale,
+        });
+        blogs.push(...blogs);
+    }
+    return blogs.map(blog => ({
+        slug: blog.slug,
+    }));
+}
 
 export const getCategories = async (id = null, locale) => {
     try {

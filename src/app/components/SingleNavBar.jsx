@@ -16,9 +16,6 @@ const SingleNavBar = ({ setIsLanding, data, isLanding }) => {
     const thumbnail_one = acf?.thumbnail_one;
     const [visible, setVisible] = useState(false);
 
-    console.log(visible, 'visible');
-
-
 
     useGSAP(() => {
         const ctx = gsap.context(() => {
@@ -39,10 +36,11 @@ const SingleNavBar = ({ setIsLanding, data, isLanding }) => {
                 end: 'bottom top',
                 onEnter: () => setVisible(true),
                 onLeave: () => setVisible(false),
+                scrub: true,
             })
         })
         return () => ctx.revert();
-    }, []);
+    }, [isLanding]);
 
 
     return (

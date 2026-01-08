@@ -33,11 +33,10 @@ export async function getPosts(options = {}) {
                 localeValue = '';
             }
         }
-        const localePath = localeValue === 'en' ? '' : localeValue;
         // Construire l'URL de base sans double slash
         const cleanBaseUrl = WP_BASE_URL.replace(/\/$/, '');
-        const baseUrl = localePath ? `${cleanBaseUrl}/${localePath}` : cleanBaseUrl;
-        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts`;
+        const baseUrl = cleanBaseUrl;
+        const apiUrl = `${baseUrl}/wp-json/wp/v2/posts?lang=${localeValue}`;
         console.log(`[getPosts] Constructed API URL: ${apiUrl}`);
 
         // If fetchAll is true, we'll paginate through all posts
@@ -245,7 +244,7 @@ function transformPosts(posts) {
  */
 export async function getPost(identifier, bySlug = false) {
     const WP_BASE_URL = process.env.WP_BASE_URL;
-    
+
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }
@@ -354,7 +353,7 @@ export async function getPost(identifier, bySlug = false) {
  */
 export async function getCategories(options = {}, fetchOpts = { next: { revalidate: 60 } }) {
     const WP_BASE_URL = process.env.WP_BASE_URL;
-    
+
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }
