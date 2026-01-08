@@ -258,7 +258,8 @@ export const CartProvider = ({ children }) => {
                         quantity: item.quantity || 1,
                         variation_id: item.variation_id || null,
                         variation: item.variation || {},
-                        currency: cartCurrency // Use cart currency (site currency)
+                        currency: cartCurrency, // Use cart currency (site currency)
+                        location: currentMetadata.location // Required by Multi-Locations-Inventory-Management plugin
                     }),
                     cache: 'no-store',
                 });
