@@ -148,6 +148,7 @@ const CheckoutPageContent = () => {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
+    const [orderProcessing, setOrderProcessing] = useState(false); // Full-screen overlay during order creation
 
     // Filter payment methods to show only allowed ones based on currency
     const filterPaymentMethods = (methods) => {
@@ -808,6 +809,7 @@ const CheckoutPageContent = () => {
 
         if (data.payment_method === 'bacs') {
             setIsSubmitting(true);
+            setOrderProcessing(true); // Show full-screen overlay
             try {
                 // Step 1: Sync localStorage cart to WooCommerce API
                 const syncResult = await syncCartToAPI();
@@ -873,14 +875,21 @@ const CheckoutPageContent = () => {
                 const result = await response.json();
 
                 if (response.ok && result.orderId) {
+                    // Clear form data and cart BEFORE redirect
                     clearSavedFormData();
                     handleClearCart();
-                    router.push(`/order-success?order_id=${result.orderId}`);
+                    // Keep overlay visible during redirect
+                    // Use replace to prevent back navigation to checkout
+                    router.replace(`/order-success?order_id=${result.orderId}`);
+                    // Don't set isSubmitting or orderProcessing to false - let the redirect happen
+                    return;
                 } else {
+                    setOrderProcessing(false);
                     alert(`${t("orderCreationError")} : ${result.error || t("unknownError")}`);
                 }
             } catch (error) {
                 console.error('Error creating order:', error);
+                setOrderProcessing(false);
                 alert(t("orderCreationErrorRetry"));
             } finally {
                 setIsSubmitting(false);
@@ -891,7 +900,8 @@ const CheckoutPageContent = () => {
 
 
     // Show empty cart message if cart is empty or loading
-    if (isCartEmpty || !cart || !cart.items || cart.items.length === 0) {
+    // BUT NOT when order is being processed (to avoid flash during redirect)
+    if (!orderProcessing && (isCartEmpty || !cart || !cart.items || cart.items.length === 0)) {
         return (
             <>
                 {notification && (
@@ -907,8 +917,8 @@ const CheckoutPageContent = () => {
                     <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
                         <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
                         <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
-                        <Link 
-                            href="/" 
+                        <Link
+                            href="/"
                             className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
                         >
                             {t("backToShop")}
@@ -939,6 +949,25 @@ const CheckoutPageContent = () => {
 
     return (
         <div className="bg-white">
+            {/* Full-screen overlay during order processing */}
+            {orderProcessing && (
+                <div className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center gap-6">
+                        {/* Spinner */}
+                        <div className="w-16 h-16 border-4 border-[#1D98FF] border-t-transparent rounded-full animate-spin"></div>
+                        {/* Message */}
+                        <div className="text-center">
+                            <h2 className="text-2xl font-bold text-[#111] mb-2">
+                                {t("processingOrder") || "Traitement de votre commande..."}
+                            </h2>
+                            <p className="text-gray-600">
+                                {t("pleaseWait") || "Veuillez patienter, ne fermez pas cette page."}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Notification */}
             {notification && (
                 <Notification
@@ -948,7 +977,7 @@ const CheckoutPageContent = () => {
                     duration={5000}
                 />
             )}
-            
+
             {/* Main Checkout Container */}
             <div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                 <div className='flex flex-col lg:flex-row items-start gap-8'>
@@ -1000,6 +1029,8 @@ const CheckoutPageContent = () => {
                                 router={router}
                                 t={t}
                                 PAYMENT_INSTRUCTIONS={PAYMENT_INSTRUCTIONS}
+                                setOrderProcessing={setOrderProcessing}
+                                syncCartToAPI={syncCartToAPI}
                             />
                         </form>
                     </div>

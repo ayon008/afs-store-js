@@ -37,6 +37,8 @@
     "selectShippingMethod": "Please select a shipping method",
     "terms": "I have read and agree to the terms and conditions",
     "processing": "Processing...",
+    "processingOrder": "Processing your order...",
+    "pleaseWait": "Please wait, do not close this page.",
     "placeOrder": "Place order",
     "continue": "Continue",
     "privacyPolicyText": "Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our",

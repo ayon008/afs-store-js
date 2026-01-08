@@ -37,6 +37,8 @@
     "selectShippingMethod": "Veuillez sélectionner une méthode d'expédition",
     "terms": "J'ai lu et j'accepte les conditions générales de vente",
     "processing": "Traitement en cours...",
+    "processingOrder": "Traitement de votre commande...",
+    "pleaseWait": "Veuillez patienter, ne fermez pas cette page.",
     "placeOrder": "Passer la commande",
     "continue": "Continuer",
     "privacyPolicyText": "Vos données personnelles seront utilisées pour traiter votre commande, vous accompagner lors de votre visite sur le site et pour d'autres raisons décrites dans notre",

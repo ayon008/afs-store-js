@@ -2,29 +2,41 @@
 
 import { useState } from 'react'
 
-export default function CheckoutMonetico({ 
-  cartData, 
-  customerData, 
-  onSuccess, 
+export default function CheckoutMonetico({
+  cartData,
+  customerData,
+  onSuccess,
   onError,
-  disabled = false 
+  disabled = false,
+  setOrderProcessing,
+  syncCartToAPI
 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const initiatePayment = async () => {
     if (disabled) return
-    
+
     // Check if terms are accepted
     if (!customerData.terms) {
       setError('Vous devez accepter les conditions générales pour continuer.');
       return;
     }
-    
+
     setLoading(true)
     setError(null)
+    // Show full-screen overlay
+    if (setOrderProcessing) setOrderProcessing(true)
 
     try {
+      // Sync localStorage cart to WooCommerce API first
+      if (syncCartToAPI) {
+        const syncResult = await syncCartToAPI();
+        if (!syncResult.success) {
+          throw new Error(syncResult.error || 'Failed to sync cart');
+        }
+      }
+
       // Map customerData to the format expected by the API
       const orderPayload = {
         billing_first_name: customerData.billing_first_name || customerData.billing?.first_name || '',
@@ -113,6 +125,7 @@ export default function CheckoutMonetico({
       console.error('Monetico payment error:', err)
       setError(err.message)
       if (onError) onError(err)
+      if (setOrderProcessing) setOrderProcessing(false)
     } finally {
       setLoading(false)
     }
