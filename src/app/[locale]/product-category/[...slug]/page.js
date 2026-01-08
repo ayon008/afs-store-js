@@ -3,9 +3,84 @@ const default_image = "/assets/images/GWEN-WB-D-lite-1024x573.png.webp"
 import Products from '@/Shared/Products/Products';
 import { getParentCategory } from '@/app/actions/WC/getParentCategory';
 import { getChildCategories } from '@/app/actions/Woo-Coommerce/getWooCommerce';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
 import { Link } from "@/i18n/navigation";
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
+
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    const locale = await getLocale();
+    const isEnglish = locale === 'en';
+
+    // Get category data
+    let category;
+    try {
+        category = await getParentCategory(slug[slug?.length - 1].toLowerCase());
+    } catch (error) {
+        return {
+            title: isEnglish ? 'Category Not Found' : 'Catégorie introuvable',
+        };
+    }
+
+    if (!category) {
+        return {
+            title: isEnglish ? 'Category Not Found' : 'Catégorie introuvable',
+        };
+    }
+
+    const categoryPath = `/product-category/${slug.join('/')}`;
+    const enUrl = `${BASE_URL}${categoryPath}`;
+    const frUrl = `${BASE_URL}/fr${categoryPath}`;
+    const currentUrl = isEnglish ? enUrl : frUrl;
+
+    // Generate hreflang alternates
+    const languages = {
+        'en': enUrl,
+        'fr': frUrl,
+        'en-US': enUrl,
+        'en-GB': enUrl,
+        'en-CA': enUrl,
+        'en-AE': enUrl,
+        'fr-FR': frUrl,
+        'fr-BE': frUrl,
+        'fr-CH': frUrl,
+        'fr-CA': frUrl,
+        'fr-LU': frUrl,
+        'es': 'https://afs-foiling.es',
+        'es-ES': 'https://afs-foiling.es',
+        'x-default': enUrl,
+    };
+
+    const title = category.name || (isEnglish ? 'Category' : 'Catégorie');
+    const description = category.description?.replace(/<[^>]*>/g, '').substring(0, 160) ||
+        (isEnglish
+            ? `Explore our ${title} collection. Premium foiling equipment Made In France.`
+            : `Découvrez notre collection ${title}. Équipement de foil premium Made In France.`);
+
+    return {
+        title: `${title} - AFS`,
+        description,
+        alternates: {
+            canonical: currentUrl,
+            languages,
+        },
+        openGraph: {
+            type: 'website',
+            title: `${title} - AFS`,
+            description,
+            url: currentUrl,
+            siteName: 'AFS',
+            locale: isEnglish ? 'en_US' : 'fr_FR',
+            alternateLocale: isEnglish ? 'fr_FR' : 'en_US',
+            images: category.image?.src ? [{
+                url: category.image.src,
+                alt: title,
+            }] : [],
+        },
+    };
+}
 
 const page = async ({ params, searchParams }) => {
     // Catch All Route
