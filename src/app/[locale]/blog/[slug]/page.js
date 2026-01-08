@@ -9,8 +9,12 @@ import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
 export const revalidate = 60;
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
+
 export async function generateMetadata({ params }) {
     const { slug, locale } = await params;
+    const isEnglish = locale === 'en';
+
     const response = await fetch(
         `${process.env.WP_BASE_URL}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${locale}`
     );
@@ -19,11 +23,12 @@ export async function generateMetadata({ params }) {
 
     if (!blog) {
         return {
-            title: "Blog Not Found",
-            description: "The requested blog post could not be found.",
+            title: isEnglish ? "Blog Not Found" : "Article introuvable",
+            description: isEnglish
+                ? "The requested blog post could not be found."
+                : "L'article demandé est introuvable.",
         };
     }
-
 
     const title = decodeEntities(blog?.title?.rendered || "Blog");
 
@@ -33,26 +38,56 @@ export async function generateMetadata({ params }) {
             ?.replace(/<[^>]+>/g, "") // remove HTML
             ?.replace(/\s+/g, " ")    // clean extra spaces
             ?.trim() ||
-        "Read this blog post"
+        (isEnglish ? "Read this blog post" : "Lire cet article")
     );
 
     // Featured image
     const featuredImage =
         blog?._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
 
+    // Build URLs for hreflang
+    const blogPath = `/blog/${slug}`;
+    const enUrl = `${BASE_URL}${blogPath}`;
+    const frUrl = `${BASE_URL}/fr${blogPath}`;
+    const currentUrl = isEnglish ? enUrl : frUrl;
+
+    // Generate hreflang alternates
+    const languages = {
+        'en': enUrl,
+        'fr': frUrl,
+        'en-US': enUrl,
+        'en-GB': enUrl,
+        'en-CA': enUrl,
+        'fr-FR': frUrl,
+        'fr-BE': frUrl,
+        'fr-CH': frUrl,
+        'fr-CA': frUrl,
+        'es': 'https://afs-foiling.es',
+        'x-default': enUrl,
+    };
+
     return {
-        title,
+        title: `${title} - AFS`,
         description,
+        alternates: {
+            canonical: currentUrl,
+            languages,
+        },
         openGraph: {
             type: "article",
-            title,
+            title: `${title} - AFS`,
             description,
-            url: `${process.env.NEXT_PUBLIC_SITE_URL}/blog/${slug}`,
+            url: currentUrl,
+            siteName: 'AFS',
+            locale: isEnglish ? 'en_US' : 'fr_FR',
+            alternateLocale: isEnglish ? 'fr_FR' : 'en_US',
             images: featuredImage ? [{ url: featuredImage }] : [],
+            publishedTime: blog?.date,
+            modifiedTime: blog?.modified,
         },
         twitter: {
             card: "summary_large_image",
-            title,
+            title: `${title} - AFS`,
             description,
             images: featuredImage ? [featuredImage] : [],
         },

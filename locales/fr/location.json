@@ -1,0 +1,51 @@
+{
+  "location": {
+    "title": "Choisissez votre emplacement",
+    "currentSelection": "Votre s\u00e9lection actuelle",
+    "availablePaymentMethods": "Moyens de paiement disponibles",
+    "externalSite": "Ouvre un site externe",
+    "select": "S\u00e9lectionner",
+    "selected": "S\u00e9lectionn\u00e9",
+    "visit": "Visiter",
+    "confirm": "Confirmer la s\u00e9lection",
+    "close": "Fermer",
+    "regions": {
+      "europe": "Europe",
+      "uk": "Royaume-Uni",
+      "us": "\u00c9tats-Unis & Canada",
+      "emirates": "Moyen-Orient"
+    },
+    "countries": {
+      "france": "France",
+      "belgium": "Belgique",
+      "switzerland": "Suisse",
+      "luxembourg": "Luxembourg",
+      "germany": "Allemagne",
+      "italy": "Italie",
+      "netherlands": "Pays-Bas",
+      "portugal": "Portugal",
+      "austria": "Autriche",
+      "greece": "Gr\u00e8ce",
+      "ireland": "Irlande",
+      "spain": "Espagne",
+      "unitedKingdom": "Royaume-Uni",
+      "unitedStates": "\u00c9tats-Unis",
+      "canada": "Canada",
+      "uae": "\u00c9mirats Arabes Unis",
+      "saudiArabia": "Arabie Saoudite",
+      "qatar": "Qatar",
+      "kuwait": "Kowe\u00eft",
+      "bahrain": "Bahre\u00efn",
+      "oman": "Oman"
+    },
+    "languages": {
+      "en": "Anglais",
+      "fr": "Fran\u00e7ais"
+    },
+    "currencies": {
+      "EUR": "Euro",
+      "USD": "Dollar am\u00e9ricain",
+      "GBP": "Livre sterling"
+    }
+  }
+}

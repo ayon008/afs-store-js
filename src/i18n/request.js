@@ -9,6 +9,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     const defaultMessages = (await import(`../../locales/${locale}/default.json`)).default;
     const checkoutMessages = (await import(`../../locales/${locale}/checkout.json`)).default;
     const cartMessages = (await import(`../../locales/${locale}/cart.json`)).default;
+    const locationMessages = (await import(`../../locales/${locale}/location.json`)).default;
 
     return {
         locale,
@@ -16,6 +17,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
             ...defaultMessages,
             checkout: checkoutMessages.checkout || checkoutMessages,
             cart: cartMessages.cart || cartMessages,
+            location: locationMessages.location || locationMessages,
         },
     }
 });

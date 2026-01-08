@@ -2,12 +2,11 @@
 "use client";
 import { ArrowLeft, DollarSign, Euro, Search, X, PoundSterling } from "lucide-react";
 import Image from "next/image";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import "flag-icons/css/flag-icons.min.css";
 import gsap from "gsap";
 import Menu from "./Menu";
 import { useGSAP } from "@gsap/react";
-import PopUp from "../PopUp/PopUp";
 import useCart from "../Hooks/useCart";
 import SideCart from "../Cart/SideCart";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,6 +14,8 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
 import Notification from "../Notification/Notification";
+import LocationLanguageModal from "../LocationLanguageModal/LocationLanguageModal";
+import { getCountryByCode, DEFAULT_COUNTRY } from "@/lib/countries-config";
 
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
@@ -54,6 +55,8 @@ const Navbar = ({ NAV_LINKS }) => {
   const [selectedCurrency, setSelectedCurrency] = useState('euro');
   // Track if the initial cookie has been read to avoid overwriting it
   const [cookieInitialized, setCookieInitialized] = useState(false);
+  // Selected country code for the new modal
+  const [selectedCountryCode, setSelectedCountryCode] = useState('FR');
 
   // Update selectedCurrency from cookie/client-side data after mount to avoid hydration mismatch
   useEffect(() => {
@@ -79,6 +82,13 @@ const Navbar = ({ NAV_LINKS }) => {
     } else {
       setSelectedLocation('2682');
     }
+
+    // Read selected country from cookie
+    const cookieCountry = Cookies.get('selected_country');
+    if (cookieCountry) {
+      setSelectedCountryCode(cookieCountry);
+    }
+
     // Mark cookie as initialized after reading
     setCookieInitialized(true);
   }, [currentCurrencySymbol]);
@@ -251,6 +261,82 @@ const Navbar = ({ NAV_LINKS }) => {
     return selectedValues;
   }
 
+  // Handler for the new LocationLanguageModal
+  const handleLocationModalSubmit = useCallback(async ({ country, language, currency, location }) => {
+    // Update local state
+    setSelectedLanguage(language);
+    setSelectedCurrency(currency);
+    setSelectedLocation(location);
+    setSelectedCountryCode(country.code);
+
+    // Check if anything changed
+    const languageChanged = language !== locale;
+
+    // Get current currency from cart or cookie
+    const currentCurrencyFromCart = cart?.totals?.currency_symbol || '€';
+    let currentCurrencyKey = 'euro';
+    if (currentCurrencyFromCart === '€' || currentCurrencyFromCart === 'EUR') {
+      currentCurrencyKey = 'euro';
+    } else if (currentCurrencyFromCart === '£' || currentCurrencyFromCart === 'GBP') {
+      currentCurrencyKey = 'gbp';
+    } else if (currentCurrencyFromCart === '$' || currentCurrencyFromCart === 'USD') {
+      currentCurrencyKey = 'usd';
+    }
+    const currencyChanged = currency !== currentCurrencyKey;
+
+    // Get current location from cookie
+    const cookieLocation = Cookies.get('location') || '2682';
+    const locationChanged = location !== cookieLocation;
+
+    // Clear the cart if language, currency, or location changes
+    if (languageChanged || currencyChanged || locationChanged) {
+      try {
+        const hasItems = cart && cart.items && cart.items.length > 0;
+        if (hasItems) {
+          const result = await handleClearCart();
+          if (result && result.success) {
+            if (languageChanged) {
+              setNotification(t("cartClearedLanguage"));
+            } else if (currencyChanged) {
+              setNotification(tCart("clearedOnCurrencyChange"));
+            } else if (locationChanged) {
+              setNotification(tCart("clearedOnLocationChange"));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+      }
+    }
+
+    // Convert to WCML format
+    const wcmlCurrency = currency === 'euro' ? 'EUR' : currency === 'gbp' ? 'GBP' : 'USD';
+
+    // Set all cookies
+    Cookies.set('currency', currency, { expires: 365, sameSite: 'Lax', path: '/' });
+    Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+    Cookies.set('location', location, { expires: 365, sameSite: 'Lax', path: '/' });
+    Cookies.set('selected_country', country.code, { expires: 365, sameSite: 'Lax', path: '/' });
+
+    if (languageChanged) {
+      // Get the actual full pathname from window.location (includes locale prefix)
+      const fullPathname = typeof window !== 'undefined' ? window.location.pathname : pathname;
+      const currentPath = fullPathname || pathname || '/';
+      const basePath = currentPath.split('?')[0];
+      const newPath = `${basePath}?lang=${language}`;
+      window.location.href = newPath;
+    } else if (currencyChanged || locationChanged) {
+      // Small delay to ensure cookies are written before reload
+      setTimeout(() => {
+        const currentPath = pathname || '/';
+        const reloadPath = `/${locale}${currentPath === '/' ? '' : currentPath}`;
+        window.location.href = reloadPath;
+      }, 100);
+    } else {
+      setPopUp(false);
+    }
+  }, [locale, pathname, cart, handleClearCart, t, tCart]);
+
   // Hover Id [First Nav];
   const [hoverId, setHoverId] = useState(null);
   // Show Secondary white div and add Clicked Item Name [2nd Nav]
@@ -421,7 +507,7 @@ const Navbar = ({ NAV_LINKS }) => {
             {/* Language */}
             <div onClick={() => setPopUp(true)} className="flex items-center">
               <button className="flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
-                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} md:mr-2 mr-0 md:scale-125 scale-100`}></span>
+                <span className={`fi fi-${getCountryByCode(selectedCountryCode)?.flag || 'fr'} md:mr-2 mr-0 md:scale-125 scale-100`}></span>
                 <span className="text-white font-extrabold tracking-wide md:block hidden">
                   {locale === 'fr' ? 'FR' : 'EN'}
                 </span>
@@ -814,7 +900,7 @@ const Navbar = ({ NAV_LINKS }) => {
             </p>
             <div className="space-y-4">
               <button onClick={() => setPopUp(true)} className="mt-4 flex items-center justify-center text-sm font-extrabold p-2 rounded-full cursor-pointer transition-colors duration-200">
-                <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} h-[10.29px] mt-[2px] w-[13.71px] mr-2 scale-125`}></span>
+                <span className={`fi fi-${getCountryByCode(selectedCountryCode)?.flag || 'fr'} h-[10.29px] mt-[2px] w-[13.71px] mr-2 scale-125`}></span>
                 <span className="text-black font-extrabold tracking-wide">
                   {locale === 'fr' ? 'FR' : 'EN'}
                 </span>
@@ -1093,245 +1179,19 @@ const Navbar = ({ NAV_LINKS }) => {
       )}
 
 
-      <PopUp isOpen={showPopUp} fn={setPopUp} >
-        {/* Parent Div */}
-        <div onClick={(e) => e.stopPropagation()} className="flex flex-col rounded-sm overflow-hidden bg-[#f0f0f0] max-w-[540px] w-[95%] mx-auto">
-          {/* 1st div */}
-          <div className="py-4 lg:px-10 px-5 shadow-[0_6px_8px_rgba(91,104,113,0.1)]">
-            <div className="flex items-center gap-5">
-              <h2 className="text-[#111] text-2xl leading-[100%] font-semibold">{t("chooseLocationLanguage")}</h2>
-              <div className="w-fit p-[5px] rounded-full border border-[#111]">
-                <X onClick={() => {
-                  setPopUp(!showPopUp);
-                  setNotification(null);
-                }} className="cursor-pointer" />
-              </div>
-            </div>
-          </div>
-          {/* 2nd div */}
-          <div className="py-4 lg:px-10 px-5 max-h-[calc(90vh-140px)] overflow-y-scroll popup-scroll-bar">
-            {/* Notification inside modal */}
-            {notification && (
-              <div className="mb-4 animate-slideDown">
-                <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-800">{notification}</p>
-                  </div>
-                  <button
-                    onClick={() => setNotification(null)}
-                    className="flex-shrink-0 text-blue-600 hover:text-blue-800 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="flex flex-col gap-[30px]">
-              <div className="flex flex-col gap-4 mb-[30px]">
-                <p className="text-[#111111bf] text-base leading-[100%] font-semibold">{t("currentLanguageCurrency")}</p>
-                <ul className="flex flex-col gap-3">
-                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
-                      {locale === 'fr' ? t("french") : t("english")}
-                    </span>
-                    <span className="font-bold">{locale === 'fr' ? t("french") : t("english")}</span>
-                  </li>
-                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      {selectedCurrency === 'euro' ? <Euro className="" size={24} /> : <DollarSign className="" size={24} />}
-                      {selectedCurrency === 'euro' ? t("euro") : t("usDollar")}
-                    </span>
-                    <span className="font-bold">{selectedCurrency === 'euro' ? 'EUR' : 'USD'}</span>
-                  </li>
-                  <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
-                    <span className="flex gap-2 flex-1 items-center flex-wrap">
-                      {/* <span className={`fi fi-${selectedLocation === '2682' ? 'fr' : 'us'} mr-2 scale-125`}></span> */}
-                      {selectedLocation === '2682' ? t("uk") : t("usa")}
-                    </span>
-                    {/* <span className="font-bold">{selectedLocation === '2682' ? 'France' : 'USA'}</span> */}
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-[30px] font-bold">
-              {/* Language Switcher */}
-              <div className="flex flex-col items-stretch gap-4">
-                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Languages</h4>
-                <ul className="flex flex-col gap-3">
-                  <li
-                    onClick={() => setSelectedLanguage('en')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLanguage === 'en' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="language"
-                        value="en"
-                        className="hidden"
-                        checked={selectedLanguage === 'en'}
-                        onChange={() => setSelectedLanguage('en')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <span className="fi fi-us mr-2 scale-125"></span>
-                        <span className="fi fi-gb mr-2 scale-125"></span>
-                        {t("english")}
-                      </span>
-                      <span className="font-bold">{t("english")}</span>
-                    </label>
-                  </li>
-                  <li
-                    onClick={() => setSelectedLanguage('fr')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLanguage === 'fr' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="language"
-                        value="fr"
-                        className="hidden"
-                        checked={selectedLanguage === 'fr'}
-                        onChange={() => setSelectedLanguage('fr')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <span className="fi fi-fr mr-2 scale-125"></span>
-                        {t("french")}
-                      </span>
-                      <span className="font-bold">{t("french")}</span>
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              {/* Currency Switcher */}
-              <div className="flex flex-col items-stretch gap-4">
-                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Currencies</h4>
-                <ul className="flex flex-col gap-3">
-                  <li
-                    onClick={() => setSelectedCurrency('euro')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'euro' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="currency"
-                        value="euro"
-                        className="hidden"
-                        checked={selectedCurrency === 'euro'}
-                        onChange={() => setSelectedCurrency('euro')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <Euro className="" size={24} />
-                        {t("euro")}
-                      </span>
-                      <span className="font-bold">EUR</span>
-                    </label>
-                  </li>
-                  <li
-                    onClick={() => setSelectedCurrency('usd')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'usd' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="currency"
-                        value="usd"
-                        className="hidden"
-                        checked={selectedCurrency === 'usd'}
-                        onChange={() => setSelectedCurrency('usd')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <DollarSign className="" size={24} />
-                        {t("usDollar")}
-                      </span>
-                      <span className="font-bold">USD</span>
-                    </label>
-                  </li>
-                  <li
-                    onClick={() => setSelectedCurrency('gbp')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedCurrency === 'gbp' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="currency"
-                        value="gbp"
-                        className="hidden"
-                        checked={selectedCurrency === 'gbp'}
-                        onChange={() => setSelectedCurrency('gbp')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        <PoundSterling className="" size={24} />
-                        British Pound
-                      </span>
-                      <span className="font-bold">GBP</span>
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              {/* location Switcher */}
-              <div className="flex flex-col items-stretch gap-4">
-                <h4 className="mb-2 text-[22px] font-semibold leading-[120%] py-4 border-t-[#111] border-t">Available Store Location</h4>
-                <ul className="flex flex-col gap-3">
-                  <li
-                    onClick={() => setSelectedLocation('2683')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLocation === '2683' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="language"
-                        value="en"
-                        className="hidden"
-                        checked={selectedLocation === '2683'}
-                        onChange={() => setSelectedLocation('2683')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        {/* <span className="fi fi-us mr-2 scale-125"></span> */}
-                        {t("usa")}
-                      </span>
-                      {/* <span className="font-bold">USA</span> */}
-                    </label>
-                  </li>
-                  <li
-                    onClick={() => setSelectedLocation('2682')}
-                    className={`min-h-[48px] font-bold px-3 py-2 flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase cursor-pointer transition-colors ${selectedLocation === '2682' ? 'bg-white' : 'bg-[#e2e2e2] hover:bg-[#d2d2d2]'
-                      }`}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="radio"
-                        name="language"
-                        value="fr"
-                        className="hidden"
-                        checked={selectedLocation === '2682'}
-                        onChange={() => setSelectedLocation('2682')}
-                      />
-                      <span className="flex gap-2 flex-1 items-center flex-wrap">
-                        {/* <span className="fi fi-fr mr-2 scale-125"></span> */}
-                        {t("uk")}
-                      </span>
-                      {/* <span className="font-bold">France</span> */}
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              {/* Submit Button */}
-              <button type="submit" className="bg-[#000] text-white font-semibold rounded-[10px] py-[10px] px-2 w-full cursor-pointer">Change</button>
-            </form>
-          </div>
-        </div >
-      </PopUp >
+      {/* Location and Language Modal */}
+      <LocationLanguageModal
+        isOpen={showPopUp}
+        onClose={() => {
+          setPopUp(false);
+          setNotification(null);
+        }}
+        currentLocale={locale}
+        currentCurrency={selectedCurrency}
+        currentLocation={selectedLocation}
+        currentCountryCode={selectedCountryCode}
+        onSubmit={handleLocationModalSubmit}
+      />
     </>
   );
 };
