@@ -644,35 +644,39 @@ const Navbar = ({ NAV_LINKS }) => {
                 <div onMouseLeave={() => handleShow(null)}>
                   {/* Service Section */}
                   <div className="bg-white w-full h-fit md:block hidden">
-                    <div className="grid grid-cols-6 gap-6 text-black/75 global-padding pt-[22px]">
-                      <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Choose
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Foil configurator</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Best match stabilizer</Link></li>
-                          <li className="cursor-pointer">
-                            <Link href="/" onClick={handleCloseDesktopMenu}>3 stabilizers / front wing comparator</Link>
-                          </li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Board construction</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Equipment buyback</Link></li>
-                          <li className="cursor-pointer">
-                            <Link href="/" onClick={handleCloseDesktopMenu}>Foil characteristics</Link>
-                          </li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Screw sizes</Link></li>
-                        </ul>
+                    <div className="grid grid-cols-4 items-start justify-center gap-6 text-black/75 global-padding pt-[22px]">
+                      <div className="">
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            Choose
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">
+                              <Link
+                                href={locale === 'fr' ? "/blog/mat-comparatif-afs" : "/blog/mast-comparison-afs"}>
+                                Mast comparison (Coming Soon)
+                              </Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link href={locale === 'fr' ? "/blog/afs-et-afs-advanced-board-construction" : "/blog/afs-and-afs-advanced-board-construction"}>
+                                Board construction (Coming Soon)
+                              </Link>
+                            </li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "/reprise-materiel" : "/equipment-recovery"}>Equipment trade-in</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>Foil specifications</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>Screw size</Link></li>
+                          </ul>
+                        </div>
                       </div>
-                      <div>
+                      {/* <div>
                         <p className="text-[16px] font-semibold tracking-wide">
                           Pay
                         </p>
                         <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                           <li className="cursor-pointer">Payment options</li>
                         </ul>
-                      </div>
-                      <div>
+                      </div> */}
+                      {/* <div>
                         <p className="text-[16px] font-semibold tracking-wide">
                           Shipping & Delivery
                         </p>
@@ -681,44 +685,50 @@ const Navbar = ({ NAV_LINKS }) => {
                           <li className="cursor-pointer">Shipping & delivery</li>
                           <li className="cursor-pointer">Returns</li>
                         </ul>
+                      </div> */}
+                      <div>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            Repair & Maintenance
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">Support</li>
+                            <li className="cursor-pointer">After-sales service request</li>
+                            <li className="cursor-pointer">Warranty</li>
+                            <li className="cursor-pointer">User manual</li>
+                          </ul>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Repair & Maintenance
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Support</li>
-                          <li className="cursor-pointer">After-sales service request</li>
-                          <li className="cursor-pointer">Warranty</li>
-                          <li className="cursor-pointer">User manual</li>
-                        </ul>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            Contact
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">Email</li>
+                            <li className="cursor-pointer">WhatsApp</li>
+                            <li className="cursor-pointer">
+                              Book a call with an AFS expert
+                            </li>
+                            <li className="cursor-pointer">
+                              Come visit us
+                            </li>
+                            <li className="cursor-pointer">Events</li>
+                            <li className="cursor-pointer">Blog</li>
+                          </ul>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Contact
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Email</li>
-                          <li className="cursor-pointer">WhatsApp</li>
-                          <li className="cursor-pointer">
-                            Book a call with an AFS expert
-                          </li>
-                          <li className="cursor-pointer">
-                            Come visit us
-                          </li>
-                          <li className="cursor-pointer">Events</li>
-                          <li className="cursor-pointer">Blog</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Team
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Work team</li>
-                          <li className="cursor-pointer">Ambassadors</li>
-                          <li className="cursor-pointer">Dealer map</li>
-                        </ul>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            Team
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">Work team</li>
+                            <li className="cursor-pointer">Ambassadors</li>
+                            <li className="cursor-pointer">Dealer map</li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-row-reverse items-center justify-center gap-2 text-black/75 py-4 border-t mt-6">
@@ -891,29 +901,14 @@ const Navbar = ({ NAV_LINKS }) => {
               <div className="grid grid-cols-1 gap-6 text-black/75 pt-[22px]">
                 <div>
                   <p className="text-[16px] font-semibold tracking-wide">
-                    Choisir
+                    Choose
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Configurateur foil</li>
-                    <li className="cursor-pointer">Best match stab</li>
-                    <li className="cursor-pointer">
-                      Comparateur 3 stabs / aile avant
-                    </li>
-                    <li className="cursor-pointer">Comparatif mât</li>
-                    <li className="cursor-pointer">Construction planche</li>
-                    <li className="cursor-pointer">Reprise matériel</li>
-                    <li className="cursor-pointer">
-                      Caractéristiques des foils
-                    </li>
-                    <li className="cursor-pointer">Taille des vis</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-[16px] font-semibold tracking-wide">
-                    Payer
-                  </p>
-                  <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Options paiement</li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison (Coming Soon)</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Board construction (Coming Soon)</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Equipment trade-in</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Foil specifications</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Screw size</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -1138,6 +1133,7 @@ const Navbar = ({ NAV_LINKS }) => {
                   <li className="min-h-[48px] font-bold px-3 py-2 bg-[#e2e2e2] flex items-center flex-wrap rounded-[10px] leading-[120%] text-[#111] text-sm uppercase">
                     <span className="flex gap-2 flex-1 items-center flex-wrap">
                       <span className={`fi fi-${locale === 'fr' ? 'fr' : 'us'} mr-2 scale-125`}></span>
+                      {locale === 'en' && <span className={`fi fi-${locale === 'fr' ? 'fr' : 'gb'} mr-2 scale-125`}></span>}
                       {locale === 'fr' ? t("french") : t("english")}
                     </span>
                     <span className="font-bold">{locale === 'fr' ? t("french") : t("english")}</span>
