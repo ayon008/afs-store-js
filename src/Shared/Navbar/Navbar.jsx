@@ -734,44 +734,44 @@ const Navbar = ({ NAV_LINKS }) => {
                       <div className="">
                         <div className="w-fit mx-auto">
                           <p className="text-[16px] font-semibold tracking-wide">
-                            Choose
+                            {t("Choose")}
                           </p>
                           <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                             <li className="cursor-pointer">
                               <Link
                                 href={locale === 'fr' ? "/blog/mat-comparatif-afs" : "/blog/mast-comparison-afs"}>
-                                Mast comparison (Coming Soon)
+                                {t("Mast comparison (Coming Soon)")}
                               </Link>
                             </li>
                             <li className="cursor-pointer">
                               <Link href={locale === 'fr' ? "/blog/afs-et-afs-advanced-board-construction" : "/blog/afs-and-afs-advanced-board-construction"}>
-                                Board construction (Coming Soon)
+                                {t("Board construction (Coming Soon)")}
                               </Link>
                             </li>
-                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "/reprise-materiel" : "/equipment-recovery"}>Equipment trade-in</Link></li>
-                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>Foil specifications</Link></li>
-                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>Screw size</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "/reprise-materiel" : "/equipment-recovery"}>{t("Equipment trade-in")}</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Foil specifications")}</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Screw size")}</Link></li>
                           </ul>
                         </div>
                       </div>
                       <div>
                         <div className="w-fit mx-auto">
                           <p className="text-[16px] font-semibold tracking-wide">
-                            Repair & Maintenance
+                            {t("Repair & Maintenance")}
                           </p>
                           <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                             <li className="cursor-pointer">
-                              <a target="_blank" onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/">Support</a>
+                              <a target="_blank" onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/">{t("Support")}</a>
                             </li>
                             <li className="cursor-pointer">
-                              <Link onClick={handleCloseDesktopMenu} href="/service-request">Customer Service Request</Link>
+                              <Link onClick={handleCloseDesktopMenu} href="/service-request">{t("Customer Service Request")}</Link>
                             </li>
                             <li className="cursor-pointer">
-                              <a onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/article/garantie-afs-duree-et-conditions-fnhfqg/?bust=1738253018543">Warranty</a>
+                              <a onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/article/garantie-afs-duree-et-conditions-fnhfqg/?bust=1738253018543">{t("Warranty")}</a>
                             </li>
                             <li className="cursor-pointer">
-                              <a onClick={handleCloseDesktopMenu} href="https://foilandco.sharepoint.com/sites/Market/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025%2FNOTICE%20AFS%5FFR%202%2Epdf&parent=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025&p=true&ga=1">
-                                User manual
+                              <a target="_blank" onClick={handleCloseDesktopMenu} href="https://foilandco.sharepoint.com/sites/Market/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025%2FNOTICE%20AFS%5FFR%202%2Epdf&parent=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025&p=true&ga=1">
+                                {t("User manual")}
                               </a>
                             </li>
                           </ul>
@@ -780,7 +780,7 @@ const Navbar = ({ NAV_LINKS }) => {
                       <div>
                         <div className="w-fit mx-auto">
                           <p className="text-[16px] font-semibold tracking-wide">
-                            Contact
+                            {t("Contact")}
                           </p>
                           <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                             <li className="cursor-pointer">
@@ -790,13 +790,13 @@ const Navbar = ({ NAV_LINKS }) => {
                               <Link onClick={handleCloseDesktopMenu} target="_blank" href="https://wa.me/33782296241">WhatsApp</Link>
                             </li>
                             <li className="cursor-pointer">
-                              Book a call with an AFS expert
+                              {t("Book a call with an AFS expert")}
                             </li>
                             <li className="cursor-pointer">
-                              Come visit us
+                              {t("Come visit us")}
                             </li>
                             <li className="cursor-pointer">
-                              <Link onClick={handleCloseDesktopMenu} href="/afs-events">Events</Link>
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-events">{t("Events")}</Link>
                             </li>
                             <li className="cursor-pointer">
                               <Link onClick={handleCloseDesktopMenu} href="/blog">Blog</Link>
@@ -811,13 +811,13 @@ const Navbar = ({ NAV_LINKS }) => {
                           </p>
                           <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                             <li className="cursor-pointer">
-                              <Link onClick={handleCloseDesktopMenu} href="/afs-team">Work team</Link>
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-team">{t("Work team")}</Link>
                             </li>
                             <li className="cursor-pointer">
-                              <Link onClick={handleCloseDesktopMenu} href="/afs-ambassadors">Ambassadors</Link>
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-ambassadors">{t("Ambassadors")}</Link>
                             </li>
                             <li className="cursor-pointer">
-                              <Link onClick={handleCloseDesktopMenu} href="/map">Dealer map</Link>
+                              <Link onClick={handleCloseDesktopMenu} href="/map">{t("Dealer map")}</Link>
                             </li>
                           </ul>
                         </div>
@@ -838,7 +838,7 @@ const Navbar = ({ NAV_LINKS }) => {
                         />
                       </svg>
                       <span className="text-[#111] font-semibold cursor-pointer">
-                        Factory tour
+                        <Link onClick={handleCloseDesktopMenu} href="/visit-the-factory">{t("Factory tour")}</Link>
                       </span>
                     </div>
                   </div>
@@ -998,7 +998,7 @@ const Navbar = ({ NAV_LINKS }) => {
               <div className="grid grid-cols-1 gap-6 text-black/75 pt-[22px]">
                 <div>
                   <p className="text-[16px] font-semibold tracking-wide">
-                    Choose
+                    {t("Choose")}
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                     <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison (Coming Soon)</Link></li>
