@@ -7,7 +7,7 @@ import More from '@/Shared/Home/More'
 import News from '@/Shared/Home/News'
 import React from 'react'
 
-const page = () => {
+const page = async () => {
   return (
     <div className='w-full'>
       <Hero />

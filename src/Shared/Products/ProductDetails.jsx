@@ -592,16 +592,16 @@ const ProductDetails = ({ data, variations }) => {
                         <p className='text-base leading-[100%] font-bold'>{t("after-sale")}</p>
                         <small className='text-[15px] leading-[19px] block'>{t("return")}</small>
                     </div>
-                    {/* <div className='space-y-2'>
+                    <div className='space-y-2'>
                         <p className='text-base leading-[100%] font-bold'>{a("payment")}</p>
                         <small className='text-[15px] leading-[19px] block'>{t("payment_single")}</small>
-                        <div className='flex items-center gap-[10px]'>
+                        {/* <div className='flex items-center gap-[10px]'>
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Layer_1-1.svg'} alt='visa' width={40} className='w-[40px] h-auto' height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/Group-26.svg'} alt='paypal;' width={80} className='w-[80px] h-auto' height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/svg3409-1.svg'} alt='mastercard' width={40} className='w-[40px] h-auto' height={50} />
                             <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/05/image-7.svg'} alt='visa' width={80} className='w-[80px] h-auto' height={50} />
-                        </div>
-                    </div> */}
+                        </div> */}
+                    </div>
                 </div>
                 <div className='flex items-stretch bg-[#F0F0F0] mt-10'>
                     <div className='p-4 2xl:w-[60%] w-full flex flex-col justify-between h-full'>
@@ -642,7 +642,7 @@ const ProductDetails = ({ data, variations }) => {
             {
                 used && (
                     <PopUp isOpen={gradeOpen} fn={setGradeOpen}>
-                        <div onClick={(e) => e.stopPropagation()} className='max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll scroll-bar relative mx-auto rounded-[4px] bg-white -z-20'>
+                        <div onClick={(e) => e.stopPropagation()} className='max-w-[1120px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll scroll-bar relative mx-auto rounded-[4px] bg-white -z-20'>
                             <button onClick={() => setGradeOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer'>
                                 <X className="w-4 h-4 lg:text-black text-white z-10" />
                             </button>
@@ -671,7 +671,7 @@ const ProductDetails = ({ data, variations }) => {
                                     </Swiper>
                                 </div>
                                 {/* Content */}
-                                <div className='flex-1 space-y-[30px] p-5 bg-white'>
+                                <div className='flex-1 space-y-[30px] lg:px-5 lg:py-10 p-5 bg-white'>
                                     <div className='space-y-[10px]'>
                                         <h2 className='global-h2'>{t("Our grades")}</h2>
                                         <p className='lg:text-lg text-base leading-[110%] font-semibold text-[#111111bf]'>

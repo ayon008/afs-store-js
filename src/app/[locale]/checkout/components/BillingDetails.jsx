@@ -153,13 +153,13 @@ const BillingDetails = ({
                         ]}
                         placeholder={t("surveyPlaceholder")}
                     />
-                    {watchFields.survey === t("surveyOptions.other") && (
+                    {watchFields.survey === "Autre (veuillez préciser)" && (
                         <Input
                             label={t("pleaseSpecify")}
                             type="text"
                             id="survey_other"
                             register={register("survey_other", {
-                                required: t("pleaseSpecify")
+                                required: watchFields.survey === "Autre (veuillez préciser)" ? t("pleaseSpecify") : false
                             })}
                             error={getFieldError("survey_other")}
                             value={watchFields.survey_other}

@@ -4,8 +4,8 @@ import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Props: cartData, customerData (from checkout form state), disabled
-export default function CheckoutPayPal({ cartData, customerData, onSuccess, disabled = false }) {
+// Props: cartData, customerData (from checkout form state), disabled, setOrderProcessing, syncCartToAPI
+export default function CheckoutPayPal({ cartData, customerData, onSuccess, disabled = false, setOrderProcessing, syncCartToAPI }) {
     const router = useRouter();
     const [wooOrderId, setWooOrderId] = useState(null);
     const [error, setError] = useState(null);
@@ -22,7 +22,18 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
     const createOrder = async (data, actions) => {
         setError(null);
         setLoading(true);
+        // Show full-screen overlay
+        if (setOrderProcessing) setOrderProcessing(true);
+
         try {
+            // Sync localStorage cart to WooCommerce API first
+            if (syncCartToAPI) {
+                const syncResult = await syncCartToAPI();
+                if (!syncResult.success) {
+                    throw new Error(syncResult.error || 'Failed to sync cart');
+                }
+            }
+
             const res = await fetch("/api/orders/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -43,6 +54,7 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
             console.error('Error creating PayPal order:', err);
             setError(err.message || 'Failed to create order');
             setLoading(false);
+            if (setOrderProcessing) setOrderProcessing(false);
             throw err;
         }
     };
@@ -89,6 +101,7 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
             console.error('Error capturing PayPal payment:', err);
             setError(err.message || 'Failed to complete payment');
             setLoading(false);
+            if (setOrderProcessing) setOrderProcessing(false);
             throw err;
         }
     };
@@ -98,6 +111,7 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
         console.log('PayPal payment cancelled:', data);
         setError('Payment was cancelled. Please try again.');
         setLoading(false);
+        if (setOrderProcessing) setOrderProcessing(false);
     };
 
     // Called when there's an error with PayPal
@@ -105,6 +119,7 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
         console.error('PayPal error:', err);
         setError('An error occurred with the PayPal transaction. Please try again.');
         setLoading(false);
+        if (setOrderProcessing) setOrderProcessing(false);
     };
 
     return (

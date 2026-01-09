@@ -23,7 +23,9 @@ export default function CheckoutAuthorize({
   customerData,
   onSuccess,
   onError,
-  disabled = false
+  disabled = false,
+  setOrderProcessing,
+  syncCartToAPI
 }) {
   const t = useTranslations("checkout.authorize")
   const tCheckout = useTranslations("checkout")
@@ -102,8 +104,18 @@ export default function CheckoutAuthorize({
 
     setLoading(true)
     setError(null)
+    // Show full-screen overlay
+    if (setOrderProcessing) setOrderProcessing(true)
 
     try {
+      // Sync localStorage cart to WooCommerce API first
+      if (syncCartToAPI) {
+        const syncResult = await syncCartToAPI();
+        if (!syncResult.success) {
+          throw new Error(syncResult.error || 'Failed to sync cart');
+        }
+      }
+
       // Build order data
       const orderData = {
         billing_first_name: customerData.billing_first_name || customerData.billing?.first_name || '',
@@ -202,6 +214,7 @@ export default function CheckoutAuthorize({
       console.error('Payment error:', err)
       setError(err.message || 'An error occurred during payment')
       if (onError) onError(err)
+      if (setOrderProcessing) setOrderProcessing(false)
     } finally {
       setLoading(false)
     }

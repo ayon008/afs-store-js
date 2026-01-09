@@ -21,8 +21,11 @@ const CartList = ({ item }) => {
     const name = item.name || item.title;
 
 
-    const currency_symbol = item?.prices?.currency_symbol || '€';
-    const total_Currency_Symbol = item?.totals?.currency_symbol || '€';
+    // Use cart currency (from totals) as primary, fallback to item currency
+    // This ensures consistency - all items use the same currency as the cart total
+    const cartCurrencySymbol = item?.totals?.currency_symbol || item?.prices?.currency_symbol || '€';
+    const currency_symbol = cartCurrencySymbol;
+    const total_Currency_Symbol = cartCurrencySymbol;
     const variations = item?.variation || [];
     const itemKey = item?.key;
     // Extract slug from permalink (can be /product/ or /fr/produit/ or /produit/)

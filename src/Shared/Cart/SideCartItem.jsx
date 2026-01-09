@@ -10,11 +10,18 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
     // const { taxInfo } = useCart();
     const image = item.images?.[0]?.src || item.image;
     const name = item.name || item.title;
-    // Use line_total which is already TTC (HT + tax)
-    const total = parseInt(item?.totals?.line_total || 0);
-    const basePriceWithTax = item?.prices?.price; // Unit price TTC
-    const currency_symbol = item?.prices?.currency_symbol || '€';
-    const total_Currency_Symbol = item?.totals?.currency_symbol || '€';
+    
+    // Declare state first
+    const [quantity, setQuantity] = useState(parseInt(item.quantity));
+    const [updating, setUpdating] = useState(false);
+    const isMountedRef = useRef(true);
+    const isUpdatingRef = useRef(false);
+    
+    // Use cart currency (from totals) as primary, fallback to item currency
+    // This ensures consistency - all items use the same currency as the cart total
+    const cartCurrencySymbol = item?.totals?.currency_symbol || item?.prices?.currency_symbol || '€';
+    const currency_symbol = cartCurrencySymbol;
+    const total_Currency_Symbol = cartCurrencySymbol;
     const variations = item?.variation || [];
     const itemKey = item?.key;
 
@@ -24,22 +31,31 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
     // Get maximum quantity from stock or quantity limits
     const maxQuantity = item?.quantity_limits?.maximum || item?.stock_quantity || item?.quantity_limit || Infinity;
 
-    const [quantity, setQuantity] = useState(parseInt(item.quantity));
-    const [updating, setUpdating] = useState(false);
-    const isMountedRef = useRef(true);
+    // Recalculate total based on current quantity to ensure it's always up to date
+    const basePriceWithTax = parseInt(item?.prices?.price || 0);
+    const total = basePriceWithTax * quantity; // Recalculate total based on current quantity
 
-    // Sync quantity with props when item.quantity changes
+    // Sync quantity with props when item.quantity changes (only when not updating to avoid conflicts)
     useEffect(() => {
+        // Skip sync if we're currently updating
+        if (isUpdatingRef.current || updating) {
+            return;
+        }
+        
         const itemQuantity = parseInt(item.quantity);
-        if (itemQuantity !== quantity && !updating) {
+        const currentQuantity = parseInt(quantity);
+        
+        // Only sync if values differ and itemQuantity is valid
+        if (itemQuantity !== currentQuantity && !isNaN(itemQuantity) && itemQuantity > 0) {
             setQuantity(itemQuantity);
         }
-    }, [item.quantity]);
+    }, [item.quantity, quantity, updating]);
 
     // Cleanup on unmount
     useEffect(() => {
         return () => {
             isMountedRef.current = false;
+            isUpdatingRef.current = false;
         };
     }, []);
 
@@ -48,9 +64,13 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
 
     const handleIncrement = async () => {
         if (updating || isMaxReached) return;
-        setUpdating(true);
+        
         const oldQuantity = quantity;
         const newQuantity = quantity + 1;
+        
+        // Set updating state
+        setUpdating(true);
+        isUpdatingRef.current = true;
         
         // Optimistic update
         setQuantity(newQuantity);
@@ -58,30 +78,36 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
         try {
             const result = await onUpdateQuantity(itemKey, newQuantity);
             if (!result || !result.success) {
-                // Rollback on error
+                // Revert on error
                 if (isMountedRef.current) {
                     setQuantity(oldQuantity);
                 }
                 console.error('Failed to increment quantity:', result?.error);
             }
         } catch (error) {
-            // Rollback on error
-            if (isMountedRef.current) {
-                setQuantity(oldQuantity);
-            }
             console.error('Failed to increment quantity:', error);
-        } finally {
             if (isMountedRef.current) {
-                setUpdating(false);
+                setQuantity(oldQuantity); // Revert on error
             }
+        } finally {
+            // Always reset updating state immediately
+            setUpdating(false);
+            // Reset ref after a brief moment to allow sync
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 150);
         }
     };
 
     const handleDecrement = async () => {
         if (updating || quantity <= 1) return;
-        setUpdating(true);
+        
         const oldQuantity = quantity;
         const newQuantity = quantity - 1;
+        
+        // Set updating state
+        setUpdating(true);
+        isUpdatingRef.current = true;
         
         // Optimistic update
         setQuantity(newQuantity);
@@ -89,22 +115,24 @@ const SideCartItems = ({ item, onUpdateQuantity, onRemove }) => {
         try {
             const result = await onUpdateQuantity(itemKey, newQuantity);
             if (!result || !result.success) {
-                // Rollback on error
+                // Revert on error
                 if (isMountedRef.current) {
                     setQuantity(oldQuantity);
                 }
                 console.error('Failed to decrement quantity:', result?.error);
             }
         } catch (error) {
-            // Rollback on error
-            if (isMountedRef.current) {
-                setQuantity(oldQuantity);
-            }
             console.error('Failed to decrement quantity:', error);
-        } finally {
             if (isMountedRef.current) {
-                setUpdating(false);
+                setQuantity(oldQuantity); // Revert on error
             }
+        } finally {
+            // Always reset updating state immediately
+            setUpdating(false);
+            // Reset ref after a brief moment to allow sync
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 150);
         }
     };
 

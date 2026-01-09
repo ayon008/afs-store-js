@@ -1,6 +1,7 @@
 {
   "checkout": {
     "address": "Numéro et nom de la rue",
+    "backToHome": "Retour à l'accueil",
     "backToShop": "Retour à la boutique",
     "basket": "Panier",
     "billingDetails": "Données de facturation",
@@ -36,6 +37,8 @@
     "selectShippingMethod": "Veuillez sélectionner une méthode d'expédition",
     "terms": "J'ai lu et j'accepte les conditions générales de vente",
     "processing": "Traitement en cours...",
+    "processingOrder": "Traitement de votre commande...",
+    "pleaseWait": "Veuillez patienter, ne fermez pas cette page.",
     "placeOrder": "Passer la commande",
     "continue": "Continuer",
     "privacyPolicyText": "Vos données personnelles seront utilisées pour traiter votre commande, vous accompagner lors de votre visite sur le site et pour d'autres raisons décrites dans notre",
@@ -80,6 +83,14 @@
     "orderCreationError": "Erreur lors de la création de la commande",
     "orderCreationErrorRetry": "Erreur lors de la création de la commande. Veuillez réessayer.",
     "unknownError": "Une erreur est survenue",
+    "orderConfirmed": "Commande confirmée !",
+    "orderConfirmedMessage": "Merci pour votre commande. Vous recevrez bientôt un email de confirmation avec les détails de votre commande.",
+    "orderNumber": "Numéro de commande",
+    "viewOrders": "Voir mes commandes",
+    "emailConfirmation": "Email de confirmation",
+    "emailConfirmationMessage": "Un email récapitulatif vous a été envoyé avec tous les détails de votre commande.",
+    "deliveryInfo": "Livraison",
+    "deliveryInfoMessage": "Vous recevrez un email avec le suivi de votre colis dès son expédition.",
     "authorize": {
       "cardDetails": "Détails de la carte",
       "enterNewCardDetails": "Saisir les détails d'une nouvelle carte",

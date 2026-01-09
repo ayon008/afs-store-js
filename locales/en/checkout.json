@@ -1,6 +1,7 @@
 {
   "checkout": {
     "address": "Street number and name",
+    "backToHome": "Back to Home",
     "backToShop": "Back to shop",
     "basket": "Basket",
     "billingDetails": "Billing details",
@@ -36,6 +37,8 @@
     "selectShippingMethod": "Please select a shipping method",
     "terms": "I have read and agree to the terms and conditions",
     "processing": "Processing...",
+    "processingOrder": "Processing your order...",
+    "pleaseWait": "Please wait, do not close this page.",
     "placeOrder": "Place order",
     "continue": "Continue",
     "privacyPolicyText": "Your personal data will be used to process your order, assist you during your visit to the website, and for other reasons described in our",
@@ -80,6 +83,14 @@
     "orderCreationError": "Error creating order",
     "orderCreationErrorRetry": "Error creating order. Please try again.",
     "unknownError": "An error occurred",
+    "orderConfirmed": "Order Confirmed!",
+    "orderConfirmedMessage": "Thank you for your order. You will receive a confirmation email shortly with your order details.",
+    "orderNumber": "Order Number",
+    "viewOrders": "View My Orders",
+    "emailConfirmation": "Email Confirmation",
+    "emailConfirmationMessage": "A summary email has been sent to you with all the details of your order.",
+    "deliveryInfo": "Delivery",
+    "deliveryInfoMessage": "You will receive an email with tracking information as soon as your package is shipped.",
     "authorize": {
       "cardDetails": "Card Details",
       "enterNewCardDetails": "Enter New Card Details",

@@ -44,7 +44,7 @@ const CheckoutPageContent = () => {
     }
 
     // Cart
-    const { cart, loadCart, handleClearCart } = useCart();
+    const { cart, loadCart, handleClearCart, syncCartToAPI } = useCart();
 
     const cartBillingAddress = cart?.billing_address;
     const cartShippingAddress = cart?.shipping_address;
@@ -131,6 +131,9 @@ const CheckoutPageContent = () => {
         }
     }, [reset, cartShippingAddress, cartBillingAddress, trigger]);
 
+    // Note: Cart stays in localStorage during checkout
+    // We only sync to WooCommerce API when the order is submitted
+    // Shipping rates are calculated via a separate API call based on country selection
 
     const watchFields = watch();
 
@@ -145,6 +148,7 @@ const CheckoutPageContent = () => {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
+    const [orderProcessing, setOrderProcessing] = useState(false); // Full-screen overlay during order creation
 
     // Filter payment methods to show only allowed ones based on currency
     const filterPaymentMethods = (methods) => {
@@ -416,180 +420,189 @@ const CheckoutPageContent = () => {
     const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '' });
     const isUpdatingRef = React.useRef(false);
 
-    // Update billing address in cart when billing fields change (to calculate shipping methods)
-    const updateBillingAddress = useCallback(async (billingData) => {
-        // Update if we have at least the country (minimum requirement for shipping calculation)
-        // WooCommerce can sometimes calculate shipping with just country, but ideally we need more fields
-        if (billingData.billing_country) {
-            // Check if we're already updating or if nothing has changed
-            const currentKey = `${billingData.billing_country}-${billingData.billing_postcode}-${billingData.billing_city}-${billingData.billing_address_1}`;
-            if (isUpdatingRef.current || lastUpdateRef.current.key === currentKey) {
-                return;
-            }
+    // State for shipping
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [updatingShipping, setUpdatingShipping] = useState(false);
+    const [selectedRateId, setSelectedRateId] = useState(null);
+    const [notification, setNotification] = useState(null);
+    const [calculatedShippingRates, setCalculatedShippingRates] = useState([]);
 
-            try {
-                isUpdatingRef.current = true;
-                lastUpdateRef.current.key = currentKey;
-                setUpdatingShipping(true);
-                
-                // Use API route for guest users, or server action for authenticated users
-                const response = await fetch('/api/cart/update-billing', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        billing_address: {
-                            first_name: billingData.billing_first_name || '',
-                            last_name: billingData.billing_last_name || '',
-                            company: billingData.billing_company || '',
-                            address_1: billingData.billing_address_1 || '',
-                            address_2: '',
-                            city: billingData.billing_city || '',
-                            state: billingData.billing_state || '',
-                            postcode: billingData.billing_postcode?.trim() || '',
-                            country: billingData.billing_country || '',
-                            email: billingData.billing_email || '',
-                            phone: billingData.billing_phone || '',
+    // Calculate shipping rates based on country and cart items
+    const calculateShippingRates = useCallback(async (addressData) => {
+        // Need at least country and cart items
+        const shippingCountry = addressData.shipping_country || addressData.billing_country;
+        if (!shippingCountry || !cart?.items || cart.items.length === 0) {
+            return;
+        }
+
+        // Check if we're already updating or if nothing has changed
+        const currentKey = `${shippingCountry}-${addressData.billing_postcode || ''}-${addressData.billing_city || ''}`;
+        if (isUpdatingRef.current || lastUpdateRef.current.key === currentKey) {
+            return;
+        }
+
+        try {
+            isUpdatingRef.current = true;
+            lastUpdateRef.current.key = currentKey;
+            setUpdatingShipping(true);
+
+            // Prepare items from localStorage cart (include variation attributes for variable products)
+            // Use _variationRaw which has the original object format { "Taille": "3.0m2" }
+            const items = cart.items.map(item => ({
+                id: item.id,
+                quantity: item.quantity,
+                variation_id: item.variation_id || null,
+                variation: item._variationRaw || item.variation || null
+            }));
+
+            // Call the shipping calculation API
+            const response = await fetch('/api/shipping/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    country: shippingCountry,
+                    state: addressData.billing_state || addressData.shipping_state || '',
+                    postcode: addressData.billing_postcode?.trim() || addressData.shipping_postcode?.trim() || '',
+                    city: addressData.billing_city || addressData.shipping_city || '',
+                    items: items
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.shipping_rates) {
+                    // Extract flat list of shipping rates from packages
+                    const rates = result.shipping_rates.flatMap((pkg, pkgIndex) => {
+                        if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
+                            return pkg.shipping_rates.map(rate => ({
+                                ...rate,
+                                package_id: pkg.package_id || pkgIndex
+                            }));
                         }
-                    })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    // Check if shipping rates are already in the response
-                    const hasShippingRatesInResponse = result.data?.shipping_rates?.some(
-                        pkg => pkg.shipping_rates && Array.isArray(pkg.shipping_rates) && pkg.shipping_rates.length > 0
-                    );
-                    
-                    // Only reload cart once, with a single delay if needed
-                    if (hasShippingRatesInResponse || result.hasShippingRates) {
-                        await loadCart();
-                    } else {
-                        // Wait for WooCommerce to calculate shipping rates (single wait)
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                        await loadCart();
+                        return [];
+                    });
+                    setCalculatedShippingRates(rates);
+
+                    // Auto-select first rate if none selected
+                    if (rates.length > 0 && !selectedRateId) {
+                        const firstRateValue = `${rates[0].package_id || 0}:${rates[0].rate_id}`;
+                        setSelectedRateId(firstRateValue);
+                        setValue('shipping_method', rates[0].rate_id);
                     }
                 } else {
-                    const errorText = await response.text();
-                    console.error('Failed to update billing address:', errorText);
+                    setCalculatedShippingRates([]);
                 }
-            } catch (error) {
-                console.error('Error updating billing address:', error);
-            } finally {
-                setUpdatingShipping(false);
-                isUpdatingRef.current = false;
+            } else {
+                const errorText = await response.text();
+                console.error('Failed to calculate shipping rates:', errorText);
+                setCalculatedShippingRates([]);
             }
+        } catch (error) {
+            console.error('Error calculating shipping rates:', error);
+            setCalculatedShippingRates([]);
+        } finally {
+            setUpdatingShipping(false);
+            isUpdatingRef.current = false;
         }
-    }, [loadCart]);
+    }, [cart?.items, selectedRateId, setValue]);
 
-    // Debounced update of billing address - trigger on country change or when address is complete
+    // Debounced calculation of shipping rates - trigger on country change
     useEffect(() => {
         // Skip if already updating
         if (isUpdatingRef.current) {
             return;
         }
 
+        // Determine which country to use (shipping address takes priority if set)
+        const shippingCountry = shippingAddress
+            ? (watchFields.shipping_country || watchFields.billing_country)
+            : watchFields.billing_country;
+
         const timer = setTimeout(() => {
-            // Update if country is set (minimum requirement)
-            // This allows WooCommerce to at least try to calculate shipping rates
-            if (watchFields.billing_country) {
-                const currentKey = `${watchFields.billing_country}-${watchFields.billing_postcode}-${watchFields.billing_city}-${watchFields.billing_address_1}`;
-                
-                // Only update if something actually changed
+            // Calculate shipping rates if country is set
+            if (shippingCountry) {
+                const currentKey = `${shippingCountry}-${watchFields.billing_postcode || watchFields.shipping_postcode}-${watchFields.billing_city || watchFields.shipping_city}`;
+
+                // Only calculate if something actually changed
                 if (lastUpdateRef.current.key !== currentKey) {
-                    updateBillingAddress(watchFields);
+                    calculateShippingRates(watchFields);
                 }
             }
-        }, 1000); // Wait 1 second after user stops typing
+        }, 800); // Wait 800ms after user stops typing
 
         return () => clearTimeout(timer);
     }, [
         watchFields.billing_country,
+        watchFields.shipping_country,
         watchFields.billing_postcode,
+        watchFields.shipping_postcode,
         watchFields.billing_city,
-        watchFields.billing_address_1,
-        watchFields.billing_first_name,
-        watchFields.billing_last_name,
-        watchFields.billing_email,
-        updateBillingAddress
+        watchFields.shipping_city,
+        watchFields.billing_state,
+        watchFields.shipping_state,
+        shippingAddress,
+        calculateShippingRates
     ]);
 
     const states = countryDetails?.states || [];
 
-    const cartTotal = parseFloat(cart?.totals?.total_price || 0) / 100;
-    const sousTotal = (cart?.items?.reduce(
-        (acc, item) =>
-            acc +
-            Number(item.totals?.line_subtotal || 0) +
-            Number(item.totals?.line_subtotal_tax || 0),
-        0
-    ) || 0) / 100;
+    // Use calculated shipping rates from API (not from cart)
+    const allShippingRates = calculatedShippingRates;
 
-    const [shippingLoading, setShippingLoading] = useState(false);
-    const [updatingShipping, setUpdatingShipping] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
-    const [notification, setNotification] = useState(null);
+    // Calculate subtotal from localStorage cart items
+    // localStorage cart items have: price (unit price as string/number), quantity
+    const sousTotal = React.useMemo(() => {
+        if (!cart?.items || cart.items.length === 0) return 0;
 
-    // Extract shipping rates from cart - optimized, no logs
-    const allShippingRates = React.useMemo(() => {
-        if (!cart?.shipping_rates) {
-            return [];
-        }
-        
-        // Handle array of packages
-        if (Array.isArray(cart.shipping_rates)) {
-            return cart.shipping_rates.flatMap((pkg, pkgIndex) => {
-                if (pkg.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map(rate => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex
-                    }));
-                }
-                if (Array.isArray(pkg) && pkg.length > 0) {
-                    return pkg.map(rate => ({
-                        ...rate,
-                        package_id: pkgIndex
-                    }));
-                }
-                return [];
-            });
-        }
-        
-        // Handle object structure
-        if (typeof cart.shipping_rates === 'object') {
-            return Object.values(cart.shipping_rates).flatMap((pkg, pkgIndex) => {
-                if (pkg?.shipping_rates && Array.isArray(pkg.shipping_rates)) {
-                    return pkg.shipping_rates.map(rate => ({
-                        ...rate,
-                        package_id: pkg.package_id || pkgIndex
-                    }));
-                }
-                return [];
-            });
-        }
-        
-        return [];
-    }, [cart?.shipping_rates]);
+        return cart.items.reduce((acc, item) => {
+            // Handle different price formats
+            let unitPrice = 0;
+            if (item.totals?.line_subtotal) {
+                // API cart format
+                unitPrice = (Number(item.totals.line_subtotal) + Number(item.totals.line_subtotal_tax || 0)) / 100;
+            } else if (item.price) {
+                // localStorage cart format - price is already in decimal format
+                unitPrice = parseFloat(item.price) * (item.quantity || 1);
+            }
+            return acc + unitPrice;
+        }, 0);
+    }, [cart?.items]);
+
+    // Calculate selected shipping cost
+    const selectedShippingCost = React.useMemo(() => {
+        if (!selectedRateId || allShippingRates.length === 0) return 0;
+        // selectedRateId is now in format "package_id:rate_id"
+        const [packageId, rateId] = selectedRateId.split(':');
+        const selectedRate = allShippingRates.find(rate => 
+            rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+        );
+        if (!selectedRate) return 0;
+        // Price is in cents
+        return parseFloat(selectedRate.price || 0) / 100;
+    }, [selectedRateId, allShippingRates]);
+
+    // Total = subtotal + shipping
+    const cartTotal = sousTotal + selectedShippingCost;
 
     // Ref to track user's manual selection (local state takes priority)
     const userSelectedRateRef = React.useRef(null);
-    // Ref to store pending sync info (rateId and packageId to sync)
-    const pendingSyncRef = React.useRef(null);
-    // Ref to store debounce timer
-    const syncTimerRef = React.useRef(null);
 
+    // Auto-select shipping rate when rates change
     useEffect(() => {
-        // If user has manually selected a rate, prioritize that over cart state
+        // If user has manually selected a rate, prioritize that
         if (userSelectedRateRef.current) {
-            const userSelected = allShippingRates.find(rate => rate.rate_id === userSelectedRateRef.current);
+            // userSelectedRateRef.current is now in format "package_id:rate_id"
+            const [packageId, rateId] = userSelectedRateRef.current.split(':');
+            const userSelected = allShippingRates.find(rate => 
+                rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+            );
             if (userSelected) {
-                // User selection exists in available rates, keep it
                 if (selectedRateId !== userSelectedRateRef.current) {
                     setSelectedRateId(userSelectedRateRef.current);
-                    setValue('shipping_method', userSelectedRateRef.current);
+                    setValue('shipping_method', rateId);
                 }
                 return;
             } else {
@@ -598,29 +611,16 @@ const CheckoutPageContent = () => {
             }
         }
 
-        // Only auto-update from cart if no user selection
-        const selected = allShippingRates.find(rate => rate.selected);
-        if (selected && selected.rate_id !== selectedRateId) {
-            setSelectedRateId(selected.rate_id);
-            setValue('shipping_method', selected.rate_id);
-        } else if (!selected && allShippingRates.length > 0 && !selectedRateId && !userSelectedRateRef.current) {
-            // Auto-select first rate if none selected (only on initial load)
+        // Auto-select first rate if none selected
+        if (allShippingRates.length > 0 && !selectedRateId) {
             const firstRate = allShippingRates[0];
             if (firstRate) {
-                setSelectedRateId(firstRate.rate_id);
+                const firstRateValue = `${firstRate.package_id || 0}:${firstRate.rate_id}`;
+                setSelectedRateId(firstRateValue);
                 setValue('shipping_method', firstRate.rate_id);
             }
         }
     }, [allShippingRates, selectedRateId, setValue]);
-
-    // Cleanup timer on unmount
-    useEffect(() => {
-        return () => {
-            if (syncTimerRef.current) {
-                clearTimeout(syncTimerRef.current);
-            }
-        };
-    }, []);
 
     // Check if PayPal button should be disabled
     const isPayPalDisabled = useMemo(() => {
@@ -717,59 +717,18 @@ const CheckoutPageContent = () => {
         selectedRateId
     ]);
 
-    // Ref to prevent multiple simultaneous syncs
-    const isSyncingShippingRef = React.useRef(false);
-    
-    // Function to sync shipping rate with server (silent, no loading state)
-    const syncShippingRateToServer = async (rateId, packageId, showLoading = false) => {
-        if (!rateId || !packageId) return;
-        
-        // Prevent multiple simultaneous syncs
-        if (isSyncingShippingRef.current) {
-            return;
-        }
-        
-        isSyncingShippingRef.current = true;
-        
-        if (showLoading) {
-            setShippingLoading(true);
-        }
-        
-        try {
-            const result = await selectShippingRate(rateId, packageId);
-            if (result.success) {
-                // Reload cart once (no setTimeout, direct call)
-                await loadCart();
-            }
-        } catch (error) {
-            console.error('Error syncing shipping rate:', error);
-        } finally {
-            if (showLoading) {
-                setShippingLoading(false);
-            }
-            isSyncingShippingRef.current = false;
-        }
-    };
-
+    // Handle shipping rate selection (local state only, sync happens at order submission)
     const handleSelectRate = (value) => {
-        const [packageId, rateId] = value.split(':');
-        if (rateId === selectedRateId) {
+        // value is already in format "package_id:rate_id"
+        if (value === selectedRateId) {
             return;
         }
-        
-        // Update local state immediately (purely local - no server call, no loading state)
-        userSelectedRateRef.current = rateId;
-        setSelectedRateId(rateId);
-        setValue('shipping_method', rateId);
-        
-        // Store pending sync info for later (only sync before form submission)
-        pendingSyncRef.current = { rateId, packageId };
-        
-        // Clear any existing timer (no automatic sync)
-        if (syncTimerRef.current) {
-            clearTimeout(syncTimerRef.current);
-            syncTimerRef.current = null;
-        }
+
+        // Update local state only - store the full value "package_id:rate_id"
+        const [packageId, rateId] = value.split(':');
+        userSelectedRateRef.current = value; // Store full value
+        setSelectedRateId(value); // Store full value "package_id:rate_id"
+        setValue('shipping_method', rateId); // Form still uses just rate_id
     };
 
     // Check if cart is empty
@@ -856,112 +815,96 @@ const CheckoutPageContent = () => {
             return;
         }
 
-        // Sync shipping method to server before submission if there's a pending sync
-        if (pendingSyncRef.current || (selectedRateId && userSelectedRateRef.current === selectedRateId)) {
-            // Clear any pending timer
-            if (syncTimerRef.current) {
-                clearTimeout(syncTimerRef.current);
-                syncTimerRef.current = null;
-            }
-            
-            // Find packageId for the selected rate
-            const selectedRate = allShippingRates.find(rate => rate.rate_id === selectedRateId);
-            if (selectedRate && selectedRate.package_id) {
-                // Sync immediately before submission (with loading state only here)
-                await syncShippingRateToServer(selectedRateId, selectedRate.package_id, true);
-                pendingSyncRef.current = null;
-            } else if (pendingSyncRef.current) {
-                // Use pending sync info if available
-                await syncShippingRateToServer(
-                    pendingSyncRef.current.rateId,
-                    pendingSyncRef.current.packageId,
-                    true
-                );
-                pendingSyncRef.current = null;
-            }
-        }
-
         // PayPal is handled directly by the CheckoutPayPal component
         // No need to handle it in onSubmit
 
         if (data.payment_method === 'bacs') {
             setIsSubmitting(true);
+            setOrderProcessing(true); // Show full-screen overlay
             try {
-                const customerData = {
-                    ...data,
-                    billing: {
-                        first_name: data.billing_first_name,
-                        last_name: data.billing_last_name,
-                        company: data.billing_company || '',
-                        address_1: data.billing_address_1,
-                        address_2: '',
-                        city: data.billing_city,
-                        state: data.billing_state || '',
-                        postcode: data.billing_postcode,
-                        country: data.billing_country,
-                        email: data.billing_email,
-                        phone: data.billing_phone || ''
-                    },
-                    // Use shipping address only if checkbox is checked, otherwise use billing address
-                    shipping: shippingAddress ? {
-                        first_name: data.shipping_first_name,
-                        last_name: data.shipping_last_name,
-                        company: data.shipping_company || '',
-                        address_1: data.shipping_address_1,
-                        address_2: '',
-                        city: data.shipping_city,
-                        state: data.shipping_state || '',
-                        postcode: data.shipping_postcode,
-                        country: data.shipping_country || data.billing_country
-                    } : {
-                        // Use billing address as shipping address by default
-                        first_name: data.billing_first_name,
-                        last_name: data.billing_last_name,
-                        company: data.billing_company || '',
-                        address_1: data.billing_address_1,
-                        address_2: '',
-                        city: data.billing_city,
-                        state: data.billing_state || '',
-                        postcode: data.billing_postcode,
-                        country: data.billing_country
-                    }
+                // Step 1: Sync localStorage cart to WooCommerce API
+                const syncResult = await syncCartToAPI();
+                if (!syncResult.success) {
+                    throw new Error(syncResult.error || 'Failed to sync cart');
+                }
+
+                // Step 2: Select shipping rate if available
+                // selectedRateId is now in format "package_id:rate_id"
+                const [packageId, rateId] = selectedRateId.split(':');
+                const selectedRate = allShippingRates.find(rate => 
+                    rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+                );
+                if (selectedRate) {
+                    await selectShippingRate(rateId, selectedRate.package_id || 0);
+                }
+
+                // Step 3: Create order with synced cart data
+                // Format data according to /api/orders expectations
+                const orderPayload = {
+                    // Billing info at root level
+                    billing_email: data.billing_email,
+                    billing_first_name: data.billing_first_name,
+                    billing_last_name: data.billing_last_name,
+                    billing_company: data.billing_company || '',
+                    billing_address_1: data.billing_address_1,
+                    billing_city: data.billing_city,
+                    billing_state: data.billing_state || '',
+                    billing_postcode: data.billing_postcode,
+                    billing_country: data.billing_country,
+                    billing_phone: data.billing_phone || '',
+                    // Shipping info
+                    shipping_first_name: shippingAddress ? data.shipping_first_name : data.billing_first_name,
+                    shipping_last_name: shippingAddress ? data.shipping_last_name : data.billing_last_name,
+                    shipping_company: shippingAddress ? (data.shipping_company || '') : (data.billing_company || ''),
+                    shipping_address_1: shippingAddress ? data.shipping_address_1 : data.billing_address_1,
+                    shipping_city: shippingAddress ? data.shipping_city : data.billing_city,
+                    shipping_state: shippingAddress ? (data.shipping_state || '') : (data.billing_state || ''),
+                    shipping_postcode: shippingAddress ? data.shipping_postcode : data.billing_postcode,
+                    shipping_country: shippingAddress ? (data.shipping_country || data.billing_country) : data.billing_country,
+                    // Payment
+                    payment_method: 'bacs',
+                    payment_method_title: 'Virement bancaire',
+                    // Line items
+                    line_items: cart.items.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        variation_id: item.variation_id || 0
+                    })),
+                    // Shipping lines
+                    shipping_lines: selectedRate ? [{
+                        method_id: selectedRate.method_id,
+                        method_title: selectedRate.name,
+                        total: (parseFloat(selectedRate.price || 0) / 100).toString()
+                    }] : [],
+                    // Order notes
+                    order_comments: data.order_comments || ''
                 };
 
                 const response = await fetch('/api/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        cartData: {
-                            totals: cart.totals,
-                            lineItems: items.map(item => ({
-                                product_id: item.id,
-                                quantity: item.quantity,
-                                variation_id: item.variation_id || 0
-                            })),
-                            shippingLines: cart.shipping_rates?.[0]?.shipping_rates
-                                ?.filter(rate => rate.selected)
-                                .map(rate => ({
-                                    method_id: rate.method_id,
-                                    method_title: rate.name,
-                                    total: (rate.price / 100).toString()
-                                })) || []
-                        },
-                        customerData,
-                        paymentMethod: 'bacs'
-                    })
+                    credentials: 'include',
+                    body: JSON.stringify(orderPayload)
                 });
 
                 const result = await response.json();
 
                 if (response.ok && result.orderId) {
+                    // Clear form data and cart BEFORE redirect
                     clearSavedFormData();
-                    clearCart();
-                    router.push(`/order-success?order_id=${result.orderId}`);
+                    handleClearCart();
+                    // Keep overlay visible during redirect
+                    // Use replace to prevent back navigation to checkout
+                    router.replace(`/order-success?order_id=${result.orderId}`);
+                    // Don't set isSubmitting or orderProcessing to false - let the redirect happen
+                    return;
                 } else {
+                    setOrderProcessing(false);
                     alert(`${t("orderCreationError")} : ${result.error || t("unknownError")}`);
                 }
             } catch (error) {
                 console.error('Error creating order:', error);
+                setOrderProcessing(false);
                 alert(t("orderCreationErrorRetry"));
             } finally {
                 setIsSubmitting(false);
@@ -972,7 +915,8 @@ const CheckoutPageContent = () => {
 
 
     // Show empty cart message if cart is empty or loading
-    if (isCartEmpty || !cart || !cart.items || cart.items.length === 0) {
+    // BUT NOT when order is being processed (to avoid flash during redirect)
+    if (!orderProcessing && (isCartEmpty || !cart || !cart.items || cart.items.length === 0)) {
         return (
             <>
                 {notification && (
@@ -988,8 +932,8 @@ const CheckoutPageContent = () => {
                     <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
                         <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
                         <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
-                        <Link 
-                            href="/" 
+                        <Link
+                            href="/"
                             className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
                         >
                             {t("backToShop")}
@@ -1001,11 +945,44 @@ const CheckoutPageContent = () => {
         );
     }
 
-    const currencySymbol = cart?.totals?.currency_symbol || '€';
-    const totalTax = Number(cart?.totals?.total_tax) / 100 || 0;
+    // Get currency symbol from cart metadata or default to €
+    const currencySymbol = React.useMemo(() => {
+        // Try API cart format first
+        if (cart?.totals?.currency_symbol) return cart.totals.currency_symbol;
+        // Try localStorage cart metadata
+        if (cart?.metadata?.currency) {
+            const curr = cart.metadata.currency.toLowerCase();
+            if (curr === 'usd') return '$';
+            if (curr === 'gbp') return '£';
+            return '€';
+        }
+        return '€';
+    }, [cart?.totals?.currency_symbol, cart?.metadata?.currency]);
+
+    // Tax is not calculated for localStorage cart (will be calculated at order creation)
+    const totalTax = 0;
 
     return (
         <div className="bg-white">
+            {/* Full-screen overlay during order processing */}
+            {orderProcessing && (
+                <div className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center gap-6">
+                        {/* Spinner */}
+                        <div className="w-16 h-16 border-4 border-[#1D98FF] border-t-transparent rounded-full animate-spin"></div>
+                        {/* Message */}
+                        <div className="text-center">
+                            <h2 className="text-2xl font-bold text-[#111] mb-2">
+                                {t("processingOrder") || "Traitement de votre commande..."}
+                            </h2>
+                            <p className="text-gray-600">
+                                {t("pleaseWait") || "Veuillez patienter, ne fermez pas cette page."}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Notification */}
             {notification && (
                 <Notification
@@ -1015,7 +992,7 @@ const CheckoutPageContent = () => {
                     duration={5000}
                 />
             )}
-            
+
             {/* Main Checkout Container */}
             <div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                 <div className='flex flex-col lg:flex-row items-start gap-8'>
@@ -1067,6 +1044,8 @@ const CheckoutPageContent = () => {
                                 router={router}
                                 t={t}
                                 PAYMENT_INSTRUCTIONS={PAYMENT_INSTRUCTIONS}
+                                setOrderProcessing={setOrderProcessing}
+                                syncCartToAPI={syncCartToAPI}
                             />
                         </form>
                     </div>

@@ -4,6 +4,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from '@gsap/react';
+import { initBlogScripts } from '@/data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -220,7 +221,7 @@ const BlogContent = ({ blog }) => {
                             dangerouslySetInnerHTML={{ __html: content }}
                         /> */}
 
-                        <div dangerouslySetInnerHTML={{ __html: content }} className='prose'/>
+                        <div dangerouslySetInnerHTML={{ __html: content }} className='prose' />
                     </article>
                 </div>
             </div>

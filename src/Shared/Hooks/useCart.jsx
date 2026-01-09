@@ -77,6 +77,10 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         return null;
     }
     
+    // Get currency symbol from cart metadata (site currency)
+    const currencySymbol = localCart.metadata.currency === 'USD' ? '$' : 
+                          localCart.metadata.currency === 'GBP' ? '£' : '€';
+    
     // Calculate totals
     let items_count = 0;
     let subtotal = 0;
@@ -89,18 +93,35 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         const lineSubtotal = price * quantity;
         subtotal += lineSubtotal;
         
+        // Convert variation object to array format for display
+        // From: { "Taille": "3.0m2", "Color": "Blue" }
+        // To: [{ attribute: "Taille", value: "3.0m2" }, { attribute: "Color", value: "Blue" }]
+        let variationArray = [];
+        if (item.variation && typeof item.variation === 'object' && !Array.isArray(item.variation)) {
+            variationArray = Object.entries(item.variation).map(([attr, value]) => ({
+                attribute: attr,
+                value: String(value)
+            }));
+        } else if (Array.isArray(item.variation)) {
+            variationArray = item.variation;
+        }
+
         return {
             id: item.id,
             name: item.productData?.name || '',
             quantity: quantity,
             variation_id: item.variation_id || null,
+            variation: variationArray, // Array format for display components
+            _variationRaw: item.variation || {}, // Keep raw format for API calls
             prices: {
                 price: Math.round(price * 100), // Convert to cents
                 regular_price: Math.round(price * 100),
+                currency_symbol: currencySymbol, // Use cart currency, not product currency
             },
             totals: {
                 line_subtotal: Math.round(lineSubtotal * 100),
                 line_total: Math.round(lineSubtotal * 100),
+                currency_symbol: currencySymbol, // Use cart currency, not product currency
             },
             images: item.productData?.images || [],
             image: item.productData?.image || null,
@@ -108,10 +129,6 @@ const convertLocalStorageCartToDisplay = (localCart) => {
             productData: item.productData
         };
     });
-    
-    // Get currency symbol
-    const currencySymbol = localCart.metadata.currency === 'USD' ? '$' : 
-                          localCart.metadata.currency === 'GBP' ? '£' : '€';
     
     return {
         items: items,
@@ -241,6 +258,9 @@ export const CartProvider = ({ children }) => {
             await clearCart();
 
             // Add each item to WooCommerce cart
+            // Use the cart's currency (site currency), not individual product currencies
+            const cartCurrency = localCart.metadata.currency || localCart.currency;
+            
             for (const item of localCart.items) {
                 const response = await fetch('/api/cart/add-item', {
                     method: 'POST',
@@ -252,7 +272,9 @@ export const CartProvider = ({ children }) => {
                         id: item.id,
                         quantity: item.quantity || 1,
                         variation_id: item.variation_id || null,
-                        variation: item.variation || {}
+                        variation: item.variation || {},
+                        currency: cartCurrency, // Use cart currency (site currency)
+                        location: currentMetadata.location // Required by Multi-Locations-Inventory-Management plugin
                     }),
                     cache: 'no-store',
                 });
@@ -316,16 +338,25 @@ export const CartProvider = ({ children }) => {
             setLoading(true);
             setError(null);
 
+            // Always use the current site currency (from cookie), not the product currency
+            // This ensures all products in the cart are in the same currency as the site
             const currentMetadata = getCurrentMetadata(locale);
             
             // Get existing cart or create new one
             let localCart = getLocalStorageCart();
             
-            // Validate existing cart metadata
+            // Validate existing cart metadata against current site currency
             if (localCart && !validateCartMetadata(localCart, currentMetadata)) {
-                // Clear invalid cart
-                localCart = null;
-                clearLocalStorageCart();
+                // If cart exists with different currency, update to current site currency
+                if (localCart.metadata.currency !== currentMetadata.currency) {
+                    // Update cart currency to match current site currency
+                    localCart.currency = currentMetadata.currency;
+                    localCart.metadata.currency = currentMetadata.currency;
+                } else {
+                    // Clear invalid cart for other metadata mismatches
+                    localCart = null;
+                    clearLocalStorageCart();
+                }
             }
 
             // Initialize cart if needed

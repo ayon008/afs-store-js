@@ -1,0 +1,51 @@
+{
+  "location": {
+    "title": "Choose your location",
+    "currentSelection": "Your current selection",
+    "availablePaymentMethods": "Available payment methods",
+    "externalSite": "Opens external website",
+    "select": "Select",
+    "selected": "Selected",
+    "visit": "Visit",
+    "confirm": "Confirm selection",
+    "close": "Close",
+    "regions": {
+      "europe": "Europe",
+      "uk": "United Kingdom",
+      "us": "United States & Canada",
+      "emirates": "Middle East"
+    },
+    "countries": {
+      "france": "France",
+      "belgium": "Belgium",
+      "switzerland": "Switzerland",
+      "luxembourg": "Luxembourg",
+      "germany": "Germany",
+      "italy": "Italy",
+      "netherlands": "Netherlands",
+      "portugal": "Portugal",
+      "austria": "Austria",
+      "greece": "Greece",
+      "ireland": "Ireland",
+      "spain": "Spain",
+      "unitedKingdom": "United Kingdom",
+      "unitedStates": "United States",
+      "canada": "Canada",
+      "uae": "United Arab Emirates",
+      "saudiArabia": "Saudi Arabia",
+      "qatar": "Qatar",
+      "kuwait": "Kuwait",
+      "bahrain": "Bahrain",
+      "oman": "Oman"
+    },
+    "languages": {
+      "en": "English",
+      "fr": "French"
+    },
+    "currencies": {
+      "EUR": "Euro",
+      "USD": "US Dollar",
+      "GBP": "British Pound"
+    }
+  }
+}

@@ -22,7 +22,9 @@ const PaymentMethods = ({
     clearCart,
     router,
     t,
-    PAYMENT_INSTRUCTIONS
+    PAYMENT_INSTRUCTIONS,
+    setOrderProcessing,
+    syncCartToAPI
 }) => {
     return (
         <div className='bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden'>
@@ -65,23 +67,31 @@ const PaymentMethods = ({
                             )}
 
                             {/* PayPal Component */}
-                            {isPayPal && (
+                            {isPayPal && cart && items && (
                                 <div className="mt-2">
                                     <CheckoutPayPal
                                         cartData={{
-                                            totals: cart.totals,
-                                            lineItems: items.map(item => ({
+                                            totals: cart?.totals || {},
+                                            lineItems: items?.map(item => ({
                                                 product_id: item.id,
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
-                                            })),
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            })) || [],
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
@@ -93,33 +103,43 @@ const PaymentMethods = ({
                                             }
                                         }}
                                         disabled={isPayPalDisabled}
+                                        setOrderProcessing={setOrderProcessing}
+                                        syncCartToAPI={syncCartToAPI}
                                         onSuccess={(details) => {
                                             clearSavedFormData();
                                             clearCart();
-                                            router.push(`/order-success?order_id=${details.orderId}`);
+                                            router.replace(`/order-success?order_id=${details.orderId}`);
                                         }}
                                     />
                                 </div>
                             )}
 
                             {/* Monetico Component */}
-                            {isMonetico && (
+                            {isMonetico && cart && items && (
                                 <div className="mt-2">
                                     <CheckoutMonetico
                                         cartData={{
-                                            totals: cart.totals,
-                                            lineItems: items.map(item => ({
+                                            totals: cart?.totals || {},
+                                            lineItems: items?.map(item => ({
                                                 product_id: item.id,
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
-                                            })),
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            })) || [],
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
@@ -131,33 +151,43 @@ const PaymentMethods = ({
                                             }
                                         }}
                                         disabled={!watchFields.terms}
+                                        setOrderProcessing={setOrderProcessing}
+                                        syncCartToAPI={syncCartToAPI}
                                         onSuccess={(details) => {
                                             clearSavedFormData();
                                             clearCart();
-                                            router.push(`/order-success?order_id=${details.orderId}`);
+                                            router.replace(`/order-success?order_id=${details.orderId}`);
                                         }}
                                     />
                                 </div>
                             )}
 
                             {/* Authorize Component */}
-                            {isAuthorize && (
+                            {isAuthorize && cart && items && (
                                 <div className="mt-2">
                                     <CheckoutAuthorize
                                         cartData={{
-                                            totals: cart.totals,
-                                            lineItems: items.map(item => ({
+                                            totals: cart?.totals || {},
+                                            lineItems: items?.map(item => ({
                                                 product_id: item.id,
                                                 quantity: item.quantity,
                                                 variation_id: item.variation_id || 0
-                                            })),
-                                            shippingLines: allShippingRates
-                                                ?.filter(rate => rate.rate_id === selectedRateId)
-                                                .map(rate => ({
-                                                    method_id: rate.method_id,
-                                                    method_title: rate.name,
-                                                    total: (rate.price / 100).toString()
-                                                })) || []
+                                            })) || [],
+                                            shippingLines: (() => {
+                                                if (!selectedRateId || !allShippingRates) return [];
+                                                // selectedRateId is now in format "package_id:rate_id"
+                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                return allShippingRates
+                                                    .filter(rate => 
+                                                        rate.rate_id === rateId && 
+                                                        String(rate.package_id || 0) === String(packageId)
+                                                    )
+                                                    .map(rate => ({
+                                                        method_id: rate.method_id,
+                                                        method_title: rate.name,
+                                                        total: (rate.price / 100).toString()
+                                                    }));
+                                            })()
                                         }}
                                         customerData={{
                                             ...watchFields,
@@ -169,10 +199,12 @@ const PaymentMethods = ({
                                             }
                                         }}
                                         disabled={!watchFields.terms}
+                                        setOrderProcessing={setOrderProcessing}
+                                        syncCartToAPI={syncCartToAPI}
                                         onSuccess={(details) => {
                                             clearSavedFormData();
                                             clearCart();
-                                            router.push(`/order-success?order_id=${details.orderId}`);
+                                            router.replace(`/order-success?order_id=${details.orderId}`);
                                         }}
                                     />
                                 </div>

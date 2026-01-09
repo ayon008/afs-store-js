@@ -1,7 +1,7 @@
 // app/api/cart/add-item/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency, getLocation } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 
 // Helper to parse set-cookie headers (same as before)
@@ -29,14 +29,17 @@ async function getWooCommerceCookies() {
         const cookieStore = await cookies();
         const allCookies = cookieStore.getAll();
 
-        // Filter WooCommerce/WP specific cookies
+        // Filter WooCommerce/WP specific cookies AND location cookies
+        // The WCMLIM plugin reads from wcmlim_selected_location and wcmlim_selected_location_termid
         const wooCookies = allCookies
             .filter(cookie =>
                 cookie.name.includes('woocommerce') ||
                 cookie.name.includes('wordpress') ||
                 cookie.name.includes('wp_') ||
                 cookie.name.includes('wc_') ||
-                cookie.name === 'PHPSESSID'
+                cookie.name.includes('wcmlim') || // Include WCMLIM plugin cookies
+                cookie.name === 'PHPSESSID' ||
+                cookie.name === 'location' // Include location cookie
             )
             .map(cookie => `${cookie.name}=${cookie.value}`)
             .join('; ');
@@ -45,6 +48,59 @@ async function getWooCommerceCookies() {
     } catch (error) {
         console.error('Error getting WooCommerce cookies:', error);
         return '';
+    }
+}
+
+// Set location in WooCommerce session (required by Multi-Locations-Inventory-Management plugin)
+async function setLocationInSession(location, cookiesWithWcml, WC_STORE_URL) {
+    try {
+        // Update customer session with location via update-customer endpoint
+        // The location cookie in the headers will be read by the plugin
+        // Also try to pass location in the body as metadata (some plugins read from body)
+        const updateResponse = await fetch(`${WC_STORE_URL}/cart/update-customer?location=${location}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+            },
+            body: JSON.stringify({
+                billing_address: {
+                    // Minimal address data, location cookie in headers will be read by plugin
+                },
+                shipping_address: {
+                    // Minimal address data
+                },
+                // Try to pass location in metadata (some plugins might read from here)
+                meta_data: [
+                    {
+                        key: 'location',
+                        value: location
+                    }
+                ]
+            }),
+            cache: "no-store",
+        });
+
+        if (!updateResponse.ok) {
+            return false;
+        }
+
+        // After updating customer, fetch the cart to initialize the session properly
+        // This ensures the plugin reads the location cookie and sets it in the session
+        const cartResponse = await fetch(`${WC_STORE_URL}/cart`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+            },
+            cache: "no-store",
+        });
+
+        return cartResponse.ok;
+    } catch (error) {
+        console.error('Error setting location in session:', error);
+        return false;
     }
 }
 
@@ -95,7 +151,7 @@ export async function POST(request) {
 
         // Get the payload from request body
         const body = await request.json();
-        const { id: productId, quantity = 1, variation_id: variationId, variation = {} } = body;
+        const { id: productId, quantity = 1, variation_id: variationId, variation = {}, location: bodyLocation } = body;
 
         // Debug logging
         console.log('Received body:', JSON.stringify(body, null, 2));
@@ -116,10 +172,29 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
+        // Always use the site currency (from cookie) to ensure consistency
+        const cookieCurrency = await getCurrency();
+        // Convert cookie currency format (euro/usd/gbp) to currency code (EUR/USD/GBP)
+        let currencyToUse = cookieCurrency;
+        if (currencyToUse === 'euro') currencyToUse = 'EUR';
+        else if (currencyToUse === 'usd') currencyToUse = 'USD';
+        else if (currencyToUse === 'gbp') currencyToUse = 'GBP';
+        else currencyToUse = 'EUR'; // Default to EUR
+        
+        // Ensure currency is in uppercase format
+        currencyToUse = currencyToUse.toUpperCase();
+
+        // Get location from body (preferred) or cookies (required by WooCommerce, from "Available Store Location" modal)
+        // The bodyLocation takes precedence if provided in the request
+        const cookieLocation = await getLocation();
+        const location = bodyLocation || cookieLocation || '2682'; // Default to '2682' (Europe) if not set
+
         // Build payload for WooCommerce
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
+            currency: currencyToUse, // Include currency in payload
+            location: parseInt(location) || parseInt('2682') // Convert to integer (required by Multi-Locations-Inventory-Management plugin)
         };
 
         if (variationId) {
@@ -167,13 +242,65 @@ export async function POST(request) {
 
         console.log('Final payload:', JSON.stringify(payload, null, 2));
 
+        // Add WCML currency cookie for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currencyToUse}`;
+        
+        // Build cookies string with currency and location
+        let cookiesWithWcml = allCookies || '';
+        if (wcmlCurrencyCookie) {
+            cookiesWithWcml = cookiesWithWcml 
+                ? `${cookiesWithWcml}; ${wcmlCurrencyCookie}` 
+                : wcmlCurrencyCookie;
+        }
+        
+        // Add location cookies (required by WooCommerce-Multi-Locations-Inventory-Management plugin)
+        // The plugin reads from cookies: wcmlim_selected_location (index) and wcmlim_selected_location_termid (term ID)
+        // We have the term ID in the 'location' cookie, so we set wcmlim_selected_location_termid
+        const locationCookie = `location=${location}`;
+        const wcmlimLocationTermIdCookie = `wcmlim_selected_location_termid=${location}`;
+        cookiesWithWcml = cookiesWithWcml
+            ? `${cookiesWithWcml}; ${locationCookie}; ${wcmlimLocationTermIdCookie}`
+            : `${locationCookie}; ${wcmlimLocationTermIdCookie}`;
+
+        // Set location in WooCommerce session BEFORE adding item
+        // This is required by WooCommerce-Multi-Locations-Inventory-Management plugin
+        if (location) {
+            // First, initialize the session by fetching the cart
+            // This ensures the WooCommerce session is created
+            try {
+                await fetch(`${WC_STORE_URL}/cart`, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+                    },
+                    cache: "no-store",
+                });
+            } catch (error) {
+                console.warn('Failed to initialize cart session:', error);
+            }
+
+            // Then, ensure location is set in the session
+            // We'll call update-customer with minimal data to establish the session
+            // The location cookie will be read by the plugin from the Cookie header
+            const locationSet = await setLocationInSession(location, cookiesWithWcml, WC_STORE_URL);
+            if (!locationSet) {
+                console.warn('Failed to set location in session, continuing anyway...');
+            }
+            
+            // Small delay to ensure session is updated and plugin processes location
+            await new Promise(resolve => setTimeout(resolve, 300)); // Increased from 100ms to 300ms
+        }
+
         // Make request to WooCommerce to add item
-        const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+        // Include location as query parameter as well (some plugins read from query params)
+        const addItemUrl = `${WC_STORE_URL}/cart/add-item${location ? `?location=${location}` : ''}`;
+        const response = await fetch(addItemUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                ...(allCookies ? { "Cookie": allCookies } : {}),
+                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
             },
             body: JSON.stringify(payload),
             cache: "no-store",
@@ -196,9 +323,30 @@ export async function POST(request) {
             throw new Error(errorMessage);
         }
 
-        // Parse and set any new cookies from WooCommerce response
-        const setCookieHeader = response.headers.get("set-cookie");
-        if (setCookieHeader) {
+        // Parse and forward Set-Cookie headers from WooCommerce response to the browser
+        // This is CRITICAL for session persistence
+        const responseHeaders = new Headers();
+
+        // Get all Set-Cookie headers from WooCommerce response
+        let setCookieHeaders = [];
+        if (typeof response.headers.getSetCookie === 'function') {
+            setCookieHeaders = response.headers.getSetCookie();
+        } else {
+            // Fallback for older implementations
+            const setCookieHeader = response.headers.get("set-cookie");
+            if (setCookieHeader) {
+                setCookieHeaders = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+            }
+        }
+
+        // Forward Set-Cookie headers to the client response
+        if (setCookieHeaders.length > 0) {
+            setCookieHeaders.forEach(header => {
+                responseHeaders.append("Set-Cookie", header);
+            });
+
+            // Also set cookies in Next.js cookie store for server-side access
+            const setCookieHeader = setCookieHeaders.join(', ');
             const parsedCookies = parseSetCookieHeader(setCookieHeader);
             const cookieStore = await cookies();
 
@@ -242,7 +390,7 @@ export async function POST(request) {
                     }
                 });
 
-                // Set the cookie in the browser
+                // Set the cookie in Next.js cookie store
                 cookieStore.set({
                     name: c.name,
                     value: c.value,
@@ -258,6 +406,8 @@ export async function POST(request) {
             data: data,
             // For debugging
             cookiesReceived: allCookies ? true : false
+        }, {
+            headers: responseHeaders // Forward Set-Cookie headers to browser
         });
 
     } catch (error) {

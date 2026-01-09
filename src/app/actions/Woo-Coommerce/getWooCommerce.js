@@ -484,17 +484,27 @@ export const getPrice = async (productId) => {
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
     const localeValue = await getLocaleValue();
-    const currency = await getCurrency();
+    // Always use site currency (from cookie) to ensure consistency across all cart items
+    const cookieCurrency = await getCurrency();
     const location = await getLocation();
     const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
     try {
         const cookieHeader = await getWooCommerceCookies();
 
         // Build payload for WooCommerce
+        // Convert cookie currency format (euro/usd/gbp) to currency code (EUR/USD/GBP)
+        let currencyToUse = cookieCurrency;
+        if (currencyToUse === 'euro') currencyToUse = 'EUR';
+        else if (currencyToUse === 'usd') currencyToUse = 'USD';
+        else if (currencyToUse === 'gbp') currencyToUse = 'GBP';
+        else currencyToUse = 'EUR'; // Default to EUR
+        
+        // Ensure currency is in uppercase format
+        currencyToUse = currencyToUse.toUpperCase();
         const payload = {
             id: parseInt(productId),
             quantity: parseInt(quantity),
-            currency: currency,
+            currency: currencyToUse,
         };
 
         if (variationId) {
@@ -524,13 +534,20 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         console.log('WC_STORE_URL:', WC_STORE_URL);
         console.log('Cookie header present:', !!cookieHeader);
         console.log('Cookie header length:', cookieHeader?.length || 0);
+        console.log('Using currency:', currencyToUse);
+
+        // Add WCML currency cookie for multi-currency support
+        const wcmlCurrencyCookie = `wcml_client_currency=${currencyToUse}`;
+        const cookiesWithWcml = cookieHeader 
+            ? `${cookieHeader}; ${wcmlCurrencyCookie}` 
+            : wcmlCurrencyCookie;
 
         // Call WooCommerce API directly
         const response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': cookieHeader,
+                'Cookie': cookiesWithWcml,
                 'Accept': 'application/json',
             },
             body: JSON.stringify(payload),
