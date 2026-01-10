@@ -4,7 +4,7 @@ import useCart from "@/Shared/Hooks/useCart";
 import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 import { selectShippingRate } from "@/app/actions/Woo-Coommerce/Shop/Cart/cart";
 import { countriesList } from "@/lib/countriesList";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -13,9 +13,10 @@ import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
 import BillingDetails from "./components/BillingDetails";
 import ShippingDetails from "./components/ShippingDetails";
+import ShippingMethods from "./components/ShippingMethods";
 import PaymentMethods from "./components/PaymentMethods";
 import OrderSummary from "./components/OrderSummary";
-import { CreditCard } from "lucide-react";
+import { CreditCard, ShoppingCart, ArrowRight } from "lucide-react";
 
 // Wrapper component to ensure NextIntl context is available
 const CheckoutPageContent = () => {
@@ -424,8 +425,13 @@ const CheckoutPageContent = () => {
     const [shippingLoading, setShippingLoading] = useState(false);
     const [updatingShipping, setUpdatingShipping] = useState(false);
     const [selectedRateId, setSelectedRateId] = useState(null);
-    const [notification, setNotification] = useState(null);
+    const [notification, setNotification] = useState(null); // { message: string, type: 'info' | 'warning' | 'error' }
     const [calculatedShippingRates, setCalculatedShippingRates] = useState([]);
+
+    // Helper to show notification with type
+    const showNotification = (message, type = 'info') => {
+        setNotification({ message, type });
+    };
 
     // Calculate shipping rates based on country and cart items
     const calculateShippingRates = useCallback(async (addressData) => {
@@ -447,13 +453,39 @@ const CheckoutPageContent = () => {
             setUpdatingShipping(true);
 
             // Prepare items from localStorage cart (include variation attributes for variable products)
-            // Use _variationRaw which has the original object format { "Taille": "3.0m2" }
-            const items = cart.items.map(item => ({
-                id: item.id,
-                quantity: item.quantity,
-                variation_id: item.variation_id || null,
-                variation: item._variationRaw || item.variation || null
-            }));
+            // Use _variationRaw (object format) if it has data, otherwise use variation (array format)
+            const items = cart.items.map(item => {
+                // Determine which variation format to use
+                // _variationRaw is object format: { "attribute_pa_taille": "M" }
+                // variation is array format: [{ attribute: "attribute_pa_taille", value: "M" }]
+                let variationData = null;
+
+                // Check if _variationRaw has actual data (not empty object)
+                if (item._variationRaw && typeof item._variationRaw === 'object' && Object.keys(item._variationRaw).length > 0) {
+                    variationData = item._variationRaw;
+                }
+                // Fall back to array format if available
+                else if (Array.isArray(item.variation) && item.variation.length > 0) {
+                    variationData = item.variation;
+                }
+                // Last resort: try to get from productData if available
+                else if (item.productData?.variations && item.variation_id) {
+                    const matchedVariation = item.productData.variations.find(v => v.id === item.variation_id);
+                    if (matchedVariation?.attributes) {
+                        variationData = matchedVariation.attributes.reduce((acc, attr) => {
+                            acc[attr.name || attr.attribute] = attr.option || attr.value;
+                            return acc;
+                        }, {});
+                    }
+                }
+
+                return {
+                    id: item.id,
+                    quantity: item.quantity,
+                    variation_id: item.variation_id || null,
+                    variation: variationData
+                };
+            });
 
             // Call the shipping calculation API
             const response = await fetch('/api/shipping/calculate', {
@@ -742,6 +774,24 @@ const CheckoutPageContent = () => {
         }
     }, [cart]);
 
+    // Get currency symbol from cart metadata or default to €
+    // IMPORTANT: This must be defined before any early returns to avoid hooks order issues
+    const currencySymbol = React.useMemo(() => {
+        // Try API cart format first
+        if (cart?.totals?.currency_symbol) return cart.totals.currency_symbol;
+        // Try localStorage cart metadata
+        if (cart?.metadata?.currency) {
+            const curr = cart.metadata.currency.toLowerCase();
+            if (curr === 'usd') return '$';
+            if (curr === 'gbp') return '£';
+            return '€';
+        }
+        return '€';
+    }, [cart?.totals?.currency_symbol, cart?.metadata?.currency]);
+
+    // Tax is not calculated for localStorage cart (will be calculated at order creation)
+    const totalTax = 0;
+
     // Clear cart if locale changes (user navigated to different language checkout)
     // Use a ref to track the previous locale to detect actual changes
     const previousLocaleRef = React.useRef(null);
@@ -769,17 +819,17 @@ const CheckoutPageContent = () => {
                 try {
                     const result = await handleClearCart();
                     if (result && result.success) {
-                        // Show notification
-                        setNotification(tCommon("cartClearedLanguage"));
+                        // Show warning notification with clear message
+                        showNotification(tCommon("cartClearedLanguage"), 'warning');
                         // Reload cart to update state
                         await loadCart();
                     }
                 } catch (error) {
                     console.error('Error clearing cart on locale change:', error);
-                    setNotification(tCommon("cartClearedLanguage")); // Show notification anyway
+                    showNotification(tCommon("cartClearedLanguage"), 'warning'); // Show notification anyway
                 }
             };
-            
+
             clearCartForLocaleChange();
         }
         
@@ -921,46 +971,52 @@ const CheckoutPageContent = () => {
             <>
                 {notification && (
                     <Notification
-                        message={notification}
-                        type="info"
+                        message={notification.message || notification}
+                        type={notification.type || "info"}
                         onClose={() => setNotification(null)}
-                        duration={5000}
+                        duration={6000}
                     />
                 )}
-                <div className='global-padding global-margin'>
-                <div className='max-w-[800px] mx-auto py-[80px] lg:py-[100px]'>
-                    <div className='bg-[#F7F7F7] p-8 lg:p-12 text-center rounded-sm border border-[#ddd]'>
-                        <h2 className='text-2xl lg:text-3xl font-bold text-[#111] mb-4'>{t("emptyCart")}</h2>
-                        <p className='text-lg text-gray-600 mb-8'>{t("emptyCartMessage")}</p>
-                        <Link
-                            href="/"
-                            className='inline-block text-white bg-[#1D98FF] rounded-sm px-[50px] uppercase py-[18px] font-semibold hover:bg-[#1a7acc] transition-colors'
-                        >
-                            {t("backToShop")}
-                        </Link>
+                <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center py-12 px-4'>
+                    <div className='max-w-2xl w-full'>
+                        <div className='bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden'>
+                            {/* Icon Section */}
+                            <div className='bg-gradient-to-br from-blue-50 to-indigo-50 p-12 text-center'>
+                                <div className='inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg mb-6'>
+                                    <ShoppingCart className='w-12 h-12 text-gray-400' />
+                                </div>
+                                <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-3'>
+                                    {t("emptyCart")}
+                                </h2>
+                                <p className='text-lg text-gray-600 max-w-md mx-auto'>
+                                    {t("emptyCartMessage")}
+                                </p>
+                            </div>
+
+                            {/* Action Section */}
+                            <div className='p-8 text-center bg-gray-50'>
+                                <Link
+                                    href="/product-category/foiling/wing-foil"
+                                    className='
+                                        inline-flex items-center justify-center gap-3
+                                        bg-[#1D98FF] text-white font-semibold
+                                        px-8 py-4 rounded-xl
+                                        hover:bg-[#1585e0] active:scale-[0.98]
+                                        shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+                                        transition-all duration-200
+                                        text-base uppercase tracking-wide
+                                    '
+                                >
+                                    {t("backToShop")}
+                                    <ArrowRight className='w-5 h-5' />
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
             </>
         );
     }
-
-    // Get currency symbol from cart metadata or default to €
-    const currencySymbol = React.useMemo(() => {
-        // Try API cart format first
-        if (cart?.totals?.currency_symbol) return cart.totals.currency_symbol;
-        // Try localStorage cart metadata
-        if (cart?.metadata?.currency) {
-            const curr = cart.metadata.currency.toLowerCase();
-            if (curr === 'usd') return '$';
-            if (curr === 'gbp') return '£';
-            return '€';
-        }
-        return '€';
-    }, [cart?.totals?.currency_symbol, cart?.metadata?.currency]);
-
-    // Tax is not calculated for localStorage cart (will be calculated at order creation)
-    const totalTax = 0;
 
     return (
         <div className="bg-white">
@@ -986,10 +1042,10 @@ const CheckoutPageContent = () => {
             {/* Notification */}
             {notification && (
                 <Notification
-                    message={notification}
-                    type="info"
+                    message={notification.message || notification}
+                    type={notification.type || "info"}
                     onClose={() => setNotification(null)}
-                    duration={5000}
+                    duration={6000}
                 />
             )}
 
@@ -1027,6 +1083,18 @@ const CheckoutPageContent = () => {
                                 t={t}
                             />
 
+                            {/* Shipping Methods */}
+                            <ShippingMethods
+                                allShippingRates={allShippingRates}
+                                selectedRateId={selectedRateId}
+                                handleSelectRate={handleSelectRate}
+                                shippingLoading={shippingLoading}
+                                updatingShipping={updatingShipping}
+                                watchFields={watchFields}
+                                cart={cart}
+                                t={t}
+                            />
+
                             {/* Payment Methods */}
                             <PaymentMethods
                                 register={register}
@@ -1056,9 +1124,6 @@ const CheckoutPageContent = () => {
                         items={items}
                         allShippingRates={allShippingRates}
                         selectedRateId={selectedRateId}
-                        handleSelectRate={handleSelectRate}
-                        shippingLoading={shippingLoading}
-                        updatingShipping={updatingShipping}
                         watchFields={watchFields}
                         register={register}
                         errors={errors}

@@ -83,6 +83,20 @@ export async function POST(request) {
             return allCookies.join('; ');
         };
 
+        // Helper to normalize attribute name for WooCommerce Store API
+        // WooCommerce expects: "pa_color" not "attribute_pa_color" or "Color"
+        const normalizeAttributeName = (attrName) => {
+            if (!attrName) return '';
+            let normalized = String(attrName);
+
+            // Strip "attribute_" prefix if present
+            if (normalized.startsWith('attribute_')) {
+                normalized = normalized.substring(10); // Remove "attribute_"
+            }
+
+            return normalized;
+        };
+
         // Helper to build item payload for WC Store API
         const buildItemPayload = (item) => {
             const payload = {
@@ -95,18 +109,31 @@ export async function POST(request) {
             }
 
             // Add variation attributes if present (required for variable products)
+            // WooCommerce Store API expects: [{ attribute: "pa_color", value: "red" }]
             if (item.variation) {
+                let variationArray = [];
+
                 if (Array.isArray(item.variation)) {
                     // Already in array format [{ attribute, value }]
-                    payload.variation = item.variation;
-                } else if (typeof item.variation === 'object') {
-                    // Convert object format { "Taille": "3.0m2" } to array format
-                    payload.variation = Object.entries(item.variation).map(([attr, value]) => ({
-                        attribute: attr,
+                    variationArray = item.variation.map(v => ({
+                        attribute: normalizeAttributeName(v.attribute || v.name || ''),
+                        value: String(v.value || v.option || '')
+                    })).filter(v => v.attribute && v.value);
+                } else if (typeof item.variation === 'object' && Object.keys(item.variation).length > 0) {
+                    // Convert object format { "attribute_pa_taille": "3.0m2" } to array format
+                    variationArray = Object.entries(item.variation).map(([attr, value]) => ({
+                        attribute: normalizeAttributeName(attr),
                         value: String(value)
-                    }));
+                    })).filter(v => v.attribute && v.value);
+                }
+
+                // Only add variation if we have valid attributes
+                if (variationArray.length > 0) {
+                    payload.variation = variationArray;
                 }
             }
+
+            console.log('[Shipping Calculate] Built payload for item:', payload.id, 'variation_id:', payload.variation_id, 'variation:', JSON.stringify(payload.variation || null));
 
             return payload;
         };

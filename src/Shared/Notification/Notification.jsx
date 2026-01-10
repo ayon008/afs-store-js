@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from 'react';
-import { X, Info, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Info, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 
 const Notification = ({ message, type = 'info', onClose, duration = 5000 }) => {
     useEffect(() => {
@@ -18,6 +18,8 @@ const Notification = ({ message, type = 'info', onClose, duration = 5000 }) => {
                 return <CheckCircle className="w-5 h-5 flex-shrink-0" />;
             case 'error':
                 return <AlertCircle className="w-5 h-5 flex-shrink-0" />;
+            case 'warning':
+                return <AlertTriangle className="w-5 h-5 flex-shrink-0" />;
             default:
                 return <Info className="w-5 h-5 flex-shrink-0" />;
         }
@@ -29,6 +31,8 @@ const Notification = ({ message, type = 'info', onClose, duration = 5000 }) => {
                 return 'bg-[#2A7029]';
             case 'error':
                 return 'bg-[#8b0000]';
+            case 'warning':
+                return 'bg-[#D97706]';
             default:
                 return 'bg-[#1D98FF]';
         }

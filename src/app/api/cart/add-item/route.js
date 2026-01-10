@@ -134,6 +134,20 @@ function extractStringValue(value) {
     return String(value || '');
 }
 
+// Helper to normalize attribute name for WooCommerce Store API
+// WooCommerce expects: "pa_color" not "attribute_pa_color" or "Color"
+function normalizeAttributeName(attrName) {
+    if (!attrName) return '';
+    let normalized = String(attrName);
+
+    // Strip "attribute_" prefix if present
+    if (normalized.startsWith('attribute_')) {
+        normalized = normalized.substring(10); // Remove "attribute_"
+    }
+
+    return normalized;
+}
+
 export async function POST(request) {
     const localeValue = await getLocaleValue();
     const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
@@ -202,6 +216,8 @@ export async function POST(request) {
         }
 
         // Handle variations - FIXED VERSION
+        // WooCommerce Store API expects: [{ attribute: "pa_color", value: "red" }]
+        // The attribute should be the taxonomy slug without "attribute_" prefix
         if (variation) {
             // Case 1: Variation is already an array (from your log)
             if (Array.isArray(variation)) {
@@ -210,11 +226,11 @@ export async function POST(request) {
                     // Extract attribute name
                     let attribute = '';
                     if (item.attribute !== undefined) {
-                        attribute = String(item.attribute);
+                        attribute = normalizeAttributeName(item.attribute);
                     } else if (item.name !== undefined) {
-                        attribute = String(item.name);
+                        attribute = normalizeAttributeName(item.name);
                     } else if (item.key !== undefined) {
-                        attribute = String(item.key);
+                        attribute = normalizeAttributeName(item.key);
                     }
 
                     // Extract value
@@ -229,10 +245,11 @@ export async function POST(request) {
                 console.log('Variation is an object');
                 payload.variation = Object.entries(variation)
                     .map(([attribute, value]) => {
+                        const normalizedAttr = normalizeAttributeName(attribute);
                         const stringValue = extractStringValue(value);
-                        console.log(`Processed: attribute="${attribute}", value="${stringValue}"`);
+                        console.log(`Processed: attribute="${normalizedAttr}", value="${stringValue}"`);
                         return {
-                            attribute: String(attribute),
+                            attribute: normalizedAttr,
                             value: stringValue
                         };
                     })
