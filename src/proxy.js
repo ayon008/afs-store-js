@@ -171,7 +171,15 @@ export default async function middleware(req) {
     // Handle language switch FIRST (before i18n middleware)
     // Only process if ?lang= parameter is present (user-initiated language change)
     const langParam = req.nextUrl.searchParams.get('lang');
+    console.log('[Middleware] Language switch check:', {
+        langParam,
+        currentLocale: locale,
+        pathname,
+        pathWithoutLocale,
+        willProcess: langParam && (langParam === 'en' || langParam === 'fr') && langParam !== locale
+    });
     if (langParam && (langParam === 'en' || langParam === 'fr') && langParam !== locale) {
+        console.log('[Middleware] Processing language switch from', locale, 'to', langParam);
         // Check if we're on a product page (handle both /product/ and /produit/ routes)
         // Try pathWithoutLocale first, then fallback to full pathname
         let productMatch = pathWithoutLocale.match(/^\/(?:product|produit)\/(.+)$/);
@@ -294,6 +302,13 @@ export default async function middleware(req) {
                 newPathname = `/${langParam}${pathWithoutLocaleClean === '/' ? '' : pathWithoutLocaleClean}`;
             }
 
+            console.log('[Middleware] Non-product page redirect:', {
+                pathWithoutLocale,
+                pathWithoutLocaleClean,
+                langParam,
+                newPathname
+            });
+
             // Create redirect URL with absolute path
             const baseUrl = new URL(req.url);
             const redirectUrl = new URL(newPathname, baseUrl.origin);
@@ -304,6 +319,8 @@ export default async function middleware(req) {
                     redirectUrl.searchParams.set(key, value);
                 }
             });
+            
+            console.log('[Middleware] Redirecting to:', redirectUrl.toString());
             return NextResponse.redirect(redirectUrl, 307);
         }
     }

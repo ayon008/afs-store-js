@@ -159,6 +159,17 @@ WooCommerce proxy: `/api/wc/orders/[id]`
 - Use `useTranslations` hook from next-intl
 - Locale prefix mode: "as-needed" (no prefix for default English)
 
+**Language Switching:**
+- **IMPORTANT**: To change language programmatically, use `router.replace(pathname, { locale: language })` from `@/i18n/navigation`
+- **DO NOT** use `?lang=` parameter or `window.location.href` - use the next-intl router directly
+- The router automatically handles locale prefixes: `/fr/` for French, no prefix for English (default)
+- When cart is not empty and language changes:
+  1. Clear localStorage cart with `handleClearCart()`
+  2. Clear WooCommerce server cart via `/api/cart/clear` (DELETE)
+  3. Wait 400-500ms for cookies to update
+  4. Use `router.replace(pathname, { locale: language })` to change language
+- The middleware (`src/proxy.js`) handles `?lang=` parameter for backward compatibility, but programmatic changes should use the router
+
 ### Image Optimization
 
 Remote patterns configured in `next.config.mjs` for:
