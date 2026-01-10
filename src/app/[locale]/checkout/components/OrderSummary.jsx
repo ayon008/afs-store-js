@@ -90,7 +90,11 @@ const OrderSummary = ({
 
                     {/* Shipping Cost Display */}
                     {selectedRateId && allShippingRates && allShippingRates.length > 0 && (() => {
-                        const [packageId, rateId] = selectedRateId.split(':');
+                        // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+                        const colonIndex = selectedRateId.indexOf(':');
+                        if (colonIndex === -1) return null;
+                        const packageId = selectedRateId.substring(0, colonIndex);
+                        const rateId = selectedRateId.substring(colonIndex + 1);
                         const selectedRate = allShippingRates.find(rate =>
                             rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
                         );

@@ -15,19 +15,26 @@ const ShippingMethods = ({
     // Check if we have at least the country (minimum requirement)
     const hasCountry = !!watchFields.billing_country;
 
-    // Auto-select single shipping method
+    // Auto-select single shipping method (force selection even if already selected to ensure it's in total)
     useEffect(() => {
-        if (allShippingRates && allShippingRates.length === 1 && !selectedRateId) {
+        if (allShippingRates && allShippingRates.length === 1) {
             const singleRate = allShippingRates[0];
             const rateValue = `${singleRate.package_id || 0}:${singleRate.rate_id}`;
-            handleSelectRate(rateValue);
+            // Force select the unique rate to ensure it's added to total
+            if (selectedRateId !== rateValue) {
+                handleSelectRate(rateValue);
+            }
         }
     }, [allShippingRates, selectedRateId, handleSelectRate]);
 
     // Get selected shipping cost for display
     const getSelectedShippingCost = () => {
         if (!selectedRateId || !allShippingRates || allShippingRates.length === 0) return null;
-        const [packageId, rateId] = selectedRateId.split(':');
+        // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+        const colonIndex = selectedRateId.indexOf(':');
+        if (colonIndex === -1) return null;
+        const packageId = selectedRateId.substring(0, colonIndex);
+        const rateId = selectedRateId.substring(colonIndex + 1);
         const selectedRate = allShippingRates.find(rate =>
             rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
         );
