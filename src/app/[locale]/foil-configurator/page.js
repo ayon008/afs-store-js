@@ -21,7 +21,7 @@ const Page = () => {
     const [level, setLevel] = useState('');
     const [recommendation, setRecommendation] = useState('');
     const [showSubpractice, setShowSubpractice] = useState(false);
-
+    
     const updateWeightOutput = (e) => {
         setWeight(e.target.value);
     }

@@ -5,6 +5,8 @@ import { Link } from '@/i18n/navigation';
 import getAmbessedor from '@/app/actions/WC/getAmbessadurs';
 import getCountries from '@/app/actions/WC/getCountries';
 import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
+import NotFound from '@/Shared/NotFound/404';
 
 const BreadCums = async ({ locale }) => {
     const t = await getTranslations("breadcum", locale);
@@ -23,7 +25,6 @@ const page = async ({ locale }) => {
     const categories = await getAmbessedor();
     const countries = await getCountries();
     const t = await getTranslations("ambassadors", locale);
-
     return (
         <div className='global-padding pt-4'>
             <div className=''>

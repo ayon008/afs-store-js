@@ -449,7 +449,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
             {/* Profile */}
 
-            <Link href={`/${locale}/login`}>
+            <Link href={`/login`}>
               <svg
                 width="24"
                 height="24"
@@ -730,81 +730,97 @@ const Navbar = ({ NAV_LINKS }) => {
                 <div onMouseLeave={() => handleShow(null)}>
                   {/* Service Section */}
                   <div className="bg-white w-full h-fit md:block hidden">
-                    <div className="grid grid-cols-6 gap-6 text-black/75 global-padding pt-[22px]">
-                      <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Choose
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Foil configurator</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Best match stabilizer</Link></li>
-                          <li className="cursor-pointer">
-                            <Link href="/" onClick={handleCloseDesktopMenu}>3 stabilizers / front wing comparator</Link>
-                          </li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Board construction</Link></li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Equipment buyback</Link></li>
-                          <li className="cursor-pointer">
-                            <Link href="/" onClick={handleCloseDesktopMenu}>Foil characteristics</Link>
-                          </li>
-                          <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Screw sizes</Link></li>
-                        </ul>
+                    <div className="grid grid-cols-4 items-start justify-center gap-6 text-black/75 global-padding pt-[22px]">
+                      <div className="">
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            {t("Choose")}
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">
+                              <Link
+                                href={locale === 'fr' ? "/blog/mat-comparatif-afs" : "/blog/mast-comparison-afs"}>
+                                {t("Mast comparison (Coming Soon)")}
+                              </Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link href={locale === 'fr' ? "/blog/afs-et-afs-advanced-board-construction" : "/blog/afs-and-afs-advanced-board-construction"}>
+                                {t("Board construction (Coming Soon)")}
+                              </Link>
+                            </li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "/reprise-materiel" : "/equipment-recovery"}>{t("Equipment trade-in")}</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Foil specifications")}</Link></li>
+                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Screw size")}</Link></li>
+                          </ul>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Pay
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Payment options</li>
-                        </ul>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            {t("Repair & Maintenance")}
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">
+                              <a target="_blank" onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/">{t("Support")}</a>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/service-request">{t("Customer Service Request")}</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <a onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/article/garantie-afs-duree-et-conditions-fnhfqg/?bust=1738253018543">{t("Warranty")}</a>
+                            </li>
+                            <li className="cursor-pointer">
+                              <a target="_blank" onClick={handleCloseDesktopMenu} href="https://foilandco.sharepoint.com/sites/Market/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025%2FNOTICE%20AFS%5FFR%202%2Epdf&parent=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025&p=true&ga=1">
+                                {t("User manual")}
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Shipping & Delivery
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Order tracking</li>
-                          <li className="cursor-pointer">Shipping & delivery</li>
-                          <li className="cursor-pointer">Returns</li>
-                        </ul>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            {t("Contact")}
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} target="_blank" href="mailto:support@afs-foiling.com">Email</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} target="_blank" href="https://wa.me/33782296241">WhatsApp</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              {t("Book a call with an AFS expert")}
+                            </li>
+                            <li className="cursor-pointer">
+                              {t("Come visit us")}
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-events">{t("Events")}</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/blog">Blog</Link>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Repair & Maintenance
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Support</li>
-                          <li className="cursor-pointer">After-sales service request</li>
-                          <li className="cursor-pointer">Warranty</li>
-                          <li className="cursor-pointer">User manual</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Contact
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Email</li>
-                          <li className="cursor-pointer">WhatsApp</li>
-                          <li className="cursor-pointer">
-                            Book a call with an AFS expert
-                          </li>
-                          <li className="cursor-pointer">
-                            Come visit us
-                          </li>
-                          <li className="cursor-pointer">Events</li>
-                          <li className="cursor-pointer">Blog</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-[16px] font-semibold tracking-wide">
-                          Team
-                        </p>
-                        <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                          <li className="cursor-pointer">Work team</li>
-                          <li className="cursor-pointer">Ambassadors</li>
-                          <li className="cursor-pointer">Dealer map</li>
-                        </ul>
+                        <div className="w-fit mx-auto">
+                          <p className="text-[16px] font-semibold tracking-wide">
+                            Team
+                          </p>
+                          <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-team">{t("Work team")}</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/afs-ambassadors">{t("Ambassadors")}</Link>
+                            </li>
+                            <li className="cursor-pointer">
+                              <Link onClick={handleCloseDesktopMenu} href="/map">{t("Dealer map")}</Link>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-row-reverse items-center justify-center gap-2 text-black/75 py-4 border-t mt-6">
@@ -822,7 +838,7 @@ const Navbar = ({ NAV_LINKS }) => {
                         />
                       </svg>
                       <span className="text-[#111] font-semibold cursor-pointer">
-                        Factory tour
+                        <Link onClick={handleCloseDesktopMenu} href="/visit-the-factory">{t("Factory tour")}</Link>
                       </span>
                     </div>
                   </div>
@@ -856,7 +872,11 @@ const Navbar = ({ NAV_LINKS }) => {
                 onClick={() => {
                   // Si le lien n'a pas de sous-menus, fermer le menu
                   if (!link.sublinks || link.sublinks.length === 0) {
-                    handleCloseMenu();
+                    if (link.name == 'Service') {
+                      handleShow('Service');
+                    } else {
+                      handleCloseMenu();
+                    }
                   } else {
                     handleShow(link.name);
                   }
@@ -872,7 +892,7 @@ const Navbar = ({ NAV_LINKS }) => {
                     }
                   }}>{link.name}</Link>
                 </span>
-                {link.sublinks?.length > 0 && (
+                {(link.sublinks?.length > 0 || link.name == 'Service') && (
                   <svg
                     width="20"
                     height="20"
@@ -914,18 +934,19 @@ const Navbar = ({ NAV_LINKS }) => {
           </div>
         </div>
       </div>
+
       {/* 2nd slide */}
-      {subLinks?.sublinks?.length > 0 && (
+      {(subLinks?.sublinks?.length > 0 || hoverId == 'Service') && (
         <div
           ref={secondRef}
           className="fixed inset-0 transform translate-x-full opacity-0 h-screen text-black/75 z-[110] bg-white px-6 pb-6 pt-[90px] block md:hidden overflow-y-scroll"
         >
           <p
             onClick={() => handleShow(null)}
-            className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]"
+            className="text-[12px] leading-[100%] font-bold uppercase text-[#999999] flex items-center gap-1"
           >
-            <ArrowLeft className="inline mr-1" />
-            {hoverId}
+            <ArrowLeft className="w-4 h-4 mt-[2px]" />
+            <span className="block">{hoverId}</span>
           </p>
           {hoverId !== "Service" ? (
             <>
@@ -977,29 +998,14 @@ const Navbar = ({ NAV_LINKS }) => {
               <div className="grid grid-cols-1 gap-6 text-black/75 pt-[22px]">
                 <div>
                   <p className="text-[16px] font-semibold tracking-wide">
-                    Choisir
+                    {t("Choose")}
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Configurateur foil</li>
-                    <li className="cursor-pointer">Best match stab</li>
-                    <li className="cursor-pointer">
-                      Comparateur 3 stabs / aile avant
-                    </li>
-                    <li className="cursor-pointer">Comparatif mât</li>
-                    <li className="cursor-pointer">Construction planche</li>
-                    <li className="cursor-pointer">Reprise matériel</li>
-                    <li className="cursor-pointer">
-                      Caractéristiques des foils
-                    </li>
-                    <li className="cursor-pointer">Taille des vis</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-[16px] font-semibold tracking-wide">
-                    Payer
-                  </p>
-                  <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Options paiement</li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Mast comparison (Coming Soon)</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Board construction (Coming Soon)</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Equipment trade-in</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Foil specifications</Link></li>
+                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>Screw size</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -1017,7 +1023,9 @@ const Navbar = ({ NAV_LINKS }) => {
                     Réparation et maintenance
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Support</li>
+                    <li className="cursor-pointer">
+                      <a target="_blank" onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/">Support</a>
+                    </li>
                     <li className="cursor-pointer">Demande de SAV</li>
                     <li className="cursor-pointer">Garantie</li>
                     <li className="cursor-pointer">Notice d&apos;utilisation</li>
@@ -1028,14 +1036,20 @@ const Navbar = ({ NAV_LINKS }) => {
                     Contact
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer">Mail</li>
-                    <li className="cursor-pointer">Whatsapp</li>
+                    <li className="cursor-pointer">
+                      <Link onClick={handleCloseDesktopMenu} target="_blank" href="mailto:support@afs-foiling.com">Email</Link>
+                    </li>
+                    <li className="cursor-pointer">
+                      <Link onClick={handleCloseDesktopMenu} target="_blank" href="https://wa.me/33782296241">WhatsApp</Link>
+                    </li>
                     <li className="cursor-pointer">
                       Réserver un appel avec un expert AFS
                     </li>
                     <li className="cursor-pointer">Venir nous rendre visite</li>
                     <li className="cursor-pointer">Evenements</li>
-                    <li className="cursor-pointer">Blog</li>
+                    <li className="cursor-pointer">
+                      <Link onClick={handleCloseDesktopMenu} href="/blog">Blog</Link>
+                    </li>
                   </ul>
                 </div>
                 <div>
@@ -1082,10 +1096,10 @@ const Navbar = ({ NAV_LINKS }) => {
           <div className="p-6">
             <p
               onClick={() => setDetailsDiv(null)}
-              className="text-[12px] leading-[100%] font-bold uppercase text-[#999999]"
+              className="text-[12px] leading-[100%] font-bold uppercase text-[#999999] flex items-center gap-1"
             >
-              <ArrowLeft className="inline mr-1" />
-              {detailsDiv}
+              <ArrowLeft className="w-4 h-4 mt-[2px]" />
+              <span className="block">{detailsDiv}</span>
             </p>
             <div className="mt-5">
               <h4 className="font-semibold text-base leading-[110%]">

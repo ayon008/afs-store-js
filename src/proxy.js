@@ -120,9 +120,25 @@ export default async function middleware(req) {
 
     const authRoutes = ["/login", "/signup"];
     const protectedRoutes = ["/my-account", "/my-account/logout", "/my-account/orders", "/my-account/payment-methods", "/my-account/reset-password", "/demande-sav", "/orders"];
+    // Add handling for translated routes
+    const translatedRoutes = {
+        '/connexion': '/login',
+        '/inscription': '/signup',
+        '/mon-compte': '/my-account',
+        '/mon-compte/commandes': '/my-account/orders',
+        '/mon-compte/moyens-de-paiement': '/my-account/payment-methods',
+        '/mon-compte/reinitialiser-mot-de-passe': '/my-account/reset-password',
+        '/demande-sav': '/demande-sav',
+        '/commandes': '/orders',
+    };
 
-    const isAuthRoute = authRoutes.some(route => pathWithoutLocale.startsWith(route));
-    const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
+    let checkPath = pathWithoutLocale;
+    if (locale === 'fr' && translatedRoutes[pathWithoutLocale]) {
+        checkPath = translatedRoutes[pathWithoutLocale];
+    }
+
+    const isAuthRoute = authRoutes.some(route => checkPath.startsWith(route));
+    const isProtectedRoute = protectedRoutes.some(route => checkPath.startsWith(route));
 
     // Handle auth redirects
     if (isAuthRoute && validToken) {
@@ -140,7 +156,7 @@ export default async function middleware(req) {
     if (pathWithoutLocale === '/checkout') {
         const referer = req.headers.get('referer') || '';
         const isComingFromCart = referer.includes('/cart');
-        
+
         // Don't redirect if coming from cart page (user just clicked checkout button)
         // This prevents redirect loops when cart is being synced
         if (!isComingFromCart) {
@@ -163,25 +179,25 @@ export default async function middleware(req) {
             // Fallback: check full pathname (useful when locale is in path)
             productMatch = pathname.match(/\/(?:product|produit)\/([^\/\?]+)/);
         }
-        
+
         if (productMatch && productMatch[1]) {
             const currentSlug = productMatch[1].split('?')[0].split('#')[0]; // Remove query params and hash if any
-            
+
             // Debug: log the detected slug
             console.log(`[Language Switch] Detected slug: ${currentSlug}, from locale: ${locale}, to locale: ${langParam}, pathname: ${pathname}, pathWithoutLocale: ${pathWithoutLocale}`);
-            
+
             // Only make API call when language is being changed
             try {
                 const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_WP_BASE_URL;
                 if (WP_BASE_URL) {
                     const translateUrl = `${WP_BASE_URL}/wp-json/afs-wcml/v1/products/translate-slug?slug=${encodeURIComponent(currentSlug)}&target_lang=${langParam}`;
-                    
+
                     console.log(`[Language Switch] Calling API: ${translateUrl}`);
-                    
+
                     // Use AbortController for timeout to prevent blocking
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout (increased for reliability)
-                    
+
                     const translateResponse = await fetch(translateUrl, {
                         cache: 'no-store', // Don't cache in middleware
                         headers: {
@@ -189,13 +205,13 @@ export default async function middleware(req) {
                         },
                         signal: controller.signal,
                     });
-                    
+
                     clearTimeout(timeoutId);
 
                     if (translateResponse && translateResponse.ok) {
                         const translation = await translateResponse.json();
                         console.log(`[Language Switch] API Response:`, JSON.stringify(translation, null, 2));
-                        
+
                         // Check if translation exists and has a slug
                         if (translation && translation.exists === true && translation.slug && translation.slug.trim() !== '') {
                             // Redirect to translated product with correct route
@@ -277,7 +293,7 @@ export default async function middleware(req) {
                 // French needs /fr/ prefix
                 newPathname = `/${langParam}${pathWithoutLocaleClean === '/' ? '' : pathWithoutLocaleClean}`;
             }
-            
+
             // Create redirect URL with absolute path
             const baseUrl = new URL(req.url);
             const redirectUrl = new URL(newPathname, baseUrl.origin);
@@ -303,7 +319,7 @@ export default async function middleware(req) {
             return NextResponse.redirect(redirectUrl, 308);
         }
     }
-    
+
     // Redirect /produit/ to /product/ for English locale (when no /fr/ prefix)
     if (locale === 'en' && pathWithoutLocale.startsWith('/produit/') && !pathname.startsWith('/fr/')) {
         const slug = pathWithoutLocale.replace('/produit/', '').replace(/\/$/, '');

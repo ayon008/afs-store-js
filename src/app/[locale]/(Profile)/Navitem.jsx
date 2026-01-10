@@ -1,11 +1,8 @@
 "use client"
-
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, LogOut } from "lucide-react";
-import { useTranslations } from "next-intl";
-
-
+import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 // Custom SVG renderer for string icons
 const CustomIcon = ({ name, isActive }) => {
@@ -71,12 +68,45 @@ const CustomIcon = ({ name, isActive }) => {
     }
 };
 
-
-
-
 const NavItems = () => {
     const pathname = usePathname();
+    const locale = useLocale();
     const t = useTranslations("profile");
+
+    // Route translations mapping
+    const routeTranslations = {
+        "/my-account": {
+            en: "/my-account",
+            fr: "/fr/mon-compte"
+        },
+        "/my-account/orders": {
+            en: "/my-account/orders",
+            fr: "/fr/mon-compte/commandes"
+        },
+        "/my-account/payment-methods": {
+            en: "/my-account/payment-methods",
+            fr: "/fr/mon-compte/moyens-de-paiement"
+        },
+        "/service-request": {
+            en: "/service-request",
+            fr: "/fr/demande-sav"
+        },
+        "/my-account/reset-password": {
+            en: "/my-account/reset-password",
+            fr: "/fr/mon-compte/reinitialiser-mot-de-passe"
+        },
+        "/my-account/logout": {
+            en: "/my-account/logout",
+            fr: "/fr/mon-compte/deconnexion"
+        }
+    };
+
+    // Helper function to check if route is active
+    const isRouteActive = (baseHref) => {
+        const translatedPath = routeTranslations[baseHref]?.[locale] || baseHref;
+        return pathname === translatedPath || pathname.endsWith(translatedPath);
+    };
+
     // Navigation items
     const NAV_ITEMS = [
         { label: t("info"), href: "/my-account", icon: "user" },
@@ -85,20 +115,20 @@ const NavItems = () => {
         { label: "SAV", href: "/demande-sav", icon: "sav" },
         { label: t("change"), href: "/my-account/reset-password", icon: "password" },
         { label: t("logout"), href: "/my-account/logout", icon: "logout" },
-        { label: "", href: "", icon: <></> }
     ];
 
     return (
         <ul className="space-y-[18px] mt-[22px] xl:block flex flex-wrap items-center gap-[10px] w-full">
             {NAV_ITEMS.map((item, i) => {
-                const isActive = pathname.endsWith(item.href);
+                const isActive = isRouteActive(item.href);
            
                 return (
                     <li key={i}>
                         <Link
                             href={item.href}
-                            className={`text-base font-bold leading-[100%] uppercase flex items-center gap-1 group ${isActive ? "text-[#111]" : "text-[#111]/40"
-                                }`}
+                            className={`text-base font-bold leading-[100%] uppercase flex items-center gap-1 group ${
+                                isActive ? "text-[#111]" : "text-[#111]/40"
+                            }`}
                         >
                             <CustomIcon name={item.icon} isActive={isActive} />
                             <span className="group-hover:text-[#111]">{item.label}</span>
