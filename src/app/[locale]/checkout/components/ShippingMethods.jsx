@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Truck, MapPin, Clock, CheckCircle2 } from "lucide-react";
 
 const ShippingMethods = ({
@@ -14,6 +14,15 @@ const ShippingMethods = ({
 }) => {
     // Check if we have at least the country (minimum requirement)
     const hasCountry = !!watchFields.billing_country;
+
+    // Auto-select single shipping method
+    useEffect(() => {
+        if (allShippingRates && allShippingRates.length === 1 && !selectedRateId) {
+            const singleRate = allShippingRates[0];
+            const rateValue = `${singleRate.package_id || 0}:${singleRate.rate_id}`;
+            handleSelectRate(rateValue);
+        }
+    }, [allShippingRates, selectedRateId, handleSelectRate]);
 
     // Get selected shipping cost for display
     const getSelectedShippingCost = () => {
@@ -32,6 +41,57 @@ const ShippingMethods = ({
     };
 
     const selectedShipping = getSelectedShippingCost();
+
+    // If only one shipping method and it's selected, show compact version
+    const isSingleMethod = allShippingRates && allShippingRates.length === 1 && selectedRateId;
+
+    // Don't render the full component if there's only one method and it's already selected
+    if (isSingleMethod && !shippingLoading && !updatingShipping) {
+        const singleRate = allShippingRates[0];
+        const totalPrice = (singleRate.price / 100 + (singleRate.taxes || 0) / 100);
+
+        return (
+            <div className='bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden'>
+                <div className='bg-[#000000] p-6'>
+                    <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm'>
+                            <Truck className='w-6 h-6 text-white' />
+                        </div>
+                        <div className='flex-1'>
+                            <h3 className='text-2xl font-bold text-white'>{t("shippingMethods")}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className='p-6'>
+                    <div className='flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl'>
+                        <div className='flex items-center gap-3'>
+                            <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center'>
+                                <CheckCircle2 className='w-5 h-5 text-green-600' />
+                            </div>
+                            <div>
+                                <span className='font-semibold text-gray-900'>{singleRate.name}</span>
+                                {singleRate.delivery_time && (
+                                    <div className='flex items-center gap-1 mt-0.5 text-sm text-gray-500'>
+                                        <Clock className='w-3.5 h-3.5' />
+                                        <span>{singleRate.delivery_time}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className='text-right'>
+                            {totalPrice === 0 ? (
+                                <span className='text-lg font-bold text-green-600'>{t("free")}</span>
+                            ) : (
+                                <span className='text-lg font-bold text-gray-900'>
+                                    {totalPrice.toFixed(2)}{cart?.totals?.currency_symbol || singleRate.currency_symbol || '€'}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden'>

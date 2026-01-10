@@ -223,13 +223,16 @@ const ProductDetails = ({ data, variations }) => {
             return {};
         }
 
-        // variationAttributes from WooCommerce already has the correct format
-        // Each attribute has: { name: "attribute_pa_taille", option: "M" }
+        // Use slug for API compatibility (WooCommerce Store API expects "pa_taille" not "Taille")
+        // Each attribute has: { id, name: "Taille", slug: "pa_taille", option: "M" }
         const formattedVariations = {};
 
         variationAttributes.forEach((attr) => {
-            if (attr.name && attr.option) {
-                formattedVariations[attr.name] = attr.option;
+            // Prefer slug over name for API calls
+            const attrKey = attr.slug || attr.name || '';
+            const attrValue = attr.option || '';
+            if (attrKey && attrValue) {
+                formattedVariations[attrKey] = attrValue;
             }
         });
 

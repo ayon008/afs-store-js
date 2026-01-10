@@ -466,18 +466,37 @@ const CheckoutPageContent = () => {
                 }
                 // Fall back to array format if available
                 else if (Array.isArray(item.variation) && item.variation.length > 0) {
-                    variationData = item.variation;
+                    // Convert array to object format for consistency
+                    variationData = item.variation.reduce((acc, v) => {
+                        if (v.attribute && v.value) {
+                            acc[v.attribute] = v.value;
+                        }
+                        return acc;
+                    }, {});
                 }
                 // Last resort: try to get from productData if available
                 else if (item.productData?.variations && item.variation_id) {
                     const matchedVariation = item.productData.variations.find(v => v.id === item.variation_id);
                     if (matchedVariation?.attributes) {
+                        // Use slug for API compatibility (WooCommerce Store API expects "pa_taille" not "Taille")
                         variationData = matchedVariation.attributes.reduce((acc, attr) => {
-                            acc[attr.name || attr.attribute] = attr.option || attr.value;
+                            const attrKey = attr.slug || attr.name || attr.attribute || '';
+                            const attrValue = attr.option || attr.value || '';
+                            if (attrKey && attrValue) {
+                                acc[attrKey] = attrValue;
+                            }
                             return acc;
                         }, {});
                     }
                 }
+
+                console.log('[Checkout] Preparing item for shipping:', {
+                    id: item.id,
+                    variation_id: item.variation_id,
+                    hasVariationRaw: !!item._variationRaw && Object.keys(item._variationRaw || {}).length > 0,
+                    hasVariationArray: Array.isArray(item.variation) && item.variation.length > 0,
+                    variationData: variationData
+                });
 
                 return {
                     id: item.id,
@@ -486,6 +505,10 @@ const CheckoutPageContent = () => {
                     variation: variationData
                 };
             });
+
+            // Get location from cart metadata (set when items were added)
+            const cartLocation = cart?.metadata?.location || cart?._localStorage?.location;
+            console.log('[Checkout] Cart location:', cartLocation);
 
             // Call the shipping calculation API
             const response = await fetch('/api/shipping/calculate', {
@@ -499,7 +522,8 @@ const CheckoutPageContent = () => {
                     state: addressData.billing_state || addressData.shipping_state || '',
                     postcode: addressData.billing_postcode?.trim() || addressData.shipping_postcode?.trim() || '',
                     city: addressData.billing_city || addressData.shipping_city || '',
-                    items: items
+                    items: items,
+                    location: cartLocation // Pass location for Multi-Locations-Inventory-Management plugin
                 })
             });
 

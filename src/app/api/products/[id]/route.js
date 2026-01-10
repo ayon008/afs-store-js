@@ -43,6 +43,22 @@ export async function GET(request, { params }) {
             }
         }
 
+        // Create a map from attribute display name/id to slug
+        // Product attributes contain: { id, name, slug, options, variation }
+        const attributeSlugMap = {};
+        if (product.attributes && Array.isArray(product.attributes)) {
+            product.attributes.forEach(attr => {
+                // Map by id
+                if (attr.id) {
+                    attributeSlugMap[`id_${attr.id}`] = attr.slug || `pa_${attr.name.toLowerCase().replace(/\s+/g, '-')}`;
+                }
+                // Map by display name (case-insensitive)
+                if (attr.name) {
+                    attributeSlugMap[attr.name.toLowerCase()] = attr.slug || `pa_${attr.name.toLowerCase().replace(/\s+/g, '-')}`;
+                }
+            });
+        }
+
         // Convert currency from cookie format (euro/usd/gbp) to currency code (EUR/USD/GBP)
         const currencyCode = currency === 'euro' ? 'EUR' : currency === 'usd' ? 'USD' : currency === 'gbp' ? 'GBP' : 'EUR';
 
@@ -60,11 +76,31 @@ export async function GET(request, { params }) {
             stock_quantity: product.stock_quantity || null,
             type: product.type,
             currency: currencyCode, // Include currency in response
+            // Include product attributes with their slugs for reference
+            attributes: (product.attributes || []).map(attr => ({
+                id: attr.id,
+                name: attr.name,
+                slug: attr.slug || `pa_${attr.name.toLowerCase().replace(/\s+/g, '-')}`,
+                options: attr.options || [],
+                variation: attr.variation || false,
+            })),
             variations: variations.map(v => ({
                 id: v.id,
                 price: parseFloat(v.price) || 0,
                 price_with_tax: parseFloat(v.price) * 1.2 || 0,
-                attributes: v.attributes || [],
+                // Enrich variation attributes with slug for WooCommerce Store API compatibility
+                attributes: (v.attributes || []).map(attr => {
+                    // Try to find the slug from our map
+                    const slugById = attr.id ? attributeSlugMap[`id_${attr.id}`] : null;
+                    const slugByName = attr.name ? attributeSlugMap[attr.name.toLowerCase()] : null;
+                    const slug = slugById || slugByName || (attr.name ? `pa_${attr.name.toLowerCase().replace(/\s+/g, '-')}` : '');
+                    return {
+                        id: attr.id,
+                        name: attr.name,       // Display name (e.g., "Taille", "Size")
+                        slug: slug,            // Taxonomy slug (e.g., "pa_taille", "pa_size")
+                        option: attr.option,   // Selected value (e.g., "3.0m2")
+                    };
+                }),
                 stock_status: v.stock_status || 'instock',
                 stock_quantity: v.stock_quantity || null,
             })),

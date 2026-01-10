@@ -122,16 +122,20 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         if ((!variationRaw || Object.keys(variationRaw).length === 0) && item.variation_id && item.productData?.variations) {
             const matchedVariation = item.productData.variations.find(v => v.id === item.variation_id);
             if (matchedVariation?.attributes && Array.isArray(matchedVariation.attributes)) {
+                // Use slug for API calls (WooCommerce Store API expects "pa_taille" not "Taille")
                 variationRaw = matchedVariation.attributes.reduce((acc, attr) => {
-                    const attrName = attr.name || attr.attribute || '';
+                    // Prefer slug over name for API compatibility
+                    const attrKey = attr.slug || attr.name || attr.attribute || '';
                     const attrValue = attr.option || attr.value || '';
-                    if (attrName && attrValue) {
-                        acc[attrName] = attrValue;
+                    if (attrKey && attrValue) {
+                        acc[attrKey] = attrValue;
                     }
                     return acc;
                 }, {});
+                // For display, use the display name; for API calls in attribute field, use slug
                 variationArray = matchedVariation.attributes.map(attr => ({
-                    attribute: attr.name || attr.attribute || '',
+                    attribute: attr.slug || attr.name || attr.attribute || '', // Use slug for API
+                    displayName: attr.name || attr.attribute || '',             // Keep display name for UI
                     value: attr.option || attr.value || ''
                 })).filter(v => v.attribute && v.value);
             }
@@ -180,6 +184,7 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         billing_address: null,
         needs_payment: true,
         needs_shipping: true,
+        metadata: localCart.metadata, // Include cart metadata (locale, currency, location)
         _localStorage: true // Flag to indicate this is from localStorage
     };
 };

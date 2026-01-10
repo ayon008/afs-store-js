@@ -135,7 +135,7 @@ function extractStringValue(value) {
 }
 
 // Helper to normalize attribute name for WooCommerce Store API
-// WooCommerce expects: "pa_color" not "attribute_pa_color" or "Color"
+// WooCommerce expects: "pa_color" not "attribute_pa_color" or "Color" or "Taille"
 function normalizeAttributeName(attrName) {
     if (!attrName) return '';
     let normalized = String(attrName);
@@ -145,7 +145,39 @@ function normalizeAttributeName(attrName) {
         normalized = normalized.substring(10); // Remove "attribute_"
     }
 
-    return normalized;
+    // If already in pa_ format, return as-is
+    if (normalized.startsWith('pa_')) {
+        return normalized;
+    }
+
+    // Convert display name to slug format: "Taille" -> "pa_taille", "Size" -> "pa_size"
+    // This handles cases where cart was saved with display names instead of slugs
+    const slugified = normalized
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/[^a-z0-9-]/g, ''); // Remove special characters
+
+    return `pa_${slugified}`;
+}
+
+// Helper to normalize attribute value for WooCommerce Store API
+// WooCommerce expects slugified values: "bleu" not "Bleu", "oui" not "Oui"
+function normalizeAttributeValue(value) {
+    if (!value) return '';
+    const strValue = String(value);
+
+    // If it looks like a measurement (contains numbers with units), keep as-is
+    if (/^\d+(\.\d+)?\s*(m2|m|cm|mm|kg|g|l|ml)?$/i.test(strValue)) {
+        return strValue;
+    }
+
+    // Slugify the value: "Bleu" -> "bleu", "Oui" -> "oui"
+    return strValue
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/[^a-z0-9-_.]/g, ''); // Remove special characters (keep dots for measurements)
 }
 
 export async function POST(request) {
@@ -218,6 +250,7 @@ export async function POST(request) {
         // Handle variations - FIXED VERSION
         // WooCommerce Store API expects: [{ attribute: "pa_color", value: "red" }]
         // The attribute should be the taxonomy slug without "attribute_" prefix
+        // Values should also be slugified: "Bleu" -> "bleu", "Oui" -> "oui"
         if (variation) {
             // Case 1: Variation is already an array (from your log)
             if (Array.isArray(variation)) {
@@ -233,10 +266,11 @@ export async function POST(request) {
                         attribute = normalizeAttributeName(item.key);
                     }
 
-                    // Extract value
-                    const value = extractStringValue(item.value);
+                    // Extract and normalize value (slugify for WooCommerce)
+                    const rawValue = extractStringValue(item.value);
+                    const value = normalizeAttributeValue(rawValue);
 
-                    console.log(`Processed: attribute="${attribute}", value="${value}"`);
+                    console.log(`Processed: attribute="${attribute}", value="${value}" (raw: "${rawValue}")`);
                     return { attribute, value };
                 }).filter(item => item.attribute && item.value);
             }
@@ -246,11 +280,12 @@ export async function POST(request) {
                 payload.variation = Object.entries(variation)
                     .map(([attribute, value]) => {
                         const normalizedAttr = normalizeAttributeName(attribute);
-                        const stringValue = extractStringValue(value);
-                        console.log(`Processed: attribute="${normalizedAttr}", value="${stringValue}"`);
+                        const rawValue = extractStringValue(value);
+                        const normalizedValue = normalizeAttributeValue(rawValue);
+                        console.log(`Processed: attribute="${normalizedAttr}", value="${normalizedValue}" (raw: "${rawValue}")`);
                         return {
                             attribute: normalizedAttr,
-                            value: stringValue
+                            value: normalizedValue
                         };
                     })
                     .filter(item => item.attribute && item.value);
