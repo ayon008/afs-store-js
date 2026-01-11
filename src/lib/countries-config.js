@@ -69,7 +69,7 @@ export const REGIONS = {
   },
 };
 
-// Countries by region
+// Countries by region (with VAT rates)
 export const COUNTRIES = {
   europe: [
     {
@@ -82,6 +82,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 20,
     },
     {
       code: 'BE',
@@ -93,6 +94,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 21,
     },
     {
       code: 'CH',
@@ -104,6 +106,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 0, // No EU VAT for exports
     },
     {
       code: 'LU',
@@ -115,6 +118,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 17,
     },
     {
       code: 'DE',
@@ -126,6 +130,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 19,
     },
     {
       code: 'IT',
@@ -137,6 +142,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 22,
     },
     {
       code: 'NL',
@@ -148,6 +154,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 21,
     },
     {
       code: 'PT',
@@ -159,6 +166,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 23,
     },
     {
       code: 'AT',
@@ -170,6 +178,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 20,
     },
     {
       code: 'GR',
@@ -181,6 +190,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 24,
     },
     {
       code: 'IE',
@@ -192,6 +202,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 23,
     },
     {
       code: 'ES',
@@ -203,6 +214,7 @@ export const COUNTRIES = {
       currencyKey: 'euro',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.EUR,
+      vatRate: 21,
       isExternal: true,
       externalUrl: 'https://afs-foiling.es',
     },
@@ -218,6 +230,7 @@ export const COUNTRIES = {
       currencyKey: 'gbp',
       warehouse: WAREHOUSES.EUROPE,
       paymentMethods: CURRENCY_PAYMENT_METHODS.GBP,
+      vatRate: 20,
     },
   ],
   us: [
@@ -231,6 +244,7 @@ export const COUNTRIES = {
       currencyKey: 'usd',
       warehouse: WAREHOUSES.USA,
       paymentMethods: CURRENCY_PAYMENT_METHODS.USD,
+      vatRate: 0, // No VAT, sales tax handled separately
     },
     {
       code: 'CA',
@@ -242,6 +256,7 @@ export const COUNTRIES = {
       currencyKey: 'usd',
       warehouse: WAREHOUSES.USA,
       paymentMethods: CURRENCY_PAYMENT_METHODS.USD,
+      vatRate: 0, // No VAT, GST/HST handled separately
     },
   ],
   emirates: [
@@ -255,6 +270,7 @@ export const COUNTRIES = {
       currencyKey: 'usd',
       warehouse: WAREHOUSES.USA,
       paymentMethods: CURRENCY_PAYMENT_METHODS.USD,
+      vatRate: 5,
     },
     {
       code: 'SA',
@@ -266,8 +282,8 @@ export const COUNTRIES = {
       currencyKey: 'usd',
       warehouse: WAREHOUSES.USA,
       paymentMethods: CURRENCY_PAYMENT_METHODS.USD,
+      vatRate: 15,
     },
-
   ],
 };
 
@@ -339,6 +355,9 @@ export function getLanguageName(langCode, displayLocale = 'en') {
 // Default country (France)
 export const DEFAULT_COUNTRY = COUNTRIES.europe[0];
 
+// Default VAT rate (France)
+export const DEFAULT_VAT_RATE = 20;
+
 // Get country from cookies or default
 export function getCurrentCountryFromCookies(cookies) {
   const selectedCountry = cookies?.get?.('selected_country');
@@ -347,4 +366,53 @@ export function getCurrentCountryFromCookies(cookies) {
     if (country) return country;
   }
   return DEFAULT_COUNTRY;
+}
+
+/**
+ * Get VAT rate for a country code
+ * @param {string} countryCode - ISO 2-letter country code
+ * @returns {number} VAT rate as percentage (e.g., 20 for 20%)
+ */
+export function getVatRate(countryCode) {
+  if (!countryCode) return DEFAULT_VAT_RATE;
+  const country = getCountryByCode(countryCode.toUpperCase());
+  return country?.vatRate !== undefined ? country.vatRate : DEFAULT_VAT_RATE;
+}
+
+/**
+ * Calculate price including VAT for a specific country
+ * @param {number} priceExclTax - Price excluding tax
+ * @param {string} countryCode - ISO 2-letter country code
+ * @returns {number} Price including VAT
+ */
+export function calculatePriceWithVat(priceExclTax, countryCode) {
+  const vatRate = getVatRate(countryCode);
+  return priceExclTax * (1 + vatRate / 100);
+}
+
+/**
+ * Recalculate price_incl_tax based on the selected country
+ * Useful when WooCommerce doesn't properly calculate VAT for all countries
+ * @param {number} price - Base price (without tax)
+ * @param {number} currentPriceInclTax - Current price_incl_tax from WooCommerce
+ * @param {string} currentCountry - Country WooCommerce used for calculation
+ * @param {string} targetCountry - Country we want to calculate for
+ * @returns {number} Recalculated price including VAT
+ */
+export function recalculatePriceForCountry(price, currentPriceInclTax, currentCountry, targetCountry) {
+  // If same country, no recalculation needed
+  if (currentCountry === targetCountry) {
+    return currentPriceInclTax;
+  }
+  
+  // Use base price to calculate with target country's VAT
+  const basePrice = parseFloat(price);
+  if (isNaN(basePrice) || basePrice <= 0) {
+    return currentPriceInclTax;
+  }
+  
+  const targetVatRate = getVatRate(targetCountry);
+  const newPrice = basePrice * (1 + targetVatRate / 100);
+  
+  return Math.round(newPrice * 100) / 100; // Round to 2 decimal places
 }

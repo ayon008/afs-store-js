@@ -852,3 +852,17 @@ position: relative;
 .stepper-circle-pending {
   @apply bg-white border-2 border-gray-300 text-gray-400;
 }
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}

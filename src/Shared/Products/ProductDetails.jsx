@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
+import { recalculatePriceForCountry } from '@/lib/countries-config';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
@@ -179,7 +180,20 @@ const ProductDetails = ({ data, variations }) => {
 
                     setMatchedVariation(matchedVariation);
 
-                    setVariationPrice(matchedVariation.price_incl_tax);
+                    // Get selected country from cookie for accurate VAT calculation
+                    const selectedCountry = Cookies.get('selected_country') || 'FR';
+                    
+                    // Recalculate price with correct VAT for selected country
+                    // WooCommerce may not have VAT rates configured for all countries
+                    const basePrice = parseFloat(matchedVariation.price);
+                    const recalculatedPrice = recalculatePriceForCountry(
+                        basePrice,
+                        matchedVariation.price_incl_tax,
+                        'FR', // WooCommerce default country
+                        selectedCountry
+                    );
+
+                    setVariationPrice(recalculatedPrice);
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
                     setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);
@@ -260,9 +274,6 @@ const ProductDetails = ({ data, variations }) => {
         // Get current quantity in cart for this product/variation
         const currentQuantityInCart = getItemQuantity(productId, variationId || null);
 
-        console.log(currentQuantityInCart, 'currentQuantityInCart');
-
-
         // Check if adding 1 more would exceed stock
         if (stockQuantity !== null && stockQuantity !== undefined) {
             if (currentQuantityInCart >= stockQuantity) {
@@ -278,16 +289,6 @@ const ProductDetails = ({ data, variations }) => {
                 ? formatVariationsForWooCommerce()
                 : {};
 
-            // Debug logging
-            console.log('Adding to cart:', {
-                productId,
-                variationId,
-                hasVariations,
-                variationAttributes,
-                formattedVariations,
-                watchedValues
-            });
-
             // For variable products, if formattedVariations is empty but we have watchedValues, use those
             let finalVariations = formattedVariations;
             if (hasVariations && Object.keys(formattedVariations).length === 0 && Object.keys(watchedValues).length > 0) {
@@ -301,7 +302,6 @@ const ProductDetails = ({ data, variations }) => {
                         finalVariations[attrKey] = watchedValues[attr.name];
                     }
                 });
-                console.log('Using watchedValues as fallback:', finalVariations);
             }
 
             // Prepare product data for localStorage cart
@@ -328,8 +328,6 @@ const ProductDetails = ({ data, variations }) => {
                 productData
             );
 
-            console.log(result, 'result');
-
             // Only show alert if there's an actual error (success is explicitly false)
             // Don't show alert if success is true or if result is undefined/null
             if (result && result.success === false && result.error) {
@@ -338,7 +336,6 @@ const ProductDetails = ({ data, variations }) => {
             // If success is true, the cart should open automatically via useCart hook
         } catch (error) {
             console.error('Error adding to cart:', error);
-            console.log(error);
             alert(decodeHtmlEntities(error?.message) || 'Une erreur est survenue lors de l\'ajout au panier.');
         } finally {
             setAddingToCart(false);

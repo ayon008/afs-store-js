@@ -263,13 +263,8 @@ const Navbar = ({ NAV_LINKS }) => {
 
   // Handler for the new LocationLanguageModal
   const handleLocationModalSubmit = useCallback(async ({ country, language, currency, location }) => {
-    console.log('[Language Change] Starting handleLocationModalSubmit:', {
-      currentLocale: locale,
-      newLanguage: language,
-      currency,
-      location,
-      countryCode: country.code
-    });
+    // Close the modal immediately
+    setPopUp(false);
 
     // Update local state
     setSelectedLanguage(language);
@@ -277,11 +272,9 @@ const Navbar = ({ NAV_LINKS }) => {
     setSelectedLocation(location);
     setSelectedCountryCode(country.code);
 
-    // Check if anything changed
+    // Check what changed
     const languageChanged = language !== locale;
-    console.log('[Language Change] Language changed?', languageChanged, { from: locale, to: language });
-
-    // Get current currency from cart or cookie
+    
     const currentCurrencyFromCart = cart?.totals?.currency_symbol || '€';
     let currentCurrencyKey = 'euro';
     if (currentCurrencyFromCart === '€' || currentCurrencyFromCart === 'EUR') {
@@ -292,138 +285,33 @@ const Navbar = ({ NAV_LINKS }) => {
       currentCurrencyKey = 'usd';
     }
     const currencyChanged = currency !== currentCurrencyKey;
+    const locationChanged = location !== (Cookies.get('location') || '2682');
+    const countryChanged = country.code !== (Cookies.get('selected_country') || 'FR');
 
-    // Get current location from cookie
-    const cookieLocation = Cookies.get('location') || '2682';
-    const locationChanged = location !== cookieLocation;
-
-    // Get current country from cookie (for tax calculation)
-    const cookieCountry = Cookies.get('selected_country') || 'FR';
-    const countryChanged = country.code !== cookieCountry;
-
-    // Convert to WCML format
+    // Set all cookies
     const wcmlCurrency = currency === 'euro' ? 'EUR' : currency === 'gbp' ? 'GBP' : 'USD';
-
-    // Set all cookies first
     Cookies.set('currency', currency, { expires: 365, sameSite: 'Lax', path: '/' });
     Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     Cookies.set('location', location, { expires: 365, sameSite: 'Lax', path: '/' });
     Cookies.set('selected_country', country.code, { expires: 365, sameSite: 'Lax', path: '/' });
 
-    // Handle language change - must be done after cart is cleared if needed
-    if (languageChanged) {
+    // Determine if we need a full page reload (country/currency/location changes need fresh server data)
+    const needsFullReload = countryChanged || currencyChanged || locationChanged;
+    
+    if (languageChanged || needsFullReload) {
       const hasItems = cart && cart.items && cart.items.length > 0;
-      console.log('[Language Change] Cart status:', { hasItems, itemCount: cart?.items?.length || 0 });
       
-      // If cart has items, clear it first before changing language
+      // Clear cart if it has items (currency/location/language changes invalidate cart)
       if (hasItems) {
-        console.log('[Language Change] Cart has items, clearing cart before language change...');
         try {
-          // First, clear localStorage
-          console.log('[Language Change] Step 1: Clearing localStorage cart...');
           const localResult = await handleClearCart();
-          console.log('[Language Change] Step 1 result:', localResult);
-          
-          // Then, clear WooCommerce cart on server side (important for cookies)
-          let serverCleared = false;
-          try {
-            console.log('[Language Change] Step 2: Clearing server cart via API...');
-            const serverResponse = await fetch('/api/cart/clear', {
-              method: 'DELETE',
-              credentials: 'include',
-              cache: 'no-store',
-            });
-            
-            console.log('[Language Change] Step 2 response status:', serverResponse.status, serverResponse.ok);
-            
-            if (serverResponse.ok) {
-              // Wait for server to process the cart clearing
-              const responseData = await serverResponse.json().catch(() => ({}));
-              console.log('[Language Change] Step 2 response data:', responseData);
-              serverCleared = true;
+          if (localResult?.success) {
+            if (currencyChanged) {
+              setNotification(tCart("clearedOnCurrencyChange"));
+            } else if (locationChanged) {
+              setNotification(tCart("clearedOnLocationChange"));
             } else {
-              const errorText = await serverResponse.text().catch(() => '');
-              console.error('[Language Change] Failed to clear server cart:', serverResponse.status, errorText);
-            }
-          } catch (serverError) {
-            console.error('[Language Change] Error clearing server cart:', serverError);
-          }
-          
-          // Wait longer to ensure cookies are updated and server has processed the clear
-          // This is critical for language change to work properly
-          const waitTime = serverCleared ? 500 : 300;
-          console.log('[Language Change] Step 3: Waiting', waitTime, 'ms for cookies to update...');
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-          console.log('[Language Change] Step 3: Wait complete');
-          
-          if (localResult && localResult.success) {
-            setNotification(t("cartClearedLanguage"));
-          }
-        } catch (error) {
-          console.error('[Language Change] Error clearing cart:', error);
-        }
-      } else {
-        console.log('[Language Change] Cart is empty, no need to clear');
-      }
-      
-      // Now redirect after cart is cleared (if it had items)
-      // Use next-intl router to change locale directly (not ?lang=)
-      // pathname already has locale prefix removed by next-intl
-      const currentPath = pathname || '/';
-      
-      console.log('[Language Change] Step 4: Preparing redirect with router:', {
-        pathname,
-        currentPath,
-        currentLocale: locale,
-        newLocale: language,
-        hasItems
-      });
-      
-      // Use router.replace with locale option to change language
-      // This will automatically add /fr/ prefix for French or remove it for English
-      const redirectDelay = hasItems ? 100 : 50; // Small delay to ensure cookies are set
-      console.log('[Language Change] Step 5: Redirecting in', redirectDelay, 'ms using router.replace');
-      
-      setTimeout(() => {
-        console.log('[Language Change] Step 6: Executing router.replace with locale:', language);
-        router.replace(currentPath, { locale: language });
-      }, redirectDelay);
-    } else if (currencyChanged || locationChanged || countryChanged) {
-      console.log('[Location Change] Detected change:', { currencyChanged, locationChanged, countryChanged, cookieCountry, newCountry: country.code });
-      // Clear the cart if currency, location, or country changes (but not language)
-      if (currencyChanged || locationChanged || countryChanged) {
-        try {
-          const hasItems = cart && cart.items && cart.items.length > 0;
-          if (hasItems) {
-            // First, clear localStorage
-            const localResult = await handleClearCart();
-            
-            // Then, clear WooCommerce cart on server side (important for cookies)
-            try {
-              const serverResponse = await fetch('/api/cart/clear', {
-                method: 'DELETE',
-                credentials: 'include',
-              });
-              
-              if (!serverResponse.ok) {
-                console.error('Failed to clear server cart:', serverResponse.status);
-              } else {
-                // Wait for server to process the cart clearing
-                await serverResponse.json().catch(() => {});
-              }
-            } catch (serverError) {
-              console.error('Error clearing server cart:', serverError);
-            }
-            
-            // Wait a bit to ensure cookies are updated and server has processed the clear
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            if (localResult && localResult.success) {
-              if (currencyChanged) {
-                setNotification(tCart("clearedOnCurrencyChange"));
-              } else if (locationChanged) {
-                setNotification(tCart("clearedOnLocationChange"));
-              }
+              setNotification(t("cartClearedLanguage"));
             }
           }
         } catch (error) {
@@ -431,17 +319,28 @@ const Navbar = ({ NAV_LINKS }) => {
         }
       }
       
-      // Small delay to ensure cookies are written before reload
-      setTimeout(() => {
-        const currentPath = pathname || '/';
-        // For default locale (en), don't add prefix (localePrefix: "as-needed")
-        const localePrefix = locale === 'en' ? '' : `/${locale}`;
-        const reloadPath = currentPath === '/' ? (localePrefix || '/') : `${localePrefix}${currentPath}`;
-        console.log('[Location Change] Reloading page:', { currentPath, locale, localePrefix, reloadPath });
-        window.location.href = reloadPath;
-      }, 100);
-    } else {
-      setPopUp(false);
+      const currentPath = pathname || '/';
+      
+      if (needsFullReload) {
+        // Full page reload for country/currency/location changes
+        const localePrefix = language === 'en' ? '' : `/${language}`;
+        
+        // Translate localized route paths
+        let targetPath = currentPath;
+        if (locale === 'fr' && language === 'en' && currentPath.startsWith('/produit/')) {
+          targetPath = currentPath.replace('/produit/', '/product/');
+        } else if (locale === 'en' && language === 'fr' && currentPath.startsWith('/product/')) {
+          targetPath = currentPath.replace('/product/', '/produit/');
+        }
+        
+        const reloadPath = targetPath === '/' ? (localePrefix || '/') : `${localePrefix}${targetPath}`;
+        const cacheBuster = `_refresh=${Date.now()}`;
+        const separator = reloadPath.includes('?') ? '&' : '?';
+        window.location.href = `${reloadPath}${separator}${cacheBuster}`;
+      } else {
+        // Only language changed - use client-side navigation
+        router.replace(currentPath, { locale: language });
+      }
     }
   }, [locale, pathname, cart, handleClearCart, t, tCart]);
 

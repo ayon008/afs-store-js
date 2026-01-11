@@ -7,6 +7,9 @@ import { getTranslatedProductSlug } from '@/lib/product-routes';
 import { getProductRoutePrefix } from '@/lib/product-routes';
 import { redirect } from 'next/navigation';
 
+// Force dynamic rendering to ensure fresh data on each request (important for country-based VAT)
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }) {
     const { slug, route } = await params;
     const locale = await getLocale();

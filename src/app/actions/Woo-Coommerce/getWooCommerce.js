@@ -18,16 +18,12 @@ const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 export const getCurrency = async () => {
     const cookieStore = await cookies();
     const currencyValue = cookieStore.get('currency')?.value;
-    const currency = currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
-    console.log(currency);
-    return currency;
+    return currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
 }
 
 export const getLocation = async () => {
     const cookieStore = await cookies();
-    const locationValue = cookieStore.get('location')?.value;
-    console.log(locationValue);
-    return locationValue;
+    return cookieStore.get('location')?.value;
 }
 
 // Get selected country from cookie or default based on location
@@ -36,12 +32,11 @@ export const getSelectedCountry = async () => {
     const cookieStore = await cookies();
     const selectedCountry = cookieStore.get('selected_country')?.value;
     
-    // If cookie exists, use it
     if (selectedCountry) {
         return selectedCountry;
     }
     
-    // Otherwise, default based on location
+    // Default based on location
     const location = await getLocation() || WAREHOUSES.EUROPE;
     const isEuropeLocation = location === WAREHOUSES.EUROPE;
     return isEuropeLocation ? 'FR' : 'US';
@@ -226,16 +221,12 @@ export const getCountryDetails = async (country) => {
             headers: { Authorization: `Basic ${authHeader}` },
             cache: "no-store",
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     }
     catch (error) {
-        console.log(error);
         return error;
     }
 }
-
-
 
 // Get all the products by category Id
 export const getProductsByCategoryId = async (ids, max, min) => {
@@ -283,15 +274,10 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         }
 
         return allProducts;
-
     } catch (error) {
-        console.log(error);
         return [];
     }
 };
-
-
-
 
 
 export const getChildCategories = async (parentId) => {
@@ -333,17 +319,13 @@ export const getProductBySlug = async (slug) => {
             cache: "no-cache",
         })
         const data = await response.json();
-        const product = data[0];
-        return product;
+        return data[0];
     } catch (error) {
-        console.log(error);
         return { error: true }
     }
 }
 
-
-
-// get woo-commerce orders 
+// get woo-commerce orders
 
 export const getOrders = async () => {
 
@@ -459,8 +441,6 @@ export const lostPassword = async (email) => {
             }
         );
 
-        console.log("res", res);
-
         if (!res.ok) {
             const err = await res.json();
             return { success: false, error: err.message || 'Failed' };
@@ -469,13 +449,9 @@ export const lostPassword = async (email) => {
         return { success: true, message: data.message };
 
     } catch (error) {
-        console.log(error);
         return { success: false, error: error.message };
     }
 }
-
-
-
 
 export const getPrice = async (productId) => {
     const currency = await getCurrency();
@@ -492,14 +468,11 @@ export const getPrice = async (productId) => {
             },
             cache: "no-cache",
         });
-        const variations = await response.json();
-        return variations;
+        return await response.json();
     } catch (error) {
-        console.log(error);
         return null;
     }
 };
-
 
 // add-item - calls WooCommerce API directly to ensure cookies are synchronized
 export async function addToCart(productId, quantity = 1, variationId = null, variation = {}) {
@@ -550,12 +523,6 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             }
         }
 
-        console.log('Adding to cart with payload:', JSON.stringify(payload, null, 2));
-        console.log('WC_STORE_URL:', WC_STORE_URL);
-        console.log('Cookie header present:', !!cookieHeader);
-        console.log('Cookie header length:', cookieHeader?.length || 0);
-        console.log('Using currency:', currencyToUse);
-
         // Add WCML currency cookie for multi-currency support
         const wcmlCurrencyCookie = `wcml_client_currency=${currencyToUse}`;
         const cookiesWithWcml = cookieHeader 
@@ -573,9 +540,6 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
             body: JSON.stringify(payload),
             cache: 'no-store',
         });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         // Check if response is OK and is JSON
         const contentType = response.headers.get('content-type') || '';
@@ -657,7 +621,6 @@ export async function addToCart(productId, quantity = 1, variationId = null, var
         }
 
         const result = await response.json();
-        console.log('Add to cart response:', result);
 
         // Revalidate paths that show cart data
         revalidatePath('/');
@@ -696,8 +659,6 @@ export async function updateCartItem(itemKey, quantity) {
             quantity: parseInt(quantity)
         };
 
-        console.log('Updating cart item with payload:', JSON.stringify(payload, null, 2));
-
         // Call WooCommerce API directly
         const response = await fetch(`${WC_STORE_URL}/cart/update-item`, {
             method: 'POST',
@@ -723,7 +684,6 @@ export async function updateCartItem(itemKey, quantity) {
         }
 
         const result = await response.json();
-        console.log('Update cart item response:', result);
 
         // Revalidate paths
         revalidatePath('/cart');
@@ -1039,8 +999,6 @@ export const getPaymentMethods = async () => {
         url.searchParams.set('consumer_key', consumerKey);
         url.searchParams.set('consumer_secret', consumerSecret);
 
-        console.log('Fetching payment methods from:', url.toString().replace(consumerSecret, '***'));
-
         const response = await fetch(url.toString(), {
             headers: {
                 'Content-Type': 'application/json',
@@ -1049,42 +1007,24 @@ export const getPaymentMethods = async () => {
             cache: "no-store",
         });
 
-        console.log('Payment methods response status:', response.status, response.statusText);
-
         if (!response.ok) {
-            const errorText = await response.text().catch(() => '');
-            console.error(`Failed to fetch payment methods: ${response.status} - ${errorText.substring(0, 500)}`);
             throw new Error(`Failed to fetch payment methods: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Payment methods raw data:', Array.isArray(data), data?.length || 'N/A', typeof data);
 
         if (!Array.isArray(data)) {
-            console.error('Payment methods response is not an array:', typeof data, data);
             // If it's an object, try to extract payment methods
             if (data && typeof data === 'object') {
                 const methodsArray = Object.values(data);
                 if (Array.isArray(methodsArray) && methodsArray.length > 0) {
-                    console.log('Extracted payment methods from object:', methodsArray.length);
-                    const enabledMethods = methodsArray.filter((method) => method?.enabled);
-                    console.log(`Found ${enabledMethods.length} enabled payment methods (from object)`);
-                    return enabledMethods;
+                    return methodsArray.filter((method) => method?.enabled);
                 }
             }
             return [];
         }
 
-        console.log(`Total payment methods received: ${data.length}`);
-        const enabledMethods = data.filter((method) => method?.enabled);
-        console.log(`Found ${enabledMethods.length} enabled payment methods`);
-
-        // Log all methods for debugging
-        enabledMethods.forEach(method => {
-            console.log(`  - ${method.id}: ${method.title} (enabled: ${method.enabled})`);
-        });
-
-        return enabledMethods;
+        return data.filter((method) => method?.enabled);
     }
     catch (error) {
         console.error('Error fetching payment methods:', error.message || error);
@@ -1101,10 +1041,8 @@ export const createOrder = async (orderData) => {
             headers: { Authorization: `Basic ${authHeader}` },
             cache: "no-store",
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
-        console.log(error);
         return error;
     }
 }
