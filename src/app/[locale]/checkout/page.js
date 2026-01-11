@@ -4,6 +4,7 @@ import useCart from "@/Shared/Hooks/useCart";
 import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 import { selectShippingRate } from "@/app/actions/Woo-Coommerce/Shop/Cart/cart";
 import { countriesList } from "@/lib/countriesList";
+import { WAREHOUSES } from "@/lib/countries-config";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
@@ -17,6 +18,15 @@ import ShippingMethods from "./components/ShippingMethods";
 import PaymentMethods from "./components/PaymentMethods";
 import OrderSummary from "./components/OrderSummary";
 import { CreditCard, ShoppingCart, ArrowRight } from "lucide-react";
+
+// Helper to get cookie value
+const getCookie = (name) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
 
 // Wrapper component to ensure NextIntl context is available
 const CheckoutPageContent = () => {
@@ -150,6 +160,21 @@ const CheckoutPageContent = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCartEmpty, setIsCartEmpty] = useState(false);
     const [orderProcessing, setOrderProcessing] = useState(false); // Full-screen overlay during order creation
+
+    // Get location from cookie to determine tax display mode
+    // Europe (2682): TTC - tax included in price
+    // North America (2683): HT - tax shown separately
+    const [currentLocation, setCurrentLocation] = useState(WAREHOUSES.EUROPE);
+
+    useEffect(() => {
+        const locationFromCookie = getCookie('location');
+        if (locationFromCookie) {
+            setCurrentLocation(locationFromCookie);
+        }
+    }, []);
+
+    // Determine if we should show taxes included (Europe) or separate (North America)
+    const isEuropeLocation = currentLocation === WAREHOUSES.EUROPE;
 
     // Filter payment methods to show only allowed ones based on currency
     const filterPaymentMethods = (methods) => {
@@ -418,7 +443,7 @@ const CheckoutPageContent = () => {
     }, [watchFields.shipping_country, watchFields.billing_country]);
 
     // Ref to track last update to prevent infinite loops
-    const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '' });
+    const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '', state: '' });
     const isUpdatingRef = React.useRef(false);
 
     // State for shipping
@@ -427,6 +452,10 @@ const CheckoutPageContent = () => {
     const [selectedRateId, setSelectedRateId] = useState(null);
     const [notification, setNotification] = useState(null); // { message: string, type: 'info' | 'warning' | 'error' }
     const [calculatedShippingRates, setCalculatedShippingRates] = useState([]);
+
+    // State for dynamic tax calculation
+    const [updatingTaxes, setUpdatingTaxes] = useState(false);
+    const [apiCartItems, setApiCartItems] = useState([]);
 
     // Helper to show notification with type
     const showNotification = (message, type = 'info') => {
@@ -585,7 +614,108 @@ const CheckoutPageContent = () => {
         }
     }, [cart?.items, selectedRateId, setValue]);
 
-    // Debounced calculation of shipping rates - trigger on country change
+    // Sync cart to WooCommerce and update taxes based on billing/shipping address
+    const syncCartAndUpdateTaxes = useCallback(async (addressFields) => {
+        // Need cart items to sync
+        if (!cart?.items || cart.items.length === 0) {
+            return;
+        }
+
+        setUpdatingTaxes(true);
+        try {
+            // 1. Clear existing WooCommerce cart
+            await fetch('/api/cart/clear', {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            // Get location from cart metadata
+            const cartLocation = cart?.metadata?.location || '2682';
+
+            // 2. Add each item to WooCommerce cart
+            for (const item of cart.items) {
+                // Determine which variation format to use
+                let variationData = null;
+                if (item._variationRaw && typeof item._variationRaw === 'object' && Object.keys(item._variationRaw).length > 0) {
+                    variationData = item._variationRaw;
+                } else if (Array.isArray(item.variation) && item.variation.length > 0) {
+                    variationData = item.variation.reduce((acc, v) => {
+                        if (v.attribute && v.value) {
+                            acc[v.attribute] = v.value;
+                        }
+                        return acc;
+                    }, {});
+                }
+
+                await fetch('/api/cart/add-item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        id: item.id,
+                        quantity: item.quantity || 1,
+                        variation_id: item.variation_id || null,
+                        variation: variationData,
+                        location: cartLocation,
+                    }),
+                });
+            }
+
+            // 3. Update billing/shipping address to trigger tax recalculation
+            const billingAddress = {
+                country: addressFields.billing_country || '',
+                state: addressFields.billing_state || '',
+                postcode: addressFields.billing_postcode || '',
+                city: addressFields.billing_city || '',
+            };
+
+            const shippingAddr = shippingAddress ? {
+                country: addressFields.shipping_country || addressFields.billing_country || '',
+                state: addressFields.shipping_state || addressFields.billing_state || '',
+                postcode: addressFields.shipping_postcode || addressFields.billing_postcode || '',
+                city: addressFields.shipping_city || addressFields.billing_city || '',
+            } : null;
+
+            await fetch('/api/cart/update-billing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    billing_address: billingAddress,
+                    shipping_address: shippingAddr,
+                }),
+            });
+
+            // 4. Fetch updated cart with recalculated taxes
+            const cartResponse = await fetch('/api/cart', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (cartResponse.ok) {
+                const apiCart = await cartResponse.json();
+                // Store API cart items for tax calculation display
+                if (apiCart.items && apiCart.items.length > 0) {
+                    setApiCartItems(apiCart.items);
+                    console.log('[Checkout] Tax calculation updated:', {
+                        itemsCount: apiCart.items.length,
+                        totalTax: apiCart.totals?.total_tax,
+                        items: apiCart.items.map(i => ({
+                            name: i.name,
+                            line_subtotal_tax: i.totals?.line_subtotal_tax
+                        }))
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error syncing cart for tax calculation:', error);
+            // Silent failure - keep existing taxes
+        } finally {
+            setUpdatingTaxes(false);
+        }
+    }, [cart?.items, cart?.metadata?.location, shippingAddress]);
+
+    // Debounced calculation of shipping rates and taxes - trigger on address change
     useEffect(() => {
         // Skip if already updating
         if (isUpdatingRef.current) {
@@ -598,13 +728,22 @@ const CheckoutPageContent = () => {
             : watchFields.billing_country;
 
         const timer = setTimeout(() => {
-            // Calculate shipping rates if country is set
+            // Calculate shipping rates and taxes if country is set
             if (shippingCountry) {
-                const currentKey = `${shippingCountry}-${watchFields.billing_postcode || watchFields.shipping_postcode}-${watchFields.billing_city || watchFields.shipping_city}`;
+                // Determine which state to use (shipping takes priority if different address)
+                const currentState = shippingAddress
+                    ? (watchFields.shipping_state || watchFields.billing_state || '')
+                    : (watchFields.billing_state || '');
+
+                // Include state in the key - important for North America tax calculation
+                const currentKey = `${shippingCountry}-${currentState}-${watchFields.billing_postcode || watchFields.shipping_postcode}-${watchFields.billing_city || watchFields.shipping_city}`;
 
                 // Only calculate if something actually changed
                 if (lastUpdateRef.current.key !== currentKey) {
+                    // Calculate shipping rates
                     calculateShippingRates(watchFields);
+                    // Sync cart and recalculate taxes based on new address (including state for US/CA)
+                    syncCartAndUpdateTaxes(watchFields);
                 }
             }
         }, 800); // Wait 800ms after user stops typing
@@ -620,7 +759,8 @@ const CheckoutPageContent = () => {
         watchFields.billing_state,
         watchFields.shipping_state,
         shippingAddress,
-        calculateShippingRates
+        calculateShippingRates,
+        syncCartAndUpdateTaxes
     ]);
 
     const states = countryDetails?.states || [];
@@ -909,8 +1049,27 @@ const CheckoutPageContent = () => {
         return '€';
     }, [cart?.totals?.currency_symbol, cart?.metadata?.currency]);
 
-    // Tax is not calculated for localStorage cart (will be calculated at order creation)
-    const totalTax = 0;
+    // Calculate total tax from API cart items (updated when address changes)
+    const totalTax = React.useMemo(() => {
+        // Use API cart items if available (they have calculated taxes from WooCommerce)
+        if (apiCartItems?.length > 0) {
+            return apiCartItems.reduce((sum, item) => {
+                const tax = parseFloat(item?.totals?.line_subtotal_tax || 0) / 100;
+                return sum + tax;
+            }, 0);
+        }
+
+        // Fallback: Use cart items if they have API format (from loadCart)
+        if (cart?.items?.[0]?.totals?.line_subtotal_tax !== undefined) {
+            return cart.items.reduce((sum, item) => {
+                const tax = parseFloat(item?.totals?.line_subtotal_tax || 0) / 100;
+                return sum + tax;
+            }, 0);
+        }
+
+        // Default: No tax calculated yet (localStorage cart only)
+        return 0;
+    }, [apiCartItems, cart?.items]);
 
     // Clear cart if locale changes (user navigated to different language checkout)
     // Use a ref to track the previous locale to detect actual changes
@@ -1260,6 +1419,8 @@ const CheckoutPageContent = () => {
                         sousTotal={sousTotal}
                         cartTotal={cartTotal}
                         totalTax={totalTax}
+                        updatingTaxes={updatingTaxes}
+                        isEuropeLocation={isEuropeLocation}
                     />
                 </div>
 
@@ -1268,11 +1429,29 @@ const CheckoutPageContent = () => {
                     <div className='flex items-center justify-between mb-3'>
                         <div>
                             <span className='text-sm text-gray-500'>{t("total")}</span>
-                            {parseFloat(totalTax || 0) > 0 && (
+                            {/* Europe: Show "including VAT" info */}
+                            {isEuropeLocation && (parseFloat(totalTax || 0) > 0 || updatingTaxes) && (
                                 <span className='text-xs text-gray-400 ml-2'>
-                                    ({t("includingVAT")} {totalTax ? parseFloat(totalTax).toFixed(2) : '0.00'}{currencySymbol} {t("VAT")})
+                                    ({t("includingVAT")}{' '}
+                                    {updatingTaxes ? (
+                                        <span className="animate-pulse">...</span>
+                                    ) : (
+                                        `${totalTax ? parseFloat(totalTax).toFixed(2) : '0.00'}${currencySymbol}`
+                                    )}{' '}
+                                    {t("VAT")})
                                 </span>
                             )}
+                            {/* North America: Show state tax info */}
+                            {!isEuropeLocation && parseFloat(totalTax || 0) > 0 && (() => {
+                                const country = watchFields.shipping_country || watchFields.billing_country || '';
+                                const state = watchFields.shipping_state || watchFields.billing_state || '';
+                                const stateInfo = (country === 'US' || country === 'CA') && state ? ` ${state}` : '';
+                                return (
+                                    <span className='text-xs text-gray-400 ml-2'>
+                                        ({t("includesTax") || "includes tax"}{stateInfo ? `:${stateInfo}` : ''})
+                                    </span>
+                                );
+                            })()}
                         </div>
                         <span className='text-xl font-bold text-[#111]'>{cartTotal ? cartTotal.toFixed(2) : '0.00'}{currencySymbol}</span>
                     </div>

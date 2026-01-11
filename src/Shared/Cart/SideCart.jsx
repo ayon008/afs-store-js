@@ -1,6 +1,6 @@
 "use client"
 import { ArrowUpRight, X, ShoppingCart } from 'lucide-react'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
@@ -9,6 +9,16 @@ import { Link } from '@/i18n/navigation'
 import useCart from '../Hooks/useCart'
 import Skeleton from '../Loader/Skeleton'
 import SideCartItems from './SideCartItem'
+import { WAREHOUSES } from '@/lib/countries-config'
+
+// Helper to get cookie value
+const getCookie = (name) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
 
 const CartItemSkeleton = () => (
     <div className='flex items-center gap-8 bg-[#F7F7F7] p-[10px] rounded-sm'>
@@ -36,6 +46,16 @@ const SideCart = ({ isOpen, onClose }) => {
     const t = useTranslations("cart.sideCart");
     const { cart, loading, handleUpdateCartItem, handleRemoveCartItem } = useCart();
 
+    // Get location from cookie to determine tax display mode
+    const [isEuropeLocation, setIsEuropeLocation] = useState(true);
+
+    useEffect(() => {
+        const locationFromCookie = getCookie('location');
+        setIsEuropeLocation(locationFromCookie === WAREHOUSES.EUROPE || !locationFromCookie);
+
+        // Log for debugging
+        console.log('[SideCart] Location:', locationFromCookie, 'isEurope:', locationFromCookie === WAREHOUSES.EUROPE || !locationFromCookie);
+    }, [isOpen]); // Re-check when cart opens
 
     const cartItems = cart?.items || [];
 
@@ -45,10 +65,15 @@ const SideCart = ({ isOpen, onClose }) => {
     const sideCartRef = useRef(null);
     const overlayRef = useRef(null);
 
-
     // Calculate subtotal using line_total (TTC) for each item
     const sousTotal = cart?.items?.reduce(
         (acc, item) => acc + Number(item.totals.line_total || 0),
+        0
+    ) / 100;
+
+    // Calculate tax for display
+    const totalTax = cart?.items?.reduce(
+        (acc, item) => acc + Number(item.totals.line_subtotal_tax || 0),
         0
     ) / 100;
 
@@ -124,10 +149,19 @@ const SideCart = ({ isOpen, onClose }) => {
                     }
                 </div>
                 <div className='p-6 border-t border-t-gray-200 flex flex-col items-center justify-center gap-4 bg-gray-50'>
-                    <div className='flex items-end gap-1 flex-wrap'>
-                        <span className='text-[15px] uppercase leading-[100%] font-bold text-gray-700'>{t("subTotal")}</span>
-                        <span className='text-[28px] uppercase leading-[100%] font-bold text-gray-900'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
-                        <span className='text-[19px] leading-[100%] font-bold text-gray-600'>{t("inclVAT")}</span>
+                    <div className='flex flex-col items-center gap-1'>
+                        <div className='flex items-end gap-1 flex-wrap'>
+                            <span className='text-[15px] uppercase leading-[100%] font-bold text-gray-700'>{t("subTotal")}</span>
+                            <span className='text-[28px] uppercase leading-[100%] font-bold text-gray-900'>{currencySymbol}{(sousTotal || 0).toFixed(2)}</span>
+                            {/* Europe: Show TTC (tax included) */}
+                            {isEuropeLocation && (
+                                <span className='text-[19px] leading-[100%] font-bold text-gray-600'>{t("inclVAT")}</span>
+                            )}
+                        </div>
+                        {/* North America: Show tax will be calculated at checkout */}
+                        {!isEuropeLocation && (
+                            <span className='text-sm text-gray-500'>{t("taxCalculatedAtCheckout") || "Tax calculated at checkout"}</span>
+                        )}
                     </div>
                     <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer w-full'>
                         <button disabled={cartItems?.length === 0} className={`w-full py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-lg text-white shadow-lg hover:bg-[#1585e0] transition-all ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>

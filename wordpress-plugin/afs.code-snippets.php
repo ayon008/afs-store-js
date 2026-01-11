@@ -948,6 +948,123 @@ function afs_niloy_master_order_sync($order_id, $posted_data, $order) {
 }
 
 /**
+ * Store API Tax Calculation Enhancement
+ *
+ * This hook ensures taxes are calculated correctly in the WooCommerce Store API
+ * based on the customer's shipping address.
+ *
+ * IMPORTANT: This requires tax rates to be configured in WooCommerce:
+ * WooCommerce > Settings > Tax > Standard Rates
+ *
+ * For US taxes, you need to either:
+ * 1. Manually add tax rates for each state
+ * 2. Use a plugin like WooCommerce Tax, TaxJar, or Avalara
+ */
+add_action('woocommerce_store_api_checkout_update_customer_from_request', function($customer, $request) {
+    // Ensure customer address is set for tax calculation
+    $billing = $request->get_param('billing_address');
+    $shipping = $request->get_param('shipping_address');
+
+    if ($shipping && !empty($shipping['country'])) {
+        $customer->set_shipping_country($shipping['country']);
+        $customer->set_shipping_state($shipping['state'] ?? '');
+        $customer->set_shipping_postcode($shipping['postcode'] ?? '');
+        $customer->set_shipping_city($shipping['city'] ?? '');
+    } elseif ($billing && !empty($billing['country'])) {
+        $customer->set_shipping_country($billing['country']);
+        $customer->set_shipping_state($billing['state'] ?? '');
+        $customer->set_shipping_postcode($billing['postcode'] ?? '');
+        $customer->set_shipping_city($billing['city'] ?? '');
+    }
+
+    // Also update billing for tax calculation
+    if ($billing && !empty($billing['country'])) {
+        $customer->set_billing_country($billing['country']);
+        $customer->set_billing_state($billing['state'] ?? '');
+        $customer->set_billing_postcode($billing['postcode'] ?? '');
+        $customer->set_billing_city($billing['city'] ?? '');
+    }
+
+    // Recalculate totals
+    if (WC()->cart) {
+        WC()->cart->calculate_totals();
+    }
+
+    // Log for debugging
+    error_log('[AFS Store API] Customer address updated - Country: ' . $customer->get_shipping_country() . ', State: ' . $customer->get_shipping_state());
+
+}, 10, 2);
+
+/**
+ * Force tax recalculation on cart update-customer endpoint
+ */
+add_action('woocommerce_store_api_cart_update_customer_from_request', function($customer, $request) {
+    // Get addresses from request
+    $billing = $request->get_param('billing_address');
+    $shipping = $request->get_param('shipping_address');
+
+    // Update customer shipping address (used for tax calculation)
+    if ($shipping && !empty($shipping['country'])) {
+        $customer->set_shipping_country($shipping['country']);
+        $customer->set_shipping_state($shipping['state'] ?? '');
+        $customer->set_shipping_postcode($shipping['postcode'] ?? '');
+        $customer->set_shipping_city($shipping['city'] ?? '');
+
+        error_log('[AFS Store API Cart] Shipping address set - Country: ' . $shipping['country'] . ', State: ' . ($shipping['state'] ?? 'N/A'));
+    }
+
+    // Update customer billing address
+    if ($billing && !empty($billing['country'])) {
+        $customer->set_billing_country($billing['country']);
+        $customer->set_billing_state($billing['state'] ?? '');
+        $customer->set_billing_postcode($billing['postcode'] ?? '');
+        $customer->set_billing_city($billing['city'] ?? '');
+
+        // If no shipping address, use billing for tax calculation
+        if (!$shipping || empty($shipping['country'])) {
+            $customer->set_shipping_country($billing['country']);
+            $customer->set_shipping_state($billing['state'] ?? '');
+            $customer->set_shipping_postcode($billing['postcode'] ?? '');
+            $customer->set_shipping_city($billing['city'] ?? '');
+        }
+
+        error_log('[AFS Store API Cart] Billing address set - Country: ' . $billing['country'] . ', State: ' . ($billing['state'] ?? 'N/A'));
+    }
+
+    // Force tax recalculation
+    $customer->set_is_vat_exempt(false);
+
+    // Recalculate cart totals with new address
+    if (WC()->cart) {
+        WC()->cart->calculate_totals();
+        error_log('[AFS Store API Cart] Cart totals recalculated - Total Tax: ' . WC()->cart->get_total_tax());
+    }
+
+}, 10, 2);
+
+/**
+ * Debug: Log tax rates being applied
+ */
+add_action('woocommerce_before_calculate_totals', function($cart) {
+    if (!WC()->customer) return;
+
+    $country = WC()->customer->get_shipping_country();
+    $state = WC()->customer->get_shipping_state();
+
+    // Get applicable tax rates
+    $tax_rates = WC_Tax::get_rates_for_tax_class('');
+
+    error_log('[AFS Tax Debug] Customer Country: ' . $country . ', State: ' . $state);
+    error_log('[AFS Tax Debug] Available tax rates count: ' . count($tax_rates));
+
+    foreach ($tax_rates as $rate) {
+        if ($rate->tax_rate_country === $country || $rate->tax_rate_country === '') {
+            error_log('[AFS Tax Debug] Matching rate: ' . $rate->tax_rate_name . ' - ' . $rate->tax_rate . '% for ' . $rate->tax_rate_country . '/' . $rate->tax_rate_state);
+        }
+    }
+}, 5);
+
+/**
  * Hide unwanted col for woo product panel admin
  */
 add_action('admin_head', function () {

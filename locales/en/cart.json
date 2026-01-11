@@ -29,11 +29,15 @@
     "subtotalLabel": "Subtotal",
     "includingVAT": "including",
     "VAT": "VAT",
+    "tax": "Tax",
+    "excludingTax": "excl. tax",
+    "includesTax": "includes tax",
     "sideCart": {
       "yourCart": "Your cart",
       "close": "Close",
       "subTotal": "Sub Total",
       "inclVAT": "(incl. VAT)",
+      "taxCalculatedAtCheckout": "Tax calculated at checkout",
       "continueToBasket": "Continue to Basket",
       "outOfStock": "Out of stock",
       "maxQuantity": "Max"

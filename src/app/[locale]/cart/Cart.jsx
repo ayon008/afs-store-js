@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag, Package } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -8,13 +8,34 @@ import CartList from './CartList';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { WAREHOUSES } from '@/lib/countries-config';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Helper to get cookie value
+const getCookie = (name) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
 
 const Cart = () => {
     const t = useTranslations("cart");
     const totalsRef = useRef(null);
-    
+
+    // Get location from cookie to determine tax display mode
+    const [isEuropeLocation, setIsEuropeLocation] = useState(true);
+
+    useEffect(() => {
+        const locationFromCookie = getCookie('location');
+        setIsEuropeLocation(locationFromCookie === WAREHOUSES.EUROPE || !locationFromCookie);
+
+        // Log for debugging
+        console.log('[Cart] Location:', locationFromCookie, 'isEurope:', locationFromCookie === WAREHOUSES.EUROPE || !locationFromCookie);
+    }, []);
+
     // Shipping rates will be calculated at checkout
     const [couponCode, setCouponCode] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
@@ -243,9 +264,21 @@ const Cart = () => {
                             <div className='flex-1 overflow-y-auto p-6 lg:p-8 space-y-4'>
                                 {/* Subtotal */}
                                 <div className='flex items-center justify-between'>
-                                    <span className='text-base text-gray-600'>{t("subtotal")}</span>
+                                    <span className='text-base text-gray-600'>
+                                        {t("subtotal")}
+                                        {/* Show HT indicator for North America */}
+                                        {!isEuropeLocation && <span className='text-xs text-gray-400 ml-1'>({t("excludingTax") || "excl. tax"})</span>}
+                                    </span>
                                     <span className='text-base text-[#111] font-semibold'>{sub_total}{currencySymbol}</span>
                                 </div>
+
+                                {/* Tax line - Only for North America */}
+                                {!isEuropeLocation && parseFloat(total_tax) > 0 && (
+                                    <div className='flex items-center justify-between'>
+                                        <span className='text-base text-gray-600'>{t("tax") || "Tax"}</span>
+                                        <span className='text-base text-[#111] font-semibold'>{total_tax}{currencySymbol}</span>
+                                    </div>
+                                )}
 
                                 {/* Discount */}
                                 {parseFloat(discountTotal) > 0 && (
@@ -281,9 +314,16 @@ const Cart = () => {
                                         <strong className='text-2xl lg:text-3xl text-white font-bold block'>
                                             {total || 0}{currencySymbol}
                                         </strong>
-                                        {parseFloat(total_tax) > 0 && (
+                                        {/* Europe: Show "including VAT" */}
+                                        {isEuropeLocation && parseFloat(total_tax) > 0 && (
                                             <small className='text-gray-300 text-sm'>
                                                 ({t("includingVAT")} <strong>{total_tax || 0}{currencySymbol}</strong> {t("VAT")})
+                                            </small>
+                                        )}
+                                        {/* North America: Show "includes tax" */}
+                                        {!isEuropeLocation && parseFloat(total_tax) > 0 && (
+                                            <small className='text-gray-300 text-sm'>
+                                                ({t("includesTax") || "includes tax"})
                                             </small>
                                         )}
                                     </div>
@@ -327,10 +367,17 @@ const Cart = () => {
                 <div className='lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50 animate-slideUp'>
                     <div className='flex items-center justify-between mb-3'>
                         <div>
-                            <span className='text-sm text-gray-500'>Total</span>
-                            {parseFloat(total_tax) > 0 && (
+                            <span className='text-sm text-gray-500'>{t("total")}</span>
+                            {/* Europe: Show VAT included */}
+                            {isEuropeLocation && parseFloat(total_tax) > 0 && (
                                 <span className='text-xs text-gray-400 ml-2'>
-                                    (TVA: {total_tax}{currencySymbol})
+                                    ({t("includingVAT")} {total_tax}{currencySymbol} {t("VAT")})
+                                </span>
+                            )}
+                            {/* North America: Show "includes tax" */}
+                            {!isEuropeLocation && parseFloat(total_tax) > 0 && (
+                                <span className='text-xs text-gray-400 ml-2'>
+                                    ({t("includesTax")})
                                 </span>
                             )}
                         </div>

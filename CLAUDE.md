@@ -113,10 +113,12 @@ All WooCommerce data fetching goes through:
 - Measurements like `3.0m2` are preserved as-is
 
 **Adding Variable Products to Cart - Retry Strategy:**
-The shipping API uses a 3-strategy approach for reliability across different WooCommerce configurations:
+Both the shipping API (`src/app/api/shipping/calculate/route.js`) and the cart add-item API (`src/app/api/cart/add-item/route.js`) use a 3-strategy approach for reliability across different WooCommerce configurations:
 1. **Strategy 1**: Use `variation_id` only (most reliable) - some WooCommerce setups accept just the variation ID
 2. **Strategy 2**: Use normalized variation attributes - for setups requiring explicit attribute matching
 3. **Strategy 3**: Use `variation_id` as `id` - treats the variation as a standalone product (variations are technically separate products in WooCommerce)
+
+**IMPORTANT:** When syncing cart to WooCommerce (e.g., at checkout for tax calculation), use the same 3-strategy approach to avoid "Missing attributes for variable product" errors.
 
 **Multi-Location Inventory:**
 - Uses WooCommerce Multi-Locations-Inventory-Management plugin

@@ -344,33 +344,115 @@ export async function POST(request) {
             await new Promise(resolve => setTimeout(resolve, 300)); // Increased from 100ms to 300ms
         }
 
-        // Make request to WooCommerce to add item
-        // Include location as query parameter as well (some plugins read from query params)
+        // 3-Strategy approach for adding variable products (same as shipping/calculate route)
+        // This ensures reliability across different WooCommerce configurations
         const addItemUrl = `${WC_STORE_URL}/cart/add-item${location ? `?location=${location}` : ''}`;
-        const response = await fetch(addItemUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
-            },
-            body: JSON.stringify(payload),
-            cache: "no-store",
-        });
 
-        // Get response text for debugging
-        const responseText = await response.text();
-        console.log('WooCommerce response status:', response.status);
-        console.log('WooCommerce response body:', responseText);
+        let response;
+        let responseText;
+        let lastError = '';
+
+        // Strategy 1: If we have variation_id, try with just variation_id first (most reliable)
+        if (variationId) {
+            const strategy1Payload = {
+                id: parseInt(productId),
+                quantity: parseInt(quantity),
+                variation_id: parseInt(variationId),
+                currency: currencyToUse,
+                location: parseInt(location) || 2682,
+            };
+            console.log('[add-item] Strategy 1 - variation_id only:', JSON.stringify(strategy1Payload));
+
+            response = await fetch(addItemUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+                },
+                body: JSON.stringify(strategy1Payload),
+                cache: "no-store",
+            });
+
+            responseText = await response.text();
+            console.log('[add-item] Strategy 1 response:', response.status, responseText.substring(0, 200));
+
+            if (response.ok) {
+                console.log('[add-item] Success with Strategy 1 (variation_id only)');
+            } else {
+                lastError = responseText;
+                console.log('[add-item] Strategy 1 failed, trying Strategy 2...');
+                response = null; // Reset for next strategy
+            }
+        }
+
+        // Strategy 2: Try with full payload including variation attributes
+        if (!response || !response.ok) {
+            console.log('[add-item] Strategy 2 - with variation attributes:', JSON.stringify(payload));
+
+            response = await fetch(addItemUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+                },
+                body: JSON.stringify(payload),
+                cache: "no-store",
+            });
+
+            responseText = await response.text();
+            console.log('[add-item] Strategy 2 response:', response.status, responseText.substring(0, 200));
+
+            if (response.ok) {
+                console.log('[add-item] Success with Strategy 2 (with attributes)');
+            } else {
+                lastError = responseText;
+                console.log('[add-item] Strategy 2 failed, trying Strategy 3...');
+            }
+        }
+
+        // Strategy 3: Use variation_id as the product id (variations are technically separate products)
+        if (!response.ok && variationId) {
+            const strategy3Payload = {
+                id: parseInt(variationId), // Use variation_id as the product id
+                quantity: parseInt(quantity),
+                currency: currencyToUse,
+                location: parseInt(location) || 2682,
+            };
+            console.log('[add-item] Strategy 3 - variation as product id:', JSON.stringify(strategy3Payload));
+
+            response = await fetch(addItemUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    ...(cookiesWithWcml ? { "Cookie": cookiesWithWcml } : {}),
+                },
+                body: JSON.stringify(strategy3Payload),
+                cache: "no-store",
+            });
+
+            responseText = await response.text();
+            console.log('[add-item] Strategy 3 response:', response.status, responseText.substring(0, 200));
+
+            if (response.ok) {
+                console.log('[add-item] Success with Strategy 3 (variation as product id)');
+            } else {
+                lastError = responseText;
+            }
+        }
+
+        console.log('WooCommerce final response status:', response.status);
 
         if (!response.ok) {
-            // Try to parse error from response
+            // All strategies failed - parse error from last response
             let errorMessage = `Failed to add item: ${response.status}`;
             try {
-                const errorData = JSON.parse(responseText);
+                const errorData = JSON.parse(lastError || responseText);
                 errorMessage = errorData.message || errorData.code || errorMessage;
             } catch {
-                errorMessage = responseText || errorMessage;
+                errorMessage = lastError || responseText || errorMessage;
             }
             throw new Error(errorMessage);
         }

@@ -29,11 +29,15 @@
     "subtotalLabel": "Sous-total",
     "includingVAT": "dont",
     "VAT": "TVA",
+    "tax": "Taxes",
+    "excludingTax": "HT",
+    "includesTax": "taxes incluses",
     "sideCart": {
       "yourCart": "Votre panier",
       "close": "Fermer",
       "subTotal": "Sous-total",
       "inclVAT": "(TVA incl.)",
+      "taxCalculatedAtCheckout": "Taxes calculées au checkout",
       "continueToBasket": "Continuer vers le panier",
       "outOfStock": "Rupture",
       "maxQuantity": "Max"

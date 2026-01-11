@@ -305,11 +305,14 @@ const ProductDetails = ({ data, variations }) => {
             }
 
             // Prepare product data for localStorage cart
+            // IMPORTANT: No hardcoded tax calculation - prices come from WooCommerce API
             const productData = {
                 id: productId,
                 name: data?.name || '',
-                price: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price_with_tax) || parseFloat(data?.price) || 0),
-                price_with_tax: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price_with_tax) || parseFloat(data?.price) * 1.2 || 0),
+                // For variations, use the selected variation price; for simple products, use the price from API
+                price: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price) || 0),
+                // price_with_tax comes from API (calculated by WooCommerce based on location)
+                price_with_tax: hasVariations ? (variationPrice || 0) : (parseFloat(data?.price_with_tax) || parseFloat(data?.price_incl_tax) || parseFloat(data?.price) || 0),
                 images: data?.images || [],
                 image: data?.images?.[0]?.src || data?.image || '',
                 stock_status: hasVariations ? (isInStock ? 'instock' : 'outofstock') : (baseInStock ? 'instock' : 'outofstock'),
