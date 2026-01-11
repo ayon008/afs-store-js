@@ -10,10 +10,10 @@
     "confirm": "Confirm selection",
     "close": "Close",
     "regions": {
-      "europe": "Europe",
+      "europe": "EU",
       "uk": "United Kingdom",
       "us": "United States & Canada",
-      "emirates": "Middle East"
+      "emirates": "Rest of the world"
     },
     "countries": {
       "france": "France",

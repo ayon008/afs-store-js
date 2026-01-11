@@ -11,12 +11,14 @@ export async function GET(request, { params }) {
         const location = await getLocation() || WAREHOUSES.EUROPE; // Default to Europe
         const WP_URL = `${process.env.WP_BASE_URL}`;
 
-        // Get selected country from cookies for tax calculation
-        const cookieStore = await cookies();
-        const selectedCountry = cookieStore.get('selected_country')?.value || 'FR';
-
         // Determine if we should show prices with tax included (Europe) or excluded (North America)
         const isEuropeLocation = location === WAREHOUSES.EUROPE;
+
+        // Get selected country from cookies for tax calculation
+        // Priority: 1. Cookie selected_country, 2. Default based on location (FR for Europe, US for North America)
+        const cookieStore = await cookies();
+        const selectedCountryCookie = cookieStore.get('selected_country')?.value;
+        const selectedCountry = selectedCountryCookie || (isEuropeLocation ? 'FR' : 'US');
 
         const authHeader = "Basic " + Buffer.from(
             `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`

@@ -297,6 +297,10 @@ const Navbar = ({ NAV_LINKS }) => {
     const cookieLocation = Cookies.get('location') || '2682';
     const locationChanged = location !== cookieLocation;
 
+    // Get current country from cookie (for tax calculation)
+    const cookieCountry = Cookies.get('selected_country') || 'FR';
+    const countryChanged = country.code !== cookieCountry;
+
     // Convert to WCML format
     const wcmlCurrency = currency === 'euro' ? 'EUR' : currency === 'gbp' ? 'GBP' : 'USD';
 
@@ -384,9 +388,10 @@ const Navbar = ({ NAV_LINKS }) => {
         console.log('[Language Change] Step 6: Executing router.replace with locale:', language);
         router.replace(currentPath, { locale: language });
       }, redirectDelay);
-    } else if (currencyChanged || locationChanged) {
-      // Clear the cart if currency or location changes (but not language)
-      if (currencyChanged || locationChanged) {
+    } else if (currencyChanged || locationChanged || countryChanged) {
+      console.log('[Location Change] Detected change:', { currencyChanged, locationChanged, countryChanged, cookieCountry, newCountry: country.code });
+      // Clear the cart if currency, location, or country changes (but not language)
+      if (currencyChanged || locationChanged || countryChanged) {
         try {
           const hasItems = cart && cart.items && cart.items.length > 0;
           if (hasItems) {
@@ -429,14 +434,10 @@ const Navbar = ({ NAV_LINKS }) => {
       // Small delay to ensure cookies are written before reload
       setTimeout(() => {
         const currentPath = pathname || '/';
-        const reloadPath = `/${locale}${currentPath === '/' ? '' : currentPath}`;
-        window.location.href = reloadPath;
-      }, 100);
-    } else if (currencyChanged || locationChanged) {
-      // Small delay to ensure cookies are written before reload
-      setTimeout(() => {
-        const currentPath = pathname || '/';
-        const reloadPath = `/${locale}${currentPath === '/' ? '' : currentPath}`;
+        // For default locale (en), don't add prefix (localePrefix: "as-needed")
+        const localePrefix = locale === 'en' ? '' : `/${locale}`;
+        const reloadPath = currentPath === '/' ? (localePrefix || '/') : `${localePrefix}${currentPath}`;
+        console.log('[Location Change] Reloading page:', { currentPath, locale, localePrefix, reloadPath });
         window.location.href = reloadPath;
       }, 100);
     } else {

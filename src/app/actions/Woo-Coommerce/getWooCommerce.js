@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
 import { getWooCommerceCookies } from "./Cookies/cookie-handler";
 import { getLocale, getTranslations } from "next-intl/server";
+import { WAREHOUSES } from "@/lib/countries-config";
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
 const authHeader = Buffer
@@ -28,6 +29,23 @@ export const getLocation = async () => {
     console.log(locationValue);
     return locationValue;
 }
+
+// Get selected country from cookie or default based on location
+// Priority: 1. Cookie selected_country, 2. Default based on location (FR for Europe, US for North America)
+export const getSelectedCountry = async () => {
+    const cookieStore = await cookies();
+    const selectedCountry = cookieStore.get('selected_country')?.value;
+    
+    // If cookie exists, use it
+    if (selectedCountry) {
+        return selectedCountry;
+    }
+    
+    // Otherwise, default based on location
+    const location = await getLocation() || WAREHOUSES.EUROPE;
+    const isEuropeLocation = location === WAREHOUSES.EUROPE;
+    return isEuropeLocation ? 'FR' : 'US';
+};
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
@@ -236,7 +254,8 @@ export const getProductsByCategoryId = async (ids, max, min) => {
         const per_page = 100;
 
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
+        const selectedCountry = await getSelectedCountry();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || selectedCountry;
 
         // 1️⃣ Fetch products only from first category
         for (let i = 1; ; i++) {
@@ -464,7 +483,8 @@ export const getPrice = async (productId) => {
     const location = await getLocation();
     try {
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
+        const selectedCountry = await getSelectedCountry();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || selectedCountry;
         const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/${productId}/variations?per_page=100&currency=${currency}&lang=${locale}&shipping_country=${shippingCountry}&location=${location}`;
         const response = await fetch(url, {
             headers: {
@@ -724,7 +744,8 @@ export const getRecentProducts = async () => {
         const currency = await getCurrency();
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
+        const selectedCountry = await getSelectedCountry();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || selectedCountry;
         // const authHeader = Buffer
         //     .from(`${consumerKey}:${consumerSecret}`)
         //     .toString("base64");
@@ -760,7 +781,8 @@ export async function searchProducts(query = "") {
     try {
         const locale = await getLocale();
         const user = await getAuthenticatedUser();
-        const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
+        const selectedCountry = await getSelectedCountry();
+        const shippingCountry = user?.shipping?.country || user?.billing?.country || selectedCountry;
         const currency = await getCurrency();
 
         const res = await fetch(
