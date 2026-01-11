@@ -117,7 +117,7 @@ const Products = ({ id, childCategories }) => {
     return (
         <div className='flex items-stretch justify-center gap-10 lg:flex-row flex-col global-padding max-w-[1920px] mx-auto'>
             <div className='lg:w-[20%] w-full relative'>
-                <div className='hidden lg:block md:sticky md:top-[170px]'>
+                <div className='hidden lg:block md:sticky md:top-[170px] pb-10'>
                     <div className='lg:h-auto lg:max-h-[calc(100vh-170px)] h-0 overflow-y-scroll popup-scroll-bar-1'>
                         <div className='mb-6'>
                             {childCategories && childCategories.length > 0 &&
@@ -278,9 +278,6 @@ const Products = ({ id, childCategories }) => {
                             <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
                                 <div className='space-y-[10px]'>
                                     <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_four_h")}</h3>
-                                    <p className='text-[#111111bf] text-base leading-[110%]'>
-                                        {t("chat_pop_div_four_p")}
-                                    </p>
                                 </div>
                                 <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
                                     {t("chat_pop_div_four_btn")}
@@ -290,9 +287,6 @@ const Products = ({ id, childCategories }) => {
                             <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
                                 <div className='space-y-[10px]'>
                                     <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_five_h")}</h3>
-                                    <p className='text-[#111111bf] text-base leading-[110%]'>
-                                        {t("chat_pop_div_five_p")}
-                                    </p>
                                 </div>
                                 <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
                                     {t("chat_pop_div_five_btn")}
@@ -302,9 +296,6 @@ const Products = ({ id, childCategories }) => {
                             <div className='p-5 border border-[#666] rounded-[10px] flex flex-col justify-between gap-5'>
                                 <div className='space-y-[10px]'>
                                     <h3 className='lg:text-[28px] font-semibold leading-[100%] text-[#111] md:text-[24px] text-[20px]'>{t("chat_pop_div_six_h")}</h3>
-                                    <p className='text-[#111111bf] text-base leading-[110%]'>
-                                        {t("chat_pop_div_six_p")}
-                                    </p>
                                 </div>
                                 <button className='cursor-pointer text-[#1d98ff] lg:text-base md:text-sm uppercase font-semibold flex items-center gap-1'>
                                     {t("chat_pop_div_six_btn")}
