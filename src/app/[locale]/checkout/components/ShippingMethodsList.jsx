@@ -70,7 +70,7 @@ const ShippingMethodsList = ({
                                     </div>
                                     <div className='text-base text-[#111] font-semibold leading-[100%]'>
                                         {
-                                            totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
+                                            totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${cart?.totals?.currency_symbol || rate.currency_symbol || '€'}`
                                         }
                                     </div>
                                 </li>
@@ -122,7 +122,7 @@ const ShippingMethodsList = ({
                                 </div>
                                 <div className='text-base text-[#111] font-semibold leading-[100%]'>
                                     {
-                                        totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${rate.currency_symbol || cart?.totals?.currency_symbol || '€'}`
+                                        totalPrice === 0 ? <span className='text-green-600'>{t("free")}</span> : `${totalPrice.toFixed(2)}${cart?.totals?.currency_symbol || rate.currency_symbol || '€'}`
                                     }
                                 </div>
                             </li>

@@ -80,7 +80,11 @@ const PaymentMethods = ({
                                             shippingLines: (() => {
                                                 if (!selectedRateId || !allShippingRates) return [];
                                                 // selectedRateId is now in format "package_id:rate_id"
-                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+                                                const colonIndex = selectedRateId.indexOf(':');
+                                                if (colonIndex === -1) return [];
+                                                const packageId = selectedRateId.substring(0, colonIndex);
+                                                const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
                                                     .filter(rate => 
                                                         rate.rate_id === rateId && 
@@ -128,7 +132,11 @@ const PaymentMethods = ({
                                             shippingLines: (() => {
                                                 if (!selectedRateId || !allShippingRates) return [];
                                                 // selectedRateId is now in format "package_id:rate_id"
-                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+                                                const colonIndex = selectedRateId.indexOf(':');
+                                                if (colonIndex === -1) return [];
+                                                const packageId = selectedRateId.substring(0, colonIndex);
+                                                const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
                                                     .filter(rate => 
                                                         rate.rate_id === rateId && 
@@ -176,7 +184,11 @@ const PaymentMethods = ({
                                             shippingLines: (() => {
                                                 if (!selectedRateId || !allShippingRates) return [];
                                                 // selectedRateId is now in format "package_id:rate_id"
-                                                const [packageId, rateId] = selectedRateId.split(':');
+                                                // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+                                                const colonIndex = selectedRateId.indexOf(':');
+                                                if (colonIndex === -1) return [];
+                                                const packageId = selectedRateId.substring(0, colonIndex);
+                                                const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
                                                     .filter(rate => 
                                                         rate.rate_id === rateId && 

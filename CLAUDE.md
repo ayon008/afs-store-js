@@ -102,6 +102,31 @@ All WooCommerce data fetching goes through:
 - Proxy helper in `src/proxy.js` (handles auth headers, cookie management)
 - Custom WordPress plugins for menu data and multi-currency (WCML)
 
+### Shipping Calculation & Variable Products
+
+**Shipping calculation** (`src/app/api/shipping/calculate/route.js`) creates a temporary WooCommerce cart server-side to fetch shipping rates. Key considerations:
+
+**Variable Product Attributes:**
+- WooCommerce Store API expects attribute **slugs** (e.g., `pa_taille`) not display names (e.g., `Taille`, `Size`)
+- Attribute values must also be slugified (e.g., `bleu` not `Bleu`, `oui` not `Oui`)
+- The `normalizeAttributeName()` and `normalizeAttributeValue()` helpers handle this conversion
+- Measurements like `3.0m2` are preserved as-is
+
+**Adding Variable Products to Cart - Retry Strategy:**
+The shipping API uses a 3-strategy approach for reliability across different WooCommerce configurations:
+1. **Strategy 1**: Use `variation_id` only (most reliable) - some WooCommerce setups accept just the variation ID
+2. **Strategy 2**: Use normalized variation attributes - for setups requiring explicit attribute matching
+3. **Strategy 3**: Use `variation_id` as `id` - treats the variation as a standalone product (variations are technically separate products in WooCommerce)
+
+**Multi-Location Inventory:**
+- Uses WooCommerce Multi-Locations-Inventory-Management plugin
+- Location passed via `wcmlim_selected_location_termid` cookie and in request body
+- Default location: `2682` (Europe warehouse)
+
+**Product API Enrichment** (`src/app/api/products/[id]/route.js`):
+- Variation attributes are enriched with `slug` property for Store API compatibility
+- Maps attribute display names to taxonomy slugs from parent product attributes
+
 ### Protected Routes
 
 Middleware (`src/middleware.js` + `src/proxy.js`) protects:
@@ -133,6 +158,17 @@ WooCommerce proxy: `/api/wc/orders/[id]`
 - Messages in `locales/[locale]/default.json` and `checkout.json`
 - Use `useTranslations` hook from next-intl
 - Locale prefix mode: "as-needed" (no prefix for default English)
+
+**Language Switching:**
+- **IMPORTANT**: To change language programmatically, use `router.replace(pathname, { locale: language })` from `@/i18n/navigation`
+- **DO NOT** use `?lang=` parameter or `window.location.href` - use the next-intl router directly
+- The router automatically handles locale prefixes: `/fr/` for French, no prefix for English (default)
+- When cart is not empty and language changes:
+  1. Clear localStorage cart with `handleClearCart()`
+  2. Clear WooCommerce server cart via `/api/cart/clear` (DELETE)
+  3. Wait 400-500ms for cookies to update
+  4. Use `router.replace(pathname, { locale: language })` to change language
+- The middleware (`src/proxy.js`) handles `?lang=` parameter for backward compatibility, but programmatic changes should use the router
 
 ### Image Optimization
 

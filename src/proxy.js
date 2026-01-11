@@ -120,7 +120,6 @@ export default async function middleware(req) {
 
     const authRoutes = ["/login", "/signup"];
     const protectedRoutes = ["/my-account", "/my-account/logout", "/my-account/orders", "/my-account/payment-methods", "/my-account/reset-password", "/demande-sav", "/orders"];
-    
     // Add handling for translated routes
     const translatedRoutes = {
         '/connexion': '/login',
@@ -152,11 +151,14 @@ export default async function middleware(req) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // Check if checkout route and cart is empty
+    // Check if checkout route and cart is empty (checkout is accessible without login)
+    // Only redirect if we're not already coming from cart page (to prevent redirect loops)
     if (pathWithoutLocale === '/checkout') {
         const referer = req.headers.get('referer') || '';
         const isComingFromCart = referer.includes('/cart');
 
+        // Don't redirect if coming from cart page (user just clicked checkout button)
+        // This prevents redirect loops when cart is being synced
         if (!isComingFromCart) {
             const cartEmpty = await isCartEmpty(req);
             if (cartEmpty) {
@@ -167,31 +169,40 @@ export default async function middleware(req) {
     }
 
     // Handle language switch FIRST (before i18n middleware)
+    // Only process if ?lang= parameter is present (user-initiated language change)
     const langParam = req.nextUrl.searchParams.get('lang');
     if (langParam && (langParam === 'en' || langParam === 'fr') && langParam !== locale) {
-        
-        // Check if we're on a product page
+        // Check if we're on a product page (handle both /product/ and /produit/ routes)
+        // Try pathWithoutLocale first, then fallback to full pathname
         let productMatch = pathWithoutLocale.match(/^\/(?:product|produit)\/(.+)$/);
         if (!productMatch) {
+            // Fallback: check full pathname (useful when locale is in path)
             productMatch = pathname.match(/\/(?:product|produit)\/([^\/\?]+)/);
         }
 
         if (productMatch && productMatch[1]) {
-            const currentSlug = productMatch[1].split('?')[0].split('#')[0];
-            console.log(`[Language Switch] Detected product slug: ${currentSlug}, from locale: ${locale}, to locale: ${langParam}`);
+            const currentSlug = productMatch[1].split('?')[0].split('#')[0]; // Remove query params and hash if any
 
+            // Debug: log the detected slug
+            console.log(`[Language Switch] Detected slug: ${currentSlug}, from locale: ${locale}, to locale: ${langParam}, pathname: ${pathname}, pathWithoutLocale: ${pathWithoutLocale}`);
+
+            // Only make API call when language is being changed
             try {
                 const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_WP_BASE_URL;
                 if (WP_BASE_URL) {
                     const translateUrl = `${WP_BASE_URL}/wp-json/afs-wcml/v1/products/translate-slug?slug=${encodeURIComponent(currentSlug)}&target_lang=${langParam}`;
-                    console.log(`[Language Switch] Calling product API: ${translateUrl}`);
 
+                    console.log(`[Language Switch] Calling API: ${translateUrl}`);
+
+                    // Use AbortController for timeout to prevent blocking
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout (increased for reliability)
 
                     const translateResponse = await fetch(translateUrl, {
-                        cache: 'no-store',
-                        headers: { 'Content-Type': 'application/json' },
+                        cache: 'no-store', // Don't cache in middleware
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         signal: controller.signal,
                     });
 
@@ -199,19 +210,23 @@ export default async function middleware(req) {
 
                     if (translateResponse && translateResponse.ok) {
                         const translation = await translateResponse.json();
-                        console.log(`[Language Switch] Product API Response:`, JSON.stringify(translation, null, 2));
+                        console.log(`[Language Switch] API Response:`, JSON.stringify(translation, null, 2));
 
+                        // Check if translation exists and has a slug
                         if (translation && translation.exists === true && translation.slug && translation.slug.trim() !== '') {
+                            // Redirect to translated product with correct route
                             const baseUrl = new URL(req.url);
                             let targetPath;
                             if (langParam === 'fr') {
                                 targetPath = `/fr/produit/${translation.slug}`;
                             } else {
+                                // English - no locale prefix (as-needed mode)
                                 targetPath = `/product/${translation.slug}`;
                             }
-                            console.log(`[Language Switch] Redirecting to product: ${targetPath}`);
+                            console.log(`[Language Switch] Redirecting to: ${targetPath}`);
                             const redirectUrl = new URL(targetPath, baseUrl.origin);
                             redirectUrl.searchParams.delete('lang');
+                            // Preserve other query params
                             req.nextUrl.searchParams.forEach((value, key) => {
                                 if (key !== 'lang') {
                                     redirectUrl.searchParams.set(key, value);
@@ -219,7 +234,9 @@ export default async function middleware(req) {
                             });
                             return NextResponse.redirect(redirectUrl, 307);
                         } else {
-                            console.warn(`[Language Switch] Product translation not found for slug ${currentSlug} to ${langParam}`);
+                            // Translation doesn't exist - log for debugging
+                            console.warn(`[Language Switch] Translation not found or invalid for slug ${currentSlug} to ${langParam}:`, translation);
+                            // Redirect to home page if translation doesn't exist
                             const baseUrl = new URL(req.url);
                             const homePath = langParam === 'fr' ? '/fr' : '/';
                             const redirectUrl = new URL(homePath, baseUrl.origin);
@@ -227,8 +244,11 @@ export default async function middleware(req) {
                             return NextResponse.redirect(redirectUrl, 307);
                         }
                     } else {
+                        // Log error for debugging
                         const status = translateResponse?.status || 'unknown';
-                        console.error(`[Language Switch] Product API error: ${status} for slug ${currentSlug} to ${langParam}`);
+                        const errorText = translateResponse ? await translateResponse.text().catch(() => '') : 'No response';
+                        console.error(`[Language Switch] API error: ${status} for slug ${currentSlug} to ${langParam}. Response: ${errorText}`);
+                        // Redirect to home page on API error
                         const baseUrl = new URL(req.url);
                         const homePath = langParam === 'fr' ? '/fr' : '/';
                         const redirectUrl = new URL(homePath, baseUrl.origin);
@@ -237,9 +257,11 @@ export default async function middleware(req) {
                     }
                 }
             } catch (error) {
+                // On timeout or error, log but don't block
                 if (error.name !== 'AbortError') {
-                    console.error('Error translating product slug:', error);
+                    console.error('Error translating product slug:', error, 'for slug:', currentSlug, 'to:', langParam);
                 }
+                // Fallback: try to use the same slug
                 const baseUrl = new URL(req.url);
                 let targetPath;
                 if (langParam === 'fr') {
@@ -251,235 +273,43 @@ export default async function middleware(req) {
                 redirectUrl.searchParams.delete('lang');
                 return NextResponse.redirect(redirectUrl, 307);
             }
-        }
 
-        // Check if we're on a product-category page
-        let categoryMatch = pathWithoutLocale.match(/^\/(?:product-category|categorie-produit)\/(.+)$/);
-        if (!categoryMatch) {
-            categoryMatch = pathname.match(/\/(?:product-category|categorie-produit)\/([^\/\?]+(?:\/[^\/\?]+)*)/);
-        }
-
-        if (categoryMatch && categoryMatch[1]) {
-            const currentCategorySlug = categoryMatch[1].split('?')[0].split('#')[0];
-            console.log(`[Language Switch] Detected category slug: ${currentCategorySlug}, from locale: ${locale}, to locale: ${langParam}`);
-
-            try {
-                const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_WP_BASE_URL;
-                if (WP_BASE_URL) {
-                    const translateUrl = `${WP_BASE_URL}/wp-json/afs-wcml/v1/categories/translate-slug?slug=${encodeURIComponent(currentCategorySlug)}&target_lang=${langParam}`;
-                    console.log(`[Language Switch] Calling category API: ${translateUrl}`);
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-                    const translateResponse = await fetch(translateUrl, {
-                        cache: 'no-store',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (translateResponse && translateResponse.ok) {
-                        const translation = await translateResponse.json();
-                        console.log(`[Language Switch] Category API Response:`, JSON.stringify(translation, null, 2));
-
-                        if (translation && translation.exists === true && translation.slug && translation.slug.trim() !== '') {
-                            const baseUrl = new URL(req.url);
-                            let targetPath;
-                            if (langParam === 'fr') {
-                                targetPath = `/fr/categorie-produit/${translation.slug}`;
-                            } else {
-                                targetPath = `/product-category/${translation.slug}`;
-                            }
-                            console.log(`[Language Switch] Redirecting to category: ${targetPath}`);
-                            const redirectUrl = new URL(targetPath, baseUrl.origin);
-                            redirectUrl.searchParams.delete('lang');
-                            req.nextUrl.searchParams.forEach((value, key) => {
-                                if (key !== 'lang') {
-                                    redirectUrl.searchParams.set(key, value);
-                                }
-                            });
-                            return NextResponse.redirect(redirectUrl, 307);
-                        } else {
-                            console.warn(`[Language Switch] Category translation not found for slug ${currentCategorySlug} to ${langParam}, using same slug`);
-                            const baseUrl = new URL(req.url);
-                            let targetPath;
-                            if (langParam === 'fr') {
-                                targetPath = `/fr/categorie-produit/${currentCategorySlug}`;
-                            } else {
-                                targetPath = `/product-category/${currentCategorySlug}`;
-                            }
-                            const redirectUrl = new URL(targetPath, baseUrl.origin);
-                            redirectUrl.searchParams.delete('lang');
-                            req.nextUrl.searchParams.forEach((value, key) => {
-                                if (key !== 'lang') {
-                                    redirectUrl.searchParams.set(key, value);
-                                }
-                            });
-                            return NextResponse.redirect(redirectUrl, 307);
-                        }
-                    } else {
-                        const status = translateResponse?.status || 'unknown';
-                        console.error(`[Language Switch] Category API error: ${status} for slug ${currentCategorySlug} to ${langParam}, using same slug`);
-                        const baseUrl = new URL(req.url);
-                        let targetPath;
-                        if (langParam === 'fr') {
-                            targetPath = `/fr/categorie-produit/${currentCategorySlug}`;
-                        } else {
-                            targetPath = `/product-category/${currentCategorySlug}`;
-                        }
-                        const redirectUrl = new URL(targetPath, baseUrl.origin);
-                        redirectUrl.searchParams.delete('lang');
-                        req.nextUrl.searchParams.forEach((value, key) => {
-                            if (key !== 'lang') {
-                                redirectUrl.searchParams.set(key, value);
-                            }
-                        });
-                        return NextResponse.redirect(redirectUrl, 307);
-                    }
-                }
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Error translating category slug:', error);
-                }
-                const baseUrl = new URL(req.url);
-                let targetPath;
-                if (langParam === 'fr') {
-                    targetPath = `/fr/categorie-produit/${currentCategorySlug}`;
-                } else {
-                    targetPath = `/product-category/${currentCategorySlug}`;
-                }
-                const redirectUrl = new URL(targetPath, baseUrl.origin);
-                redirectUrl.searchParams.delete('lang');
-                return NextResponse.redirect(redirectUrl, 307);
-            }
-        }
-
-        // Check if we're on a blog page
-        let blogMatch = pathWithoutLocale.match(/^\/blog\/(.+)$/);
-        if (!blogMatch) {
-            blogMatch = pathname.match(/\/blog\/([^\/\?]+)/);
-        }
-
-        if (blogMatch && blogMatch[1]) {
-            const currentSlug = blogMatch[1].split('?')[0].split('#')[0];
-            console.log(`[Language Switch] Detected blog slug: ${currentSlug}, from locale: ${locale}, to locale: ${langParam}`);
-
-            try {
-                const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_WP_BASE_URL;
-                if (WP_BASE_URL) {
-                    const translateUrl = `${WP_BASE_URL}/wp-json/afs-wpml/v1/posts/translate-slug?slug=${encodeURIComponent(currentSlug)}&target_lang=${langParam}`;
-                    console.log(`[Language Switch] Calling blog API: ${translateUrl}`);
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-                    const translateResponse = await fetch(translateUrl, {
-                        cache: 'no-store',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (translateResponse && translateResponse.ok) {
-                        const translation = await translateResponse.json();
-                        console.log(`[Language Switch] Blog API Response:`, JSON.stringify(translation, null, 2));
-
-                        if (translation && translation.exists === true && translation.slug && translation.slug.trim() !== '') {
-                            const baseUrl = new URL(req.url);
-                            let targetPath;
-                            if (langParam === 'fr') {
-                                targetPath = `/fr/blog/${translation.slug}`;
-                            } else {
-                                targetPath = `/blog/${translation.slug}`;
-                            }
-                            console.log(`[Language Switch] Redirecting to blog: ${targetPath}`);
-                            const redirectUrl = new URL(targetPath, baseUrl.origin);
-                            redirectUrl.searchParams.delete('lang');
-                            req.nextUrl.searchParams.forEach((value, key) => {
-                                if (key !== 'lang') {
-                                    redirectUrl.searchParams.set(key, value);
-                                }
-                            });
-                            return NextResponse.redirect(redirectUrl, 307);
-                        } else {
-                            console.warn(`[Language Switch] Blog translation not found for slug ${currentSlug} to ${langParam}, using same slug`);
-                            const baseUrl = new URL(req.url);
-                            let targetPath;
-                            if (langParam === 'fr') {
-                                targetPath = `/fr/blog/${currentSlug}`;
-                            } else {
-                                targetPath = `/blog/${currentSlug}`;
-                            }
-                            const redirectUrl = new URL(targetPath, baseUrl.origin);
-                            redirectUrl.searchParams.delete('lang');
-                            req.nextUrl.searchParams.forEach((value, key) => {
-                                if (key !== 'lang') {
-                                    redirectUrl.searchParams.set(key, value);
-                                }
-                            });
-                            return NextResponse.redirect(redirectUrl, 307);
-                        }
-                    } else {
-                        const status = translateResponse?.status || 'unknown';
-                        console.error(`[Language Switch] Blog API error: ${status} for slug ${currentSlug} to ${langParam}, using same slug`);
-                        const baseUrl = new URL(req.url);
-                        let targetPath;
-                        if (langParam === 'fr') {
-                            targetPath = `/fr/blog/${currentSlug}`;
-                        } else {
-                            targetPath = `/blog/${currentSlug}`;
-                        }
-                        const redirectUrl = new URL(targetPath, baseUrl.origin);
-                        redirectUrl.searchParams.delete('lang');
-                        req.nextUrl.searchParams.forEach((value, key) => {
-                            if (key !== 'lang') {
-                                redirectUrl.searchParams.set(key, value);
-                            }
-                        });
-                        return NextResponse.redirect(redirectUrl, 307);
-                    }
-                }
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Error translating blog slug:', error);
-                }
-                const baseUrl = new URL(req.url);
-                let targetPath;
-                if (langParam === 'fr') {
-                    targetPath = `/fr/blog/${currentSlug}`;
-                } else {
-                    targetPath = `/blog/${currentSlug}`;
-                }
-                const redirectUrl = new URL(targetPath, baseUrl.origin);
-                redirectUrl.searchParams.delete('lang');
-                return NextResponse.redirect(redirectUrl, 307);
-            }
-        }
-
-        // For non-product/category/blog pages, redirect to same path with new locale
-        const pathWithoutLocaleClean = pathWithoutLocale === '/' ? '' : pathWithoutLocale;
-        let newPathname;
-        if (langParam === 'en') {
-            newPathname = pathWithoutLocaleClean || '/';
+            // If we reach here, something went wrong - redirect to home page
+            const baseUrl = new URL(req.url);
+            const homePath = langParam === 'fr' ? '/fr' : '/';
+            const redirectUrl = new URL(homePath, baseUrl.origin);
+            redirectUrl.searchParams.delete('lang');
+            return NextResponse.redirect(redirectUrl, 307);
         } else {
-            newPathname = `/${langParam}${pathWithoutLocaleClean === '/' ? '' : pathWithoutLocaleClean}`;
-        }
-
-        const baseUrl = new URL(req.url);
-        const redirectUrl = new URL(newPathname, baseUrl.origin);
-        redirectUrl.searchParams.delete('lang');
-        req.nextUrl.searchParams.forEach((value, key) => {
-            if (key !== 'lang') {
-                redirectUrl.searchParams.set(key, value);
+            // For non-product pages, redirect to same path with new locale
+            // NO API CALL - just redirect with locale change
+            const pathWithoutLocaleClean = pathWithoutLocale === '/' ? '' : pathWithoutLocale;
+            let newPathname;
+            if (langParam === 'en') {
+                // English is default, no prefix needed (as-needed mode)
+                // pathWithoutLocale already has /fr/ removed if it was there
+                newPathname = pathWithoutLocaleClean || '/';
+            } else {
+                // French needs /fr/ prefix
+                newPathname = `/${langParam}${pathWithoutLocaleClean === '/' ? '' : pathWithoutLocaleClean}`;
             }
-        });
-        return NextResponse.redirect(redirectUrl, 307);
+
+            // Create redirect URL with absolute path
+            const baseUrl = new URL(req.url);
+            const redirectUrl = new URL(newPathname, baseUrl.origin);
+            redirectUrl.searchParams.delete('lang');
+            // Preserve other query params
+            req.nextUrl.searchParams.forEach((value, key) => {
+                if (key !== 'lang') {
+                    redirectUrl.searchParams.set(key, value);
+                }
+            });
+            return NextResponse.redirect(redirectUrl, 307);
+        }
     }
 
     // Handle product route redirections based on locale
+    // Redirect /fr/product/ to /fr/produit/ for French locale
     if (locale === 'fr' && pathWithoutLocale.startsWith('/product/') && !pathWithoutLocale.startsWith('/produit/')) {
         const slug = pathWithoutLocale.replace('/product/', '').replace(/\/$/, '');
         if (slug) {
@@ -490,21 +320,11 @@ export default async function middleware(req) {
         }
     }
 
+    // Redirect /produit/ to /product/ for English locale (when no /fr/ prefix)
     if (locale === 'en' && pathWithoutLocale.startsWith('/produit/') && !pathname.startsWith('/fr/')) {
         const slug = pathWithoutLocale.replace('/produit/', '').replace(/\/$/, '');
         if (slug) {
             const redirectUrl = new URL(`/product/${slug}`, req.url);
-            redirectUrl.search = req.nextUrl.search;
-            redirectUrl.searchParams.delete('lang');
-            return NextResponse.redirect(redirectUrl, 308);
-        }
-    }
-
-    // Handle product-category route redirections for English
-    if (locale === 'en' && pathWithoutLocale.startsWith('/categorie-produit/') && !pathname.startsWith('/fr/')) {
-        const slugPath = pathWithoutLocale.replace('/categorie-produit/', '');
-        if (slugPath) {
-            const redirectUrl = new URL(`/product-category/${slugPath}`, req.url);
             redirectUrl.search = req.nextUrl.search;
             redirectUrl.searchParams.delete('lang');
             return NextResponse.redirect(redirectUrl, 308);

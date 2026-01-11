@@ -37,10 +37,12 @@ export async function POST(request) {
             state = '',
             postcode = '',
             city = '',
-            items = [] // Array of { id, quantity, variation_id, variation }
+            items = [], // Array of { id, quantity, variation_id, variation }
+            location: bodyLocation // Location passed from checkout
         } = body;
 
-        console.log('[Shipping Calculate] Request:', { country, state, postcode, city, itemsCount: items.length });
+        console.log('[Shipping Calculate] Request:', { country, state, postcode, city, itemsCount: items.length, bodyLocation });
+        console.log('[Shipping Calculate] Items received:', JSON.stringify(items, null, 2));
 
         if (!country) {
             return NextResponse.json({
@@ -57,8 +59,12 @@ export async function POST(request) {
         }
 
         // Get currency and location
+        // Prefer location from request body (cart metadata), fallback to cookies
         const currency = await getCurrency();
-        const location = await getLocation() || '2682';
+        const cookieLocation = await getLocation();
+        const location = bodyLocation || cookieLocation || '2682';
+
+        console.log('[Shipping Calculate] Using location:', location, '(from body:', bodyLocation, ', from cookie:', cookieLocation, ')');
 
         // Convert currency format
         let currencyCode = currency;
@@ -83,95 +89,211 @@ export async function POST(request) {
             return allCookies.join('; ');
         };
 
+        // Helper to normalize attribute name for WooCommerce Store API
+        // WooCommerce expects: "pa_color" not "attribute_pa_color" or "Color" or "Taille"
+        const normalizeAttributeName = (attrName) => {
+            if (!attrName) return '';
+            let normalized = String(attrName);
+
+            // Strip "attribute_" prefix if present
+            if (normalized.startsWith('attribute_')) {
+                normalized = normalized.substring(10); // Remove "attribute_"
+            }
+
+            // If already in pa_ format, return as-is
+            if (normalized.startsWith('pa_')) {
+                return normalized;
+            }
+
+            // Convert display name to slug format: "Taille" -> "pa_taille", "Size" -> "pa_size"
+            // This handles cases where cart was saved with display names instead of slugs
+            const slugified = normalized
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/[^a-z0-9-]/g, ''); // Remove special characters
+
+            return `pa_${slugified}`;
+        };
+
+        // Helper to normalize attribute value for WooCommerce Store API
+        // WooCommerce expects slugified values: "bleu" not "Bleu", "oui" not "Oui"
+        const normalizeAttributeValue = (value) => {
+            if (!value) return '';
+            const strValue = String(value);
+
+            // If it looks like a measurement (contains numbers with units), keep as-is
+            if (/^\d+(\.\d+)?\s*(m2|m|cm|mm|kg|g|l|ml)?$/i.test(strValue)) {
+                return strValue;
+            }
+
+            // Slugify the value: "Bleu" -> "bleu", "Oui" -> "oui"
+            return strValue
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/[^a-z0-9-_.]/g, ''); // Remove special characters (keep dots for measurements)
+        };
+
         // Helper to build item payload for WC Store API
-        const buildItemPayload = (item) => {
+        const buildItemPayload = (item, includeVariation = true) => {
             const payload = {
                 id: parseInt(item.id),
                 quantity: parseInt(item.quantity) || 1,
+                // Include location in payload (required by Multi-Locations-Inventory-Management plugin)
+                location: parseInt(location) || 2682,
             };
 
             if (item.variation_id) {
                 payload.variation_id = parseInt(item.variation_id);
             }
 
-            // Add variation attributes if present (required for variable products)
-            if (item.variation) {
+            // Add variation attributes if present and requested
+            // WooCommerce Store API expects: [{ attribute: "pa_color", value: "red" }]
+            if (includeVariation && item.variation) {
+                let variationArray = [];
+
                 if (Array.isArray(item.variation)) {
                     // Already in array format [{ attribute, value }]
-                    payload.variation = item.variation;
-                } else if (typeof item.variation === 'object') {
-                    // Convert object format { "Taille": "3.0m2" } to array format
-                    payload.variation = Object.entries(item.variation).map(([attr, value]) => ({
-                        attribute: attr,
-                        value: String(value)
-                    }));
+                    variationArray = item.variation.map(v => ({
+                        attribute: normalizeAttributeName(v.attribute || v.name || ''),
+                        value: normalizeAttributeValue(v.value || v.option || '')
+                    })).filter(v => v.attribute && v.value);
+                } else if (typeof item.variation === 'object' && Object.keys(item.variation).length > 0) {
+                    // Convert object format { "attribute_pa_taille": "3.0m2" } to array format
+                    variationArray = Object.entries(item.variation).map(([attr, value]) => ({
+                        attribute: normalizeAttributeName(attr),
+                        value: normalizeAttributeValue(value)
+                    })).filter(v => v.attribute && v.value);
+                }
+
+                // Only add variation if we have valid attributes
+                if (variationArray.length > 0) {
+                    payload.variation = variationArray;
                 }
             }
 
             return payload;
         };
 
+        // Helper to add item to cart with retry logic
+        const addItemToCart = async (item, cookieHeader) => {
+            let response;
+            let payload;
+
+            // Strategy 1: If we have variation_id, try with just variation_id first (most reliable)
+            if (item.variation_id) {
+                payload = buildItemPayload(item, false); // No variation attributes
+                console.log('[Shipping Calculate] Attempt 1 - variation_id only:', JSON.stringify(payload));
+
+                response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Cookie": cookieHeader,
+                    },
+                    body: JSON.stringify(payload),
+                    cache: "no-store",
+                });
+
+                if (response.ok) {
+                    console.log('[Shipping Calculate] Success with variation_id only');
+                    return { success: true, response };
+                }
+
+                console.log('[Shipping Calculate] variation_id only failed, trying with attributes...');
+            }
+
+            // Strategy 2: Try with variation attributes
+            payload = buildItemPayload(item, true);
+            console.log('[Shipping Calculate] Attempt 2 - with variation attributes:', JSON.stringify(payload));
+
+            response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Cookie": cookieHeader,
+                },
+                body: JSON.stringify(payload),
+                cache: "no-store",
+            });
+
+            if (response.ok) {
+                console.log('[Shipping Calculate] Success with variation attributes');
+                return { success: true, response };
+            }
+
+            // Strategy 3: Try with product ID only (for simple products or as last resort)
+            if (item.variation_id) {
+                payload = {
+                    id: parseInt(item.variation_id), // Use variation_id as the product id
+                    quantity: parseInt(item.quantity) || 1,
+                    location: parseInt(location) || 2682,
+                };
+                console.log('[Shipping Calculate] Attempt 3 - variation as product id:', JSON.stringify(payload));
+
+                response = await fetch(`${WC_STORE_URL}/cart/add-item`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Cookie": cookieHeader,
+                    },
+                    body: JSON.stringify(payload),
+                    cache: "no-store",
+                });
+
+                if (response.ok) {
+                    console.log('[Shipping Calculate] Success with variation as product id');
+                    return { success: true, response };
+                }
+            }
+
+            // All attempts failed
+            const errorText = await response.text();
+            console.error('[Shipping Calculate] Failed to add item:', errorText);
+            return { success: false, response, error: errorText };
+        };
+
         // Step 1: Add first item to create a session
         const firstItem = items[0];
-        const firstPayload = buildItemPayload(firstItem);
+        const firstResult = await addItemToCart(firstItem, buildCookieHeader());
 
-        console.log('[Shipping Calculate] Adding first item:', firstPayload);
-
-        const firstResponse = await fetch(`${WC_STORE_URL}/cart/add-item`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Cookie": buildCookieHeader(),
-            },
-            body: JSON.stringify(firstPayload),
-            cache: "no-store",
-        });
-
-        if (!firstResponse.ok) {
-            const errorText = await firstResponse.text();
-            console.error('[Shipping Calculate] Failed to add first item:', errorText);
+        if (!firstResult.success) {
             return NextResponse.json({
                 success: false,
                 error: "Failed to create cart session",
-                details: errorText
+                details: firstResult.error
             }, { status: 500 });
         }
+
+        const firstResponse = firstResult.response;
 
         // Capture session cookies from first response
         const firstCookies = extractSessionCookies(firstResponse);
         sessionCookiesList.push(...firstCookies);
         console.log('[Shipping Calculate] Session cookies captured:', sessionCookiesList.length);
 
-        const firstResult = await firstResponse.json();
-        console.log('[Shipping Calculate] First item added, cart items:', firstResult.items?.length);
+        const firstCartData = await firstResponse.json();
+        console.log('[Shipping Calculate] First item added, cart items:', firstCartData.items?.length);
 
         // Add remaining items if any
         for (let i = 1; i < items.length; i++) {
             const item = items[i];
-            const payload = buildItemPayload(item);
+            const result = await addItemToCart(item, buildCookieHeader());
 
-            const addResponse = await fetch(`${WC_STORE_URL}/cart/add-item`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Cookie": buildCookieHeader(),
-                },
-                body: JSON.stringify(payload),
-                cache: "no-store",
-            });
-
-            // Update session cookies
-            const newCookies = extractSessionCookies(addResponse);
-            for (const cookie of newCookies) {
-                const cookieName = cookie.split('=')[0];
-                // Replace existing cookie with same name
-                sessionCookiesList = sessionCookiesList.filter(c => !c.startsWith(cookieName + '='));
-                sessionCookiesList.push(cookie);
-            }
-
-            if (!addResponse.ok) {
+            if (result.success) {
+                // Update session cookies
+                const newCookies = extractSessionCookies(result.response);
+                for (const cookie of newCookies) {
+                    const cookieName = cookie.split('=')[0];
+                    // Replace existing cookie with same name
+                    sessionCookiesList = sessionCookiesList.filter(c => !c.startsWith(cookieName + '='));
+                    sessionCookiesList.push(cookie);
+                }
+            } else {
                 console.warn('[Shipping Calculate] Failed to add item:', item.id);
             }
         }

@@ -4,7 +4,6 @@ import { Package, Truck, CreditCard } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ShippingMethodsList from "./ShippingMethodsList";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,9 +12,6 @@ const OrderSummary = ({
     items,
     allShippingRates,
     selectedRateId,
-    handleSelectRate,
-    shippingLoading,
-    updatingShipping,
     watchFields,
     register,
     errors,
@@ -92,25 +88,36 @@ const OrderSummary = ({
                         </div>
                     </div>
 
-                    {/* Shipping Methods */}
-                    <div className='pt-4 border-t border-gray-200'>
-                        <div className='flex items-center gap-2 mb-4'>
-                            <div className='w-8 h-8 bg-[#000000] rounded-lg flex items-center justify-center'>
-                                <Truck className='w-4 h-4 text-white' />
+                    {/* Shipping Cost Display */}
+                    {selectedRateId && allShippingRates && allShippingRates.length > 0 && (() => {
+                        // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
+                        const colonIndex = selectedRateId.indexOf(':');
+                        if (colonIndex === -1) return null;
+                        const packageId = selectedRateId.substring(0, colonIndex);
+                        const rateId = selectedRateId.substring(colonIndex + 1);
+                        const selectedRate = allShippingRates.find(rate =>
+                            rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
+                        );
+                        if (!selectedRate) return null;
+                        const shippingPrice = (selectedRate.price / 100 + (selectedRate.taxes || 0) / 100);
+                        return (
+                            <div className='pt-4 border-t border-gray-200'>
+                                <div className='flex items-center justify-between'>
+                                    <div className='flex items-center gap-2'>
+                                        <Truck className='w-4 h-4 text-gray-500' />
+                                        <span className='text-base text-gray-600'>{selectedRate.name}</span>
+                                    </div>
+                                    <span className='text-base text-[#111] font-semibold'>
+                                        {shippingPrice === 0 ? (
+                                            <span className='text-green-600'>{t("free")}</span>
+                                        ) : (
+                                            `${shippingPrice.toFixed(2)}${currencySymbol}`
+                                        )}
+                                    </span>
+                                </div>
                             </div>
-                            <h3 className='text-base font-semibold text-gray-900'>{t("shippingMethods")}</h3>
-                        </div>
-                        <ShippingMethodsList
-                            allShippingRates={allShippingRates}
-                            selectedRateId={selectedRateId}
-                            handleSelectRate={handleSelectRate}
-                            shippingLoading={shippingLoading}
-                            updatingShipping={updatingShipping}
-                            watchFields={watchFields}
-                            cart={cart}
-                            t={t}
-                        />
-                    </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Totals - Sticky Bottom */}

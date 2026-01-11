@@ -86,13 +86,5 @@ export const routing = defineRouting({
             en: '/my-account/logout',
             fr: '/mon-compte/deconnexion'
         },
-        '/product-category/[...slug]': {
-            en: '/product-category/[...slug]',
-            fr: '/categorie-produit/[...slug]'
-        },
-        '/blog/[slug]': {
-            en: '/blog/[slug]',
-            fr: '/blog/[slug]'
-        },
     }
 })

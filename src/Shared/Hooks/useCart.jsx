@@ -97,13 +97,48 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         // From: { "Taille": "3.0m2", "Color": "Blue" }
         // To: [{ attribute: "Taille", value: "3.0m2" }, { attribute: "Color", value: "Blue" }]
         let variationArray = [];
-        if (item.variation && typeof item.variation === 'object' && !Array.isArray(item.variation)) {
+        let variationRaw = null;
+
+        if (item.variation && typeof item.variation === 'object' && !Array.isArray(item.variation) && Object.keys(item.variation).length > 0) {
+            // item.variation is object format - convert to array for display
             variationArray = Object.entries(item.variation).map(([attr, value]) => ({
                 attribute: attr,
                 value: String(value)
             }));
-        } else if (Array.isArray(item.variation)) {
+            variationRaw = item.variation; // Keep as-is for API calls
+        } else if (Array.isArray(item.variation) && item.variation.length > 0) {
+            // item.variation is already array format
             variationArray = item.variation;
+            // Convert array back to object for API calls
+            variationRaw = item.variation.reduce((acc, v) => {
+                if (v.attribute && v.value) {
+                    acc[v.attribute] = v.value;
+                }
+                return acc;
+            }, {});
+        }
+
+        // If we still don't have variation data but have variation_id, try to get from productData
+        if ((!variationRaw || Object.keys(variationRaw).length === 0) && item.variation_id && item.productData?.variations) {
+            const matchedVariation = item.productData.variations.find(v => v.id === item.variation_id);
+            if (matchedVariation?.attributes && Array.isArray(matchedVariation.attributes)) {
+                // Use slug for API calls (WooCommerce Store API expects "pa_taille" not "Taille")
+                variationRaw = matchedVariation.attributes.reduce((acc, attr) => {
+                    // Prefer slug over name for API compatibility
+                    const attrKey = attr.slug || attr.name || attr.attribute || '';
+                    const attrValue = attr.option || attr.value || '';
+                    if (attrKey && attrValue) {
+                        acc[attrKey] = attrValue;
+                    }
+                    return acc;
+                }, {});
+                // For display, use the display name; for API calls in attribute field, use slug
+                variationArray = matchedVariation.attributes.map(attr => ({
+                    attribute: attr.slug || attr.name || attr.attribute || '', // Use slug for API
+                    displayName: attr.name || attr.attribute || '',             // Keep display name for UI
+                    value: attr.option || attr.value || ''
+                })).filter(v => v.attribute && v.value);
+            }
         }
 
         return {
@@ -112,7 +147,7 @@ const convertLocalStorageCartToDisplay = (localCart) => {
             quantity: quantity,
             variation_id: item.variation_id || null,
             variation: variationArray, // Array format for display components
-            _variationRaw: item.variation || {}, // Keep raw format for API calls
+            _variationRaw: variationRaw, // Object format for API calls (null if no variations)
             prices: {
                 price: Math.round(price * 100), // Convert to cents
                 regular_price: Math.round(price * 100),
@@ -149,6 +184,7 @@ const convertLocalStorageCartToDisplay = (localCart) => {
         billing_address: null,
         needs_payment: true,
         needs_shipping: true,
+        metadata: localCart.metadata, // Include cart metadata (locale, currency, location)
         _localStorage: true // Flag to indicate this is from localStorage
     };
 };
