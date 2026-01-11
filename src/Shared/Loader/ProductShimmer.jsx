@@ -10,7 +10,7 @@ const ProductShimmer = () => {
                     100% { transform: translateX(100%); }
                 }
             `}</style>
-            <div className="flex lg:flex-row flex-col items-start justify-between gap-10 global-margin py-8">
+            <div className="flex lg:flex-row flex-col items-start justify-between gap-10 global-margin py-8 global-padding">
                 {/* LEFT SIDE - Images */}
                 <div className="lg:w-[60%] w-full">
                     <div className="grid-cols-2 gap-2.5 relative lg:grid hidden">

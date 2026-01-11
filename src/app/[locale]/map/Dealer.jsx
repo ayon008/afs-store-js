@@ -4,12 +4,14 @@ import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-map
 import Image from 'next/image';
 import { getDealers } from '@/app/actions/WC/getDealers';
 import DropDown from '@/Shared/DropDown/DropDown';
+import { useTranslations } from 'next-intl';
 
 const Dealers = () => {
 
     const mapRef = useRef(null);
     // Keep track if we've already set the initial center to avoid repeated adjustments
     const initialCenterSet = useRef(false);
+    const t = useTranslations("map");
 
     const [shop_name, setShopName] = useState("");
     const [selectedId, setSelectedId] = useState(null);
@@ -76,7 +78,7 @@ const Dealers = () => {
 
     const containerStyle = {
         width: '100%',
-        height: '500px'
+        height: '100%'
     };
 
     const { isLoaded } = useJsApiLoader({
@@ -164,6 +166,8 @@ const Dealers = () => {
     }
 
 
+
+
     return (
         <div>
             <div className='mb-10'>
@@ -171,7 +175,7 @@ const Dealers = () => {
             </div>
             {/* Map */}
             <div className='rounded-[4px] overflow-hidden relative z-10'>
-                <div className='lg:h-[500px] overflow-hidden h-[390px]'>
+                <div className='lg:h-dvh lg:max-h-[746px] overflow-hidden h-[520px]'>
                     <GoogleMap
                         mapContainerStyle={containerStyle}
                         zoom={5}
@@ -228,7 +232,7 @@ const Dealers = () => {
                 </div>
                 <div className='z-20 lg:top-8 lg:left-4 lg:absolute lg:max-w-[385px] lg:mt-0 mt-10 w-full bg-transparent lg:h-[380px] h-[420px]'>
                     <div className='w-full bg-black py-[12.5px] px-5 rounded-[4px]'>
-                        <h3 className='font-bold text-white text-[28px]'>Nombre de magasins:</h3>
+                        <h3 className='font-bold text-white text-[28px]'>{t("Number of stores:")}</h3>
                     </div>
                     <div className='overflow-y-scroll h-full popup-scroll-bar-1 cursor-pointer'>
                         {

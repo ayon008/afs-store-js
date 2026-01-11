@@ -24,9 +24,9 @@
     "title": "L'ESSENCE DE LA FEUILLE"
   },
   "afs-event": {
+    "Choisir un pays": "Choisir un pays",
     "headline": "Découvrez tous les événements organisés par AFS pour nos marques.",
-    "nombre": "Nombre de magasins :",
-    "pays": "Choisir un pays"
+    "nombre": "Nombre de magasins :"
   },
   "afs-products": {
     "tests": "<h>Tests et revues</h><p>Découvrez ce que la presse spécialisée a à dire sur nos produits</p>"
@@ -159,38 +159,38 @@
   },
   "common": {
     "Ambassadors": "Ambassadeurs",
-    "Board construction (Coming Soon)": "Construction du conseil d'administration (bientôt disponible)",
-    "Book a call with an AFS expert": "Réservez un appel avec un expert AFS",
+    "Board construction (Coming Soon)": "Construction planche",
+    "Book a call with an AFS expert": "Réserver un appel avec un expert AFS",
     "cartClearedCurrency": "Votre panier a été vidé car vous avez changé de devise. Les produits doivent être ajoutés à nouveau.",
     "cartClearedLanguage": "Votre panier a été vidé car vous avez changé de langue. Les produits doivent être ajoutés à nouveau dans la nouvelle langue.",
     "change": "Changer",
     "Choose": "Choisir",
     "chooseLocationLanguage": "Choisissez votre lieu et votre langue",
-    "Come visit us": "Venez nous rendre visite",
+    "Come visit us": "Venir nous rendre visite",
     "Contact": "Contact",
     "currentLanguageCurrency": "Votre langue, votre devise et l'emplacement de votre magasin",
-    "Customer Service Request": "Demande de service à la clientèle",
-    "Dealer map": "Plan du concessionnaire",
+    "Customer Service Request": "Demande de SAV",
+    "Dealer map": "Map revendeurs",
     "english": "Anglais",
-    "Equipment trade-in": "Reprise de matériel",
+    "Equipment trade-in": "Reprise materiel",
     "euro": "Euro",
-    "Events": "Evénements",
-    "Factory tour": "Visite de l'usine",
-    "Foil specifications": "Spécifications des feuilles",
+    "Events": "Evenements",
+    "Factory tour": "Visite de l’usine",
+    "Foil specifications": "Caractéristiques des foils",
     "french": "Français",
     "location": "Emplacement du magasin disponible",
-    "Mast comparison (Coming Soon)": "Comparaison de mâts (bientôt disponible)",
-    "Repair & Maintenance": "Réparation et entretien",
-    "Screw size": "Taille de la vis",
+    "Mast comparison (Coming Soon)": "Comparatif mât (bientôt disponible)",
+    "Repair & Maintenance": "Réparation et maintenance",
+    "Screw size": "Taille des vis",
     "search": "Rechercher...",
-    "Support": "Soutien",
-    "Team": "L'équipe",
+    "Support": "Support",
+    "Team": "Equipe",
     "uk": "Livraison en Europe et au Royaume-Uni",
     "usa": "Livraison aux États-Unis",
     "usDollar": "Dollar américain",
-    "User manual": "Manuel de l'utilisateur",
+    "User manual": "Notice d'utilisation",
     "Warranty": "Garantie",
-    "Work team": "Équipe de travail"
+    "Work team": "Equipe de travail"
   },
   "DirectSailing": {
     "Address": "Adresse",
@@ -414,6 +414,12 @@
     "We manufacture": " Nous fabriquons nous-mêmes certaines de nos machines de production.",
     "We settled in": "Nous nous sommes installés à Pencran, en zone rurale, afin de favoriser le développement du bassin d'emploi local, plutôt que dans une grande métropole où les zones industrielles sont déjà saturées. Nos ateliers sont installés dans un bâtiment éco-conçu, nous sommes autonomes en énergie à 90% grâce à l'installation de panneaux solaires et nous encourageons le covoiturage entre salariés.",
     "Working": "Travailler en circuit court : le choix du made in France."
+  },
+  "map": {
+    "All": "Tous",
+    "Number of stores:": "Nombre de magasins:",
+    "Our partners": "Nos partenaires",
+    "p": "Faites l’expérience de la qualité de nos produits en les découvrant chez les revendeurs locaux de confiance de votre région."
   },
   "Need-advice": {
     "After-sales": "Demande de service après-vente",

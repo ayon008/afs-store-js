@@ -10,7 +10,7 @@ const EventDropDown = ({ selectedId, setSelectedId }) => {
 
     const t = useTranslations("afs-event");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [selected, setSelected] = useState(t("pays"));
+    const [selected, setSelected] = useState(t("Choisir un pays"));
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {

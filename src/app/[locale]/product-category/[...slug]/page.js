@@ -85,7 +85,7 @@ export async function generateMetadata({ params }) {
 const page = async ({ params, searchParams }) => {
     // Catch All Route
     const { slug } = await params;
-    
+
     // Getting the Category details by the slug [last category of the slug]
     let category;
     try {
@@ -123,7 +123,7 @@ const page = async ({ params, searchParams }) => {
                             <Link
                                 key={i}
                                 href={path}
-                                className="uppercase inline"
+                                className={`uppercase inline`}
                             >
                                 {" / "}{singleSlug.split("-").join(" ")}
                             </Link>

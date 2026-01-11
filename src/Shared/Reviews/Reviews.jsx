@@ -12,11 +12,17 @@ import { useTranslations } from "next-intl";
 
 const Reviews = ({ acf }) => {
     const thumbnail_one = acf?.thumbnail_one;
+    const thumbnail_three = acf?.thumbnail_three;
+    const thumbnail_four = acf?.thumbnail_four;
     const review_title = acf?.review_title;
     const video_url = acf?.video_url;
     const review_heading_tow = acf?.review_heading_tow;
     const thumbnail_tow = acf?.thumbnail_tow;
     const video_url_if_has_tow = acf?.video_url_if_has_tow;
+    const video_url_if_has_three = acf?.video_url_if_has_three;
+    const video_url_if_has_four = acf?.video_url_if_has_four;
+    const review_heading_three = acf?.review_heading_three;
+    const review_heading_four = acf?.review_heading_four;
     const [show, setShow] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [link, setLink] = useState(null);
@@ -68,12 +74,12 @@ const Reviews = ({ acf }) => {
                         swiperRef.current = swiper;
                         setActiveIndex(swiper.realIndex);
                     }}
-                    className=""
+                    className="h-fit! lg:bg-transparent bg-black rounded-sm"
                 >
                     <SwiperSlide className="">
-                        <div className="relative h-full">
+                        <div className="relative  max-h-[545px] lg:min-h-[545px] overflow-hidden">
                             <div className="relative block h-full">
-                                <Image src={thumbnail_one} width={1080} height={545} className="object-contain w-full h-full" alt={review_title} />
+                                <Image src={thumbnail_one} width={1080} height={545} className="object-cover aspect-video w-full h-full" alt={review_title} />
                                 <span onClick={() => {
                                     setShow(true)
                                     setLink(video_url)
@@ -95,9 +101,9 @@ const Reviews = ({ acf }) => {
                     </SwiperSlide>
                     {
                         thumbnail_tow && <SwiperSlide className="flex flex-col ">
-                            <div className="relative h-full">
+                            <div className="relative  max-h-[545px] lg:min-h-[545px] overflow-hidden">
                                 <div className="relative block h-full">
-                                    <Image src={thumbnail_tow} width={1080} height={545} alt={review_title} className="object-contain w-full h-full" />
+                                    <Image src={thumbnail_tow} width={1080} height={545} alt={review_title} className="object-cover w-full h-full aspect-video" />
                                     <span onClick={() => {
                                         setShow(true)
                                         setLink(video_url_if_has_tow)
@@ -118,18 +124,68 @@ const Reviews = ({ acf }) => {
                             </div>
                         </SwiperSlide>
                     }
+                    {
+                        thumbnail_three && <SwiperSlide className="flex flex-col ">
+                            <div className="relative  max-h-[545px] lg:min-h-[545px] overflow-hidden">
+                                <div className="relative block h-full">
+                                    <Image src={thumbnail_three} width={1080} height={545} alt={review_title} className="object-cover w-full h-full aspect-video" />
+                                    <span onClick={() => {
+                                        setShow(true)
+                                        setLink(video_url_if_has_three)
+                                    }} className='cursor-pointer absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>
+                                            <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div className="lg:absolute relative lg:bottom-0 lg:left-0 bg-black p-5 lg:w-[400px] w-full rounded-[4px]">
+                                    <h3 className="lg:text-[28px] text-lg leading-[110%] font-bold text-white">{review_heading_three}</h3>
+                                    <p onClick={() => {
+                                        setShow(true)
+                                        setLink(video_url_if_has_three)
+                                    }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">{t("watch")} <ArrowUpRight className="inline" size={"1.2rem"} /></p>
+                                </div>
+                            </div>
+                        </SwiperSlide>
+                    }
+                    {
+                        thumbnail_four && <SwiperSlide className="flex flex-col ">
+                            <div className="relative  max-h-[545px] lg:min-h-[545px] overflow-hidden">
+                                <div className="relative block h-full">
+                                    <Image src={thumbnail_four} width={1080} height={545} alt={review_title} className="object-cover w-full h-full aspect-video" />
+                                    <span onClick={() => {
+                                        setShow(true)
+                                        setLink(video_url_if_has_four)
+                                    }} className='cursor-pointer absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>
+                                            <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div className="lg:absolute relative lg:bottom-0 lg:left-0 bg-black p-5 lg:w-[400px] w-full rounded-[4px]">
+                                    <h3 className="lg:text-[28px] text-lg leading-[110%] font-bold text-white">{review_heading_four}</h3>
+                                    <p onClick={() => {
+                                        setShow(true)
+                                        setLink(video_url_if_has_four)
+                                    }} className="text-base leading-[100%] text-[#077DD0] hover:text-white transition-colors duration-200 ease-in font-semibold mt-4 cursor-pointer">{t("watch")} <ArrowUpRight className="inline" size={"1.2rem"} /></p>
+                                </div>
+                            </div>
+                        </SwiperSlide>
+                    }
                 </Swiper>
                 <div className="relative w-full">
                     {/* Navigation Button */}
                     <button
                         id="customPrev"
-                        className="absolute top-1/2 left-0 -translate-y-1/2 z-50 bg-gray-100 text-gray-400 font-semibold p-2 rounded-full shadow cursor-pointer"
+                        className="absolute top-1/2 left-0 -translate-y-1/2 z-50 bg-gray-100 text-[#111] font-semibold p-2 rounded-full shadow cursor-pointer"
                     >
                         <ArrowLeft className='w-4 h-4' />
                     </button>
                     <button
                         id="customNext"
-                        className="absolute top-1/2 right-0 -translate-y-1/2 z-50 bg-gray-100 text-gray-400 font-semibold p-2 rounded-full shadow cursor-pointer"
+                        className="absolute top-1/2 right-0 -translate-y-1/2 z-50 bg-gray-100 text-[#111] font-semibold p-2 rounded-full shadow cursor-pointer"
                     >
                         <ArrowRight className='w-4 h-4' />
                     </button>
@@ -166,6 +222,46 @@ const Reviews = ({ acf }) => {
                                 </svg>
                             </div>
                         }
+                        {
+                            thumbnail_three && <div
+                                className="rounded-[4px] overflow-hidden relative cursor-pointer transition-opacity duration-200"
+                                style={{ opacity: activeIndex === 2 ? 1 : 0.5 }}
+                                onClick={() => swiperRef.current?.slideToLoop(2)}
+                            >
+                                <Image
+                                    className="lg:w-[120px] lg:h-[80px] w-[80px] h-[50px]"
+                                    src={thumbnail_three}
+                                    alt={review_heading_three}
+                                    width={120}
+                                    height={80}
+                                />
+                                <svg className="video_indicator absolute top-0 left-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="24" height="24" rx="4" fill="#1F1F1F"></rect>
+                                    <path d="M14.25 10.5001L17.6647 8.79309C17.7791 8.73597 17.9061 8.709 18.0337 8.71475C18.1614 8.7205 18.2855 8.75877 18.3942 8.82594C18.5029 8.89311 18.5927 8.98695 18.6549 9.09854C18.7172 9.21014 18.7499 9.3358 18.75 9.46359V14.5366C18.7499 14.6644 18.7172 14.79 18.6549 14.9016C18.5927 15.0132 18.5029 15.1071 18.3942 15.1742C18.2855 15.2414 18.1614 15.2797 18.0337 15.2854C17.9061 15.2912 17.7791 15.2642 17.6647 15.2071L14.25 13.5001V10.5001Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                    <path d="M12.75 7.5H6.75C5.92157 7.5 5.25 8.17157 5.25 9V15C5.25 15.8284 5.92157 16.5 6.75 16.5H12.75C13.5784 16.5 14.25 15.8284 14.25 15V9C14.25 8.17157 13.5784 7.5 12.75 7.5Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                </svg>
+                            </div>
+                        }
+                        {
+                            thumbnail_four && <div
+                                className="rounded-[4px] overflow-hidden relative cursor-pointer transition-opacity duration-200"
+                                style={{ opacity: activeIndex === 3 ? 1 : 0.5 }}
+                                onClick={() => swiperRef.current?.slideToLoop(3)}
+                            >
+                                <Image
+                                    className="lg:w-[120px] lg:h-[80px] w-[80px] h-[50px]"
+                                    src={thumbnail_four}
+                                    alt={review_heading_four}
+                                    width={120}
+                                    height={80}
+                                />
+                                <svg className="video_indicator absolute top-0 left-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="24" height="24" rx="4" fill="#1F1F1F"></rect>
+                                    <path d="M14.25 10.5001L17.6647 8.79309C17.7791 8.73597 17.9061 8.709 18.0337 8.71475C18.1614 8.7205 18.2855 8.75877 18.3942 8.82594C18.5029 8.89311 18.5927 8.98695 18.6549 9.09854C18.7172 9.21014 18.7499 9.3358 18.75 9.46359V14.5366C18.7499 14.6644 18.7172 14.79 18.6549 14.9016C18.5927 15.0132 18.5029 15.1071 18.3942 15.1742C18.2855 15.2414 18.1614 15.2797 18.0337 15.2854C17.9061 15.2912 17.7791 15.2642 17.6647 15.2071L14.25 13.5001V10.5001Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                    <path d="M12.75 7.5H6.75C5.92157 7.5 5.25 8.17157 5.25 9V15C5.25 15.8284 5.92157 16.5 6.75 16.5H12.75C13.5784 16.5 14.25 15.8284 14.25 15V9C14.25 8.17157 13.5784 7.5 12.75 7.5Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                </svg>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -174,10 +270,10 @@ const Reviews = ({ acf }) => {
             {/* Pop Up for review */}
             <PopUp isOpen={show} fn={setShow}>
                 <div className="w-full bg-black/70 h-full relative flex items-center justify-center">
-                    <div className="bg-white rounded-full cursor-pointer p-2 absolute top-4 right-4" onClick={() => setShow(!show)}>
+                    <div className="rounded-full cursor-pointer p-2 absolute top-4 right-4" onClick={() => setShow(!show)}>
                         <X className="w-4 h-4 text-black" />
                     </div>
-                    <div className="max-w-[1024px] w-full h-[80%] mx-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="max-w-[1024px] w-full mx-auto max-h-1/2 h-full" onClick={(e) => e.stopPropagation()}>
                         {show &&
                             <iframe
                                 width="100%"
@@ -190,7 +286,7 @@ const Reviews = ({ acf }) => {
                                 className="rounded-[4px] mx-auto"
                             ></iframe>
                         }
-                        <div className="backdrop-blur-[4px] mx-auto w-[40%] rounded-[4px] mt-4 bg-white/60 lg:flex items-center justify-center gap-2 py-[10px] relative hidden">
+                        <div className="backdrop-blur-[4px] mx-auto w-[60%] rounded-[4px] mt-4 bg-white/60 lg:flex items-center justify-center gap-2 py-[10px] relative hidden">
                             <div onClick={() => setLink(video_url)}
                                 className={`relative w-fit overflow-hidden rounded-[4px] ${link == video_url ? "opacity-100" : "opacity-50"}`}>
                                 <Image src={thumbnail_one} width={120} height={80} alt={review_title} className="w-[120px] h-[80px]" />
@@ -214,20 +310,60 @@ const Reviews = ({ acf }) => {
                                     </div>
                                 )
                             }
+                            {
+                                thumbnail_three && (
+                                    <div onClick={() => setLink(video_url_if_has_three)} className={`relative w-fit overflow-hidden rounded-[4px] ${link == video_url_if_has_three ? "opacity-100" : "opacity-50"}`}>
+                                        <Image src={thumbnail_three} width={120} height={80} alt={review_heading_three} className="w-[120px] h-[80px]" />
+                                        <span className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                            <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" stroke-width="3" stroke-dasharray="10 10"></rect>
+                                                <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                )
+                            }
+                            {
+                                thumbnail_four && (
+                                    <div onClick={() => setLink(video_url_if_has_four)} className={`relative w-fit overflow-hidden rounded-[4px] ${link == video_url_if_has_four ? "opacity-100" : "opacity-50"}`}>
+                                        <Image src={thumbnail_four} width={120} height={80} alt={review_heading_four} className="w-[120px] h-[80px]" />
+                                        <span className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                            <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" stroke-width="3" stroke-dasharray="10 10"></rect>
+                                                <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                )
+                            }
                             <button
-                                onClick={() => setLink(video_url)}
-                                id="customPrev"
+                                onClick={() => {
+                                    const videos = [
+                                        video_url,
+                                        thumbnail_tow && video_url_if_has_tow,
+                                        thumbnail_three && video_url_if_has_three,
+                                        thumbnail_four && video_url_if_has_four
+                                    ].filter(Boolean);
+                                    const currentIndex = videos.indexOf(link);
+                                    const prevIndex = currentIndex <= 0 ? videos.length - 1 : currentIndex - 1;
+                                    setLink(videos[prevIndex]);
+                                }}
                                 className="absolute top-1/2 left-4 -translate-y-1/2 z-50 bg-gray-100 text-gray-400 font-semibold p-2 rounded-full shadow cursor-pointer"
                             >
                                 <ArrowLeft className='w-4 h-4' />
                             </button>
                             <button
                                 onClick={() => {
-                                    if (thumbnail_tow) {
-                                        setLink(video_url_if_has_tow)
-                                    }
+                                    const videos = [
+                                        video_url,
+                                        thumbnail_tow && video_url_if_has_tow,
+                                        thumbnail_three && video_url_if_has_three,
+                                        thumbnail_four && video_url_if_has_four
+                                    ].filter(Boolean);
+                                    const currentIndex = videos.indexOf(link);
+                                    const nextIndex = currentIndex >= videos.length - 1 ? 0 : currentIndex + 1;
+                                    setLink(videos[nextIndex]);
                                 }}
-                                id="customNext"
                                 className="absolute top-1/2 right-4 -translate-y-1/2 z-50 bg-gray-100 text-gray-400 font-semibold p-2 rounded-full shadow cursor-pointer"
                             >
                                 <ArrowRight className='w-4 h-4' />

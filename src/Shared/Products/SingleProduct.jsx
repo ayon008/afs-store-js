@@ -79,7 +79,7 @@ const SingleProduct = ({ data, variations }) => {
         return (
             <div className='uppercase md:mb-3 md:mx-0 -mx-5 md:bg-white bg-black -mb-1 md:pt-0 pt-5 md:px-0 px-5 md:pb-0 pb-5'>
                 <div className='font-bold text-sm text-[#999999] flex flex-wrap'>
-                    <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span>
+                    {/* <Link className='inline' href={'/'}>{t("home")}</Link> <span className='mx-1'>/</span> */}
                     {
                         breadcrumb?.map((item, i) => {
                             // Nouvelle stratégie simple : extraire le dernier segment valide de chaque URL
@@ -120,12 +120,12 @@ const SingleProduct = ({ data, variations }) => {
                                 : '/product-category';
 
                             return (
-                                <span key={i}>
+                                <span key={i} className={`${i === breadcrumb?.length - 1 ? 'block' : 'hidden'}`}>
                                     <Link
                                         href={finalUrl}
                                         className="text-[#999999]"
                                     >
-                                        {item?.name}
+                                       {"... /"} {item?.name}
                                     </Link>
 
                                     <span

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import React from 'react';
 import Dealers from './Dealer';
+import { getTranslations } from 'next-intl/server';
 
 
 export const metadata = {
@@ -14,11 +15,12 @@ export const metadata = {
     },
 };
 
-const BreadCums = () => {
+const BreadCums = async () => {
+    const t = await getTranslations("breadcum");
     return (
         <div className='uppercase'>
             <div className='font-bold text-sm text-[#999999]'>
-                <Link className='inline' href={'/'}>Accueil</Link> / <span className='text-black'>MAP</span>
+                <Link className='inline' href={'/'}>{t("home")}</Link> / <span className='text-black'>MAP</span>
             </div>
         </div>
     )
@@ -26,17 +28,19 @@ const BreadCums = () => {
 
 
 const page = async () => {
-
+    const t = await getTranslations("map");
     return (
-        <div className='bg-white global-padding relative pt-4'>
-            <div>
+        <div className='bg-white relative pt-4'>
+            <div className='global-padding'>
                 <BreadCums />
                 <div className='lg:my-[80px] my-[40px]'>
-                    <h1 className='global-h1 text-center relative'>Nos partenaires</h1>
-                    <p className='text-center mt-4 lg:w-[35%] w-full text-lg leading-[22px] font-semibold text-[#111111bf] mx-auto'>Faites l’expérience de la qualité de nos produits en les découvrant chez les revendeurs locaux de confiance de votre région.</p>
+                    <h1 className='global-h1 text-center relative'>{t("Our partners")}</h1>
+                    <p className='text-center mt-4 lg:w-[35%] w-full text-lg leading-[22px] font-semibold text-[#111111bf] mx-auto'>{t("p")}</p>
                 </div>
             </div>
-            <Dealers />
+            <div className="px-5">
+                <Dealers />
+            </div>
         </div>
     );
 };
