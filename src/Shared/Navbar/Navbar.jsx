@@ -114,6 +114,9 @@ const Navbar = ({ NAV_LINKS }) => {
   }, [selectedCurrency, selectedLocation, cookieInitialized]);
 
 
+
+
+
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [redirectPath, setRedirectPath] = useState('');
   const [notification, setNotification] = useState(null);
@@ -274,7 +277,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
     // Check what changed
     const languageChanged = language !== locale;
-    
+
     const currentCurrencyFromCart = cart?.totals?.currency_symbol || '€';
     let currentCurrencyKey = 'euro';
     if (currentCurrencyFromCart === '€' || currentCurrencyFromCart === 'EUR') {
@@ -297,10 +300,10 @@ const Navbar = ({ NAV_LINKS }) => {
 
     // Determine if we need a full page reload (country/currency/location changes need fresh server data)
     const needsFullReload = countryChanged || currencyChanged || locationChanged;
-    
+
     if (languageChanged || needsFullReload) {
       const hasItems = cart && cart.items && cart.items.length > 0;
-      
+
       // Clear cart if it has items (currency/location/language changes invalidate cart)
       if (hasItems) {
         try {
@@ -318,13 +321,13 @@ const Navbar = ({ NAV_LINKS }) => {
           console.error('Error clearing cart:', error);
         }
       }
-      
+
       const currentPath = pathname || '/';
-      
+
       if (needsFullReload) {
         // Full page reload for country/currency/location changes
         const localePrefix = language === 'en' ? '' : `/${language}`;
-        
+
         // Translate localized route paths
         let targetPath = currentPath;
         if (locale === 'fr' && language === 'en' && currentPath.startsWith('/produit/')) {
@@ -332,7 +335,7 @@ const Navbar = ({ NAV_LINKS }) => {
         } else if (locale === 'en' && language === 'fr' && currentPath.startsWith('/product/')) {
           targetPath = currentPath.replace('/product/', '/produit/');
         }
-        
+
         const reloadPath = targetPath === '/' ? (localePrefix || '/') : `${localePrefix}${targetPath}`;
         const cacheBuster = `_refresh=${Date.now()}`;
         const separator = reloadPath.includes('?') ? '&' : '?';
@@ -413,7 +416,6 @@ const Navbar = ({ NAV_LINKS }) => {
   const productList = allProducts?.products;
 
   const [hoverImageLink, setHoverImageLink] = useState(`https://staging.afs-foiling.com/wp-content/uploads/2024/06/Ultra750UHM75_0006.png`);
-
 
   return (
     <>
@@ -1050,7 +1052,8 @@ const Navbar = ({ NAV_LINKS }) => {
                       <a onClick={handleCloseDesktopMenu} href="https://afs-foiling.crisp.help/fr/article/garantie-afs-duree-et-conditions-fnhfqg/?bust=1738253018543">{t("Warranty")}</a>
                     </li>
                     <li className="cursor-pointer">
-                      <a target="_blank" onClick={handleCloseDesktopMenu} href="https://foilandco.sharepoint.com/sites/Market/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025%2FNOTICE%20AFS%5FFR%202%2Epdf&parent=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025&p=true&ga=1">
+                      <a target="_blank" onClick={handleCloseDesktopMenu}
+                        href="https://foilandco.sharepoint.com/sites/Market/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025%2FNOTICE%20AFS%5FFR%202%2Epdf&parent=%2Fsites%2FMarket%2FDocuments%20partages%2FGeneral%2FContent%2FBrochure%2F2025&p=true&ga=1">
                         {t("User manual")}
                       </a>
                     </li>

@@ -1,12 +1,13 @@
 "use client"
 import { getDealerType } from '@/app/actions/WC/getDealers';
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
 const DropDown = ({ selectedId, setSelectedId }) => {
-
+    const t = useTranslations("map");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [selected, setSelected] = useState("ALL");
+    const [selected, setSelected] = useState(t("All"));
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {

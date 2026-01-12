@@ -24,9 +24,9 @@
     "title": "THE ESSENCE OF FOILING"
   },
   "afs-event": {
+    "Choisir un pays": "Select a country",
     "headline": "Discover all the events organised by AFS for our brands.",
-    "nombre": "Number of shops:",
-    "pays": "Choisir un pays"
+    "nombre": "Number of shops:"
   },
   "afs-products": {
     "tests": "<h>Tests and reviews</h><p>Find out what the trade press has to say about our products</p>"
@@ -159,7 +159,7 @@
   },
   "common": {
     "Ambassadors": "Ambassadors",
-    "Board construction (Coming Soon)": "Board construction (Coming Soon)",
+    "Board construction (Coming Soon)": "Board construction",
     "Book a call with an AFS expert": "Book a call with an AFS expert",
     "cartClearedCurrency": "Your cart has been cleared because you changed the currency. Products must be added again.",
     "cartClearedLanguage": "Your cart has been cleared because you changed the language. Products must be added again in the new language.",
@@ -414,6 +414,12 @@
     "We manufacture": " We manufacture some of our own production machines.",
     "We settled in": "We settled in Pencran, in a rural area, in order to promote the\n                development of the local employment basin, rather than in a\n                large metropolis where the industrial zones are already\n                saturated. Our workshops are installed in an eco-designed\n                building, we are 90% self-sufficient in energy thanks to the\n                installation of solar panels and we encourage carpooling between\n                employees.",
     "Working": "Working in short circuits: the choice of made in France."
+  },
+  "map": {
+    "All": "All",
+    "Number of stores:": "Number of stores:",
+    "Our partners": "Our partners",
+    "p": "Experience the quality of our products by discovering them at trusted local retailers in your area."
   },
   "Need-advice": {
     "After-sales": "After-sales service request",

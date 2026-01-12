@@ -30,7 +30,7 @@ const Ambassedor = ({ categories, countries }) => {
     return (
         <div className='max-w-[1920px] mx-auto'>
             <Map setCountry={setCountry} setCountryName={setCountryName} country={country} />
-            <div className='lg:mt-[80px] mt-[40px] global-margin bg-red-400'>
+            <div className='my-[40px]'>
                 <Sec1 activeTab={activeTab} setCountry={setCountry} countryName={countryName} setCountryName={setCountryName} country={country} setActiveTab={setActiveTab} categories={categories} countries={countries} />
             </div>
             {
