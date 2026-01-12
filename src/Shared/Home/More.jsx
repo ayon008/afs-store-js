@@ -40,7 +40,7 @@ export default function More() {
           </h3>
 
           <Link
-            href="/afs-team"
+            href="/afs-ambassadors"
             className="text-[14px] bg-white text-[#111] flex gap-1 rounded-sm items-center py-[12px] px-[16px] leading-[100%] font-semibold uppercase absolute left-1/2 -translate-x-1/2 opacity-100 bottom-[20px] lg:opacity-0 lg:bottom-0 lg:group-hover:opacity-100 lg:group-hover:bottom-10 lg:transition-all lg:duration-500 lg:ease-out"
           >
             {t("see-more")} <ArrowUpRight className="w-4 h-4" strokeWidth={2} />

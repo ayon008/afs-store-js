@@ -206,6 +206,8 @@ export default async function middleware(req) {
                         signal: controller.signal,
                     });
 
+                    console.log(`[Language Switch] Translate Response:`, translateResponse);
+
                     clearTimeout(timeoutId);
 
                     if (translateResponse && translateResponse.ok) {

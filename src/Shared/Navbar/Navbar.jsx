@@ -793,6 +793,9 @@ const Navbar = ({ NAV_LINKS }) => {
                           </p>
                           <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
                             <li className="cursor-pointer">
+                              <button className="cursor-pointer" onclick="$crisp.push(['do', 'chat:open'])">Chat</button>
+                            </li>
+                            <li className="cursor-pointer">
                               <Link onClick={handleCloseDesktopMenu} target="_blank" href="mailto:support@afs-foiling.com">Email</Link>
                             </li>
                             <li className="cursor-pointer">

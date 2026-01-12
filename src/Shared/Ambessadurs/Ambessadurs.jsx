@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import Sec1 from './Sec1';
 import Map from './Map';
@@ -22,9 +22,22 @@ const Ambassedor = ({ categories, countries }) => {
 
 
     if (isLoading) {
-        return <div className='h-[400px] w-full flex items-center justify-center'>
-            <p className='text-3xl text-center'>Loading....</p>
-        </div>
+        return (
+            <div className='max-w-[1920px] mx-auto global-padding'>
+                <style>{`
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            `}</style>
+                <div className='h-[578px] w-full'>
+
+                </div>
+                <div className='grid 2xl:grid-cols-4 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6 global-margin'>
+
+                </div>
+            </div>
+        )
     }
 
     return (

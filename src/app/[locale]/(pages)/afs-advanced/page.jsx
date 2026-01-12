@@ -92,14 +92,14 @@ export default function Page() {
           <Image
             width={1920}
             height={1080}
-            src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-11.51.22.jpg"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-11.51.22.jpg`}
             className="w-full object-cover shadow-xl"
             alt=""
           />
           <Image
             width={1920}
             height={1080}
-            src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-09.56.24.jpg"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/CleanShot-2022-09-14-at-09.56.24.jpg`}
             className="w-full object-cover shadow-xl"
             alt=""
           />
@@ -109,7 +109,7 @@ export default function Page() {
           <Image
             width={1920}
             height={1080}
-            src="https://afs-foiling.com/wp-content/uploads/2022/09/Group-16.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/Group-16.png`}
             className="w-full object-cover"
             alt=""
           />
@@ -205,7 +205,7 @@ function MissionSection() {
           <Image
             width={768}
             height={820}
-            src="https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-27-at-11.03.18@2x-768x820.jpg"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/CleanShot-2022-09-27-at-11.03.18@2x-768x820.jpg`}
             className="w-full object-cover shadow-2xl"
             alt=""
           />
@@ -230,17 +230,14 @@ function AFSCareSection() {
     <section
       className="min-h-screen flex items-center justify-center"
       style={{
-        backgroundImage: `
-          linear-gradient(rgba(28,28,28,0.8), rgba(28,28,28,0.8)),
-          url("https://afs-foiling.com/wp-content/uploads/2022/09/CleanShot-2022-09-20-at-10.12.03@2x.png")
-        `,
+        backgroundImage: `linear-gradient(rgba(28,28,28,0.8), rgba(28,28,28,0.8)), url(${`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/CleanShot-2022-09-20-at-10.12.03@2x.png`})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
       <div className="text-center space-y-6">
         <Image
-          src="https://afs-foiling.com/wp-content/uploads/2022/09/logo-afs-advance-300x121.png"
+          src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/09/logo-afs-advance-300x121.png`}
           className="mx-auto w-[240px]"
           width={240}
           height={121}

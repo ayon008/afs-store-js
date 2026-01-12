@@ -127,7 +127,7 @@ export default function Direct() {
                         <img
                             loading="lazy"
                             decoding="async"
-                            src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-4.png"
+                            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-4-4.png`}
                             className="w-full"
                         />
                         <span className="uppercase text-[#111111B2] text-4 leading-[1.3] font-semibold">
@@ -146,7 +146,7 @@ export default function Direct() {
                                     {t("As an")}
                                 </p>
                                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
-                                    "{t("Local and")}
+                                    &quot;{t("Local and")}&quot;
                                 </p>
                             </div>
 
@@ -154,7 +154,7 @@ export default function Direct() {
                                 <img
                                     loading="lazy"
                                     decoding="async"
-                                    src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-8.png"
+                                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-1-8.png`}
                                     className="w-full"
                                 />
                                 <span className="uppercase text-[#111111B2] text-4 leading-[1.3] font-semibold">

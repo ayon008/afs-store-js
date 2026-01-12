@@ -24,7 +24,7 @@ export default async function ahd({ locale }) {
         className="bg-fixed bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage:
-            "url('https://afs-foiling.com/wp-content/uploads/2023/04/Group-23.png')",
+            `url('${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/Group-23.png')`,
           backgroundColor: "black",
         }}
       >
@@ -34,7 +34,7 @@ export default async function ahd({ locale }) {
             className="bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage:
-                "url('https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-.png')",
+                `url('${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-.png')`,
             }}
           >
             <div className="max-w-[1920px] mx-auto flex flex-col global-padding h-[calc(100vh-120px)] justify-end pb-10">
@@ -51,7 +51,7 @@ export default async function ahd({ locale }) {
           </p>
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/MicrosoftTeams-.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/MicrosoftTeams-.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -72,7 +72,7 @@ export default async function ahd({ locale }) {
           </p>
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/MicrosoftTeams-1.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/MicrosoftTeams-1.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -97,7 +97,7 @@ export default async function ahd({ locale }) {
           </p>
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-1.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-1.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -116,7 +116,7 @@ export default async function ahd({ locale }) {
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-2.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-2.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -156,7 +156,7 @@ export default async function ahd({ locale }) {
           </p>
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-3.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-3.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -175,7 +175,7 @@ export default async function ahd({ locale }) {
         <div className="max-w-[1370px] mx-auto global-padding global-margin">
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-4.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-4.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -209,7 +209,7 @@ export default async function ahd({ locale }) {
           </p>
           <div className="relative block">
             <img
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/CleanShot-2023-5.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/CleanShot-2023-5.png`}
               alt="AHD visual"
               className="max-w-full h-auto"
               loading="lazy"
@@ -261,7 +261,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -287,7 +287,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -300,7 +300,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -326,7 +326,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-7-e1681944467616-1024x955.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-7-e1681944467616-1024x955.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -339,7 +339,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -361,7 +361,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/59699574_IMG452-e1681944514324-1024x863.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/59699574_IMG452-e1681944514324-1024x863.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -374,7 +374,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -398,7 +398,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -411,7 +411,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -437,7 +437,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-6-e1681943534610-1024x946.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -450,7 +450,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -472,7 +472,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/59699574_IMG452-e1681944514324-1024x863.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/59699574_IMG452-e1681944514324-1024x863.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -485,7 +485,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -511,7 +511,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/index-e1681944560221-1024x811.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/index-e1681944560221-1024x811.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -524,7 +524,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -546,7 +546,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-8-e1681944633883-1024x901.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-8-e1681944633883-1024x901.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -559,7 +559,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -585,7 +585,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/CleanShot-2023-10-e1681944687867-1024x873.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CleanShot-2023-10-e1681944687867-1024x873.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"
@@ -597,7 +597,7 @@ export default async function ahd({ locale }) {
               <div className="flex gap-5 w-full">
                 <div className="flex-[0_0_3%]">
                   <img
-                    src="https://afs-foiling.com/wp-content/uploads/2023/04/CompositeLayer.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/CompositeLayer.png`}
                     alt="AHD visual"
                     className="shrink-0"
                     loading="lazy"
@@ -620,7 +620,7 @@ export default async function ahd({ locale }) {
               {/* Image block */}
               <div className="md:flex-[0_0_40%] flex items-center">
                 <img
-                  src="https://afs-foiling.com/wp-content/uploads/2023/04/apiv9kzzu__2910-1024x1024.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/apiv9kzzu__2910-1024x1024.png`}
                   alt="AHD visual"
                   className="w-full  h-auto"
                   loading="lazy"

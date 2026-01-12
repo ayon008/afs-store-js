@@ -1,11 +1,11 @@
 "use server";
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
 
 export const getDealers = async (selectedId) => {
-    const localeValue = await getLocaleValue();
+    const locale = await getLocale();
     try {
-        const baseUrl = `${process.env.WP_BASE_URL}/${localeValue}`;
+        const baseUrl = `${process.env.WP_BASE_URL}`;
 
         if (!baseUrl) {
             console.error("❌ Missing WP_BASE_URL in environment variables.");
@@ -15,11 +15,10 @@ export const getDealers = async (selectedId) => {
         let allDealers = [];
         const perPage = 100;
 
-
         for (let page = 1; ; page++) {
             const url = selectedId
-                ? `${baseUrl}/${localeValue}/wp-json/wp/v2/dealer?_embed&afs-dealers-type=${selectedId}&per_page=${perPage}&page=${page}`
-                : `${baseUrl}/${localeValue}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed`;
+                ? `${baseUrl}/wp-json/wp/v2/dealer?_embed&afs-dealers-type=${selectedId}?per_page=${perPage}&page=${page}&lang=${locale}`
+                : `${baseUrl}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed&lang=${locale}`;
 
             const response = await fetch(
                 url,
@@ -54,8 +53,8 @@ export const getDealers = async (selectedId) => {
 
 
 export const getDealerType = async () => {
-    const localeValue = await getLocaleValue();
-    const BASE = `${process.env.WP_BASE_URL}/${localeValue}`;
+    const locale = await getLocale();
+    const BASE = `${process.env.WP_BASE_URL}`;
 
     if (!BASE) {
         console.error("❌ WP_BASE_URL is missing in environment variables");
@@ -64,7 +63,7 @@ export const getDealerType = async () => {
 
     try {
         const res = await fetch(
-            `${BASE}/${localeValue}/wp-json/wp/v2/afs-dealers-type?per_page=100`,
+            `${BASE}/wp-json/wp/v2/afs-dealers-type?per_page=100&lang=${locale}`,
             {
                 next: { revalidate: 3600 }, // ISR cache
             }

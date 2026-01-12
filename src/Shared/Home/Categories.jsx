@@ -26,11 +26,12 @@ export default async function CategorySection() {
       alt_text: "downwind",
     },
     {
-      name: "DOCKSTART",
-      slug: "foiling/dockstart",
-      url: "https://afs-foiling.com/product-category/foiling/dockstart/",
-      image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
-      alt_text: "dockstart",
+      name: `${t("SURF FOIL")}`,
+      slug: locale !== "fr" ? "foiling/prone-foil" : "foiling/surf-foil",
+      url: "https://afs-foiling.com/product-category/foiling/prone-foil/",
+      image:
+        "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
+      alt_text: "surf foil",
     },
     {
       name: "SUP FOIL",
@@ -41,12 +42,19 @@ export default async function CategorySection() {
       alt_text: "sup foil",
     },
     {
-      name: "SURF FOIL",
-      slug: locale !== "fr" ? "foiling/prone-foil" : "foiling/surf-foil",
-      url: "https://afs-foiling.com/product-category/foiling/prone-foil/",
+      name: "DOCKSTART",
+      slug: "foiling/dockstart",
+      url: "https://afs-foiling.com/product-category/foiling/dockstart/",
+      image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
+      alt_text: "dockstart",
+    },
+    {
+      name: "PARAWING",
+      slug: `foiling/${locale === "fr" ? "parawing" : "parawing"}`,
+      url: "https://afs-foiling.com/product-category/foiling/parawing",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
-      alt_text: "surf foil",
+        "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
+      alt_text: "windsurf",
     },
     {
       name: "WINDFOIL",
@@ -55,14 +63,6 @@ export default async function CategorySection() {
       image:
         "https://afs-foiling.com/wp-content/uploads/2022/07/afs-windfoil.jpg",
       alt_text: "windfoil",
-    },
-    {
-      name: "WINDSURF",
-      slug: locale === "fr" ? "windsurf" : "windsurf-foil",
-      url: "https://afs-foiling.com/product-category/windsurf-foil/",
-      image:
-        "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
-      alt_text: "windsurf",
     },
     {
       name: "SUP",
@@ -109,7 +109,7 @@ export default async function CategorySection() {
                 )}
 
                 <div className="absolute lg:bottom-8 lg:left-[20px] bottom-3 left-3 z-10">
-                  <p className="text-white font-bold tracking-tight text-[18px] sm:text-[20px] leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
+                  <p className="text-white font-bold tracking-tight text-[18px] uppercase sm:text-[20px] leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
                     {cat.name}
                   </p>
                 </div>
