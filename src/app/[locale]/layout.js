@@ -11,6 +11,7 @@ import { getMessages } from "next-intl/server";
 import { CartProvider } from "@/Shared/Hooks/useCart";
 import Footer from "@/Shared/footer/Footer";
 import QueryProvider from "@/Shared/Provider/QueryProvider";
+import CrispProvider from "@/Shared/Provider/CrispProvider";
 import { getCurrency, refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
 import ScrollToTop from "@/Shared/ScrollToTop/ScrollToTop";
 import RouteLoadingBar from "@/Shared/Loader/RouteLoadingBar";
@@ -138,15 +139,17 @@ export default async function RootLayout({ children, params }) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <AuthProvider>
-              <CartProvider>
-                <ScrollToTop />
-                <RouteLoadingBar />
-                <div>
-                  <Navbar NAV_LINKS={NAV_LINKS} />
-                  {children}
-                  <Footer />
-                </div>
-              </CartProvider>
+              <CrispProvider>
+                <CartProvider>
+                  <ScrollToTop />
+                  <RouteLoadingBar />
+                  <div>
+                    <Navbar NAV_LINKS={NAV_LINKS} />
+                    {children}
+                    <Footer />
+                  </div>
+                </CartProvider>
+              </CrispProvider>
             </AuthProvider>
           </QueryProvider>
         </NextIntlClientProvider>
