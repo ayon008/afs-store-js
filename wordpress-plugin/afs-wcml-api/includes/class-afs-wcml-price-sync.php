@@ -828,55 +828,76 @@ class AFS_WCML_Price_Sync {
 
 		$batch_size = isset( $_POST['batch_size'] ) ? absint( $_POST['batch_size'] ) : 10;
 		$offset = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+		$sync_unsynced_only = isset( $_POST['sync_unsynced_only'] ) ? (bool) $_POST['sync_unsynced_only'] : false;
+		$include_variations = isset( $_POST['include_variations'] ) ? (bool) $_POST['include_variations'] : true;
 
 		// Clear cache at start of batch.
 		if ( $offset === 0 ) {
 			$this->clear_translations_cache();
 		}
 
-		// Use direct SQL to get source products only (bypassing WPML language filter).
-		// This ensures we sync all source products regardless of admin language.
-		$icl_table = $wpdb->prefix . 'icl_translations';
-		$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$icl_table}'" ) === $icl_table;
+		// If syncing only unsynced products, get them using get_products_price_comparison.
+		if ( $sync_unsynced_only ) {
+			$unsynced_data = $this->get_products_price_comparison( array(
+				'per_page'           => $batch_size,
+				'page'               => ( $offset / $batch_size ) + 1,
+				'sync_status'        => 'not_synced',
+				'include_variations' => $include_variations,
+			) );
 
-		if ( $table_exists ) {
-			// WPML is active - get source products only (source_language_code IS NULL).
-			$base_sql = "
-				SELECT DISTINCT p.ID
-				FROM {$wpdb->posts} p
-				LEFT JOIN {$icl_table} t ON p.ID = t.element_id
-					AND t.element_type = 'post_product'
-				WHERE p.post_type = 'product'
-				AND p.post_status IN ('publish', 'private')
-				AND (
-					t.element_id IS NULL
-					OR t.source_language_code IS NULL
-				)
-				ORDER BY p.ID DESC
-			";
+			$product_ids = array();
+			$total_products = isset( $unsynced_data['total'] ) ? $unsynced_data['total'] : 0;
 
-			// Get total count.
-			$count_sql = "SELECT COUNT(*) FROM ({$base_sql}) as total_query";
-			$total_products = (int) $wpdb->get_var( $count_sql );
-
-			// Get batch of products.
-			$paginated_sql = $base_sql . " LIMIT %d OFFSET %d";
-			$product_ids = $wpdb->get_col( $wpdb->prepare( $paginated_sql, $batch_size, $offset ) );
+			if ( ! empty( $unsynced_data['products'] ) ) {
+				foreach ( $unsynced_data['products'] as $product_data ) {
+					$product_ids[] = $product_data['product_id'];
+				}
+			}
 		} else {
-			// WPML not active - use standard query.
-			$base_sql = "
-				SELECT DISTINCT p.ID
-				FROM {$wpdb->posts} p
-				WHERE p.post_type = 'product'
-				AND p.post_status IN ('publish', 'private')
-				ORDER BY p.ID DESC
-			";
+			// Use direct SQL to get source products only (bypassing WPML language filter).
+			// This ensures we sync all source products regardless of admin language.
+			$icl_table = $wpdb->prefix . 'icl_translations';
+			$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$icl_table}'" ) === $icl_table;
 
-			$count_sql = "SELECT COUNT(*) FROM ({$base_sql}) as total_query";
-			$total_products = (int) $wpdb->get_var( $count_sql );
+			if ( $table_exists ) {
+				// WPML is active - get source products only (source_language_code IS NULL).
+				$base_sql = "
+					SELECT DISTINCT p.ID
+					FROM {$wpdb->posts} p
+					LEFT JOIN {$icl_table} t ON p.ID = t.element_id
+						AND t.element_type = 'post_product'
+					WHERE p.post_type = 'product'
+					AND p.post_status IN ('publish', 'private')
+					AND (
+						t.element_id IS NULL
+						OR t.source_language_code IS NULL
+					)
+					ORDER BY p.ID DESC
+				";
 
-			$paginated_sql = $base_sql . " LIMIT %d OFFSET %d";
-			$product_ids = $wpdb->get_col( $wpdb->prepare( $paginated_sql, $batch_size, $offset ) );
+				// Get total count.
+				$count_sql = "SELECT COUNT(*) FROM ({$base_sql}) as total_query";
+				$total_products = (int) $wpdb->get_var( $count_sql );
+
+				// Get batch of products.
+				$paginated_sql = $base_sql . " LIMIT %d OFFSET %d";
+				$product_ids = $wpdb->get_col( $wpdb->prepare( $paginated_sql, $batch_size, $offset ) );
+			} else {
+				// WPML not active - use standard query.
+				$base_sql = "
+					SELECT DISTINCT p.ID
+					FROM {$wpdb->posts} p
+					WHERE p.post_type = 'product'
+					AND p.post_status IN ('publish', 'private')
+					ORDER BY p.ID DESC
+				";
+
+				$count_sql = "SELECT COUNT(*) FROM ({$base_sql}) as total_query";
+				$total_products = (int) $wpdb->get_var( $count_sql );
+
+				$paginated_sql = $base_sql . " LIMIT %d OFFSET %d";
+				$product_ids = $wpdb->get_col( $wpdb->prepare( $paginated_sql, $batch_size, $offset ) );
+			}
 		}
 
 		$results = array(
@@ -897,7 +918,12 @@ class AFS_WCML_Price_Sync {
 				continue;
 			}
 
-			if ( $product->is_type( 'variable' ) ) {
+			// Check if it's a variation.
+			if ( $product->is_type( 'variation' ) ) {
+				$result = $this->sync_variation_prices( $product_id );
+				$results['synced'] = array_merge( $results['synced'], $result['synced'] );
+				$results['errors'] = array_merge( $results['errors'], $result['errors'] );
+			} elseif ( $product->is_type( 'variable' ) ) {
 				$result = $this->sync_product_prices( $product_id );
 				$var_result = $this->sync_variable_product_variations( $product_id );
 				$results['synced'] = array_merge( $results['synced'], $result['synced'], $var_result['synced'] );

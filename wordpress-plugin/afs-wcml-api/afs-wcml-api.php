@@ -3,7 +3,7 @@
  * Plugin Name: AFS WCML Manual Pricing
  * Plugin URI: https://afs-foiling.com
  * Description: Plugin personnalisé pour gérer les prix manuels par devise avec WooCommerce Multilingual (WCML). Permet de définir des prix fixes par devise (USD, EUR, GBP) qui sont persistés et utilisés dans le panier, checkout, commandes et remboursements.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: AFS
  * Author URI: https://afs-foiling.com
  * Text Domain: afs-wcml-api
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AFS_WCML_API_VERSION', '2.0.4' );
+define( 'AFS_WCML_API_VERSION', '2.0.5' );
 define( 'AFS_WCML_API_PLUGIN_FILE', __FILE__ );
 define( 'AFS_WCML_API_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AFS_WCML_API_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

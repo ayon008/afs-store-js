@@ -305,6 +305,14 @@ class AFS_WCML_Admin {
 							<?php esc_html_e( 'Synchroniser tous les produits', 'afs-wcml-api' ); ?>
 						</button>
 
+						<?php if ( $total_unsync > 0 ) : ?>
+						<button type="button" class="button button-primary button-large" id="afs-wcml-sync-unsynced-only">
+							<span class="dashicons dashicons-update"></span>
+							<?php esc_html_e( 'Synchroniser uniquement les non synchronisés', 'afs-wcml-api' ); ?>
+							<span class="afs-wcml-count-badge" style="margin-left: 8px;"><?php echo esc_html( $total_unsync ); ?></span>
+						</button>
+						<?php endif; ?>
+
 						<button type="button" class="button button-secondary" id="afs-wcml-refresh-status">
 							<span class="dashicons dashicons-visibility"></span>
 							<?php esc_html_e( 'Actualiser', 'afs-wcml-api' ); ?>

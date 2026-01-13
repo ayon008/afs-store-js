@@ -156,15 +156,19 @@
 		/**
 		 * Sync all products in batches
 		 */
-		function syncAllProducts() {
+		function syncAllProducts(syncUnsyncedOnly) {
 			var $progress = $('#afs-wcml-sync-progress');
 			var $progressFill = $progress.find('.afs-wcml-progress-fill');
 			var $progressText = $progress.find('.afs-wcml-progress-text');
 			var $results = $('#afs-wcml-sync-results');
 			var $resultsContent = $results.find('.afs-wcml-results-content');
-			var $button = $('#afs-wcml-sync-all');
+			var $button = syncUnsyncedOnly ? $('#afs-wcml-sync-unsynced-only') : $('#afs-wcml-sync-all');
+			var $otherButton = syncUnsyncedOnly ? $('#afs-wcml-sync-all') : $('#afs-wcml-sync-unsynced-only');
 
 			$button.addClass('afs-wcml-spinning').prop('disabled', true);
+			if ($otherButton.length) {
+				$otherButton.prop('disabled', true);
+			}
 			$progress.show();
 			$results.hide();
 			$resultsContent.html('');
@@ -174,6 +178,7 @@
 			var totalSynced = 0;
 			var totalErrors = 0;
 			var allResults = [];
+			var totalToProcess = 0;
 
 			function processBatch() {
 				$.ajax({
@@ -183,23 +188,33 @@
 						action: 'afs_wcml_sync_all_prices',
 						nonce: afs_wcml_admin.nonce,
 						batch_size: batchSize,
-						offset: offset
+						offset: offset,
+						sync_unsynced_only: syncUnsyncedOnly ? 1 : 0,
+						include_variations: true
 					},
 					success: function(response) {
 						if (response.success) {
 							var data = response.data;
+							
+							// Set total on first batch
+							if (offset === 0) {
+								totalToProcess = data.total || 0;
+							}
+							
 							totalSynced += data.synced ? data.synced.length : 0;
 							totalErrors += data.errors ? data.errors.length : 0;
 
 							// Update progress
 							var processed = offset + data.processed;
-							var total = data.total || 1;
+							var total = totalToProcess || data.total || 1;
 							var percent = Math.min(100, Math.round((processed / total) * 100));
 							$progressFill.css('width', percent + '%');
 
-							var progressMsg = i18n.processing
-								.replace('%d', processed)
-								.replace('%d', total);
+							// Fix progress message to show correct counts
+							var progressMsg = i18n.processing;
+							// Replace first %d with processed, second %d with total
+							progressMsg = progressMsg.replace('%d', processed);
+							progressMsg = progressMsg.replace('%d', total);
 							$progressText.text(progressMsg);
 
 							// Store results
@@ -221,6 +236,9 @@
 							} else {
 								// Done
 								$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+								if ($otherButton.length) {
+									$otherButton.prop('disabled', false);
+								}
 								$progressFill.css('width', '100%');
 								$progressText.text(i18n.sync_complete + ' ' + totalSynced + ' synchronisations, ' + totalErrors + ' erreurs.');
 
@@ -242,12 +260,18 @@
 							}
 						} else {
 							$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+							if ($otherButton.length) {
+								$otherButton.prop('disabled', false);
+							}
 							$progressText.text(i18n.sync_error);
 							showManualResult('error', response.data ? response.data.message : i18n.sync_error);
 						}
 					},
 					error: function(xhr, status, error) {
 						$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+						if ($otherButton.length) {
+							$otherButton.prop('disabled', false);
+						}
 						$progressText.text(i18n.sync_error + ' (' + error + ')');
 					}
 				});
@@ -273,7 +297,17 @@
 		$('#afs-wcml-sync-all').on('click', function(e) {
 			e.preventDefault();
 			if (confirm(i18n.confirm_sync_all)) {
-				syncAllProducts();
+				syncAllProducts(false);
+			}
+		});
+
+		// Sync unsynced only button
+		$('#afs-wcml-sync-unsynced-only').on('click', function(e) {
+			e.preventDefault();
+			var unsyncedCount = parseInt($('#afs-wcml-unsync-count').text(), 10) || 0;
+			var confirmMsg = 'Voulez-vous synchroniser uniquement les ' + unsyncedCount + ' produit(s)/variation(s) non synchronisé(s) ?';
+			if (confirm(confirmMsg)) {
+				syncAllProducts(true);
 			}
 		});
 
