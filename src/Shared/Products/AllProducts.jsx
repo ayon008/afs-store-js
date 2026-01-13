@@ -11,7 +11,20 @@ const AllProducts = async ({ ids, max, min }) => {
                     const { images } = product;
                     const bestseller = product?.acf?.bestseller;
                     return (
-                        <ProductCard price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={images[1]?.src} image={images[0]?.src} key={product?.id} slug={product?.slug} />
+                        <ProductCard
+                            price={product?.price_html}
+                            // TTC depuis l'API WP (price_incl_tax)
+                            singlePrice={product?.price_incl_tax}
+                            // HT depuis l'API WP (price_excl_tax)
+                            priceExclTax={product?.price_excl_tax}
+                            type={product?.type}
+                            name={product?.name}
+                            bestseller={bestseller}
+                            hoverImage={images[1]?.src}
+                            image={images[0]?.src}
+                            key={product?.id}
+                            slug={product?.slug}
+                        />
                     )
                 })
             }

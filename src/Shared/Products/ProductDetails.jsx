@@ -9,7 +9,7 @@ import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { recalculatePriceForCountry } from '@/lib/countries-config';
+import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
@@ -69,10 +69,13 @@ const ProductDetails = ({ data, variations }) => {
     const compatibilite = acf?.compatibilite;
     const short_description = data?.short_description;
     const priceHtml = data?.price_html;
-    const priceWithTax = data?.price_with_tax;
+    // Priorité: price_incl_tax > price_with_tax (pour compatibilité)
+    const priceInclTax = data?.price_incl_tax || data?.price_with_tax;
+    const priceExclTax = data?.price_excl_tax || data?.price || 0;
     const attributes = data?.attributes;
     const productId = data?.id;
-    const location = Cookies.get('location');
+    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
+    const [selectedCountry, setSelectedCountry] = useState('FR');
     const [gradeOpen, setGradeOpen] = useState(false);
     const [selectedGrade, setSelectedGrade] = useState("A");
     const [telephonePopUp, setTelephonePopUp] = useState(false);
@@ -96,12 +99,51 @@ const ProductDetails = ({ data, variations }) => {
 
     const used = attributes?.find((item) => item?.name === "Grade") ? true : false;
 
+    // Get location and country from cookies and determine tax display mode
+    useEffect(() => {
+        const cookieLocation = Cookies.get('location');
+        if (cookieLocation === WAREHOUSES.EUROPE || cookieLocation === WAREHOUSES.USA) {
+            setLocation(cookieLocation);
+        } else {
+            setLocation(WAREHOUSES.EUROPE);
+        }
+        
+        const cookieCountry = Cookies.get('selected_country');
+        if (cookieCountry) {
+            setSelectedCountry(cookieCountry);
+        } else {
+            // Default based on location
+            setSelectedCountry(cookieLocation === WAREHOUSES.USA ? 'US' : 'FR');
+        }
+    }, []);
 
+    // Determine if we should show prices with tax included (Europe) or excluded (North America)
+    const isEuropeLocation = location === WAREHOUSES.EUROPE;
+
+    // Calculate the correct price to display based on location
+    // Europe (2682): TTC (price_incl_tax)
+    // North America (2683): HT (price_excl_tax)
+    const displayPrice = useMemo(() => {
+        if (isEuropeLocation) {
+            // Europe: Use TTC (price_incl_tax)
+            // Si price_incl_tax n'est pas disponible, recalculer à partir du HT
+            if (priceInclTax && parseFloat(priceInclTax) > 0) {
+                return parseFloat(priceInclTax);
+            } else if (priceExclTax && parseFloat(priceExclTax) > 0) {
+                // Recalculer TTC à partir du HT et du pays sélectionné
+                return calculatePriceWithVat(parseFloat(priceExclTax), selectedCountry);
+            }
+            return 0;
+        } else {
+            // North America: Use HT (price_excl_tax)
+            return parseFloat(priceExclTax) || 0;
+        }
+    }, [isEuropeLocation, priceInclTax, priceExclTax, selectedCountry]);
 
     // Update the price HTML with calculated tax price
     const price = useMemo(() => {
-        return updatePriceInHtml(priceHtml, priceWithTax);
-    }, [priceHtml, priceWithTax]);
+        return updatePriceInHtml(priceHtml, displayPrice);
+    }, [priceHtml, displayPrice]);
 
     // Watch all form values
     const watchedValues = watch();
@@ -183,17 +225,33 @@ const ProductDetails = ({ data, variations }) => {
                     // Get selected country from cookie for accurate VAT calculation
                     const selectedCountry = Cookies.get('selected_country') || 'FR';
                     
+                    // Get current location to determine tax display mode
+                    const currentLocation = Cookies.get('location') || WAREHOUSES.EUROPE;
+                    const isEuropeLoc = currentLocation === WAREHOUSES.EUROPE;
+                    
                     // Recalculate price with correct VAT for selected country
                     // WooCommerce may not have VAT rates configured for all countries
-                    const basePrice = parseFloat(matchedVariation.price);
-                    const recalculatedPrice = recalculatePriceForCountry(
-                        basePrice,
-                        matchedVariation.price_incl_tax,
-                        'FR', // WooCommerce default country
-                        selectedCountry
-                    );
+                    const basePrice = parseFloat(matchedVariation.price) || 0;
+                    const priceInclTax = parseFloat(matchedVariation.price_incl_tax) || basePrice;
+                    
+                    // Calculate the correct price to display based on location
+                    // Europe (2682): TTC (price_incl_tax)
+                    // North America (2683): HT (price)
+                    let displayVariationPrice;
+                    if (isEuropeLoc) {
+                        // Europe: Use TTC - recalculate with correct VAT for selected country
+                        displayVariationPrice = recalculatePriceForCountry(
+                            basePrice,
+                            priceInclTax,
+                            'FR', // WooCommerce default country
+                            selectedCountry
+                        );
+                    } else {
+                        // North America: Use HT (base price without tax)
+                        displayVariationPrice = basePrice;
+                    }
 
-                    setVariationPrice(recalculatedPrice);
+                    setVariationPrice(displayVariationPrice);
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
                     setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);

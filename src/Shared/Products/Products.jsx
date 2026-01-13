@@ -182,7 +182,20 @@ const Products = ({ id, childCategories }) => {
                                 const bestseller = product?.bestseller;
                                 const hoverImage = product?.img;
                                 return (
-                                    <ProductCard key={i} price={product?.price_html} singlePrice={product?.price_with_tax} type={product?.type} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} slug={product?.slug} />
+                                    <ProductCard
+                                        key={i}
+                                        price={product?.price_html}
+                                        // TTC depuis l'API WP (price_incl_tax)
+                                        singlePrice={product?.price_incl_tax}
+                                        // HT depuis l'API WP (price_excl_tax)
+                                        priceExclTax={product?.price_excl_tax}
+                                        type={product?.type}
+                                        name={product?.name}
+                                        bestseller={bestseller}
+                                        hoverImage={hoverImage}
+                                        image={image || default_image}
+                                        slug={product?.slug}
+                                    />
                                 )
                             })
                         }

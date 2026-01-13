@@ -15,7 +15,7 @@ import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
 import Notification from "../Notification/Notification";
 import LocationLanguageModal from "../LocationLanguageModal/LocationLanguageModal";
-import { getCountryByCode, DEFAULT_COUNTRY } from "@/lib/countries-config";
+import { getCountryByCode, DEFAULT_COUNTRY, WAREHOUSES } from "@/lib/countries-config";
 
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
@@ -67,13 +67,55 @@ const Navbar = ({ NAV_LINKS }) => {
     if (cookieCurrency === 'euro' || cookieCurrency === 'usd' || cookieCurrency === 'gbp') {
       setSelectedCurrency(cookieCurrency);
     } else {
-      // Fallback to cart currency symbol if available
-      const newCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR'
-        ? 'euro'
-        : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP'
-          ? 'gbp'
-          : 'usd';
-      setSelectedCurrency(newCurrency);
+      // First visit: determine currency based on location and country from country-config.js
+      const cookieLocation = Cookies.get('location');
+      const cookieCountry = Cookies.get('selected_country');
+      
+      let initialCurrency = 'euro'; // Default fallback
+      
+      if (cookieLocation || cookieCountry) {
+        // Try to get country from cookie
+        let country = null;
+        if (cookieCountry) {
+          country = getCountryByCode(cookieCountry);
+        }
+        
+        // If no country from cookie, determine from location
+        if (!country && cookieLocation) {
+          if (cookieLocation === WAREHOUSES.EUROPE) {
+            // Europe: default to France (EUR)
+            country = getCountryByCode('FR');
+          } else if (cookieLocation === WAREHOUSES.USA) {
+            // North America: default to US (USD)
+            country = getCountryByCode('US');
+          }
+        }
+        
+        // Use country currency if found
+        if (country && country.currencyKey) {
+          initialCurrency = country.currencyKey;
+        } else {
+          // Fallback to cart currency symbol if available
+          initialCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR'
+            ? 'euro'
+            : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP'
+              ? 'gbp'
+              : 'usd';
+        }
+      } else {
+        // No location or country cookie: fallback to cart currency symbol
+        initialCurrency = currentCurrencySymbol === '€' || currentCurrencySymbol === 'EUR'
+          ? 'euro'
+          : currentCurrencySymbol === '£' || currentCurrencySymbol === 'GBP'
+            ? 'gbp'
+            : 'usd';
+      }
+      
+      setSelectedCurrency(initialCurrency);
+      // Set currency cookie for first visit
+      Cookies.set('currency', initialCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
+      const wcmlCurrency = initialCurrency === 'euro' ? 'EUR' : initialCurrency === 'gbp' ? 'GBP' : 'USD';
+      Cookies.set('wcml_client_currency', wcmlCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
     }
 
     const cookieLocation = Cookies.get('location');
@@ -87,6 +129,16 @@ const Navbar = ({ NAV_LINKS }) => {
     const cookieCountry = Cookies.get('selected_country');
     if (cookieCountry) {
       setSelectedCountryCode(cookieCountry);
+    } else {
+      // First visit: set default country based on location
+      const location = Cookies.get('location') || WAREHOUSES.EUROPE;
+      if (location === WAREHOUSES.EUROPE) {
+        setSelectedCountryCode('FR');
+        Cookies.set('selected_country', 'FR', { expires: 365, sameSite: 'Lax', path: '/' });
+      } else if (location === WAREHOUSES.USA) {
+        setSelectedCountryCode('US');
+        Cookies.set('selected_country', 'US', { expires: 365, sameSite: 'Lax', path: '/' });
+      }
     }
 
     // Mark cookie as initialized after reading

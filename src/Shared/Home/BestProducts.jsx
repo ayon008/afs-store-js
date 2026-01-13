@@ -55,10 +55,21 @@ export default async function BestSellers() {
                             const bestseller = product?.bestseller;
                             const hoverImage = product?.img;
                             return (
-                                <ProductCard price={product?.price_html} name={product?.name} bestseller={bestseller} hoverImage={hoverImage} image={image || default_image} key={i} slug={product?.slug} />
+                                <ProductCard
+                                    price={product?.price_html}
+                                    // TTC depuis l'API WP (price_incl_tax)
+                                    singlePrice={product?.price_incl_tax}
+                                    // HT depuis l'API WP (price_excl_tax)
+                                    priceExclTax={product?.price_excl_tax}
+                                    name={product?.name}
+                                    bestseller={bestseller}
+                                    hoverImage={hoverImage}
+                                    image={image || default_image}
+                                    key={i}
+                                    slug={product?.slug}
+                                />
                             )
-                        }
-                        )
+                        })
                     }
                 </div>
             </div>

@@ -6,6 +6,7 @@ import FormButton from '../Button/FormButton';
 import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';
 import { getProductRoute } from '@/lib/product-routes';
+import { WAREHOUSES } from '@/lib/countries-config';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -51,6 +52,7 @@ export default function ProductCard({
     category = 'VERSATILITY',
     price,
     singlePrice,
+    priceExclTax,
     bestseller = "",
     alt,
     type = "simple"
@@ -82,11 +84,43 @@ export default function ProductCard({
         return updatedHtml;
     };
 
+    // Get location from cookies to determine tax display mode
+    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+        const cookieLocation = Cookies.get('location');
+        if (cookieLocation === WAREHOUSES.EUROPE || cookieLocation === WAREHOUSES.USA) {
+            setLocation(cookieLocation);
+        } else {
+            setLocation(WAREHOUSES.EUROPE);
+        }
+    }, []);
+
+    // Determine if we should show prices with tax included (Europe) or excluded (North America)
+    const isEuropeLocation = location === WAREHOUSES.EUROPE;
+
+    // Calculate the correct price to display based on location
+    // Europe (2682): TTC (price_with_tax)
+    // North America (2683): HT (price_excl_tax or price)
+    const displayPrice = useMemo(() => {
+        if (!isMounted) return singlePrice; // Return default during SSR
+
+        if (isEuropeLocation) {
+            // Europe: Use TTC (price_with_tax)
+            return singlePrice || 0;
+        } else {
+            // North America: Use HT (price_excl_tax or fallback to price if available)
+            return priceExclTax || 0;
+        }
+    }, [isMounted, isEuropeLocation, singlePrice, priceExclTax]);
 
     // Update the price HTML with calculated tax price
     const changePrice = useMemo(() => {
-        return updatePriceInHtml(price, singlePrice);
-    }, [price, singlePrice]);
+        if (!isMounted) return price; // Return default during SSR
+        return updatePriceInHtml(price, displayPrice);
+    }, [price, displayPrice, isMounted]);
 
     const t = useTranslations('product');
     const router = useRouter();
@@ -95,10 +129,8 @@ export default function ProductCard({
 
     // Use state to prevent hydration mismatch
     const [currencySymbol, setCurrencySymbol] = useState('€');
-    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true);
         const currency = Cookies.get('currency');
         setCurrencySymbol(currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£');
     }, []);
@@ -183,7 +215,7 @@ export default function ProductCard({
                             className="text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1"
                             dangerouslySetInnerHTML={{ __html: changePrice }}
                             suppressHydrationWarning
-                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1' suppressHydrationWarning>{singlePrice}{isMounted ? currencySymbol : '€'}</font>
+                        /> : <font className='text-[clamp(0.8125rem,0.76rem+0.2vw,1rem)] leading-[100%] text-[#111111bf] font-bold mt-1' suppressHydrationWarning>{isMounted ? displayPrice?.toFixed(2) : singlePrice}{isMounted ? currencySymbol : '€'}</font>
                     }
                 </div>
                 <div className="">

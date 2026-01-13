@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getLocaleValue, getCurrency, getLocation } from "@/app/actions/Woo-Coommerce/getWooCommerce";
-import { WAREHOUSES } from "@/lib/countries-config";
+import { WAREHOUSES, calculatePriceWithVat } from "@/lib/countries-config";
 
 export async function GET(request, { params }) {
     try {
@@ -78,12 +78,29 @@ export async function GET(request, { params }) {
         // Calculate product price based on location
         // Europe (2682): Show price with tax (TTC)
         // North America (2683): Show price without tax (HT)
-        // IMPORTANT: No hardcoded tax calculation - rely on WooCommerce
+        // IMPORTANT: No hardcoded tax percentage - rely on WooCommerce or VAT helper
         const basePrice = parseFloat(product.price) || 0;
-        // price_incl_tax comes from WooCommerce via PHP (wc_get_price_including_tax)
-        // If not available, use basePrice as fallback (no hardcoded multiplication)
-        const priceInclTax = parseFloat(product.price_incl_tax) || basePrice;
         const priceExclTax = basePrice;
+
+        // price_incl_tax peut être absent ou mal calculé côté WooCommerce pour certains pays.
+        // Pour l'Europe, on s'assure d'avoir un TTC correct via calculatePriceWithVat.
+        let rawPriceInclTax = parseFloat(product.price_incl_tax);
+        let priceInclTax;
+
+        if (isEuropeLocation) {
+            if (!isNaN(rawPriceInclTax) && rawPriceInclTax > 0) {
+                // WooCommerce fournit déjà un TTC exploitable
+                priceInclTax = rawPriceInclTax;
+            } else {
+                // Recalcule TTC à partir du HT et du pays sélectionné (ex: FR → 20%)
+                priceInclTax = calculatePriceWithVat(priceExclTax, selectedCountry);
+            }
+        } else {
+            // Hors Europe, garder la valeur WooCommerce si présente, sinon fallback sur HT
+            priceInclTax = !isNaN(rawPriceInclTax) && rawPriceInclTax > 0
+                ? rawPriceInclTax
+                : priceExclTax;
+        }
 
         console.log(`[API Products] Product ${id}:`, {
             basePrice,
@@ -106,7 +123,7 @@ export async function GET(request, { params }) {
             price: displayPrice,
             price_excl_tax: priceExclTax,
             price_incl_tax: priceInclTax,
-            price_with_tax: priceInclTax, // Legacy field for backward compatibility
+            price_with_tax: priceInclTax, // Always TTC (tax included) - used by frontend for Europe location
             regular_price: parseFloat(product.regular_price) || 0,
             sale_price: parseFloat(product.sale_price) || 0,
             images: product.images || [],
@@ -126,11 +143,25 @@ export async function GET(request, { params }) {
                 variation: attr.variation || false,
             })),
             variations: variations.map(v => {
-                // Use price_incl_tax from WooCommerce API (calculated by PHP via wc_get_price_including_tax)
-                // No hardcoded tax calculation - rely on WooCommerce
+                // Use price_incl_tax from WooCommerce API when available.
+                // If missing for Europe, recalc TTC with VAT helper.
                 const vBasePrice = parseFloat(v.price) || 0;
-                const vPriceInclTax = parseFloat(v.price_incl_tax) || vBasePrice; // Fallback to base price (no hardcoded %)
                 const vPriceExclTax = vBasePrice;
+
+                let vRawPriceInclTax = parseFloat(v.price_incl_tax);
+                let vPriceInclTax;
+
+                if (isEuropeLocation) {
+                    if (!isNaN(vRawPriceInclTax) && vRawPriceInclTax > 0) {
+                        vPriceInclTax = vRawPriceInclTax;
+                    } else {
+                        vPriceInclTax = calculatePriceWithVat(vPriceExclTax, selectedCountry);
+                    }
+                } else {
+                    vPriceInclTax = !isNaN(vRawPriceInclTax) && vRawPriceInclTax > 0
+                        ? vRawPriceInclTax
+                        : vPriceExclTax;
+                }
                 const vDisplayPrice = isEuropeLocation ? vPriceInclTax : vPriceExclTax;
 
                 // Log for debugging
@@ -144,7 +175,7 @@ export async function GET(request, { params }) {
                     price: vDisplayPrice,
                     price_excl_tax: vPriceExclTax,
                     price_incl_tax: vPriceInclTax,
-                    price_with_tax: vPriceInclTax, // Legacy field for backward compatibility
+                    price_with_tax: vPriceInclTax, // Always TTC (tax included) - used by frontend for Europe location
                     // Enrich variation attributes with slug for WooCommerce Store API compatibility
                     attributes: (v.attributes || []).map(attr => {
                         // Try to find the slug from our map
