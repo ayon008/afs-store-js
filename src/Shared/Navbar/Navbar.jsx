@@ -282,17 +282,32 @@ const Navbar = ({ NAV_LINKS }) => {
         // The middleware will handle the translation and remove ?lang= from final URL
         window.location.href = newPath;
         return selectedValues;
-      } else {
-        // For non-product pages, use ?lang= parameter to let middleware handle the locale change
+      }
+
+      // Handle category pages with slug translation
+      const categoryMatch = fullPathname?.match(/\/product-category\/(.+)/) || pathname?.match(/\/product-category\/(.+)/);
+      
+      if (categoryMatch) {
+        // For category pages, use ?lang= parameter to let middleware handle the translation
         // Use the full pathname from window.location to preserve locale prefix
         const currentPath = fullPathname || pathname || '/';
         const basePath = currentPath.split('?')[0]; // Remove existing query params
         const newPath = `${basePath}?lang=${selectedLanguage}`;
         // Use window.location for immediate redirect
-        // The middleware will handle the locale change and remove ?lang= from final URL
+        // The middleware will handle the translation and remove ?lang= from final URL
         window.location.href = newPath;
         return selectedValues;
       }
+
+      // For other pages, use ?lang= parameter to let middleware handle the locale change
+      // Use the full pathname from window.location to preserve locale prefix
+      const currentPath = fullPathname || pathname || '/';
+      const basePath = currentPath.split('?')[0]; // Remove existing query params
+      const newPath = `${basePath}?lang=${selectedLanguage}`;
+      // Use window.location for immediate redirect
+      // The middleware will handle the locale change and remove ?lang= from final URL
+      window.location.href = newPath;
+      return selectedValues;
     } else {
       // If currency or location changed, reload page to get updated values
       if (currencyChanged || locationChanged) {

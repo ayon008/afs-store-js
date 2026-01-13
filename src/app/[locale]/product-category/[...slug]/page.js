@@ -6,6 +6,7 @@ import { getChildCategories } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import { getTranslations, getLocale } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
 import { Link } from "@/i18n/navigation";
+import { getTranslatedCategoryPath } from '@/lib/product-routes';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
 
@@ -30,9 +31,12 @@ export async function generateMetadata({ params }) {
         };
     }
 
-    const categoryPath = `/product-category/${slug.join('/')}`;
-    const enUrl = `${BASE_URL}${categoryPath}`;
-    const frUrl = `${BASE_URL}/fr${categoryPath}`;
+    // Get translated category paths
+    const enPath = await getTranslatedCategoryPath(slug, 'en');
+    const frPath = await getTranslatedCategoryPath(slug, 'fr');
+    
+    const enUrl = `${BASE_URL}${enPath}`;
+    const frUrl = `${BASE_URL}${frPath}`;
     const currentUrl = isEnglish ? enUrl : frUrl;
 
     // Generate hreflang alternates
