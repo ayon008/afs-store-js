@@ -90,11 +90,11 @@ add_action('rest_api_init', function () {
             'get_callback' => function($object) {
                 // get terms from taxonomy "destination"
                 $terms = wp_get_post_terms($object['id'], 'destination');
-                
+
                 if (!empty($terms) && !is_wp_error($terms)) {
                     return wp_list_pluck($terms, 'name'); // return only names
                 }
-                
+
                 return [];
             },
             'update_callback' => null,
@@ -354,63 +354,76 @@ add_action('rest_api_init', function () {
 /**
  * ACF field for product variation STOCK
  */
-// 1️⃣ Add ACF post type for product variations
-add_filter('acf/location/rule_values/post_type', function($choices) {
+// 1️⃣ Allow "Product Variation" in ACF location rules
+add_filter('acf/location/rule_values/post_type', function ($choices) {
     $choices['product_variation'] = 'Product Variation';
     return $choices;
 });
 
-// 2️⃣ Render ACF fields below each variation in admin
-add_action('woocommerce_product_after_variable_attributes', function($loop, $variation_data, $variation) {
-    $acf_field_groups = acf_get_field_groups();
-    foreach ($acf_field_groups as $acf_field_group) {
-        foreach ($acf_field_group['location'] as $group_locations) {
-            foreach ($group_locations as $rule) {
-                if ($rule['param'] === 'post_type' && $rule['operator'] === '==' && $rule['value'] === 'product_variation') {
-                    // Render fields directly for this variation
-                    $fields = acf_get_fields($acf_field_group);
-                    if ($fields) {
-                        foreach ($fields as $field) {
-                            // Render with correct post ID
-                            acf_render_field_wrap($field, $variation->ID);
-                        }
-                    }
-                    break 2;
-                }
+
+// 2️⃣ Render ACF fields inside each variation (ADMIN)
+add_action('woocommerce_product_after_variable_attributes', function ($loop, $variation_data, $variation) {
+
+    $field_groups = acf_get_field_groups(['post_type' => 'product_variation']);
+
+    if (!$field_groups) {
+        return;
+    }
+
+    foreach ($field_groups as $group) {
+        $fields = acf_get_fields($group);
+
+        if ($fields) {
+            echo '<div class="acf-variation-fields" style="margin-top:10px;">';
+
+            foreach ($fields as $field) {
+                // IMPORTANT: namespace fields per variation
+                $field['name']  = "acf_variation[{$variation->ID}][{$field['key']}]";
+                $field['value'] = get_field($field['key'], $variation->ID);
+
+                acf_render_field_wrap($field);
             }
+
+            echo '</div>';
         }
     }
+
 }, 10, 3);
 
-// 3️⃣ Save ACF fields for each variation
-add_action('woocommerce_save_product_variation', function($variation_id, $i) {
-    if (!empty($_POST['acf']) && is_array($_POST['acf'])) {
-        // $_POST['acf'] now contains all field data for variations
-        foreach ($_POST['acf'] as $key => $value) {
-            update_field($key, $value, $variation_id);
-        }
+
+// 3️⃣ Save ACF fields per variation (THIS FIXES YOUR ISSUE)
+add_action('woocommerce_save_product_variation', function ($variation_id, $i) {
+
+    if (empty($_POST['acf_variation'][$variation_id])) {
+        return;
     }
+
+    foreach ($_POST['acf_variation'][$variation_id] as $field_key => $value) {
+        update_field($field_key, $value, $variation_id);
+    }
+
 }, 10, 2);
 
 
-
+// 4️⃣ Expose ACF variation fields in REST API (Frontend / React safe)
 add_filter(
     'woocommerce_rest_prepare_product_variation_object',
     function ($response, $variation, $request) {
 
-        $fields = [];
+        $acf_data = [];
         $field_groups = acf_get_field_groups(['post_type' => 'product_variation']);
 
         foreach ($field_groups as $group) {
-            $group_fields = acf_get_fields($group);
-            if ($group_fields) {
-                foreach ($group_fields as $field) {
-                    $fields[$field['name']] = get_field($field['name'], $variation->get_id());
+            $fields = acf_get_fields($group);
+
+            if ($fields) {
+                foreach ($fields as $field) {
+                    $acf_data[$field['name']] = get_field($field['key'], $variation->get_id());
                 }
             }
         }
 
-        $response->data['acf'] = $fields;
+        $response->data['acf'] = $acf_data;
 
         return $response;
     },
@@ -537,6 +550,9 @@ add_action('rest_api_init', function () {
 /**
  * custom api with TTC
  */
+/**
+ * custom api with TTC
+ */
 add_action('rest_api_init', function () {
     if (!class_exists('WooCommerce')) return;
 
@@ -555,7 +571,7 @@ add_action('rest_api_init', function () {
             'shipping_postcode' => [],
             'currency'          => [],
             'search'            => [],
-            'slug'              => [], 
+            'slug'              => [],
         ],
     ]);
 });
@@ -567,7 +583,7 @@ function afs_get_products(WP_REST_Request $request) {
     /* ------------------- 1. PREPARE ------------------- */
     $lang     = apply_filters('wpml_current_language', null);
     $search   = trim((string) $request->get_param('search'));
-    $slug     = trim((string) $request->get_param('slug')); 
+    $slug     = trim((string) $request->get_param('slug'));
     $page     = max(1, (int) $request->get_param('page'));
     $per_page = min(100, max(1, (int) $request->get_param('per_page')));
     $offset   = ($page - 1) * $per_page;
@@ -578,11 +594,11 @@ function afs_get_products(WP_REST_Request $request) {
     $category_param = (string) $request->get_param('category');
     $categories = $category_param ? array_map('intval', explode(',', $category_param)) : [];
 
-	
-	
-	
-	
-	
+
+
+
+
+
     /* ------------------- 2. CUSTOMER / TAX / GEO ------------------- */
     if (function_exists('wc_load_cart')) wc_load_cart();
 
@@ -632,14 +648,14 @@ function afs_get_products(WP_REST_Request $request) {
     WC()->customer->set_shipping_postcode($shipping_postcode);
 
 
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
     /* ------------------- 3. WPML CATEGORY ------------------- */
     if ($categories && function_exists('icl_object_id')) {
         $categories = array_filter(array_map(function ($cat_id) use ($lang) {
@@ -648,7 +664,7 @@ function afs_get_products(WP_REST_Request $request) {
     }
 
     /* ------------------- 4. WCML CURRENCY ------------------- */
-      $currency = strtoupper((string) $request->get_param('currency'));
+    $currency = strtoupper((string) $request->get_param('currency'));
 
     if ($currency && defined('WCML_VERSION')) {
         add_filter('wcml_client_currency', function() use ($currency) { return $currency; }, 999);
@@ -658,7 +674,7 @@ function afs_get_products(WP_REST_Request $request) {
         if (isset($woocommerce_wpml->multi_currency)) {
             $woocommerce_wpml->multi_currency->set_client_currency($currency);
         }
-        
+
         if (function_exists('wc_clear_notices')) wc_clear_notices();
     }
 
@@ -759,13 +775,18 @@ function afs_get_products(WP_REST_Request $request) {
         $product = wc_get_product($id);
         if (!$product) continue;
 
-        $price_excl_tax = wc_get_price_excluding_tax($product);
-        $price_incl_tax = wc_get_price_including_tax($product);
-
         if ($product->is_type('variable')) {
-            $display_price = $product->get_variation_price('min', true);
+            // For variable products: get min price with and without tax from variations
+            // get_variation_price('min', true) returns minimum price WITH tax (TTC)
+            // get_variation_price('min', false) returns minimum price WITHOUT tax (HT)
+            $price_incl_tax = $product->get_variation_price('min', true); // TTC
+            $price_excl_tax = $product->get_variation_price('min', false); // HT
+            $display_price = $price_incl_tax; // Use TTC for display (will be adjusted by frontend based on location)
             $price_html    = sprintf(__('From %s', 'woocommerce'), wc_price($display_price));
         } else {
+            // For simple products: use standard WooCommerce functions
+            $price_excl_tax = wc_get_price_excluding_tax($product);
+            $price_incl_tax = wc_get_price_including_tax($product);
             $display_price = wc_get_price_to_display($product, ['price' => $product->get_price(), 'qty' => 1]);
             $price_html    = wc_price($display_price);
         }
@@ -811,73 +832,73 @@ function afs_get_products(WP_REST_Request $request) {
  * test wcml
  */
 add_action( 'rest_api_init', function () {
-	register_rest_route( 'custom/v1', '/products', [
-		'methods'             => 'GET',
-		'callback'            => 'afs_custom_products_api',
-		'permission_callback' => '__return_true',
-		'args'                => [
-			'currency' => [
-				'required' => false,
-				'default'  => 'EUR',
-			],
-		],
-	] );
+    register_rest_route( 'custom/v1', '/products', [
+        'methods'             => 'GET',
+        'callback'            => 'afs_custom_products_api',
+        'permission_callback' => '__return_true',
+        'args'                => [
+            'currency' => [
+                'required' => false,
+                'default'  => 'EUR',
+            ],
+        ],
+    ] );
 } );
 
 function afs_custom_products_api( WP_REST_Request $request ) {
-	$currency = strtoupper( $request->get_param( 'currency' ) ?: 'EUR' );
-	$allowed  = [ 'EUR', 'USD', 'GBP' ];
+    $currency = strtoupper( $request->get_param( 'currency' ) ?: 'EUR' );
+    $allowed  = [ 'EUR', 'USD', 'GBP' ];
 
-	if ( ! in_array( $currency, $allowed, true ) ) {
-		$currency = 'EUR';
-	}
+    if ( ! in_array( $currency, $allowed, true ) ) {
+        $currency = 'EUR';
+    }
 
-	global $woocommerce_wpml;
-	if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
-		$woocommerce_wpml->multi_currency->set_client_currency( $currency );
-	}
+    global $woocommerce_wpml;
+    if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
+        $woocommerce_wpml->multi_currency->set_client_currency( $currency );
+    }
 
-	// force WCML cookie
-	if ( ! headers_sent() ) {
-		setcookie( 'wcml_client_currency', $currency, time() + 86400, '/' );
-	}
-	$_COOKIE['wcml_client_currency'] = $currency;
+    // force WCML cookie
+    if ( ! headers_sent() ) {
+        setcookie( 'wcml_client_currency', $currency, time() + 86400, '/' );
+    }
+    $_COOKIE['wcml_client_currency'] = $currency;
 
-	$products = wc_get_products([
-		'status' => 'publish',
-		'limit'  => -1,
-	]);
+    $products = wc_get_products([
+        'status' => 'publish',
+        'limit'  => -1,
+    ]);
 
-	$response = [];
+    $response = [];
 
-	foreach ( $products as $product ) {
+    foreach ( $products as $product ) {
 
-		$price = null;
+        $price = null;
 
-		if ( $product->is_type( 'simple' ) ) {
-			// 🔑 force reload price after WCML currency is set
-			$price = (float) wc_get_price_to_display( $product );
-		}
+        if ( $product->is_type( 'simple' ) ) {
+            // 🔑 force reload price after WCML currency is set
+            $price = (float) wc_get_price_to_display( $product );
+        }
 
-		if ( $product->is_type( 'variable' ) ) {
-			// 🔑 get min price in current currency
-			$price = (float) $product->get_variation_price( 'min', true );
-		}
+        if ( $product->is_type( 'variable' ) ) {
+            // 🔑 get min price in current currency
+            $price = (float) $product->get_variation_price( 'min', true );
+        }
 
-		if ( $price === null || $price <= 0 ) {
-			continue;
-		}
+        if ( $price === null || $price <= 0 ) {
+            continue;
+        }
 
-		$response[] = [
-			'id'       => $product->get_id(),
-			'slug'     => $product->get_slug(),
-			'name'     => $product->get_name(),
-			'price'    => (int) round( $price * 100 ),
-			'currency' => $currency,
-		];
-	}
+        $response[] = [
+            'id'       => $product->get_id(),
+            'slug'     => $product->get_slug(),
+            'name'     => $product->get_name(),
+            'price'    => (int) round( $price * 100 ),
+            'currency' => $currency,
+        ];
+    }
 
-	return rest_ensure_response( $response );
+    return rest_ensure_response( $response );
 }
 
 /**
@@ -893,7 +914,7 @@ add_filter('woocommerce_rest_prepare_product_variation_object', 'afs_niloy_maste
 
 function afs_niloy_master_logic($response, $post, $request) {
     $france_id = 2682; // France ID
-    
+
     // Lấy location từ tham số, nếu không có thì mặc định là France
     $location_id = $request->get_param('location') ?: $france_id;
 
@@ -910,7 +931,7 @@ function afs_niloy_master_logic($response, $post, $request) {
     $data['manage_stock']   = true;
     $data['stock_quantity'] = $final_qty;
     $data['stock_status']   = ($final_qty > 0) ? 'instock' : 'outofstock';
-    
+
     $response->set_data($data);
     return $response;
 }
@@ -936,7 +957,7 @@ function afs_niloy_master_update($product, $request, $creating) {
 // --- 3. ORDER LOGIC (Deduct stock on order) ---
 add_action('woocommerce_checkout_order_processed', 'afs_niloy_master_order_sync', 10, 3);
 function afs_niloy_master_order_sync($order_id, $posted_data, $order) {
-    $location_id = $order->get_meta('location_id') ?: 2682; 
+    $location_id = $order->get_meta('location_id') ?: 2682;
     foreach ($order->get_items() as $item) {
         $id = $item->get_variation_id() ?: $item->get_product_id();
         $qty = $item->get_quantity();
@@ -947,6 +968,22 @@ function afs_niloy_master_order_sync($order_id, $posted_data, $order) {
     }
 }
 
+/**
+ * Hide unwanted col for woo product panel admin
+ */
+add_action('admin_head', function () {
+    echo '
+    <style>
+        td.price_at_locations.column-price_at_locations, td.stock_at_locations.column-stock_at_locations, th#stock_at_locations, th#price_at_locations, th#rank_math_seo_details, td.rank_math_seo_details.column-rank_math_seo_details, td.taxonomy-product_brand.column-taxonomy-product_brand, th#taxonomy-product_brand {
+            display: none;
+        }
+    </style>
+    ';
+});
+
+/**
+ * Store API Tax Calculation Enhancement
+ */
 /**
  * Store API Tax Calculation Enhancement
  *
@@ -1065,14 +1102,88 @@ add_action('woocommerce_before_calculate_totals', function($cart) {
 }, 5);
 
 /**
- * Hide unwanted col for woo product panel admin
+ * Get products (simple) with tax - price_incl_tax field
  */
-add_action('admin_head', function () {
-    echo '
-    <style>
-        td.price_at_locations.column-price_at_locations, td.stock_at_locations.column-stock_at_locations, th#stock_at_locations, th#price_at_locations, th#rank_math_seo_details, td.rank_math_seo_details.column-rank_math_seo_details, td.taxonomy-product_brand.column-taxonomy-product_brand, th#taxonomy-product_brand {
-            display: none;
-        }
-    </style>
-    ';
+/**
+ * Get products (simple) with tax - price_incl_tax field
+ */
+add_action('rest_api_init', function () {
+
+    register_rest_field(
+        'product',
+        'price_incl_tax',
+        array(
+            'get_callback' => function ($product_arr) {
+
+                if (!class_exists('WooCommerce')) return null;
+                if (function_exists('wc_load_cart')) wc_load_cart();
+
+                if (!WC()->customer) {
+                    WC()->customer = new WC_Customer(0);
+                }
+
+                $product_obj = wc_get_product($product_arr['id']);
+                if (!$product_obj) return null;
+
+                // IMPORTANT: Get price EXCLUDING tax first to avoid double taxation
+                // WooCommerce may store prices WITH tax included (common in France)
+                // So we need to get the base price without tax, then recalculate with correct country's tax
+                $price = (float) wc_get_price_excluding_tax($product_obj);
+
+                /* ---------------- TAX / GEO LOGIC ---------------- */
+
+                $shipping_country  = '';
+                $shipping_state    = '';
+                $shipping_postcode = '';
+
+                $req_country  = isset($_GET['shipping_country']) ? sanitize_text_field($_GET['shipping_country']) : null;
+                $req_state    = isset($_GET['shipping_state']) ? sanitize_text_field($_GET['shipping_state']) : '';
+                $req_postcode = isset($_GET['shipping_postcode']) ? sanitize_text_field($_GET['shipping_postcode']) : '';
+
+                if ($req_country !== null) {
+                    if ($req_country === '' || $req_country === 'null') {
+                        if (class_exists('WC_Geolocation')) {
+                            $geo = WC_Geolocation::geolocate_ip();
+                            if (!empty($geo['country'])) {
+                                $shipping_country = $geo['country'];
+                                $shipping_state   = $geo['state'] ?? '';
+                            }
+                        }
+                    } else {
+                        $shipping_country  = strtoupper($req_country);
+                        $shipping_state    = $req_state ?: '';
+                        $shipping_postcode = $req_postcode ?: '';
+                    }
+                } else {
+                    if (class_exists('WC_Geolocation')) {
+                        $geo = WC_Geolocation::geolocate_ip();
+                        if (!empty($geo['country'])) {
+                            $shipping_country = $geo['country'];
+                            $shipping_state   = $geo['state'] ?? '';
+                        }
+                    }
+                }
+
+                if (!$shipping_country) {
+                    $shipping_country = WC()->countries->get_base_country();
+                    $shipping_state   = WC()->countries->get_base_state();
+                }
+
+                WC()->customer->set_is_vat_exempt(false);
+                WC()->customer->set_shipping_country($shipping_country);
+                WC()->customer->set_shipping_state($shipping_state);
+                WC()->customer->set_shipping_postcode($shipping_postcode);
+
+                /* ---------------- CALCULATE TAX ---------------- */
+
+                $price_incl_tax = wc_get_price_including_tax($product_obj, array(
+                    'price' => $price,
+                    'qty'   => 1,
+                ));
+
+                return round($price_incl_tax, 4);
+            },
+            'schema' => null,
+        )
+    );
 });
