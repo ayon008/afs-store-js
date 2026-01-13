@@ -2,7 +2,7 @@ import React from "react";
 import ProductCard from "../Card/ProductCard";
 import { getLocale, getTranslations } from "next-intl/server";
 import default_image from "../../../public/assets/images/Team/Group-1-3.png.webp"
-import { getCurrency, getLang } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getCurrency, getLang, getSelectedCountry } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 import { getAuthenticatedUser } from "@/app/actions/WC/Auth/getAuth";
 
 
@@ -11,7 +11,10 @@ const getProduct = async (slug) => {
     const locale = await getLocale();
     const currency = await getCurrency();
     const user = await getAuthenticatedUser();
-    const shippingCountry = user?.shipping?.country || user?.billing?.country || "";
+    // Priority: 1. User shipping/billing country, 2. Selected country from cookie, 3. Default
+    const userCountry = user?.shipping?.country || user?.billing?.country;
+    const selectedCountry = await getSelectedCountry();
+    const shippingCountry = userCountry || selectedCountry || "";
     try {
         const res = await fetch(`${process.env.WP_BASE_URL}/wp-json/afs/v1/products?slug=${slug}&per_page=100&lang=${locale}&shipping_country=${shippingCountry}&currency=${currency}`, {
             cache: 'no-cache'
@@ -61,6 +64,7 @@ export default async function BestSellers() {
                                     singlePrice={product?.price_incl_tax}
                                     // HT depuis l'API WP (price_excl_tax)
                                     priceExclTax={product?.price_excl_tax}
+                                    type={product?.type || "simple"}
                                     name={product?.name}
                                     bestseller={bestseller}
                                     hoverImage={hoverImage}

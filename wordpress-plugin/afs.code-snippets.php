@@ -809,6 +809,7 @@ function afs_get_products(WP_REST_Request $request) {
             'price_incl_tax' => $price_incl_tax,
             'price'          => $display_price,
             'price_html'     => $price_html,
+            'type'           => $product->get_type(), // 'simple' or 'variable'
             'img'        => $img,
             'bestseller'     => $bestseller,
         ];
