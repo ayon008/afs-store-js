@@ -18,17 +18,27 @@ class AFS_WCML_Prices {
 	/**
 	 * Get active currencies from WCML.
 	 *
+	 * @param bool $include_default Whether to include the default currency.
 	 * @return array
 	 */
-	public function get_active_currencies() {
+	public function get_active_currencies( $include_default = false ) {
 		global $woocommerce_wpml;
 
+		$active_currencies = array();
+
+		// Always add default currency first if requested.
+		if ( $include_default ) {
+			$default_currency = $this->get_default_currency();
+			$active_currencies[ $default_currency ] = array(
+				'is_default' => true,
+			);
+		}
+
 		if ( ! $woocommerce_wpml || ! isset( $woocommerce_wpml->multi_currency ) ) {
-			return array();
+			return $active_currencies;
 		}
 
 		$currencies = $woocommerce_wpml->multi_currency->get_currencies();
-		$active_currencies = array();
 
 		if ( ! empty( $currencies ) ) {
 			foreach ( $currencies as $code => $currency ) {
@@ -37,6 +47,15 @@ class AFS_WCML_Prices {
 		}
 
 		return $active_currencies;
+	}
+
+	/**
+	 * Get all currencies including default.
+	 *
+	 * @return array
+	 */
+	public function get_all_currencies() {
+		return $this->get_active_currencies( true );
 	}
 
 	/**
