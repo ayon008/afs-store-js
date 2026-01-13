@@ -134,6 +134,8 @@ export async function GET(request, { params }) {
             currency: currencyCode, // Include currency in response
             location: location, // Include location for frontend reference
             is_tax_included: isEuropeLocation, // Indicate if tax is included in price
+            // Include ACF fields from WooCommerce API
+            acf: product.acf || {},
             // Include product attributes with their slugs for reference
             attributes: (product.attributes || []).map(attr => ({
                 id: attr.id,

@@ -76,6 +76,7 @@ const ProductDetails = ({ data, variations }) => {
     const productId = data?.id;
     const [location, setLocation] = useState(WAREHOUSES.EUROPE);
     const [selectedCountry, setSelectedCountry] = useState('FR');
+    const [currencySymbol, setCurrencySymbol] = useState('€'); // Default to EUR to avoid hydration mismatch
     const [gradeOpen, setGradeOpen] = useState(false);
     const [selectedGrade, setSelectedGrade] = useState("A");
     const [telephonePopUp, setTelephonePopUp] = useState(false);
@@ -115,6 +116,11 @@ const ProductDetails = ({ data, variations }) => {
             // Default based on location
             setSelectedCountry(cookieLocation === WAREHOUSES.USA ? 'US' : 'FR');
         }
+
+        // Set currency symbol from cookie (client-side only to avoid hydration mismatch)
+        const currency = Cookies.get('currency');
+        const symbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
+        setCurrencySymbol(symbol);
     }, []);
 
     // Determine if we should show prices with tax included (Europe) or excluded (North America)
@@ -311,9 +317,6 @@ const ProductDetails = ({ data, variations }) => {
         return formattedVariations;
     };
 
-    const currency = Cookies.get('currency');
-    const currencySymbol = currency === 'euro' ? '€' : currency === 'usd' ? '$' : '£';
-
     // Handle add to cart
     const onSubmit = async (formData) => {
         // For variable products: require variationPrice and isInStock
@@ -507,7 +510,16 @@ const ProductDetails = ({ data, variations }) => {
             <div>
                 <h1 className="text-[clamp(2rem,1.6547rem+0.7203vw,2.375rem)] font-bold leading-[100%] lg:mt-3">{data?.name}</h1>
                 <div className='mt-2 mb-3 text-[15px] leading-[22px] font-semibold' dangerouslySetInnerHTML={{ __html: short_description }} />
-                <div className='text-lg leading-[29px] font-bold mb-6' dangerouslySetInnerHTML={{ __html: price }} />
+                {/* Show price: HTML for variable products, formatted price for simple products */}
+                {hasVariations ? (
+                    <div className='text-lg leading-[29px] font-bold mb-6' dangerouslySetInnerHTML={{ __html: price }} />
+                ) : (
+                    displayPrice > 0 && (
+                        <div className='text-lg leading-[29px] font-bold mb-6'>
+                            {parseFloat(displayPrice)?.toFixed(2)}{currencySymbol}
+                        </div>
+                    )
+                )}
                 {
                     compatibilite && <button onClick={() => setOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer flex items-center'>
                         <span>{t("size")}</span>
@@ -586,24 +598,49 @@ const ProductDetails = ({ data, variations }) => {
                             </span>
                         )}
 
-                        {/* Price */}
-                        {variationPrice && !priceLoading && variationInStock && (
+                        {/* Price for variations */}
+                        {hasVariations && variationPrice && !priceLoading && variationInStock && (
                             <div className='space-y-1'>
                                 <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
                                     {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
                                 </span>
                                 <span className='text-base font-semibold text-[#111]'>
                                     {
-                                        location === '2683' && matchedVariation?.acf?.stock_for_usa ?
+                                        // Amérique du Nord (2683) : afficher stock_for_usa
+                                        location === WAREHOUSES.USA && matchedVariation?.acf?.stock_for_usa ?
                                             <>{t("stock_usd_acf")} : {matchedVariation?.acf?.stock_for_usa}</>
                                             :
-                                            matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
+                                            // Europe (2682) : afficher date_de_livraison_estimee_from_dolibarr
+                                            isEuropeLocation && matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
                                             <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}
                                             </>
                                     }
                                 </span>
                             </div>
                         )}
+
+                        {/* Stock info for simple products */}
+                        {!hasVariations && (() => {
+                            const shouldShowStockUSA = !!(location === WAREHOUSES.USA && acf?.stock_for_usa);
+                            const shouldShowStockEU = !!(isEuropeLocation && acf?.date_de_livraison_estimee_from_dolibarr);
+                            const shouldShowStock = shouldShowStockUSA || shouldShowStockEU;
+                            
+                            return shouldShowStock ? (
+                                <span className='text-base font-semibold text-[#111]'>
+                                    {
+                                        // Amérique du Nord (2683) : afficher stock_for_usa
+                                        shouldShowStockUSA ?
+                                            <>{t("stock_usd_acf")} : {acf?.stock_for_usa}</>
+                                            :
+                                            // Europe (2682) : afficher date_de_livraison_estimee_from_dolibarr
+                                            shouldShowStockEU ?
+                                            <>{t("stock_fr_acf")} : {acf?.date_de_livraison_estimee_from_dolibarr}</>
+                                            :
+                                            null
+                                    }
+                                </span>
+                            ) : null;
+                        })()}
 
                         {/* Select variations message */}
                         {/* {!allVariationsSelected && attributes?.length > 0 && (

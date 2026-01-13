@@ -431,6 +431,34 @@ add_filter(
     3
 );
 
+// 5️⃣ Expose ACF product fields in REST API (Frontend / React safe)
+add_filter(
+    'woocommerce_rest_prepare_product_object',
+    function ($response, $product, $request) {
+        // Only add ACF if not already set (ACF REST API might have already set it)
+        if (!isset($response->data['acf']) || empty($response->data['acf'])) {
+            $acf_data = [];
+            $field_groups = acf_get_field_groups(['post_type' => 'product']);
+
+            foreach ($field_groups as $group) {
+                $fields = acf_get_fields($group);
+
+                if ($fields) {
+                    foreach ($fields as $field) {
+                        $acf_data[$field['name']] = get_field($field['key'], $product->get_id());
+                    }
+                }
+            }
+
+            $response->data['acf'] = $acf_data;
+        }
+
+        return $response;
+    },
+    10,
+    3
+);
+
 /**
  * Breadcrumb for single product
  */
