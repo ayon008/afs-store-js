@@ -6,7 +6,7 @@ import FormButton from '../Button/FormButton';
 import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';
 import { getProductRoute } from '@/lib/product-routes';
-import { WAREHOUSES } from '@/lib/countries-config';
+import { WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
 
 // Helper function to format price
 const formatPrice = (price) => {
@@ -84,8 +84,9 @@ export default function ProductCard({
         return updatedHtml;
     };
 
-    // Get location from cookies to determine tax display mode
+    // Get location and country from cookies to determine tax display mode
     const [location, setLocation] = useState(WAREHOUSES.EUROPE);
+    const [selectedCountry, setSelectedCountry] = useState('FR');
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -96,25 +97,39 @@ export default function ProductCard({
         } else {
             setLocation(WAREHOUSES.EUROPE);
         }
+        
+        const cookieCountry = Cookies.get('selected_country');
+        if (cookieCountry) {
+            setSelectedCountry(cookieCountry);
+        } else {
+            setSelectedCountry(cookieLocation === WAREHOUSES.USA ? 'US' : 'FR');
+        }
     }, []);
 
     // Determine if we should show prices with tax included (Europe) or excluded (North America)
     const isEuropeLocation = location === WAREHOUSES.EUROPE;
 
     // Calculate the correct price to display based on location
-    // Europe (2682): TTC (price_with_tax)
-    // North America (2683): HT (price_excl_tax or price)
+    // Europe (2682): TTC (price_incl_tax)
+    // North America (2683): HT (price_excl_tax)
     const displayPrice = useMemo(() => {
         if (!isMounted) return singlePrice; // Return default during SSR
 
         if (isEuropeLocation) {
-            // Europe: Use TTC (price_with_tax)
-            return singlePrice || 0;
+            // Europe: Use TTC (price_incl_tax)
+            // Si price_incl_tax n'est pas disponible, recalculer à partir du HT
+            if (singlePrice && parseFloat(singlePrice) > 0) {
+                return parseFloat(singlePrice);
+            } else if (priceExclTax && parseFloat(priceExclTax) > 0) {
+                // Fallback: Recalculer TTC à partir du HT et du pays sélectionné
+                return calculatePriceWithVat(parseFloat(priceExclTax), selectedCountry);
+            }
+            return 0;
         } else {
-            // North America: Use HT (price_excl_tax or fallback to price if available)
-            return priceExclTax || 0;
+            // North America: Use HT (price_excl_tax)
+            return parseFloat(priceExclTax) || 0;
         }
-    }, [isMounted, isEuropeLocation, singlePrice, priceExclTax]);
+    }, [isMounted, isEuropeLocation, singlePrice, priceExclTax, selectedCountry]);
 
     // Update the price HTML with calculated tax price
     const changePrice = useMemo(() => {

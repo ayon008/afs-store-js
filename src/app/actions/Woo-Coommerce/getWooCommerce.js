@@ -310,7 +310,9 @@ export const getProductBySlug = async (slug) => {
     const locale = await getLocale();
     const currency = await getCurrency();
     const location = await getLocation();
-    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}&currency=${currency}&location=${location}`;
+    // Get selected country for tax calculation
+    const selectedCountry = await getSelectedCountry();
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products?slug=${slug}&lang=${locale}&currency=${currency}&location=${location}&shipping_country=${selectedCountry}`;
     try {
         const response = await fetch(url, {
             headers: {
