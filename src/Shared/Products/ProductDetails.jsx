@@ -80,6 +80,7 @@ const ProductDetails = ({ data, variations }) => {
     const [gradeOpen, setGradeOpen] = useState(false);
     const [selectedGrade, setSelectedGrade] = useState("A");
     const [telephonePopUp, setTelephonePopUp] = useState(false);
+    const calendlyContainerRef = React.useRef(null);
 
     const gradeImage = [
         { grade: "A", images: ["https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont@2x.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-6.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-8.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-11.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-12.png"] },
@@ -502,6 +503,87 @@ const ProductDetails = ({ data, variations }) => {
         return availability;
     }, [attributes, watchedValues, variationIndex]);
 
+    // Gérer le chargement et la réinitialisation du widget Calendly dans le modal
+    useEffect(() => {
+        if (!telephonePopUp || typeof window === 'undefined' || !calendlyContainerRef.current) return;
+
+        let calendlyWidget = null;
+
+        // Fonction pour charger le script Calendly
+        const loadCalendlyScript = () => {
+            return new Promise((resolve, reject) => {
+                // Vérifier si le script est déjà chargé
+                if (window.Calendly) {
+                    resolve();
+                    return;
+                }
+
+                // Vérifier si le script est déjà en cours de chargement
+                const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+                if (existingScript) {
+                    existingScript.addEventListener('load', resolve);
+                    existingScript.addEventListener('error', reject);
+                    return;
+                }
+
+                // Créer et charger le script
+                const script = document.createElement('script');
+                script.src = 'https://assets.calendly.com/assets/external/widget.js';
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        };
+
+        // Fonction pour initialiser le widget
+        const initCalendlyWidget = () => {
+            if (!calendlyContainerRef.current || !window.Calendly) return;
+
+            // Nettoyer complètement le conteneur
+            calendlyContainerRef.current.innerHTML = '';
+
+            // Créer un nouveau div pour le widget
+            const widgetDiv = document.createElement('div');
+            widgetDiv.className = 'calendly-inline-widget';
+            widgetDiv.setAttribute('data-url', 'https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs');
+            widgetDiv.style.minWidth = '320px';
+            widgetDiv.style.height = '100%';
+            calendlyContainerRef.current.appendChild(widgetDiv);
+
+            // Initialiser le widget Calendly
+            try {
+                window.Calendly.initInlineWidget({
+                    url: 'https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs',
+                    parentElement: widgetDiv
+                });
+                calendlyWidget = widgetDiv;
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation du widget Calendly:', error);
+            }
+        };
+
+        // Charger le script puis initialiser le widget
+        loadCalendlyScript()
+            .then(() => {
+                // Attendre un peu pour que Calendly soit prêt
+                setTimeout(() => {
+                    initCalendlyWidget();
+                }, 100);
+            })
+            .catch((error) => {
+                console.error('Erreur lors du chargement du script Calendly:', error);
+            });
+
+        // Cleanup: nettoyer complètement le widget quand le modal se ferme
+        return () => {
+            if (calendlyContainerRef.current) {
+                calendlyContainerRef.current.innerHTML = '';
+            }
+            calendlyWidget = null;
+        };
+    }, [telephonePopUp]);
+
 
 
 
@@ -874,12 +956,11 @@ const ProductDetails = ({ data, variations }) => {
             }
             <PopUp isOpen={telephonePopUp} fn={setTelephonePopUp}>
                 <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[649px] w-[95%] h-fit overflow-x-hidden  p-5 relative mx-auto rounded-[4px] overflow-hidden'>
-                    <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
+                    <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer z-10'>
                         <X className="w-4 h-4" />
                     </button>
                     <div className='pt-6 h-[80vh]'>
-                        <div className="calendly-inline-widget" data-url="https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs" style={{ minWidth: "320px", height: "100%" }}></div>
-                        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+                        <div ref={calendlyContainerRef} style={{ minWidth: "320px", height: "100%" }}></div>
                     </div>
                 </div>
             </PopUp>
