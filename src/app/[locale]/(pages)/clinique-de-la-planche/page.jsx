@@ -126,7 +126,7 @@ export default function Clinique() {
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-3.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-4-3.png`}
               className="w-full"
             />
             <span>{t("Store in Caen")}</span>
@@ -157,7 +157,7 @@ export default function Clinique() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-7.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-1-7.png`}
                   className="w-full"
                 />
                 <span>{t("Equipe")}</span>

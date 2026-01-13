@@ -137,7 +137,7 @@ const page = async ({ params, searchParams }) => {
 
     return (
         <div className='global-margin'>
-            <div className='h-[calc(100vh-139px)] max-h-[780px] w-full relative mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] bg-no-repeat bg-cover bg-center'
+            <div className='lg:h-[75vh] h-[50vh] max-h-[540px] lg:max-h-[720px] w-full relative mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] bg-no-repeat bg-cover bg-center'
                 style={{ backgroundImage: `url(${image})` }}
             >
                 <div className='global-padding pt-4 max-w-[1920px] mx-auto'>

@@ -1,11 +1,11 @@
 "use server"
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
 
 export default async function getAmbessedor() {
     try {
-        const localeValue = await getLocaleValue();
-        const response = await fetch(`${process.env.WP_BASE_URL}/${localeValue}/wp-json/wp/v2/discipline`, {
+        const locale = await getLocale();
+        const response = await fetch(`${process.env.WP_BASE_URL}/wp-json/wp/v2/discipline?lang=${locale}`, {
             next: { revalidate: 3600 }
         });
         const data = await response.json();

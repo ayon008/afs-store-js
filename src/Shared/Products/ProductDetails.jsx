@@ -536,8 +536,8 @@ const ProductDetails = ({ data, variations }) => {
                                 </span>
                                 <span className='text-base font-semibold text-[#111]'>
                                     {
-                                        location === '2683' && matchedVariation?.acf?.USA_Stock ?
-                                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.USA_Stock}</>
+                                        location === '2683' && matchedVariation?.acf?.stock_for_usa ?
+                                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.stock_for_usa}</>
                                             :
                                             matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
                                             <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}
@@ -613,7 +613,7 @@ const ProductDetails = ({ data, variations }) => {
                             <h3 className='font-bold text-base leading-6'>{t("need")}</h3>
                             <p className='text-[15px] leading-4 text-[#666666]/75'>{t("we")}</p>
                         </div>
-                        <p onClick={() => setTelephonePopUp(true)} className='text- cursor-pointer leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
+                        <p onClick={() => setTelephonePopUp(true)} className='text-sm flex items-center cursor-pointer leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
                     <div className='2xl:w-[40%] w-0 bg-[url("https://afs-foiling.com/fr/wp-content/uploads/2025/06/bg_img-1.png")] bg-contain bg-center bg-no-repeat'>
                         <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
