@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
 import { getWooCommerceCookies } from "./Cookies/cookie-handler";
 import { getLocale, getTranslations } from "next-intl/server";
-import { WAREHOUSES } from "@/lib/countries-config";
+import { WAREHOUSES, getCountryByCode } from "@/lib/countries-config";
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
 const authHeader = Buffer
@@ -15,15 +15,17 @@ const authHeader = Buffer
 const WP_URL = process.env.WP_BASE_URL || 'https://staging.afs-foiling.com/fr';
 const WC_STORE_URL = `${WP_URL}/wp-json/wc/store/v1`;
 
-export const getCurrency = async () => {
-    const cookieStore = await cookies();
-    const currencyValue = cookieStore.get('currency')?.value;
-    return currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
-}
-
 export const getLocation = async () => {
     const cookieStore = await cookies();
-    return cookieStore.get('location')?.value;
+    const location = cookieStore.get('location')?.value;
+    
+    // If location cookie doesn't exist, return default (Europe)
+    // Cookie will be initialized by Navbar on client side
+    if (!location || (location !== WAREHOUSES.EUROPE && location !== WAREHOUSES.USA)) {
+        return WAREHOUSES.EUROPE; // Default to Europe
+    }
+    
+    return location;
 }
 
 // Get selected country from cookie or default based on location
@@ -37,10 +39,56 @@ export const getSelectedCountry = async () => {
     }
     
     // Default based on location
+    // Cookie will be initialized by Navbar on client side
     const location = await getLocation() || WAREHOUSES.EUROPE;
     const isEuropeLocation = location === WAREHOUSES.EUROPE;
     return isEuropeLocation ? 'FR' : 'US';
 };
+
+export const getCurrency = async () => {
+    const cookieStore = await cookies();
+    let currencyValue = cookieStore.get('currency')?.value;
+    
+    // If currency cookie doesn't exist, determine default based on location/country (same logic as Navbar)
+    // Cookie will be initialized by Navbar on client side
+    if (!currencyValue || (currencyValue !== 'euro' && currencyValue !== 'usd' && currencyValue !== 'gbp')) {
+        // Use getLocation() and getSelectedCountry() to determine default currency
+        const location = await getLocation();
+        const selectedCountry = await getSelectedCountry();
+        
+        let initialCurrency = 'euro'; // Default fallback
+        
+        // Try to get country from selected_country
+        let country = getCountryByCode(selectedCountry);
+        
+        // If no country found, determine from location
+        if (!country && location) {
+            if (location === WAREHOUSES.EUROPE) {
+                // Europe: default to France (EUR)
+                country = getCountryByCode('FR');
+            } else if (location === WAREHOUSES.USA) {
+                // North America: default to US (USD)
+                country = getCountryByCode('US');
+            }
+        }
+        
+        // Use country currency if found
+        if (country && country.currencyKey) {
+            initialCurrency = country.currencyKey;
+        } else {
+            // Fallback based on location
+            if (location === WAREHOUSES.USA) {
+                initialCurrency = 'usd';
+            } else {
+                initialCurrency = 'euro';
+            }
+        }
+        
+        currencyValue = initialCurrency;
+    }
+    
+    return currencyValue === 'euro' ? 'EUR' : currencyValue === 'gbp' ? 'GBP' : 'USD';
+}
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
