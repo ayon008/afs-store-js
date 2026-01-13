@@ -2,79 +2,91 @@ import Image from "next/image";
 import React from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getTranslatedCategoryRoute } from "@/lib/product-routes";
+import { getParentCategory } from "@/app/actions/WC/getParentCategory";
 
-
+// Helper function to get category name from WordPress
+async function getCategoryName(slug, locale) {
+  try {
+    // Extract the last slug part for hierarchical categories
+    const slugParts = slug.split('/');
+    const lastSlug = slugParts[slugParts.length - 1];
+    
+    const category = await getParentCategory(lastSlug);
+    return category?.name || slug.toUpperCase().replace(/-/g, ' ');
+  } catch (error) {
+    console.error(`Error fetching category name for ${slug}:`, error);
+    // Fallback to slug-based name
+    return slug.split('/').pop().toUpperCase().replace(/-/g, ' ');
+  }
+}
 
 export default async function CategorySection() {
   const t = await getTranslations("home");
   const locale = await getLocale();
 
-  const categories = [
+  const categoriesData = [
     {
-      name: "WING FOIL",
-      slug: locale === "fr" ? "foiling/wing-foil" : "foiling/wing-foil",
-      url: "https://afs-foiling.com/product-category/foiling/wing-foil/",
+      slug: "foiling/wing-foil",
       image:
         "https://afs-foiling.com/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
       alt_text: "wing foil",
     },
     {
-      name: "DOWNWIND",
-      slug: locale === "fr" ? "foiling/downwind" : "foiling/downwind-foil",
-      url: "https://afs-foiling.com/product-category/foiling/downwind-foil/",
+      slug: "foiling/downwind-foil",
       image: "https://afs-foiling.com/wp-content/uploads/2023/11/afs-pure-ha.png",
       alt_text: "downwind",
     },
     {
-      name: `${t("SURF FOIL")}`,
-      slug: locale !== "fr" ? "foiling/prone-foil" : "foiling/surf-foil",
-      url: "https://afs-foiling.com/product-category/foiling/prone-foil/",
+      slug: "foiling/prone-foil",
       image:
         "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
       alt_text: "surf foil",
     },
     {
-      name: "SUP FOIL",
-      slug: "foiling/sup-foil-foiling",
-      url: "https://afs-foiling.com/product-category/foiling/sup-foil/",
+      slug: "foiling/sup-foil",
       image:
         "https://afs-foiling.com/wp-content/uploads/2024/01/afs-downwind.jpeg",
       alt_text: "sup foil",
     },
     {
-      name: "DOCKSTART",
       slug: "foiling/dockstart",
-      url: "https://afs-foiling.com/product-category/foiling/dockstart/",
       image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
       alt_text: "dockstart",
     },
     {
-      name: "PARAWING",
-      slug: `foiling/${locale === "fr" ? "parawing" : "parawing"}`,
-      url: "https://afs-foiling.com/product-category/foiling/parawing",
+      slug: "foiling/parawing",
       image:
         "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
       alt_text: "windsurf",
     },
     {
-      name: "WINDFOIL",
-      slug: locale === "fr" ? "windfoil" : "windfoiling",
-      url: "https://afs-foiling.com/product-category/foiling/windfoiling/",
+      slug: "windfoiling",
       image:
         "https://afs-foiling.com/wp-content/uploads/2022/07/afs-windfoil.jpg",
       alt_text: "windfoil",
     },
     {
-      name: "SUP",
-      slug: locale === "fr" ? "stand-up-paddle" : "stand-up-paddle",
-      url: "https://afs-foiling.com/product-category/stand-up-paddle/",
+      slug: "stand-up-paddle",
       image: "https://afs-foiling.com/wp-content/uploads/2025/06/sup.jpg",
       alt_text: "sup",
     },
-  ].map((c) => ({
-    ...c,
-    path: `/product-category/${c.slug}`,
-  }));
+  ];
+
+  // Generate translated routes and names for all categories
+  const categories = await Promise.all(
+    categoriesData.map(async (c) => {
+      const [translatedPath, translatedName] = await Promise.all([
+        getTranslatedCategoryRoute(c.slug, locale, locale),
+        getCategoryName(c.slug, locale),
+      ]);
+      return {
+        ...c,
+        name: translatedName,
+        path: translatedPath,
+      };
+    })
+  );
 
 
   return (

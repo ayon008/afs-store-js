@@ -486,13 +486,13 @@ const Navbar = ({ NAV_LINKS }) => {
 
   return (
     <>
-      <nav className='sticky left-0 right-0 top-0 z-[140] text-white w-full navbar'>
+      <nav className='sticky left-0 right-0 top-0 z-[250] text-white w-full navbar'>
         {/* Logo and Search Part */}
         <div
-          className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between relative z-[140]"
+          className="py-4 bg-[#000000] global-padding border-b border-gray-600 w-full flex items-center justify-between relative z-[250]"
           onMouseEnter={() => handleShow(null)}
         >
-          <div className="flex items-center gap-2 relative z-[140]">
+          <div className="flex items-center gap-2 relative z-[250]">
             {/* Menu */}
             <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
 

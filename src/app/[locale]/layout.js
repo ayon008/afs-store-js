@@ -15,6 +15,7 @@ import CrispProvider from "@/Shared/Provider/CrispProvider";
 import { getCurrency, refreshCookies } from "../actions/Woo-Coommerce/getWooCommerce";
 import ScrollToTop from "@/Shared/ScrollToTop/ScrollToTop";
 import RouteLoadingBar from "@/Shared/Loader/RouteLoadingBar";
+import NavigationShimmer from "@/Shared/Loader/NavigationShimmer";
 import { ALL_COUNTRIES } from "@/lib/countries-config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
@@ -143,6 +144,7 @@ export default async function RootLayout({ children, params }) {
                 <CartProvider>
                   <ScrollToTop />
                   <RouteLoadingBar />
+                  <NavigationShimmer />
                   <div>
                     <Navbar NAV_LINKS={NAV_LINKS} />
                     {children}

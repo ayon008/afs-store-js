@@ -420,6 +420,7 @@ export default async function middleware(req) {
         }
     }
 
+
     // Check if product slug matches the current locale, if not, translate it
     // This handles cases like /fr/produit/wing-pump (English slug in French URL)
     let productMatchForTranslation = pathWithoutLocale.match(/^\/(?:product|produit)\/(.+)$/);

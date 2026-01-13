@@ -12,6 +12,15 @@ export function getProductRoutePrefix(locale) {
 }
 
 /**
+ * Get the category route prefix based on locale (without locale prefix, next-intl will add it)
+ * @param {string} locale - The locale ('en' or 'fr')
+ * @returns {string} The route prefix ('/product-category/' or '/categorie-produit/')
+ */
+export function getCategoryRoutePrefix(locale) {
+    return locale === 'fr' ? '/categorie-produit/' : '/product-category/';
+}
+
+/**
  * Get the full product route URL (without locale prefix, next-intl will add it automatically)
  * @param {string} locale - The locale ('en' or 'fr')
  * @param {string} slug - The product slug
@@ -190,7 +199,8 @@ export async function getTranslatedCategoryRoute(identifier, targetLocale, curre
     const translation = await getTranslatedCategorySlug(identifier, targetLocale, currentLocale);
     
     if (translation.exists && translation.slug) {
-        return `/product-category/${translation.slug}`;
+        const prefix = getCategoryRoutePrefix(targetLocale);
+        return `${prefix}${translation.slug}`;
     }
     
     // Return home page for target locale if translation doesn't exist
@@ -205,7 +215,8 @@ export async function getTranslatedCategoryRoute(identifier, targetLocale, curre
  */
 export async function getTranslatedCategoryPath(slugArray, targetLocale) {
     if (!slugArray || slugArray.length === 0) {
-        return '/product-category';
+        const prefix = getCategoryRoutePrefix(targetLocale);
+        return prefix.slice(0, -1); // Remove trailing slash
     }
 
     // Translate each segment
@@ -217,11 +228,13 @@ export async function getTranslatedCategoryPath(slugArray, targetLocale) {
             const slugParts = translation.slug.split('/');
             translatedSegments.push(slugParts[slugParts.length - 1]);
         } else {
-            // If translation fails, return original path
-            return `/product-category/${slugArray.join('/')}`;
+            // If translation fails, return original path with correct prefix
+            const prefix = getCategoryRoutePrefix(targetLocale);
+            return `${prefix}${slugArray.join('/')}`;
         }
     }
 
-    return `/product-category/${translatedSegments.join('/')}`;
+    const prefix = getCategoryRoutePrefix(targetLocale);
+    return `${prefix}${translatedSegments.join('/')}`;
 }
 

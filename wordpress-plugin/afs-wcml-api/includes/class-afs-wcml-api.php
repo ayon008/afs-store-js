@@ -790,11 +790,16 @@ class AFS_WCML_REST_API {
 
 		// Validate target language.
 		if ( ! in_array( $target_lang, array( 'en', 'fr' ), true ) ) {
-			return new WP_Error(
-				'rest_invalid_param',
-				__( 'Langue cible invalide. Utilisez "en" ou "fr".', 'afs-wcml-api' ),
-				array( 'status' => 400 )
+			$error_response = array(
+				'slug'        => null,
+				'exists'      => false,
+				'product_id'  => null,
+				'target_lang' => $target_lang,
+				'message'     => __( 'Langue cible invalide. Utilisez "en" ou "fr".', 'afs-wcml-api' ),
 			);
+			$response = new WP_REST_Response( $error_response, 200 );
+			$response->header( 'Cache-Control', 'public, max-age=300' );
+			return $response;
 		}
 
 		// Build cache key
@@ -1036,12 +1041,38 @@ class AFS_WCML_REST_API {
 			) );
 		}
 
-		// If category is already in target language, return it directly
+		// If category is already in target language, return it directly (with hierarchical path if needed)
 		if ( $source_lang === $target_lang ) {
 			$term = get_term( $term_id, 'product_cat' );
 			if ( $term && ! is_wp_error( $term ) ) {
+				$response_slug = $term->slug;
+				
+				// If original slug was hierarchical, build the hierarchical path
+				if ( $slug && strpos( $slug, '/' ) !== false ) {
+					$current_term = $term;
+					$path_terms = array( $current_term );
+					
+					// Walk up the hierarchy
+					while ( $current_term->parent ) {
+						$parent_term = get_term( $current_term->parent, 'product_cat' );
+						if ( $parent_term && ! is_wp_error( $parent_term ) ) {
+							array_unshift( $path_terms, $parent_term );
+							$current_term = $parent_term;
+						} else {
+							break;
+						}
+					}
+					
+					// Build path from terms
+					$translated_parts = array_map( function( $t ) {
+						return $t->slug;
+					}, $path_terms );
+					
+					$response_slug = implode( '/', $translated_parts );
+				}
+				
 				$response_data = array(
-					'slug'        => $term->slug,
+					'slug'        => $response_slug,
 					'exists'      => true,
 					'term_id'     => $term_id,
 					'target_lang' => $target_lang,

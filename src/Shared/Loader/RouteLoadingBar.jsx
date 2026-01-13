@@ -12,19 +12,41 @@ export default function RouteLoadingBar() {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        // Détecter les clics sur les liens de navigation
+        // Détecter les clics sur les liens de navigation (y compris dans le footer)
         const handleLinkClick = (e) => {
             const target = e.target.closest('a[href]');
             if (target && target.href) {
                 const href = target.getAttribute('href');
-                // Ignorer les liens externes, ancres et mailto
+                const currentPath = window.location.pathname;
+                
+                // Ignorer les liens externes, ancres, mailto et tel
                 if (href && 
                     !href.startsWith('http') && 
                     !href.startsWith('#') && 
                     !href.startsWith('mailto:') &&
                     !href.startsWith('tel:')) {
-                    setIsLoading(true);
-                    setProgress(0);
+                    
+                    try {
+                        // Essayer de créer une URL complète
+                        const targetUrl = new URL(target.href, window.location.origin);
+                        const targetPath = targetUrl.pathname;
+                        
+                        // Vérifier si c'est une navigation vers une nouvelle page
+                        if (targetPath !== currentPath) {
+                            setIsLoading(true);
+                            setProgress(0);
+                            
+                            // Déclencher un événement pour forcer l'affichage du shimmer
+                            window.dispatchEvent(new CustomEvent('navigation:start'));
+                        }
+                    } catch (error) {
+                        // Si l'URL est relative, comparer directement
+                        if (href !== currentPath && href.startsWith('/')) {
+                            setIsLoading(true);
+                            setProgress(0);
+                            window.dispatchEvent(new CustomEvent('navigation:start'));
+                        }
+                    }
                 }
             }
         };
@@ -41,6 +63,7 @@ export default function RouteLoadingBar() {
                     button.classList.contains('navigation-button')) {
                     setIsLoading(true);
                     setProgress(0);
+                    window.dispatchEvent(new CustomEvent('navigation:start'));
                 }
             }
         };
@@ -51,6 +74,7 @@ export default function RouteLoadingBar() {
             setProgress(0);
         };
 
+        // Utiliser capture phase pour attraper tous les clics, même dans le footer
         document.addEventListener('click', handleLinkClick, true);
         document.addEventListener('click', handleButtonClick, true);
         window.addEventListener('navigation:start', handleNavigationStart);
@@ -60,7 +84,7 @@ export default function RouteLoadingBar() {
             document.removeEventListener('click', handleButtonClick, true);
             window.removeEventListener('navigation:start', handleNavigationStart);
         };
-    }, []);
+    }, [pathname]);
 
     useEffect(() => {
         if (isLoading) {

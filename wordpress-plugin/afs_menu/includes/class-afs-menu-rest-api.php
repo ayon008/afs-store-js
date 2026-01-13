@@ -436,9 +436,26 @@ class AFS_Menu_REST_API {
         // Handle product URLs - convert /produit/slug or /product/slug to /product/slug
         $path = preg_replace( '#^/produit/#', '/product/', $path );
 
-        // Handle category URLs - convert /categorie-produit/slug to /product-category/slug
-        $path = preg_replace( '#^/categorie-produit/#', '/product-category/', $path );
-        $path = preg_replace( '#^/product-category/#', '/product-category/', $path );
+        // Handle category URLs - preserve the original prefix and translate slugs
+        $category_prefix = '/product-category/';
+        $is_category_url = false;
+        
+        // Check if it's a category URL (either /product-category/ or /categorie-produit/)
+        if ( preg_match( '#^/(?:product-category|categorie-produit)/(.+)$#', $path, $matches ) ) {
+            $is_category_url = true;
+            $category_path = $matches[1];
+            $translated_path = $this->translate_category_path( $category_path, $lang );
+            
+            if ( $translated_path ) {
+                // Use the correct prefix based on language
+                if ( $lang === 'fr' ) {
+                    $category_prefix = '/categorie-produit/';
+                } else {
+                    $category_prefix = '/product-category/';
+                }
+                $path = $category_prefix . $translated_path;
+            }
+        }
 
         // Add language prefix for non-English
         if ( $lang === 'fr' && $path !== '/' ) {
@@ -446,6 +463,129 @@ class AFS_Menu_REST_API {
         }
 
         return $path;
+    }
+
+    /**
+     * Translate category path (slug) to target language
+     *
+     * @param string $category_path Category path (e.g., "foiling/wing-foil" or "wing-foil")
+     * @param string $target_lang Target language code (en, fr)
+     * @return string|null Translated category path or null if translation fails
+     */
+    private function translate_category_path( $category_path, $target_lang ) {
+        if ( empty( $category_path ) || ! function_exists( 'get_term_by' ) ) {
+            return $category_path;
+        }
+
+        // Handle hierarchical paths (e.g., "foiling/wing-foil")
+        $path_parts = explode( '/', $category_path );
+        $last_slug = end( $path_parts );
+
+        // Find the category by slug
+        $term = get_term_by( 'slug', $last_slug, 'product_cat' );
+        
+        if ( ! $term || is_wp_error( $term ) ) {
+            // Fallback: try WP_Term_Query which respects WPML filters
+            $term_query = new WP_Term_Query( array(
+                'taxonomy'   => 'product_cat',
+                'slug'       => $last_slug,
+                'hide_empty' => false,
+                'number'     => 1,
+            ) );
+            
+            if ( ! empty( $term_query->terms ) ) {
+                $term = $term_query->terms[0];
+            }
+        }
+
+        if ( ! $term || is_wp_error( $term ) ) {
+            return $category_path; // Return original if not found
+        }
+
+        // Get translated term ID using WPML
+        $translated_term_id = $term->term_id;
+        if ( function_exists( 'apply_filters' ) ) {
+            $translated_term_id = apply_filters( 'wpml_object_id', $term->term_id, 'product_cat', false, $target_lang );
+        }
+
+        // If no translation found, return original
+        if ( ! $translated_term_id || $translated_term_id === $term->term_id ) {
+            // Check if already in target language
+            $source_lang = null;
+            if ( function_exists( 'apply_filters' ) ) {
+                $source_lang = apply_filters( 'wpml_element_language_code', null, array(
+                    'element_id'   => $term->term_id,
+                    'element_type' => 'tax_product_cat'
+                ) );
+            }
+            
+            if ( $source_lang === $target_lang ) {
+                // Already in target language, build hierarchical path if needed
+                return $this->build_category_path( $term->term_id, $target_lang );
+            }
+            
+            return $category_path; // No translation available
+        }
+
+        // Get translated term and build path
+        $translated_term = get_term( $translated_term_id, 'product_cat' );
+        if ( ! $translated_term || is_wp_error( $translated_term ) ) {
+            return $category_path;
+        }
+
+        // Build hierarchical path if original was hierarchical
+        if ( count( $path_parts ) > 1 ) {
+            return $this->build_category_path( $translated_term_id, $target_lang );
+        }
+
+        return $translated_term->slug;
+    }
+
+    /**
+     * Build hierarchical category path from term ID
+     *
+     * @param int    $term_id Category term ID
+     * @param string $lang Language code
+     * @return string Category path (e.g., "foiling/wing-foil")
+     */
+    private function build_category_path( $term_id, $lang ) {
+        $term = get_term( $term_id, 'product_cat' );
+        if ( ! $term || is_wp_error( $term ) ) {
+            return '';
+        }
+
+        $path_terms = array( $term );
+        $current_term = $term;
+
+        // Walk up the hierarchy
+        while ( $current_term->parent ) {
+            $parent_term = get_term( $current_term->parent, 'product_cat' );
+            if ( $parent_term && ! is_wp_error( $parent_term ) ) {
+                // Get translated parent if WPML is active
+                if ( function_exists( 'apply_filters' ) ) {
+                    $translated_parent_id = apply_filters( 'wpml_object_id', $parent_term->term_id, 'product_cat', false, $lang );
+                    if ( $translated_parent_id ) {
+                        $parent_term = get_term( $translated_parent_id, 'product_cat' );
+                    }
+                }
+                
+                if ( $parent_term && ! is_wp_error( $parent_term ) ) {
+                    array_unshift( $path_terms, $parent_term );
+                    $current_term = $parent_term;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        // Build path from terms
+        $path_parts = array_map( function( $t ) {
+            return $t->slug;
+        }, $path_terms );
+
+        return implode( '/', $path_parts );
     }
 
     /**
