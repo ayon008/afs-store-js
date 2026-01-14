@@ -16,7 +16,7 @@ export const getDealers = async (d) => {
         const perPage = 100;
 
         for (let page = 1; ; page++) {
-            const url = `${baseUrl}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed&lang=${locale}`
+            const url = `${baseUrl}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed&lang=${locale}&orderby=date&order=asc`
             const response = await fetch(
                 url,
                 {
