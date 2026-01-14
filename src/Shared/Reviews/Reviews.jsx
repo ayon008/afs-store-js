@@ -57,7 +57,7 @@ const Reviews = ({ acf }) => {
 
     return (
         <div>
-            <h2 className='text-[28px] leading-[28px] font-bold mb-6'>{t("reviews")}</h2>
+            <h2 className='text-[28px] leading-[28px] font-bold mb-6'>Reviews</h2>
             <div className="max-w-[1080px] rounded-sm overflow-hidden">
                 <Swiper
                     modules={[Navigation, Pagination]}
@@ -189,7 +189,7 @@ const Reviews = ({ acf }) => {
                     >
                         <ArrowRight className='w-4 h-4' />
                     </button>
-                    <div className="lg:w-[92%] w-[80%] mx-auto h-full flex items-center gap-2 mt-4">
+                    <div className={`${thumbnail_tow ? 'lg:w-[92%] w-[80%]' : 'w-full'} mx-auto h-full flex items-center gap-2 mt-4`}>
                         <div
                             className="rounded-[4px] overflow-hidden relative cursor-pointer transition-opacity duration-200"
                             style={{ opacity: activeIndex === 0 ? 1 : 0.5 }}

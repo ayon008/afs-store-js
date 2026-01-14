@@ -5,8 +5,7 @@ import { Link } from '@/i18n/navigation';
 import getAmbessedor from '@/app/actions/WC/getAmbessadurs';
 import getCountries from '@/app/actions/WC/getCountries';
 import { getTranslations } from 'next-intl/server';
-import { redirect } from 'next/navigation';
-import NotFound from '@/Shared/NotFound/404';
+import { allAmbassadors } from '@/app/actions/WC/getAllAmbessador';
 
 const BreadCums = async ({ locale }) => {
     const t = await getTranslations("breadcum", locale);
@@ -23,6 +22,7 @@ const BreadCums = async ({ locale }) => {
 
 const page = async ({ locale }) => {
     const categories = await getAmbessedor();
+    const data = await allAmbassadors();
     const countries = await getCountries();
     const t = await getTranslations("ambassadors", locale);
     return (
@@ -33,7 +33,7 @@ const page = async ({ locale }) => {
             <div className='lg:my-[80px] my-[40px]'>
                 <h1 className='global-h1 text-center'>{t("afs")}<span className='global-blue'>{t("team")}</span></h1>
             </div>
-            <Ambassedor categories={categories} countries={countries} />
+            <Ambassedor categories={categories} countries={countries} data={data} />
         </div>
     );
 };

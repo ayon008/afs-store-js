@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React from 'react';
 import Dealers from './Dealer';
 import { getTranslations } from 'next-intl/server';
+import { getDealers, getDealerType } from '@/app/actions/WC/getDealers';
 
 
 export const metadata = {
@@ -28,7 +29,9 @@ const BreadCums = async () => {
 
 
 const page = async () => {
+    const data = await getDealers();
     const t = await getTranslations("map");
+    const categories = await getDealerType();
     return (
         <div className='bg-white relative pt-4'>
             <div className='global-padding'>
@@ -39,7 +42,7 @@ const page = async () => {
                 </div>
             </div>
             <div className="px-5">
-                <Dealers />
+                <Dealers data={data} categories={categories} />
             </div>
         </div>
     );

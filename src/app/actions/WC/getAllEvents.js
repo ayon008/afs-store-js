@@ -57,8 +57,7 @@ export const getAllEvents = async (selectedId) => {
     try {
         // We loop for 1 → 100 pages max (WP won’t go beyond)
         for (let page = 1; page <= 100; page++) {
-            const url = selectedId ? `${BASE}/wp-json/wp/v2/event?destination=${selectedId}&lang=${locale}&_embed&per_page=${perPage}&page=${page}` : `${BASE}/wp-json/wp/v2/event?per_page=${perPage}&page=${page}&_embed&lang=${locale}`;
-
+            const url = `${BASE}/wp-json/wp/v2/event?per_page=${perPage}&page=${page}&_embed&lang=${locale}`;
             const res = await fetch(
                 url,
                 {

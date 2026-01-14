@@ -2,6 +2,7 @@ import Events from '@/Shared/Afs-Events/Events';
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { getAllEvents } from '@/app/actions/WC/getAllEvents';
 
 export const metadata = {
     title: 'AFS EVENTS - FRANCE US UK EU - AFS',
@@ -29,9 +30,10 @@ const BreadCums = async () => {
 
 const page = async () => {
     const t = await getTranslations("afs-event");
+    const data = await getAllEvents();
     return (
         <div className='bg-[#111111] text-white'>
-            <div className='global-padding relative pt-4 text-white'>
+            <div className='global-padding relative pt-4 text-white max-w-[1920px] mx-auto'>
                 <BreadCums />
                 <div className='lg:my-[80px] my-[40px]'>
                     <h1 className='global-h1 text-center relative'>AFS Events</h1>
@@ -39,7 +41,7 @@ const page = async () => {
                 </div>
             </div>
             <div className='lg:pl-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]'>
-                <Events />
+                <Events data={data} />
             </div>
         </div>
     );

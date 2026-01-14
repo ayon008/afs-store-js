@@ -546,7 +546,7 @@ const ProductDetails = ({ data, variations }) => {
             // Créer un nouveau div pour le widget
             const widgetDiv = document.createElement('div');
             widgetDiv.className = 'calendly-inline-widget';
-            widgetDiv.setAttribute('data-url', 'https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs');
+            widgetDiv.setAttribute('data-url', 'https://calendly.com/antonin-raffarin/besoin-d-etre-conseille-clone');
             widgetDiv.style.minWidth = '320px';
             widgetDiv.style.height = '100%';
             calendlyContainerRef.current.appendChild(widgetDiv);
@@ -554,7 +554,7 @@ const ProductDetails = ({ data, variations }) => {
             // Initialiser le widget Calendly
             try {
                 window.Calendly.initInlineWidget({
-                    url: 'https://calendly.com/antonin-raffarin/passage-a-l-usine-foil-co-afs',
+                    url: 'https://calendly.com/antonin-raffarin/besoin-d-etre-conseille-clone',
                     parentElement: widgetDiv
                 });
                 calendlyWidget = widgetDiv;

@@ -70,16 +70,16 @@ const Navbar = ({ NAV_LINKS }) => {
       // First visit: determine currency based on location and country from country-config.js
       const cookieLocation = Cookies.get('location');
       const cookieCountry = Cookies.get('selected_country');
-      
+
       let initialCurrency = 'euro'; // Default fallback
-      
+
       if (cookieLocation || cookieCountry) {
         // Try to get country from cookie
         let country = null;
         if (cookieCountry) {
           country = getCountryByCode(cookieCountry);
         }
-        
+
         // If no country from cookie, determine from location
         if (!country && cookieLocation) {
           if (cookieLocation === WAREHOUSES.EUROPE) {
@@ -90,7 +90,7 @@ const Navbar = ({ NAV_LINKS }) => {
             country = getCountryByCode('US');
           }
         }
-        
+
         // Use country currency if found
         if (country && country.currencyKey) {
           initialCurrency = country.currencyKey;
@@ -110,7 +110,7 @@ const Navbar = ({ NAV_LINKS }) => {
             ? 'gbp'
             : 'usd';
       }
-      
+
       setSelectedCurrency(initialCurrency);
       // Set currency cookie for first visit
       Cookies.set('currency', initialCurrency, { expires: 365, sameSite: 'Lax', path: '/' });
@@ -286,7 +286,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
       // Handle category pages with slug translation
       const categoryMatch = fullPathname?.match(/\/product-category\/(.+)/) || pathname?.match(/\/product-category\/(.+)/);
-      
+
       if (categoryMatch) {
         // For category pages, use ?lang= parameter to let middleware handle the translation
         // Use the full pathname from window.location to preserve locale prefix
@@ -513,15 +513,7 @@ const Navbar = ({ NAV_LINKS }) => {
 
           <div className="flex items-center gap-2">
             {/* Search Button */}
-            <Search onClick={() => setIsSearchOpen(true)} className="w-6 h-6 md:hidden block" />
-            <div className="relative mr-4 hidden md:block">
-              <input
-                onClick={() => setIsSearchOpen(true)}
-                className="hidden md:flex items-center bg-[#3d3d3d] rounded-full h-9 w-64 pl-10 pr-3 placeholder:text-white placeholder:text-sm placeholder:font-semibold"
-                placeholder={t("search")}
-              />
-              <Search className="w-6 h-6 mr-2 text-white opacity-90 absolute -translate-y-1/2 left-3 top-1/2" />
-            </div>
+            <Search onClick={() => setIsSearchOpen(true)} className="w-6 h-6 block cursor-pointer mr-1" strokeWidth={1.5} />
 
             {/* Profile */}
 
@@ -869,10 +861,12 @@ const Navbar = ({ NAV_LINKS }) => {
                               <Link onClick={handleCloseDesktopMenu} target="_blank" href="https://wa.me/33782296241">WhatsApp</Link>
                             </li>
                             <li className="cursor-pointer">
-                              {t("Book a call with an AFS expert")}
+                              <Link onClick={handleCloseDesktopMenu} target="_blank" href="https://calendly.com/antonin-raffarin/besoin-d-etre-conseille-clone">
+                                {t("Book a call with an AFS expert")}
+                              </Link>
                             </li>
                             <li className="cursor-pointer">
-                              {t("Come visit us")}
+                              <Link onClick={handleCloseDesktopMenu} href="/contact-us">{t("Come visit us")}</Link>
                             </li>
                             <li className="cursor-pointer">
                               <Link onClick={handleCloseDesktopMenu} href="/afs-events">{t("Events")}</Link>

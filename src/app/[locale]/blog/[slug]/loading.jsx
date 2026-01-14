@@ -10,7 +10,7 @@ const BlogPostShimmer = () => {
                     100% { transform: translateX(100%); }
                 }
             `}</style>
-            <div className="w-full relative global-margin py-8">
+            <div className="w-full relative global-margin py-8 global-padding">
                 <div className="space-y-6">
                     {/* Breadcrumb shimmer */}
                     <div className="w-1/2 h-4 bg-gray-200 rounded relative overflow-hidden">

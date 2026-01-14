@@ -2,7 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 
-export const getDealers = async (selectedId) => {
+export const getDealers = async (d) => {
     const locale = await getLocale();
     try {
         const baseUrl = `${process.env.WP_BASE_URL}`;
@@ -16,10 +16,7 @@ export const getDealers = async (selectedId) => {
         const perPage = 100;
 
         for (let page = 1; ; page++) {
-            const url = selectedId
-                ? `${baseUrl}/wp-json/wp/v2/dealer?_embed&afs-dealers-type=${selectedId}?per_page=${perPage}&page=${page}&lang=${locale}`
-                : `${baseUrl}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed&lang=${locale}`;
-
+            const url = `${baseUrl}/wp-json/wp/v2/dealer?per_page=${perPage}&page=${page}&_embed&lang=${locale}`
             const response = await fetch(
                 url,
                 {

@@ -74,7 +74,7 @@ const Sec1 = ({ categories, activeTab, setActiveTab, countries, country, setCoun
       p-[10px] font-bold text-[15px] leading-[20px]
       bg-[#1d98ff] text-white
       hover:bg-[#1180e0] transition-colors
-      focus:outline-none rounded-[4px]
+      focus:outline-none rounded-[4px] text-left 
     `}
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >

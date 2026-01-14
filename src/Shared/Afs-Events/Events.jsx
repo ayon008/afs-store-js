@@ -4,11 +4,9 @@ import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import EventDropDown from './EventDropDown';
-import { getAllEvents } from '@/app/actions/WC/getAllEvents';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
 
-const Events = () => {
+const Events = ({ data }) => {
 
     const t = useTranslations("afs-event");
 
@@ -17,11 +15,19 @@ const Events = () => {
     // const [data, setData] = useState([]);
     const [shop_name, setShopName] = useState("");
     const [selectedShop, setSelectedShop] = useState(null);
+    const [filterData, setFilterData] = useState(data || []);
 
     const center = {
         lat: 43.2902432365116,
         lng: 5.48532171164206
     }
+
+
+
+    useEffect(() => {
+        const filter = selectedId ? data.filter(item => item?.destination.includes(selectedId)) : data;
+        setFilterData(filter);
+    }, [selectedId, data]);
 
     const mapStyle = [
         {
@@ -66,10 +72,6 @@ const Events = () => {
         }
     ];
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['events', selectedId],
-        queryFn: async () => await getAllEvents(selectedId),
-    })
 
     const containerStyle = {
         width: '100%',
@@ -82,7 +84,7 @@ const Events = () => {
 
     if (!isLoaded) return <p>Loading map...</p>;
 
-    const locations = data?.map((singleData, i) => ({
+    const locations = filterData?.map((singleData, i) => ({
         id: singleData?.id ?? i,
         lat: parseFloat(singleData?.acf?.latitude),
         lng: parseFloat(singleData?.acf?.longitude),
@@ -131,6 +133,10 @@ const Events = () => {
 
     }
 
+
+    console.log(data, 'data');
+
+
     const handleClick = (id, name, lat, lng) => {
         // Parse incoming coords to float and add guards.
         const latNum = parseFloat(lat);
@@ -159,7 +165,7 @@ const Events = () => {
 
     return (
         <div className='max-w-[1920px] mx-auto'>
-            <div className='flex items-center lg:flex-row flex-col lg:h-dvh lg:max-h-[746px] h-[1020px] gap-4'>
+            <div className='flex items-center lg:flex-row flex-col lg:h-[calc(100vh-139px)] h-[1020px] gap-4'>
                 <div className='lg:w-1/3 lg:h-full w-full overflow-hidden lg:px-0 px-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]'>
                     <EventDropDown selectedId={selectedId} setSelectedId={setSelectedId} />
                     <h3 className='lg:text-[50px] lg:leading-[55px] text-[32px] leading-[32px] text-white font-bold mt-4 mb-6'>
@@ -167,7 +173,7 @@ const Events = () => {
                     </h3>
                     <div className='overflow-y-scroll h-[calc(520px-150px)] lg:h-[calc(100%-195px)] 2xl:h-[calc(100%-140px)] popup-scroll-bar-1'>
                         {
-                            data?.map((singleData, i) => {
+                            filterData?.map((singleData, i) => {
                                 const idKey = singleData?.id ?? i;
                                 const event = singleData?.acf;
                                 const event_name = event?.event_name;

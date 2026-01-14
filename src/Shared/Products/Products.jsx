@@ -51,7 +51,6 @@ const Products = ({ id, childCategories }) => {
         }
     }, [minPrice, maxPrice]);
 
-
     const filteredProducts = useMemo(() => {
         if (!allProductsData) return [];
 
@@ -130,7 +129,7 @@ const Products = ({ id, childCategories }) => {
                         </div>
                         {
                             isLoading ? <PriceFilterShimmer /> : <>
-                                <div>
+                                <div className='pl-1'>
                                     <label className='font-semibold text-base leading-[100%] text-black uppercase' htmlFor="vol">{t("price")}</label>
                                     <RangeSlider
                                         min={minPrice}

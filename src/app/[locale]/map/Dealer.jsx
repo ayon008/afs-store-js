@@ -2,11 +2,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import Image from 'next/image';
-import { getDealers } from '@/app/actions/WC/getDealers';
-import DropDown from '@/Shared/DropDown/DropDown';
 import { useTranslations } from 'next-intl';
 
-const Dealers = () => {
+const Dealers = ({ data, categories }) => {
 
     const mapRef = useRef(null);
     // Keep track if we've already set the initial center to avoid repeated adjustments
@@ -16,6 +14,22 @@ const Dealers = () => {
     const [shop_name, setShopName] = useState("");
     const [selectedId, setSelectedId] = useState(null);
     const [selectedShop, setSelectedShop] = useState("");
+    const [filterData, setFilterData] = useState(data || []);
+    const schoolLength = data?.filter(item => item?.["afs-dealers-type"]?.includes(1642)).length || 0;
+    const dealerLength = data?.filter(item => item?.["afs-dealers-type"]?.includes(1604)).length || 0;
+    const companyLength = data?.filter(item => item?.["afs-dealers-type"]?.includes(2673)).length || 0;
+    const advancedLength = data?.filter(item => item?.["afs-dealers-type"]?.includes(1641)).length || 0;
+
+    useEffect(() => {
+        const filtered = data?.filter(item =>
+            item?.["afs-dealers-type"]?.includes(selectedId)
+        );
+        if (selectedId) {
+            setFilterData(filtered);
+        } else {
+            setFilterData(data);
+        }
+    }, [selectedId, data]);
 
     const mapStyle = [
         {
@@ -60,16 +74,6 @@ const Dealers = () => {
         }
     ];
 
-    const [data, setData] = useState([]);
-
-    useEffect(() => {
-        const load = async () => {
-            const data = await getDealers(selectedId);
-            setData(data);
-        }
-        load();
-    }, [selectedId]);
-
 
     const center = {
         lat: 43.2902432365116,
@@ -87,7 +91,7 @@ const Dealers = () => {
 
     if (!isLoaded) return <p>Loading map...</p>;
 
-    const locations = data?.map((singleData, i) => ({
+    const locations = filterData?.map((singleData, i) => ({
         id: i, lat: parseFloat(singleData?.acf?.latitude), lng: parseFloat(singleData?.acf?.longitude), category: singleData?.afs_dealers_type_names[0], shop_name: singleData?.acf?.shop_name
     }));
 
@@ -149,7 +153,6 @@ const Dealers = () => {
         // Parse incoming coords to float and add guards.
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
-        console.log('handleClick:', name, latNum, lngNum, 'mapRef current:', !!mapRef.current);
         if (Number.isFinite(latNum) && Number.isFinite(lngNum) && mapRef.current) {
             setSelectedShop(name);
             // pan to location then increase zoom a bit after a small delay for smoother UX
@@ -165,17 +168,26 @@ const Dealers = () => {
         }
     }
 
-
-
-
     return (
         <div>
-            <div className='mb-10'>
-                <DropDown selectedId={selectedId} setSelectedId={setSelectedId} />
+            <div className='lg:mb-20 mb-10 flex items-center justify-center lg:gap-10 gap-5 flex-wrap'>
+                {/* <DropDown selectedId={selectedId} setSelectedId={setSelectedId} /> */}
+                <p onClick={() => setSelectedId(null)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors text-center ${!selectedId ? 'text-black' : "text-[#999]"}`}>ALL <sup>({data?.length})</sup></p>
+                {categories && categories.length > 0 && categories?.map((s) => {
+                    return (
+                        <p onClick={() => setSelectedId(s?.id)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors text-center ${selectedId === s?.id ? 'text-black!' : "text-[#999]"}`} key={s?.id}>{s?.name} <sup>(
+                            {
+                                s?.id === 1642 ? schoolLength :
+                                    s?.id === 1604 ? dealerLength :
+                                        s?.id === 2673 ? companyLength :
+                                            s?.id === 1641 ? advancedLength : 0
+                            })</sup></p>
+                    )
+                })}
             </div>
             {/* Map */}
-            <div className='rounded-[4px] overflow-hidden relative z-10'>
-                <div className='lg:h-dvh lg:max-h-[746px] overflow-hidden h-[520px]'>
+            <div className='rounded-[4px] overflow-hidden relative z-10 global-margin lg:mb-0!'>
+                <div className='lg:h-[calc(100vh-139px)] overflow-hidden h-[520px]'>
                     <GoogleMap
                         mapContainerStyle={containerStyle}
                         zoom={5}
@@ -230,13 +242,13 @@ const Dealers = () => {
                         })}
                     </GoogleMap>
                 </div>
-                <div className='z-20 lg:top-8 lg:left-4 lg:absolute lg:max-w-[385px] lg:mt-0 mt-10 w-full bg-transparent lg:h-[380px] h-[420px]'>
-                    <div className='w-full bg-black py-[12.5px] px-5 rounded-[4px]'>
+                <div className='z-20 lg:top-8 lg:left-4 lg:absolute lg:max-w-[385px] lg:mt-0 mt-10 w-full bg-transparent lg:h-[calc(100vh-250px)] h-[420px]'>
+                    <div className='w-full bg-black p-[10px] rounded-[4px]'>
                         <h3 className='font-bold text-white text-[28px]'>{t("Number of stores:")}</h3>
                     </div>
                     <div className='overflow-y-scroll h-full popup-scroll-bar-1 cursor-pointer'>
                         {
-                            data?.map((singleData, i) => {
+                            filterData?.map((singleData, i) => {
                                 const storeData = singleData?.acf;
                                 const name = storeData?.shop_name;
                                 const afs_dealers_type_names = singleData?.afs_dealers_type_names;
@@ -247,34 +259,36 @@ const Dealers = () => {
                                 const selectedLng = storeData?.longitude;
                                 return (
                                     <div key={i} onClick={() => handleClick(name, storeData?.latitude, storeData?.longitude)} onMouseLeave={() => setShopName("")} onMouseEnter={() => setShopName(name)} className='rounded-[4px] my-1 w-[99%] overflow-hidden'>
-                                        <div className={`bg-white pb-6 pt-5 px-5 transition-all duration-300 ${shop_name === name ? 'shadow-md scale-[1.01]' : ''} ${selectedShop === name ? "hidden" : "block"}`}>
+                                        <div className={`bg-[#F7F7F7] p-5 transition-all duration-300 ${shop_name === name ? 'shadow-md scale-[1.01]' : ''} ${selectedShop === name ? "hidden" : "block"}`}>
                                             <div className='flex items-center gap-2'>
                                                 {afs_dealers_type_names?.map((dealerType, i) => {
                                                     return (
-                                                        <div className='text-[#111111bf] text-sm border-[#111111bf] border w-fit px-1 rounded-[4px] uppercase' key={i}>
+                                                        <div className='text-[#111111bf] text-sm border-[#111111bf] border w-fit p-1 rounded-[4px] uppercase' key={i}>
                                                             {dealerType}
                                                         </div>
                                                     )
                                                 })}
                                             </div>
-                                            <p className='text-lg leading-[25px] font-bold mt-2 '>{name}</p>
+                                            <p className='text-lg leading-[25px] font-bold mt-2'>{name}</p>
                                         </div>
                                         {
                                             selectedShop === name &&
                                             <div onClick={() => setSelectedShop("")} className='bg-white'>
-                                                <Image src={image} alt={name} width={400} height={150} className='w-full h-[150px] object-cover' />
+                                                {image && <Image src={image} alt={name} width={400} height={320} className='aspect-[385/280] w-full object-cover rounded-sm' />}
                                                 <div className='p-5'>
-                                                    <div className='flex items-center gap-2'>
-                                                        {afs_dealers_type_names?.map((dealerType, i) => {
-                                                            return (
-                                                                <div className='text-[#111111bf] text-sm border-[#111111bf] border w-fit px-1 rounded-[4px] uppercase' key={i}>
-                                                                    {dealerType}
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                    <div className='my-3'>
+                                                    <div className='flex flex-col flex-wrap gap-2'>
+                                                        <div className='flex items-center gap-2'>
+                                                            {afs_dealers_type_names?.map((dealerType, i) => {
+                                                                return (
+                                                                    <div className='text-[#111111bf] text-sm border-[#111111bf] border w-fit px-1 rounded-[4px] uppercase' key={i}>
+                                                                        {dealerType}
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
                                                         <p className='text-lg leading-[25px] font-bold'>{name}</p>
+                                                    </div>
+                                                    <div className='my-3 space-y-1'>
                                                         <p className='text-lg text-[#111111bf]'>{shop_address}</p>
                                                         <p className='text-lg text-[#111111bf]'>+{phone_no}</p>
                                                     </div>
