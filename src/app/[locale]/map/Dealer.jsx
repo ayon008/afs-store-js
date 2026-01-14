@@ -286,11 +286,11 @@ const Dealers = ({ data, categories }) => {
                                                                 )
                                                             })}
                                                         </div>
-                                                        <p className='text-lg leading-[25px] font-bold'>{name}</p>
+                                                        <p className='text-lg leading-[25px] font-bold'>{name && name}</p>
                                                     </div>
                                                     <div className='my-3 space-y-1'>
-                                                        <p className='text-lg text-[#111111bf]'>{shop_address}</p>
-                                                        <p className='text-lg text-[#111111bf]'>+{phone_no}</p>
+                                                        {shop_address && <p className='text-lg text-[#111111bf]'>{shop_address}</p>}
+                                                        {phone_no && <p className='text-lg text-[#111111bf]'>+{phone_no}</p>}
                                                     </div>
                                                     <div className='flex items-center gap-1' onClick={() => openDirections(selectedLat, selectedLng)}>
                                                         <p className='text-[#1D98FF] text-lg font-semibold'>Instruction</p>
