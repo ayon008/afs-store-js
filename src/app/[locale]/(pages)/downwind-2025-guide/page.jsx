@@ -100,8 +100,7 @@ export default function Clinique() {
       <div
         className="global-margin"
         style={{
-          backgroundImage:
-            "url('https://afs-foiling.com/fr/wp-content/uploads/2024/02/bg_image-4.png')",
+          backgroundImage: `url(${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/bg_image-4.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -200,7 +199,7 @@ export default function Clinique() {
               {t("Generally")}
             </p>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2024/02/image-21.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/image-21.png`}
               alt="Foiling downwind"
               width={800}
               height={600}
@@ -217,14 +216,14 @@ export default function Clinique() {
               {t("For beginners")}
             </p>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2024/02/image-22.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/image-22.png`}
               alt="Foiling downwind"
               width={800}
               height={600}
               className="rounded-sm"
             />
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2024/02/image-23.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/image-23.png`}
               alt="Foiling downwind"
               width={800}
               height={600}

@@ -96,13 +96,13 @@ const Page = () => {
                 <div className="text-3xl font-bold mb-4 text-gray-900">Pratique :</div>
 
                 {[
-                    { id: "supfoil", value: "supfoil", label: "Sup Foil", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/02/afs-whitebird-scaled.jpeg" },
-                    { id: "wingfoil", value: "wingfoil", label: "Wing Foil", img: "https://afs-foiling.com/fr/wp-content/uploads/2023/11/afs-fire-scaled.jpg" },
-                    { id: "surffoil", value: "surffoil", label: "Surf Foil", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/03/background.png" },
-                    { id: "downwind", value: "downwind", label: "Downwind", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/02/afs-blackbird-v2.jpeg" },
-                    { id: "dockstart", value: "dockstart", label: "Dockstart", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Action-sk8-9.png" },
-                    { id: "wakefoil", value: "wakefoil", label: "Wakefoil", img: "https://afs-foiling.com/fr/wp-content/uploads/2023/10/Action-sk8-35.png" },
-                    { id: "windfoil", value: "windfoil", label: "Windfoil", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/09/AFS_Wind_Aile_S.jpg" }
+                    { id: "supfoil", value: "supfoil", label: "Sup Foil", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/afs-whitebird-scaled.jpeg` },
+                    { id: "wingfoil", value: "wingfoil", label: "Wing Foil", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/11/afs-fire-scaled.jpg` },
+                    { id: "surffoil", value: "surffoil", label: "Surf Foil", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/background.png` },
+                    { id: "downwind", value: "downwind", label: "Downwind", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/afs-blackbird-v2.jpeg` },
+                    { id: "dockstart", value: "dockstart", label: "Dockstart", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Action-sk8-9.png` },
+                    { id: "wakefoil", value: "wakefoil", label: "Wakefoil", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/10/Action-sk8-35.png` },
+                    { id: "windfoil", value: "windfoil", label: "Windfoil", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/09/AFS_Wind_Aile_S.jpg` }
                 ].map(option => (
                     <div key={option.id} className="flex items-center mb-4">
                         <Image
@@ -131,11 +131,11 @@ const Page = () => {
                 <div className="mb-8">
                     <div className="text-3xl font-bold mb-4 text-gray-900">Sous-Pratique Wing Foil :</div>
                     {[
-                        { id: "freestyle", value: "freestyle", label: "Freestyle", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/09/jump-afs.jpg" },
-                        { id: "wave", value: "wave", label: "Wave", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/01/Rectangle-22.png" },
-                        { id: "race", value: "race", label: "Race", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/06/diamond-V2-3.jpg" },
-                        { id: "freeride", value: "freeride", label: "Freeride", img: "https://afs-foiling.com/fr/wp-content/uploads/2023/10/cat-wing-foil-gwen.jpeg" },
-                        { id: "unknown", value: "unknown", label: "C'est quoi ces mots barbares ?", img: "https://afs-foiling.com/fr/wp-content/uploads/2024/12/depositphotos_163039262-stock-photo-outraged-woman-asking-what-the.webp" }
+                        { id: "freestyle", value: "freestyle", label: "Freestyle", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/09/jump-afs.jpg` },
+                        { id: "wave", value: "wave", label: "Wave", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/Rectangle-22.png` },
+                        { id: "race", value: "race", label: "Race", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/06/diamond-V2-3.jpg` },
+                        { id: "freeride", value: "freeride", label: "Freeride", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/10/cat-wing-foil-gwen.jpeg` },
+                        { id: "unknown", value: "unknown", label: "C'est quoi ces mots barbares ?", img: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/12/depositphotos_163039262-stock-photo-outraged-woman-asking-what-the.webp` }
                     ].map(option => (
                         <div key={option.id} className="flex items-center mb-4">
                             <Image

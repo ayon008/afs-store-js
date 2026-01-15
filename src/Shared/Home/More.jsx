@@ -13,7 +13,7 @@ export default function More() {
       <div className="flex md:flex-row flex-col gap-5 items-stretch justify-between h-[800px] md:h-[clamp(30rem,15.406rem+17.094vw,32.5rem)] w-full">
         <div
           style={{
-            backgroundImage: `url(${`https://afs-foiling.com/fr/wp-content/uploads/2025/06/1A4A82C8-D73A-4826-B627-E39C082F1173.jpg`})`,
+            backgroundImage: `url(${`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/1A4A82C8-D73A-4826-B627-E39C082F1173.jpg`})`,
           }}
           className="bg-cover bg-no-repeat bg-center w-full rounded-[4px] py-6 px-5 md:py-10 relative team-box group overflow-hidden h-1/2 md:h-full"
         >
@@ -31,7 +31,7 @@ export default function More() {
 
         <div
           style={{
-            backgroundImage: `url(${`https://afs-foiling.com/fr/wp-content/uploads/2025/06/MicrosoftTeams-.png`})`,
+            backgroundImage: `url(${`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/MicrosoftTeams-.png`})`,
           }}
           className="bg-cover bg-no-repeat bg-center w-full rounded-[4px] py-6 px-5 md:py-10 relative team-box group overflow-hidden h-1/2 md:h-full"
         >

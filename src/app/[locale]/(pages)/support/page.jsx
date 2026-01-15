@@ -1,10 +1,11 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useTranslations } from 'next-intl';
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 
-export default function AfsSupport({ locale }) {
-  const t = useTranslations("support");
+export default async function AfsSupport() {
+  const t = await getTranslations("support");
 
   return (
     <>
@@ -31,7 +32,7 @@ export default function AfsSupport({ locale }) {
         <meta property="og:type" content="website" />
         <meta
           property="og:image"
-          content="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
+          content={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}
         />
 
         {/* Twitter Preview */}
@@ -43,12 +44,12 @@ export default function AfsSupport({ locale }) {
         />
         <meta
           name="twitter:image"
-          content="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
+          content={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}
         />
       </Head>
       <div className="bg-[#F0F0F0] min-h-[calc(100vh - 80px)] global-margin pb-[40px]">
         <Image
-          src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/imgs.png"
+          src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}
           alt="AFS Support"
           loading="lazy"
           className="w-full h-auto object-cover sm:h-auto min-h-[150px] mb-[80px] md:mb-[120px]"
@@ -324,8 +325,8 @@ export default function AfsSupport({ locale }) {
             </li>
 
             <li>
-              <a
-                href="/demande-sav/"
+              <Link
+                href="/demande-sav"
                 className="iconBox flex flex-col items-center justify-center gap-[10px] px-[20px] pb-[20px] group"
               >
                 <svg
@@ -370,7 +371,7 @@ export default function AfsSupport({ locale }) {
                     </svg>
                   </icon>
                 </div>
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -397,7 +398,7 @@ export default function AfsSupport({ locale }) {
               className="absolute inset-0 z-0 blur-xs"
               style={{
                 backgroundImage:
-                  "url('https://afs-foiling.com/fr/wp-content/uploads/2024/03/afs-diamond-UL-2-1.png')",
+                  `url(${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/afs-diamond-UL-2-1.png)`,
                 backgroundPosition: "bottom",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
@@ -479,7 +480,7 @@ export default function AfsSupport({ locale }) {
               className="absolute inset-0 z-0 blur-xs"
               style={{
                 backgroundImage:
-                  "url('https://afs-foiling.com/fr/wp-content/uploads/2024/03/image-24-1.png')",
+                  `url(${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image-24-1.png)`,
                 backgroundPosition: "bottom",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
@@ -512,9 +513,9 @@ export default function AfsSupport({ locale }) {
               </p>
               <ul>
                 <li>
-                  <a href="/demande-sav/" className="global-blue font-semibold">
+                  <Link href="/demande-sav" className="global-blue font-semibold">
                     {t("contact-us")}
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -533,13 +534,13 @@ export default function AfsSupport({ locale }) {
         <div className="flex flex-wrap gap-x-[40px] gap-y-[40px] justify-between w-[1080px] max-w-[100%]">
           <div className="group w-[calc(50%-20px)] md:w-[250px]">
             <a
-              href="https://afs-foiling.com/fr/wp-content/uploads/2024/04/Guide-Hydrofoil.pdf"
+              href={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/04/Guide-Hydrofoil.pdf`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center gap-[10px]"
             >
               <Image
-                src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/image_wrap-6.png"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image_wrap-6.png`}
                 className="w-full md:w-[250px] h-auto object-contain"
                 alt="Guide PDF"
                 width={1920}
@@ -573,13 +574,13 @@ export default function AfsSupport({ locale }) {
 
           <div className="group w-[calc(50%-20px)] md:w-[250px]">
             <a
-              href="https://afs-foiling.com/fr/wp-content/uploads/2024/04/Guide-Board.pdf"
+              href={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/04/Guide-Board.pdf`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center gap-[10px]"
             >
               <Image
-                src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/image_wrap-6.png"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image_wrap-6.png`}
                 className="w-full md:w-[250px] h-auto object-contain"
                 alt="Guide PDF"
                 width={250}
@@ -612,13 +613,13 @@ export default function AfsSupport({ locale }) {
           </div>
           <div className="group w-[calc(50%-20px)] md:w-[250px]">
             <a
-              href="https://afs-foiling.com/fr/wp-content/uploads/2024/04/Guide-Wing.pdf"
+              href={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/04/Guide-Wing.pdf`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center gap-[10px]"
             >
               <Image
-                src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/image_wrap-8.png"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image_wrap-8.png`}
                 className="w-full md:w-[250px] h-auto object-contain"
                 alt="Guide PDF"
                 width={1920}
@@ -662,7 +663,7 @@ export default function AfsSupport({ locale }) {
           className="flex gap-[10px] h-[auto] md:h-[clamp(37.5rem,18.3649rem+25.9459vw,49.5rem)] bg-[#dbdbdb] rounded w-full justify-between items-center flex-col md:flex-row"
         >
           <Image
-            src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/image-32-1.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image-32-1.png`}
             className="flex-[1_0_0%] object-contain max-w-[100%] md:max-w-[33.33%]"
             alt="Guide PDF"
             width={1920}
@@ -690,7 +691,7 @@ export default function AfsSupport({ locale }) {
             </p>
             <a
               className="flex gap-[4px] justify-center items-center"
-              href="https://afs-foiling.com/fr/fr/reprise-materiel/"
+              href={`${process.env.NEXT_PUBLIC_BASE_URL}/reprise-materiel/`}
             >
               <span className="text-[clamp(0.875rem,0.8024rem+0.3226vw,1.125rem)] font-semibold global-blue">
                 {t("return")}
@@ -711,7 +712,7 @@ export default function AfsSupport({ locale }) {
             </a>
           </div>
           <Image
-            src="https://afs-foiling.com/fr/wp-content/uploads/2024/03/image-25-3.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/image-25-3.png`}
             className="flex-[1_0_0%] object-contain max-w-[100%] md:max-w-[33.33%]"
             alt="Guide PDF"
             width={1920}
@@ -759,7 +760,7 @@ export default function AfsSupport({ locale }) {
                 {t("consult")}{" "}
                 <a
                   className="global-blue"
-                  href="https://afs-foiling.com/fr/fr/votre-foil-fait-du-bruit-cela-en-devient-genant-il-existe-une-solution/"
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/votre-foil-fait-du-bruit-cela-en-devient-genant-il-existe-une-solution/`}
                 >
                   {t("article")}
                 </a>{" "}
@@ -880,7 +881,7 @@ export default function AfsSupport({ locale }) {
                 </ul>
                 <Image
                   class="py-2"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2023/10/resize-169627230787765529Capetoile.jpeg"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/10/resize-169627230787765529Capetoile.jpeg`}
                   alt="resize-169627230787765529Capetoile"
                   width={1920}
                   height={120}
@@ -893,7 +894,7 @@ export default function AfsSupport({ locale }) {
                 </ul>
                 <Image
                   class="py-2"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2023/10/Cap-rouge-e1696272591756.jpeg"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/10/Cap-rouge-e1696272591756.jpeg`}
                   alt="Red cap"
                   width={1920}
                   height={120}

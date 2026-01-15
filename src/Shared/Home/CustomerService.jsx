@@ -79,28 +79,28 @@ export default function CustomerService() {
     {
       title: "Best match stab",
       description: t("best"),
-      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/04/Alan-fedit-74-1-scaled.jpeg",
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/04/Alan-fedit-74-1-scaled.jpeg`,
     },
     {
       title: t("foil"),
       description: t("foil-des"),
-      url: "https://afs-foiling.com/fr/wp-content/uploads/2025/06/comparateur.png",
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/comparateur.png`,
     },
     {
       title: t("compare"),
       description: t("compare-des"),
-      url: "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png`,
     },
     {
       title: t("equip"),
       description: t("equip-des"),
-      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/11/Gwen-WB-d-lite-.jpg",
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/11/Gwen-WB-d-lite-.jpg`,
     },
     {
       title: t("need"),
       description:
         t("need-des"),
-      url: "https://afs-foiling.com/fr/wp-content/uploads/2024/10/00107169-bombannes-adultes-wingfoil.webp",
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/00107169-bombannes-adultes-wingfoil.webp`,
     },
   ];
 

@@ -35,11 +35,11 @@ export default function Hero() {
                 muted
                 playsInline
                 preload="auto"
-                poster="https://afs-foiling.com/fr/wp-content/uploads/2025/08/Rectangle-1-2.png"
+                poster={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/08/Rectangle-1-2.png`}
                 className="absolute top-0 left-0 w-full h-full object-cover"
             >
                 <source
-                    src="https://afs-foiling.com/fr/wp-content/uploads/2025/08/ADS_USINE_V2.mp4"
+                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/08/ADS_USINE_V2.mp4`}
                     type="video/mp4"
                 />
             </video>

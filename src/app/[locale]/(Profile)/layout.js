@@ -15,11 +15,11 @@ export const metadata = {
         type: 'website',
         title: 'My Account - AFS',
         description: 'Manage your account and personal information on AFS. Discover your orders, preferences and history.',
-        url: 'https://afs-foiling.com/mon-compte',
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/mon-compte`,
         siteName: 'AFS',
         images: [
             {
-                url: 'https://afs-foiling.com/wp-content/uploads/2024/02/Fly2023-7-1-1.png',
+                url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/Fly2023-7-1-1.png`,
                 width: 1920,
                 height: 1484,
                 alt: 'My Account AFS',
@@ -33,7 +33,7 @@ export const metadata = {
         card: 'summary_large_image',
         title: 'My Account - AFS',
         description: 'Manage your account and personal information on AFS. Discover your orders, preferences and history.',
-        images: ['https://afs-foiling.com/wp-content/uploads/2024/02/Fly2023-7-1-1.png'],
+        images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/Fly2023-7-1-1.png`],
         creator: '@upwork13',
     },
     other: {

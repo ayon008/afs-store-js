@@ -15,7 +15,7 @@
  * }
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://afs-foiling.com';
 
 /**
  * Generate hreflang alternates for SEO
@@ -75,7 +75,7 @@ export function createPageMetadata({
   pathname = '',
   title,
   description,
-  image = 'https://afs-foiling.com/wp-content/uploads/2024/02/Fly2023-7-1-1.png',
+  image = `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/02/Fly2023-7-1-1.png`,
   imageAlt = 'AFS Foiling',
 }) {
   const isEnglish = locale === 'en';

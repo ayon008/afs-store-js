@@ -1,11 +1,10 @@
-"use client";
+import { getTranslations } from "next-intl/server";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 
-const BreadCums = () => {
-  const b = useTranslations("breadcum");
+const BreadCums = async () => {
+  const b = await getTranslations("breadcum");
 
   return (
     <div className="mb-[20px] uppercase">
@@ -19,8 +18,8 @@ const BreadCums = () => {
   );
 };
 
-export default function MadeFr() {
-  const t = useTranslations("madeInFrance");
+export default async function MadeFr() {
+  const t = await getTranslations("madeInFrance");
   return (
     <>
       {/* HERO */}
@@ -31,11 +30,11 @@ export default function MadeFr() {
           <h1 className="global-h1 text-center py-[80px]">{t("title")}</h1>
           <div className="flex flex-col gap-[20] md:gap-[28px] global-margin">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/DSC07778.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/DSC07778.png`}
               alt="AFS Foiling visual"
               width={1200}
               height={800}
-              className="max-w-[960px] mx-auto h-auto mb-5 w-[100%]"
+              className="max-w-[960px] mx-auto h-auto mb-5 w-full"
             />
             <p className="text-[20px] font-bold text-center max-w-[780px] mx-auto leading-[1.3]">
               {t("Foil and Co")}
@@ -53,7 +52,7 @@ export default function MadeFr() {
         <div className="grid grid-cols-1 min-[460px]:grid-cols-2 md:grid-cols-3 gap-4 global-margin max-w-[1080px] mx-auto">
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/carbon-nanotube.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/carbon-nanotube.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -66,7 +65,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/circuit.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/circuit.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -79,7 +78,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/factory.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/factory.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -92,7 +91,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/Trace-1946.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/Trace-1946.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -103,7 +102,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/money-structure.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/money-structure.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -116,7 +115,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/path7.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/path7.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -129,7 +128,7 @@ export default function MadeFr() {
           </span>
           <span className="block bg-[#333] rounded-sm py-5 px-5 space-y-3">
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/Trace-1947.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/Trace-1947.png`}
               alt="Carbon nanotube"
               width={800}
               height={600}
@@ -199,11 +198,11 @@ export default function MadeFr() {
           </div>
           <div>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/C0073.MP4.02_16-1.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/C0073.MP4.02_16-1.png`}
               alt="AFS Foiling visual"
               width={1200}
               height={800}
-              className="max-w-[960px] mx-auto h-auto w-[100%]"
+              className="max-w-[960px] mx-auto h-auto w-full"
             />
             <h2 className="global-h2 text-center pt-[80px]">
               {t("Foil & Co")}

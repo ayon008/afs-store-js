@@ -1,14 +1,12 @@
-"use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 /* ---------------- Breadcrumbs ---------------- */
 
-const BreadCums = () => {
-  const b = useTranslations("breadcum");
+const BreadCums = async () => {
+  const b = await getTranslations("breadcum");
 
   return (
     <div className="mb-[20px] uppercase">
@@ -25,8 +23,8 @@ const BreadCums = () => {
 
 /* ---------------- Page ---------------- */
 
-export default function equipment() {
-  const t = useTranslations("equipment");
+export default async function Equipment() {
+  const t = await getTranslations("equipment");
 
   return (
     <>
@@ -37,7 +35,7 @@ export default function equipment() {
           className="sticky top-[78px] lg:top-[142px] z-[10]"
           style={{
             backgroundImage:
-              "url('https://afs-foiling.com/wp-content/uploads/2023/08/zyro-image-1.png')",
+              `url(${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/08/zyro-image-1.png)`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -163,10 +161,11 @@ export default function equipment() {
                 </a>
               </div>
               <Image
-                src="https://afs-foiling.com/wp-content/uploads/2023/08/Group-2-2.png"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/08/Group-2-2.png`}
                 width={800}
                 height={600}
                 className="max-w-[420px] hidden md:block"
+                alt="Equipment recovery"
               />
             </div>
           </div>

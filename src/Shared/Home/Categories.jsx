@@ -29,46 +29,46 @@ export default async function CategorySection() {
     {
       slug: "foiling/wing-foil",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png`,
       alt_text: "wing foil",
     },
     {
       slug: "foiling/downwind-foil",
-      image: "https://afs-foiling.com/wp-content/uploads/2023/11/afs-pure-ha.png",
+      image: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/11/afs-pure-ha.png`,
       alt_text: "downwind",
     },
     {
       slug: "foiling/prone-foil",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2025/06/surf-foil-scaled.jpg",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/surf-foil-scaled.jpg`,
       alt_text: "surf foil",
     },
     {
       slug: "foiling/sup-foil",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2024/01/afs-downwind.jpeg",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/afs-downwind.jpeg`,
       alt_text: "sup foil",
     },
     {
       slug: "foiling/dockstart",
-      image: "https://afs-foiling.com/wp-content/uploads/2025/05/enduro-GLT.jpg",
+      image: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/05/enduro-GLT.jpg`,
       alt_text: "dockstart",
     },
     {
       slug: "foiling/parawing",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2022/07/ahd-windsurf.jpg",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/ahd-windsurf.jpg`,
       alt_text: "windsurf",
     },
     {
       slug: "windfoiling",
       image:
-        "https://afs-foiling.com/wp-content/uploads/2022/07/afs-windfoil.jpg",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/afs-windfoil.jpg`,
       alt_text: "windfoil",
     },
     {
       slug: "stand-up-paddle",
-      image: "https://afs-foiling.com/wp-content/uploads/2025/06/sup.jpg",
+      image: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/sup.jpg`,
       alt_text: "sup",
     },
   ];

@@ -18,7 +18,7 @@ import RouteLoadingBar from "@/Shared/Loader/RouteLoadingBar";
 import NavigationShimmer from "@/Shared/Loader/NavigationShimmer";
 import { ALL_COUNTRIES } from "@/lib/countries-config";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://afs-foiling.com';
 
 /**
  * Generate hreflang alternates for SEO
@@ -92,7 +92,7 @@ export async function generateMetadata({ params }) {
       alternateLocale: locale === 'fr' ? 'en_US' : 'fr_FR',
       images: [
         {
-          url: "https://afs-foiling.com/wp-content/uploads/2024/02/Fly2023-7-1-1.png",
+          url: `${process.env.NEXT_PUBLIC_SITE_URL}/wp-content/uploads/2024/02/Fly2023-7-1-1.png`,
           width: 1920,
           height: 1484,
           alt: isEnglish ? "Fly 4'8–6'0" : "Fly 4'8–6'0",
@@ -107,7 +107,7 @@ export async function generateMetadata({ params }) {
       title,
       description,
       images: [
-        "https://afs-foiling.com/wp-content/uploads/2024/02/Fly2023-7-1-1.png",
+        `${process.env.NEXT_PUBLIC_SITE_URL}/wp-content/uploads/2024/02/Fly2023-7-1-1.png`,
       ],
     },
     other: {

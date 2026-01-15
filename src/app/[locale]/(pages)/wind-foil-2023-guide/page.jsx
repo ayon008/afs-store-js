@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { alliance } from "@/fonts/Alliance";
+import { Link } from "@/i18n/navigation";
 
 /* ---------------- Breadcrumbs ---------------- */
 
@@ -103,7 +103,7 @@ export default function Wind() {
         className="global-margin"
         style={{
           backgroundImage:
-            "url('https://afs-foiling.com/wp-content/uploads/2024/09/AFS_Wind_Aile_S.jpg')",
+            `url('${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/09/AFS_Wind_Aile_S.jpg')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -174,17 +174,17 @@ export default function Wind() {
               {t.rich("if-you", {
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}{" "}
-              <a
-                href="https://staging.afs-foiling.com/categorie-produit/foiling/windfoil/"
+              <Link
+                href="/categorie-produit/foiling/windfoil/"
                 className="text-[#1D98FF]"
               >
                 Windfoil
-              </a>{" "}
+              </Link>{" "}
               {t("is-a")}{" "}
             </p>
 
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2021/03/nahskwell-fluid-stand-up-paddle-cruising.jpg"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2021/03/nahskwell-fluid-stand-up-paddle-cruising.jpg`}
               alt="Foiling downwind"
               width={800}
               height={600}
@@ -268,7 +268,7 @@ export default function Wind() {
               {t("allround_paddles_h")}
             </h3>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/nahskwell-fluid.jpg"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/nahskwell-fluid.jpg`}
               alt="Foiling downwind"
               width={800}
               height={600}
@@ -282,7 +282,7 @@ export default function Wind() {
               {t("touring_paddles")}
             </h3>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2022/07/nahskwell-fit-stand-up-paddle-cruising.jpeg"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/nahskwell-fit-stand-up-paddle-cruising.jpeg`}
               alt="Foiling downwind"
               width={800}
               height={600}
@@ -302,7 +302,7 @@ export default function Wind() {
               {t("paddles_for_surfing")}
             </h3>
             <Image
-              src="https://afs-foiling.com/wp-content/uploads/2023/02/nahskwell-sup-min-min.jpg"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/02/nahskwell-sup-min-min.jpg`}
               alt="Foiling downwind"
               width={800}
               height={600}
@@ -416,7 +416,7 @@ export default function Wind() {
             <p className="text-[clamp(1rem,0.6547rem+0.7203vw,1.375rem)] leading-[120%] text-[#111111BF]">
               {t("discipline_p")}{" "}
               <Link
-                href="https://afs-foiling.com/fr/categorie-produit/foiling/sup-foil-foiling/"
+                href="/product-category/foiling/sup-foil-foiling/"
                 className="text-[#1d98ff] underline"
               >
                 {t("guide_specifically")}
@@ -442,7 +442,7 @@ export default function Wind() {
             </p>
             <Link
               class="py-[10px] px-[14px] bg-[#1d98ff] text-white font-bold text-4 w-fit rounded-sm mx-auto mt-4"
-              href="https://afs-foiling.com/fr/categorie-produit/stand-up-paddle/"
+              href="/product-category/stand-up-paddle/"
             >
               {t("discover_our_stand_up_paddles")}
             </Link>

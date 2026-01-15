@@ -1,10 +1,10 @@
-"use client";
-import { useTranslations } from "next-intl";
 
-import Link from "next/link";
 
-const BreadCums = () => {
-  const t = useTranslations("breadcum");
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+
+const BreadCums = async () => {
+  const t = await getTranslations("breadcum");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
@@ -17,10 +17,10 @@ const BreadCums = () => {
   );
 };
 
-export default function Wing() {
+export default async function Wing() {
 
-  const t = useTranslations("wing-foil-bordeaux-gliss-up");
-  const tBreadcum = useTranslations("breadcum");
+  const t = await getTranslations("wing-foil-bordeaux-gliss-up");
+  const tBreadcum = await getTranslations("breadcum");
 
 
   return (

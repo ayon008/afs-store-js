@@ -83,15 +83,15 @@ const ProductDetails = ({ data, variations }) => {
     const calendlyContainerRef = React.useRef(null);
 
     const gradeImage = [
-        { grade: "A", images: ["https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont@2x.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-6.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-8.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-11.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-12.png"] },
-        { grade: "B", images: ["https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-14-e1730759964574.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-15-e1730760041494.png", , "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-16-e1730760102909.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-17-e1730760192264.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-18-e1730760254642.png", "https://afs-foiling.com/fr/wp-content/uploads/2024/10/right_cont-19-e1730760323713.png"] },
+        { grade: "A", images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont@2x.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-6.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-8.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-11.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-12.png`] },
+        { grade: "B", images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-14-e1730759964574.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-15-e1730760041494.png`, , `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-16-e1730760102909.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-17-e1730760192264.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-18-e1730760254642.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-19-e1730760323713.png`] },
         {
             grade: "C", images: [
-                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-1-11-e1730761608511.png",
-                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-2-9-e1730761695455.png",
-                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-3-5-e1730761755539.png",
-                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-4-1-e1730761801550.png",
-                "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Group-5-1-e1730761843118.png"
+                `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Group-1-11-e1730761608511.png`,
+                `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Group-2-9-e1730761695455.png`,
+                `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Group-3-5-e1730761755539.png`,
+                `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Group-4-1-e1730761801550.png`,
+                `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/Group-5-1-e1730761843118.png`
             ]
         }
     ]

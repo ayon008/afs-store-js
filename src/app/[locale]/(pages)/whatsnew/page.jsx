@@ -69,7 +69,7 @@ export default async function Whatsnew({ locale }) {
                             decoding="async"
                             width={933}
                             height={935}
-                            src="https://afs-foiling.com/fr/wp-content/uploads/2025/09/Capture-decran-2025-09-05-a-11.13.37.png"
+                            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/09/Capture-decran-2025-09-05-a-11.13.37.png`}
                             className="attachment-full size-full wp-image-297053"
                             alt=""
                             sizes="(max-width: 933px) 100vw, 933px"
@@ -233,10 +233,11 @@ export default async function Whatsnew({ locale }) {
                             decoding="async"
                             width={933}
                             height={935}
-                            src="https://afs-foiling.com/fr/wp-content/uploads/2025/08/Capture-decran-2025-08-13-a-10.16.15.png"
+                            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/08/Capture-decran-2025-08-13-a-10.16.15.png`}
                             alt=""
                             sizes="(max-width: 933px) 100vw, 933px"
                         />
+
                     </div>
                 </div>
 

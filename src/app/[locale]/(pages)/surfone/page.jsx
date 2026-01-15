@@ -1,10 +1,8 @@
-"use client";
-
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 
-const BreadCums = () => {
-  const b = useTranslations("breadcum");
+const BreadCums = async() => {
+  const b = await getTranslations("breadcum");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
@@ -17,9 +15,9 @@ const BreadCums = () => {
   );
 };
 
-export default function Surfone() {
-  const t = useTranslations("surfone");
-  const g = useTranslations("wing-foil-bordeaux-gliss-up");
+export default async function Surfone() {
+  const t = await getTranslations("surfone");
+  const g = await getTranslations("wing-foil-bordeaux-gliss-up");
 
   return (
     <>
@@ -72,7 +70,7 @@ export default function Surfone() {
             <div className="flex flex-col gap-[4px]">
               <h4 className="font-bold text-[#111111]">AFS Expert</h4>
               <p className="font-semibold text-[#111111B2]">
-                Laura Fernandez "LAURA WIND
+                Laura Fernandez &quot;LAURA WIND
               </p>
             </div>
 
@@ -128,7 +126,7 @@ export default function Surfone() {
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/wp-content/uploads/2024/01/image-4-2.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-4-2.png`}
               className="w-full"
             />
             <span>{g("Store in Bordeaux")}</span>
@@ -140,9 +138,9 @@ export default function Surfone() {
             </p>
 
             <h2 className="mb-[40px] text-[32px] font-semibold uppercase leading-[105%] text-[#111]/70">
-              <span className="text-[#1D98FF]">"</span>
+              <span className="text-[#1D98FF]">&quot;</span>
               {t("The sales staff")}
-              <span className="text-[#1D98FF]">"</span>
+              <span className="text-[#1D98FF]">&quot;</span>
             </h2>
 
             <div className="flex flex-col gap-[20px] max-[1024px]:flex-col lg:flex-row lg:justify-between">
@@ -150,11 +148,11 @@ export default function Surfone() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/wp-content/uploads/2024/01/image-52.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-52.png`}
                   className="w-[75%]"
                 />
                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
-                  Laura Fernandez “LAURA WIND
+                  Laura Fernandez &quot;LAURA WIND
                 </p>
                 <p className="text-[#111111B2] text-4 leading-[1.3] font-semibold">
                   {t("Passionate about nature")}
@@ -165,7 +163,7 @@ export default function Surfone() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/wp-content/uploads/2024/01/image-1-6.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-1-6.png`}
                   className="w-full"
                 />
                 <span>{g("gliss")}</span>

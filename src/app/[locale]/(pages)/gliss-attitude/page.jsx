@@ -1,10 +1,8 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-const BreadCums = () => {
-  const t = useTranslations("breadcum")
+const BreadCums = async () => {
+  const t = await getTranslations("breadcum")
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#999999]">
@@ -17,9 +15,9 @@ const BreadCums = () => {
   );
 };
 
-export default function Gliss() {
-  const t = useTranslations("gliss")
-  const a = useTranslations("wing-foil-bordeaux-gliss-up")
+export default async function Gliss() {
+  const t = await getTranslations("gliss")
+  const a = await getTranslations("wing-foil-bordeaux-gliss-up")
   return (
     <>
       {/* HERO */}
@@ -125,8 +123,9 @@ export default function Gliss() {
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-5.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-4-5.png`}
               className="w-full"
+              alt="Gliss Attitude"
             />
             <span>Boutique à Marseille</span>
           </div>
@@ -150,15 +149,17 @@ export default function Gliss() {
               <img
                 loading="lazy"
                 decoding="async"
-                src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-2-10.png"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-2-10.png`}
                 className="w-[220px]"
+                alt="Gliss Attitude"
               />
               <div className="flex basis-[50%] flex-col space-y-[12px]">
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-9.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/image-1-9.png`}
                   className="w-full"
+                  alt="Gliss Attitude"
                 />
                 <span>Gliss Attitude Team</span>
               </div>

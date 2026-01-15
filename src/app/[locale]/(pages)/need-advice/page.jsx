@@ -1,11 +1,9 @@
-"use client";
-import Head from "next/head";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 
-const BreadCums = () => {
-  const b = useTranslations("breadcum");
-  const c = useTranslations("Need-advice");
+const BreadCums = async () => {
+  const b = await getTranslations("breadcum");
+  const c = await getTranslations("Need-advice");
   return (
     <div className="mb-[20px] uppercase">
       <div className="text-sm font-bold text-[#ccc]">
@@ -18,8 +16,8 @@ const BreadCums = () => {
   );
 };
 
-export default function TicketsPage() {
-  const t = useTranslations("Need-advice");
+export default async function TicketsPage() {
+  const t = await getTranslations("Need-advice");
   return (
     <>
       <div className="bg-black">
@@ -27,7 +25,7 @@ export default function TicketsPage() {
           className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] gap-[20px] global-padding global-margin bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
-              "url('https://afs-foiling.com/fr/wp-content/uploads/2025/07/image-7244.png')",
+              `url(${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/07/image-7244.png)`,
           }}
         >
           <div className="min-h-[calc(100vh-150px)] flex flex-col">
@@ -125,7 +123,7 @@ export default function TicketsPage() {
             <li>
               <a
                 className="hover:underline"
-                href="https://afs-foiling.com/fr/categorie-produit/foiling/wing-foil/#guide"
+                href={`${process.env.NEXT_PUBLIC_BASE_URL}/categorie-produit/foiling/wing-foil/#guide`}
               >
                 WING FOIL
               </a>
@@ -134,7 +132,7 @@ export default function TicketsPage() {
             <li>
               <a
                 className="hover:underline"
-                href="https://afs-foiling.com/fr/les-etapes-cles-pour-se-lancer-en-dockstart/"
+                href={`${process.env.NEXT_PUBLIC_BASE_URL}/les-etapes-cles-pour-se-lancer-en-dockstart/`}
               >
                 DOCKSTART
               </a>
@@ -143,7 +141,7 @@ export default function TicketsPage() {
             <li>
               <a
                 className="hover:underline"
-                href="https://afs-foiling.com/fr/guide-downwind/"
+                href={`${process.env.NEXT_PUBLIC_BASE_URL}/guide-downwind/`}
               >
                 DOWNWIND
               </a>
@@ -152,7 +150,7 @@ export default function TicketsPage() {
             <li>
               <a
                 className="hover:underline"
-                href="https://afs-foiling.com/fr/categorie-produit/foiling/surf-foil/"
+                href={`${process.env.NEXT_PUBLIC_BASE_URL}/categorie-produit/foiling/surf-foil/`}
               >
                 SURF FOIL
               </a>

@@ -8,7 +8,7 @@ import NotFound from '@/Shared/NotFound/404';
 import { Link } from "@/i18n/navigation";
 import { getTranslatedCategoryPath, getCategoryRoutePrefix } from '@/lib/product-routes';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://afs-foiling.com';
 
 export async function generateCategoryMetadata(slug) {
     const locale = await getLocale();

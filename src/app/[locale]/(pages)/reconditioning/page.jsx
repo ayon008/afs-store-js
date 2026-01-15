@@ -1,5 +1,4 @@
 "use client";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
 import Link from "next/link";
@@ -61,11 +60,11 @@ export default function Reconditioning() {
               className="w-full h-auto cursor-pointer"
               preload="metadata"
               playsInline
-              poster="https://afs-foiling.com/wp-content/uploads/2023/08/image-7243-4.png"
+              poster={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/08/image-7243-4.png`}
               onClick={toggleVideo}
             >
               <source
-                src="https://afs-foiling.com/wp-content/uploads/2023/08/AFS_lance_son_offre_de_materiel_reconditionne___1080_X_1920_1.mp4"
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/08/AFS_lance_son_offre_de_materiel_reconditionne___1080_X_1920_1.mp4`}
                 type="video/mp4"
               />
             </video>

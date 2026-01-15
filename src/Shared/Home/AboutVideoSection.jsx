@@ -36,7 +36,7 @@ export default function AboutVideoSection() {
         
         <div className="relative overflow-hidden rounded-sm">
           <Image
-            src="https://afs-foiling.com/fr/wp-content/uploads/2025/12/image-3-2.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/12/image-3-2.png`}
             className="rounded-sm bg-white"
             alt="Tour"
             width={1000}
