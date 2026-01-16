@@ -106,6 +106,9 @@ const CheckoutPageContent = () => {
     // Removed the useEffect that auto-checks shipping address
 
     useEffect(() => {
+        // Get selected country from cookie (from "Choose your location")
+        const selectedCountryFromCookie = getCookie('selected_country');
+        
         // Build form values object, merging both billing and shipping addresses
         const formValues = {};
         
@@ -114,13 +117,17 @@ const CheckoutPageContent = () => {
             formValues.billing_first_name = cartBillingAddress.first_name || '';
             formValues.billing_last_name = cartBillingAddress.last_name || '';
             formValues.billing_company = cartBillingAddress.company || '';
-            formValues.billing_country = cartBillingAddress.country || '';
+            // Use cart country if available, otherwise use selected country from cookie
+            formValues.billing_country = cartBillingAddress.country || selectedCountryFromCookie || '';
             formValues.billing_address_1 = cartBillingAddress.address_1 || '';
             formValues.billing_city = cartBillingAddress.city || '';
             formValues.billing_state = cartBillingAddress.state || '';
             formValues.billing_postcode = cartBillingAddress.postcode || '';
             formValues.billing_phone = cartBillingAddress.phone || '';
             formValues.billing_email = cartBillingAddress.email || '';
+        } else if (selectedCountryFromCookie) {
+            // If no cart billing address, pre-fill country from cookie
+            formValues.billing_country = selectedCountryFromCookie;
         }
         
         // Initialize shipping address with billing address by default
@@ -129,14 +136,18 @@ const CheckoutPageContent = () => {
             formValues.shipping_first_name = cartShippingAddress?.first_name || cartBillingAddress.first_name || '';
             formValues.shipping_last_name = cartShippingAddress?.last_name || cartBillingAddress.last_name || '';
             formValues.shipping_company = cartShippingAddress?.company || cartBillingAddress.company || '';
-            formValues.shipping_country = cartShippingAddress?.country || cartBillingAddress.country || '';
+            // Use cart shipping country if available, otherwise use billing country, otherwise use selected country from cookie
+            formValues.shipping_country = cartShippingAddress?.country || cartBillingAddress.country || selectedCountryFromCookie || '';
             formValues.shipping_address_1 = cartShippingAddress?.address_1 || cartBillingAddress.address_1 || '';
             formValues.shipping_city = cartShippingAddress?.city || cartBillingAddress.city || '';
             formValues.shipping_state = cartShippingAddress?.state || cartBillingAddress.state || '';
             formValues.shipping_postcode = cartShippingAddress?.postcode || cartBillingAddress.postcode || '';
+        } else if (selectedCountryFromCookie) {
+            // If no cart billing address, pre-fill shipping country from cookie
+            formValues.shipping_country = selectedCountryFromCookie;
         }
         
-        // Only reset if we have at least one address
+        // Only reset if we have at least one address or a country to pre-fill
         if (Object.keys(formValues).length > 0) {
             reset(formValues);
         }
@@ -172,6 +183,21 @@ const CheckoutPageContent = () => {
             setCurrentLocation(locationFromCookie);
         }
     }, []);
+
+    // Update country fields if selected_country cookie exists and fields are empty
+    useEffect(() => {
+        const selectedCountryFromCookie = getCookie('selected_country');
+        if (selectedCountryFromCookie) {
+            // Only update if billing country is empty
+            if (!watchFields.billing_country) {
+                setValue('billing_country', selectedCountryFromCookie);
+            }
+            // Only update shipping country if it's empty and billing country is also empty or same as cookie
+            if (!watchFields.shipping_country && (!watchFields.billing_country || watchFields.billing_country === selectedCountryFromCookie)) {
+                setValue('shipping_country', selectedCountryFromCookie);
+            }
+        }
+    }, [setValue, watchFields.billing_country, watchFields.shipping_country]);
 
     // Determine if we should show taxes included (Europe) or separate (North America)
     const isEuropeLocation = currentLocation === WAREHOUSES.EUROPE;
