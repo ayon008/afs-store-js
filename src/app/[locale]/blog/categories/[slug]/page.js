@@ -5,6 +5,7 @@ import Image from 'next/image';
 import BlogCard from '@/Shared/Card/BlogCard';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { normalizeWordPressUrl } from '@/lib/url-utils';
 
 
 
@@ -36,9 +37,11 @@ const categoryPost = async (id, locale) => {
             // Transform the WordPress post data
             let imageUrl = '/images/blogs/paraglider.png'; // fallback image
             if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
-                imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? imageUrl;
+                const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+                imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
             } else if (post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url) {
-                imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url ?? imageUrl;
+                const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url;
+                imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
             }
             const cleanExcerpt = post.excerpt.rendered
                 .replace(/<[^>]*>/g, '') // Remove HTML tags

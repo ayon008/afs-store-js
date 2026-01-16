@@ -3,6 +3,7 @@
 import { ArrowDown } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 export default function Hero() {
     const videoRef = useRef(null);
@@ -35,11 +36,11 @@ export default function Hero() {
                 muted
                 playsInline
                 preload="auto"
-                poster={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/08/Rectangle-1-2.png`}
+                poster={`${getWordPressBaseUrl()}/wp-content/uploads/2025/08/Rectangle-1-2.png`}
                 className="absolute top-0 left-0 w-full h-full object-cover"
             >
                 <source
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/08/ADS_USINE_V2.mp4`}
+                    src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/08/ADS_USINE_V2.mp4`}
                     type="video/mp4"
                 />
             </video>

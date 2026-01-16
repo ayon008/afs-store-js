@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { getPosts } from '@/lib/wp';
 import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
+import { normalizeWordPressUrl } from '@/lib/url-utils';
 export const revalidate = 60;
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
@@ -42,8 +43,8 @@ export async function generateMetadata({ params }) {
     );
 
     // Featured image
-    const featuredImage =
-        blog?._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
+    const rawFeaturedImage = blog?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+    const featuredImage = rawFeaturedImage ? normalizeWordPressUrl(rawFeaturedImage) : null;
 
     // Build URLs for hreflang
     const blogPath = `/blog/${slug}`;
@@ -182,7 +183,8 @@ const page = async ({ params }) => {
     const date = moment(blog?.date || new Date()).format("MMMM DD, YYYY");
 
     // featured image 
-    const featuredImage = blog?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+    const rawFeaturedImage = blog?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+    const featuredImage = rawFeaturedImage ? normalizeWordPressUrl(rawFeaturedImage) : null;
     const alt = blog?._embedded?.["wp:featuredmedia"]?.[0]?.alt_text ?? '';
 
     // Title

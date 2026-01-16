@@ -6,6 +6,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import PopUp from "../PopUp/PopUp";
 import { useTranslations } from "next-intl";
+import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 export default function AboutVideoSection() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function AboutVideoSection() {
         
         <div className="relative overflow-hidden rounded-sm">
           <Image
-            src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/12/image-3-2.png`}
+            src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/12/image-3-2.png`}
             className="rounded-sm bg-white"
             alt="Tour"
             width={1000}

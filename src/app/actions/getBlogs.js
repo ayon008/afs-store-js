@@ -1,6 +1,7 @@
 "use server"
 
 import { getLocale } from "next-intl/server";
+import { normalizeWordPressUrl } from "@/lib/url-utils";
 
 export async function getPosts(options = {}) {
     const WP_BASE_URL = process.env.WP_BASE_URL;
@@ -185,9 +186,11 @@ function transformPosts(posts) {
         // Extract featured image URL
         let imageUrl = '/images/blogs/paraglider.png'; // fallback image
         if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
-            imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? imageUrl;
+            const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+            imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
         } else if (post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url) {
-            imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url ?? imageUrl;
+            const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url;
+            imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
         }
 
         // Clean and format excerpt (remove HTML tags)
@@ -292,9 +295,11 @@ export async function getPost(identifier, bySlug = false) {
         // Transform the WordPress post data
         let imageUrl = '/images/blogs/paraglider.png'; // fallback image
         if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
-            imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? imageUrl;
+            const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+            imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
         } else if (post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url) {
-            imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url ?? imageUrl;
+            const rawUrl = post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.medium?.source_url;
+            imageUrl = rawUrl ? normalizeWordPressUrl(rawUrl) : imageUrl;
         }
 
         // Clean and format excerpt (remove HTML tags)

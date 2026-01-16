@@ -6,6 +6,7 @@ import Link from 'next/link';
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from "gsap"
 import { useTranslations } from 'next-intl';
+import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 const Footer = () => {
     const [first, setFirst] = useState(false);
@@ -297,7 +298,7 @@ const Footer = () => {
             {/* lower Section */}
             <div className='max-w-[1440px] mx-auto global-padding py-20 flex lg:flex-row flex-col justify-between items-start lg:gap-20 gap-10'>
                 <div className='max-w-[360px]'>
-                    <Image src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/12/svgviewer-output-36.svg`} width={172} height={144} alt='Logo-Afs' className='mb-10' />
+                    <Image src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/12/svgviewer-output-36.svg`} width={172} height={144} alt='Logo-Afs' className='mb-10' />
                     <div className="news-letter max-w-[360px] w-full flex flex-col gap-4">
                         <h3 className="text-[16px] font-bold leading-[1.1] text-[#404040]">
                             {t("email")}
