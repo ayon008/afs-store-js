@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { getLocaleValue, getCurrency } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
 async function parseSetCookieHeader(setCookieHeader) {
     const cookies = {};
@@ -44,6 +44,145 @@ async function getWooCommerceCookies() {
         console.error('Error getting WooCommerce cookies:', error);
         return '';
     }
+}
+
+// Helper to get currency symbol
+function getCurrencySymbol(currencyCode) {
+    const symbols = {
+        'EUR': '€',
+        'USD': '$',
+        'GBP': '£'
+    };
+    return symbols[currencyCode] || '€';
+}
+
+// Helper to get currency formatting info
+function getCurrencyInfo(currencyCode) {
+    const info = {
+        'EUR': {
+            symbol: '€',
+            minor_unit: 2,
+            decimal_separator: ',',
+            thousand_separator: '',
+            prefix: '',
+            suffix: '€'
+        },
+        'USD': {
+            symbol: '$',
+            minor_unit: 2,
+            decimal_separator: '.',
+            thousand_separator: ',',
+            prefix: '$',
+            suffix: ''
+        },
+        'GBP': {
+            symbol: '£',
+            minor_unit: 2,
+            decimal_separator: '.',
+            thousand_separator: ',',
+            prefix: '£',
+            suffix: ''
+        }
+    };
+    return info[currencyCode] || info['EUR'];
+}
+
+// Normalize shipping rates currency metadata to match target currency
+// Also converts prices if exchange rate is provided
+async function normalizeShippingRatesCurrency(shippingRates, targetCurrency, defaultCurrency = 'EUR', exchangeRate = null) {
+    console.log(`[Normalize Shipping] Called with targetCurrency: ${targetCurrency}, defaultCurrency: ${defaultCurrency}, exchangeRate: ${exchangeRate}`);
+    
+    if (!Array.isArray(shippingRates) || !targetCurrency) {
+        console.warn('[Normalize Shipping] Invalid input - shippingRates is array:', Array.isArray(shippingRates), 'targetCurrency:', targetCurrency);
+        return shippingRates;
+    }
+
+    const currencyInfo = getCurrencyInfo(targetCurrency);
+    console.log(`[Normalize Shipping] Currency info for ${targetCurrency}:`, currencyInfo);
+
+    // If target currency is the same as default, no conversion needed
+    if (targetCurrency === defaultCurrency) {
+        // Just update metadata
+        return shippingRates.map(shippingPackage => {
+            if (!shippingPackage.shipping_rates || !Array.isArray(shippingPackage.shipping_rates)) {
+                return shippingPackage;
+            }
+
+            const normalizedPackage = { ...shippingPackage };
+            normalizedPackage.shipping_rates = shippingPackage.shipping_rates.map(rate => {
+                const normalizedRate = { ...rate };
+                normalizedRate.currency_code = targetCurrency;
+                normalizedRate.currency_symbol = currencyInfo.symbol;
+                normalizedRate.currency_minor_unit = currencyInfo.minor_unit;
+                normalizedRate.currency_decimal_separator = currencyInfo.decimal_separator;
+                normalizedRate.currency_thousand_separator = currencyInfo.thousand_separator;
+                normalizedRate.currency_prefix = currencyInfo.prefix;
+                normalizedRate.currency_suffix = currencyInfo.suffix;
+                return normalizedRate;
+            });
+            return normalizedPackage;
+        });
+    }
+
+    // Convert prices if exchange rate is provided
+    return shippingRates.map(shippingPackage => {
+        if (!shippingPackage.shipping_rates || !Array.isArray(shippingPackage.shipping_rates)) {
+            return shippingPackage;
+        }
+
+        const normalizedPackage = { ...shippingPackage };
+        normalizedPackage.shipping_rates = shippingPackage.shipping_rates.map(rate => {
+            const normalizedRate = { ...rate };
+            
+            // Convert price if exchange rate is available
+            if (exchangeRate && exchangeRate > 0 && normalizedRate.price && !isNaN(normalizedRate.price)) {
+                const originalPrice = normalizedRate.price;
+                const priceInDefault = parseFloat(normalizedRate.price) / 100; // Convert from centimes
+                const priceInTarget = priceInDefault * exchangeRate;
+                const priceInTargetRounded = Math.round(priceInTarget * 100) / 100; // Round to 2 decimals
+                normalizedRate.price = Math.round(priceInTargetRounded * 100).toString(); // Convert back to centimes
+                console.log(`[Normalize Shipping] Converted price: ${originalPrice} -> ${normalizedRate.price} (rate: ${exchangeRate})`);
+            } else {
+                console.log(`[Normalize Shipping] Price not converted - exchangeRate: ${exchangeRate}, price: ${normalizedRate.price}`);
+            }
+
+            // Convert taxes if exchange rate is available
+            if (exchangeRate && exchangeRate > 0 && normalizedRate.taxes) {
+                if (typeof normalizedRate.taxes === 'string' && !isNaN(normalizedRate.taxes)) {
+                    const taxInDefault = parseFloat(normalizedRate.taxes) / 100;
+                    const taxInTarget = taxInDefault * exchangeRate;
+                    const taxInTargetRounded = Math.round(taxInTarget * 100) / 100;
+                    normalizedRate.taxes = Math.round(taxInTargetRounded * 100).toString();
+                } else if (Array.isArray(normalizedRate.taxes)) {
+                    normalizedRate.taxes = normalizedRate.taxes.map(tax => {
+                        if (typeof tax === 'string' && !isNaN(tax)) {
+                            const taxInDefault = parseFloat(tax) / 100;
+                            const taxInTarget = taxInDefault * exchangeRate;
+                            const taxInTargetRounded = Math.round(taxInTarget * 100) / 100;
+                            return Math.round(taxInTargetRounded * 100).toString();
+                        }
+                        return tax;
+                    });
+                }
+            }
+            
+            // Update all currency-related fields
+            const oldCurrencyCode = normalizedRate.currency_code;
+            normalizedRate.currency_code = targetCurrency;
+            normalizedRate.currency_symbol = currencyInfo.symbol;
+            normalizedRate.currency_minor_unit = currencyInfo.minor_unit;
+            normalizedRate.currency_decimal_separator = currencyInfo.decimal_separator;
+            normalizedRate.currency_thousand_separator = currencyInfo.thousand_separator;
+            normalizedRate.currency_prefix = currencyInfo.prefix;
+            normalizedRate.currency_suffix = currencyInfo.suffix;
+            
+            console.log(`[Normalize Shipping] Updated currency metadata: ${oldCurrencyCode} -> ${targetCurrency}, symbol: ${currencyInfo.symbol}`);
+
+            return normalizedRate;
+        });
+
+        return normalizedPackage;
+    });
 }
 
 export async function POST(request) {
@@ -296,6 +435,52 @@ export async function POST(request) {
                 console.log('Shipping rates already in response:', JSON.stringify(data.shipping_rates, null, 2));
             }
             
+            // Normalize currency metadata in shipping rates and convert prices
+            const currencyCode = await getCurrency(); // getCurrency() now returns 'EUR', 'USD', or 'GBP' directly
+            const defaultCurrency = 'EUR'; // Default currency from WooCommerce
+            
+            console.log(`[Update Billing] Normalizing shipping rates - Target currency: ${currencyCode}, Default: ${defaultCurrency}`);
+            
+            // Get exchange rate from WCML API
+            let exchangeRate = null;
+            if (currencyCode !== defaultCurrency) {
+                try {
+                    // Normalize URL to avoid double slashes
+                    const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '');
+                    const exchangeRatesUrl = `${baseUrl}/wp-json/afs-wcml/v1/exchange-rates`;
+                    console.log(`[Update Billing] Fetching exchange rate from: ${exchangeRatesUrl}`);
+                    const exchangeRatesResponse = await fetch(exchangeRatesUrl, {
+                        cache: 'no-store',
+                    });
+                    console.log(`[Update Billing] Exchange rates response status: ${exchangeRatesResponse.status}`);
+                    if (exchangeRatesResponse.ok) {
+                        const exchangeData = await exchangeRatesResponse.json();
+                        console.log(`[Update Billing] Exchange rates data:`, JSON.stringify(exchangeData));
+                        if (exchangeData.success && exchangeData.rates && exchangeData.rates[currencyCode]) {
+                            exchangeRate = exchangeData.rates[currencyCode];
+                            console.log(`[Update Billing] Exchange rate for ${currencyCode}:`, exchangeRate);
+                        } else {
+                            console.warn(`[Update Billing] Exchange rate not found for ${currencyCode} in response:`, exchangeData);
+                        }
+                    } else {
+                        const errorText = await exchangeRatesResponse.text();
+                        console.warn(`[Update Billing] Exchange rates API error (${exchangeRatesResponse.status}):`, errorText);
+                    }
+                } catch (error) {
+                    console.warn('[Update Billing] Failed to fetch exchange rate:', error);
+                }
+            } else {
+                console.log(`[Update Billing] Target currency is same as default (${currencyCode}), no conversion needed`);
+            }
+            
+            if (data.shipping_rates && Array.isArray(data.shipping_rates)) {
+                console.log(`[Update Billing] Before normalization:`, JSON.stringify(data.shipping_rates, null, 2));
+                data.shipping_rates = await normalizeShippingRatesCurrency(data.shipping_rates, currencyCode, defaultCurrency, exchangeRate);
+                console.log(`[Update Billing] After normalization:`, JSON.stringify(data.shipping_rates, null, 2));
+            } else {
+                console.warn('[Update Billing] No shipping rates to normalize or not an array:', data.shipping_rates);
+            }
+            
             return NextResponse.json({
                 success: true,
                 data: data,
@@ -375,6 +560,52 @@ export async function POST(request) {
             }
         } else {
             console.log('Shipping rates already in response (no set-cookie):', JSON.stringify(data.shipping_rates, null, 2));
+        }
+        
+        // Normalize currency metadata in shipping rates and convert prices
+        const currencyCode = await getCurrency(); // getCurrency() now returns 'EUR', 'USD', or 'GBP' directly
+        const defaultCurrency = 'EUR'; // Default currency from WooCommerce
+        
+        console.log(`[Update Billing] Normalizing shipping rates (no set-cookie) - Target currency: ${currencyCode}, Default: ${defaultCurrency}`);
+        
+        // Get exchange rate from WCML API
+        let exchangeRate = null;
+        if (currencyCode !== defaultCurrency) {
+            try {
+                // Normalize URL to avoid double slashes
+                const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '');
+                const exchangeRatesUrl = `${baseUrl}/wp-json/afs-wcml/v1/exchange-rates`;
+                console.log(`[Update Billing] Fetching exchange rate from: ${exchangeRatesUrl}`);
+                const exchangeRatesResponse = await fetch(exchangeRatesUrl, {
+                    cache: 'no-store',
+                });
+                console.log(`[Update Billing] Exchange rates response status: ${exchangeRatesResponse.status}`);
+                if (exchangeRatesResponse.ok) {
+                    const exchangeData = await exchangeRatesResponse.json();
+                    console.log(`[Update Billing] Exchange rates data:`, JSON.stringify(exchangeData));
+                    if (exchangeData.success && exchangeData.rates && exchangeData.rates[currencyCode]) {
+                        exchangeRate = exchangeData.rates[currencyCode];
+                        console.log(`[Update Billing] Exchange rate for ${currencyCode}:`, exchangeRate);
+                    } else {
+                        console.warn(`[Update Billing] Exchange rate not found for ${currencyCode} in response:`, exchangeData);
+                    }
+                } else {
+                    const errorText = await exchangeRatesResponse.text();
+                    console.warn(`[Update Billing] Exchange rates API error (${exchangeRatesResponse.status}):`, errorText);
+                }
+            } catch (error) {
+                console.warn('[Update Billing] Failed to fetch exchange rate:', error);
+            }
+        } else {
+            console.log(`[Update Billing] Target currency is same as default (${currencyCode}), no conversion needed`);
+        }
+        
+        if (data.shipping_rates && Array.isArray(data.shipping_rates)) {
+            console.log(`[Update Billing] Before normalization (no set-cookie):`, JSON.stringify(data.shipping_rates, null, 2));
+            data.shipping_rates = await normalizeShippingRatesCurrency(data.shipping_rates, currencyCode, defaultCurrency, exchangeRate);
+            console.log(`[Update Billing] After normalization (no set-cookie):`, JSON.stringify(data.shipping_rates, null, 2));
+        } else {
+            console.warn('[Update Billing] No shipping rates to normalize or not an array (no set-cookie):', data.shipping_rates);
         }
         
         return NextResponse.json({

@@ -58,6 +58,13 @@ class AFS_WCML_Core {
 	public $cart_api;
 
 	/**
+	 * Shipping Converter instance.
+	 *
+	 * @var AFS_WCML_Shipping_Converter
+	 */
+	public $shipping_converter;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -71,6 +78,9 @@ class AFS_WCML_Core {
 		if ( class_exists( 'AFS_WCML_Cart_API' ) ) {
 			$this->cart_api = new AFS_WCML_Cart_API();
 		}
+
+		// Initialize shipping converter for multi-currency support.
+		$this->shipping_converter = new AFS_WCML_Shipping_Converter();
 
 		$this->init_hooks();
 	}

@@ -26,6 +26,134 @@ function extractSessionCookies(response) {
         .filter(c => c.length > 0);
 }
 
+// Helper to get currency symbol
+function getCurrencySymbol(currencyCode) {
+    const symbols = {
+        'EUR': '€',
+        'USD': '$',
+        'GBP': '£'
+    };
+    return symbols[currencyCode] || '€';
+}
+
+// Helper to get currency formatting info
+function getCurrencyInfo(currencyCode) {
+    const info = {
+        'EUR': {
+            symbol: '€',
+            minor_unit: 2,
+            decimal_separator: ',',
+            thousand_separator: '',
+            prefix: '',
+            suffix: '€'
+        },
+        'USD': {
+            symbol: '$',
+            minor_unit: 2,
+            decimal_separator: '.',
+            thousand_separator: ',',
+            prefix: '$',
+            suffix: ''
+        },
+        'GBP': {
+            symbol: '£',
+            minor_unit: 2,
+            decimal_separator: '.',
+            thousand_separator: ',',
+            prefix: '£',
+            suffix: ''
+        }
+    };
+    return info[currencyCode] || info['EUR'];
+}
+
+// Normalize shipping rates currency metadata to match target currency
+// Also converts prices if exchange rate is provided
+async function normalizeShippingRatesCurrency(shippingRates, targetCurrency, defaultCurrency = 'EUR', exchangeRate = null) {
+    if (!Array.isArray(shippingRates) || !targetCurrency) {
+        return shippingRates;
+    }
+
+    const currencyInfo = getCurrencyInfo(targetCurrency);
+
+    // If target currency is the same as default, no conversion needed
+    if (targetCurrency === defaultCurrency) {
+        // Just update metadata
+        return shippingRates.map(shippingPackage => {
+            if (!shippingPackage.shipping_rates || !Array.isArray(shippingPackage.shipping_rates)) {
+                return shippingPackage;
+            }
+
+            const normalizedPackage = { ...shippingPackage };
+            normalizedPackage.shipping_rates = shippingPackage.shipping_rates.map(rate => {
+                const normalizedRate = { ...rate };
+                normalizedRate.currency_code = targetCurrency;
+                normalizedRate.currency_symbol = currencyInfo.symbol;
+                normalizedRate.currency_minor_unit = currencyInfo.minor_unit;
+                normalizedRate.currency_decimal_separator = currencyInfo.decimal_separator;
+                normalizedRate.currency_thousand_separator = currencyInfo.thousand_separator;
+                normalizedRate.currency_prefix = currencyInfo.prefix;
+                normalizedRate.currency_suffix = currencyInfo.suffix;
+                return normalizedRate;
+            });
+            return normalizedPackage;
+        });
+    }
+
+    // Convert prices if exchange rate is provided
+    return shippingRates.map(shippingPackage => {
+        if (!shippingPackage.shipping_rates || !Array.isArray(shippingPackage.shipping_rates)) {
+            return shippingPackage;
+        }
+
+        const normalizedPackage = { ...shippingPackage };
+        normalizedPackage.shipping_rates = shippingPackage.shipping_rates.map(rate => {
+            const normalizedRate = { ...rate };
+            
+            // Convert price if exchange rate is available
+            if (exchangeRate && exchangeRate > 0 && normalizedRate.price && !isNaN(normalizedRate.price)) {
+                const priceInDefault = parseFloat(normalizedRate.price) / 100; // Convert from centimes
+                const priceInTarget = priceInDefault * exchangeRate;
+                const priceInTargetRounded = Math.round(priceInTarget * 100) / 100; // Round to 2 decimals
+                normalizedRate.price = Math.round(priceInTargetRounded * 100).toString(); // Convert back to centimes
+            }
+
+            // Convert taxes if exchange rate is available
+            if (exchangeRate && exchangeRate > 0 && normalizedRate.taxes) {
+                if (typeof normalizedRate.taxes === 'string' && !isNaN(normalizedRate.taxes)) {
+                    const taxInDefault = parseFloat(normalizedRate.taxes) / 100;
+                    const taxInTarget = taxInDefault * exchangeRate;
+                    const taxInTargetRounded = Math.round(taxInTarget * 100) / 100;
+                    normalizedRate.taxes = Math.round(taxInTargetRounded * 100).toString();
+                } else if (Array.isArray(normalizedRate.taxes)) {
+                    normalizedRate.taxes = normalizedRate.taxes.map(tax => {
+                        if (typeof tax === 'string' && !isNaN(tax)) {
+                            const taxInDefault = parseFloat(tax) / 100;
+                            const taxInTarget = taxInDefault * exchangeRate;
+                            const taxInTargetRounded = Math.round(taxInTarget * 100) / 100;
+                            return Math.round(taxInTargetRounded * 100).toString();
+                        }
+                        return tax;
+                    });
+                }
+            }
+            
+            // Update all currency-related fields
+            normalizedRate.currency_code = targetCurrency;
+            normalizedRate.currency_symbol = currencyInfo.symbol;
+            normalizedRate.currency_minor_unit = currencyInfo.minor_unit;
+            normalizedRate.currency_decimal_separator = currencyInfo.decimal_separator;
+            normalizedRate.currency_thousand_separator = currencyInfo.thousand_separator;
+            normalizedRate.currency_prefix = currencyInfo.prefix;
+            normalizedRate.currency_suffix = currencyInfo.suffix;
+
+            return normalizedRate;
+        });
+
+        return normalizedPackage;
+    });
+}
+
 export async function POST(request) {
     try {
         const localeValue = await getLocaleValue();
@@ -60,18 +188,11 @@ export async function POST(request) {
 
         // Get currency and location
         // Prefer location from request body (cart metadata), fallback to cookies
-        const currency = await getCurrency();
+        const currencyCode = await getCurrency(); // getCurrency() now returns 'EUR', 'USD', or 'GBP' directly
         const cookieLocation = await getLocation();
         const location = bodyLocation || cookieLocation || '2682';
 
         console.log('[Shipping Calculate] Using location:', location, '(from body:', bodyLocation, ', from cookie:', cookieLocation, ')');
-
-        // Convert currency format
-        let currencyCode = currency;
-        if (currencyCode === 'euro') currencyCode = 'EUR';
-        else if (currencyCode === 'usd') currencyCode = 'USD';
-        else if (currencyCode === 'gbp') currencyCode = 'GBP';
-        else currencyCode = 'EUR';
 
         // Build base cookies for WooCommerce request
         const baseCookies = [
@@ -410,11 +531,38 @@ export async function POST(request) {
 
         console.log('[Shipping Calculate] Returning rates:', shippingRates.length);
 
+        // Normalize currency metadata in shipping rates and convert prices
+        const defaultCurrency = 'EUR'; // Default currency from WooCommerce
+        
+        // Get exchange rate from WCML API
+        let exchangeRate = null;
+        if (currencyCode !== defaultCurrency) {
+            try {
+                // Normalize URL to avoid double slashes
+                const baseUrl = process.env.WP_BASE_URL?.replace(/\/$/, '');
+                const exchangeRatesUrl = `${baseUrl}/wp-json/afs-wcml/v1/exchange-rates`;
+                const exchangeRatesResponse = await fetch(exchangeRatesUrl, {
+                    cache: 'no-store',
+                });
+                if (exchangeRatesResponse.ok) {
+                    const exchangeData = await exchangeRatesResponse.json();
+                    if (exchangeData.success && exchangeData.rates && exchangeData.rates[currencyCode]) {
+                        exchangeRate = exchangeData.rates[currencyCode];
+                        console.log(`[Shipping Calculate] Exchange rate for ${currencyCode}:`, exchangeRate);
+                    }
+                }
+            } catch (error) {
+                console.warn('[Shipping Calculate] Failed to fetch exchange rate:', error);
+            }
+        }
+        
+        const normalizedRates = await normalizeShippingRatesCurrency(shippingRates, currencyCode, defaultCurrency, exchangeRate);
+
         return NextResponse.json({
             success: true,
-            shipping_rates: shippingRates,
+            shipping_rates: normalizedRates,
             currency_code: updateResult.totals?.currency_code || currencyCode,
-            currency_symbol: updateResult.totals?.currency_symbol || '€'
+            currency_symbol: updateResult.totals?.currency_symbol || getCurrencySymbol(currencyCode)
         });
 
     } catch (error) {

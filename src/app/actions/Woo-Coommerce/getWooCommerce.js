@@ -47,6 +47,14 @@ export const getSelectedCountry = async () => {
 
 export const getCurrency = async () => {
     const cookieStore = await cookies();
+    
+    // Priority 1: Read wcml_client_currency cookie (most reliable, used by WCML)
+    const wcmlCurrency = cookieStore.get('wcml_client_currency')?.value;
+    if (wcmlCurrency === 'EUR' || wcmlCurrency === 'USD' || wcmlCurrency === 'GBP') {
+        return wcmlCurrency;
+    }
+    
+    // Priority 2: Read currency cookie (legacy format: 'euro', 'usd', 'gbp')
     let currencyValue = cookieStore.get('currency')?.value;
     
     // If currency cookie doesn't exist, determine default based on location/country (same logic as Navbar)

@@ -266,6 +266,17 @@ class AFS_WCML_REST_API {
 			)
 		);
 
+		// Get exchange rates for currencies.
+		register_rest_route(
+			$this->namespace,
+			'/exchange-rates',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_exchange_rates' ),
+				'permission_callback' => '__return_true', // Public endpoint
+			)
+		);
+
 		// Translate category slug to another language.
 		register_rest_route(
 			$this->namespace,
@@ -1179,6 +1190,93 @@ class AFS_WCML_REST_API {
 		$response = new WP_REST_Response( $response_data, 200 );
 		$response->header( 'Cache-Control', 'public, max-age=3600' );
 		return $response;
+	}
+
+	/**
+	 * Get exchange rates for all currencies.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_exchange_rates( $request ) {
+		try {
+			global $woocommerce_wpml;
+
+			if ( ! $woocommerce_wpml || ! isset( $woocommerce_wpml->multi_currency ) ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'WCML is not available.', 'afs-wcml-api' ),
+						'rates'   => array(),
+					),
+					200
+				);
+			}
+
+			$multi_currency = $woocommerce_wpml->multi_currency;
+			
+			if ( ! method_exists( $multi_currency, 'get_default_currency' ) ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'WCML multi_currency methods not available.', 'afs-wcml-api' ),
+						'rates'   => array(),
+					),
+					200
+				);
+			}
+
+			$default_currency = $multi_currency->get_default_currency();
+			if ( ! $default_currency ) {
+				$default_currency = 'EUR'; // Fallback
+			}
+
+			$currencies = $multi_currency->get_currencies();
+			if ( ! is_array( $currencies ) ) {
+				$currencies = array();
+			}
+
+			$rates = array();
+
+			// Add default currency with rate 1.0
+			$rates[ $default_currency ] = 1.0;
+
+			// Get rates for all currencies
+			foreach ( $currencies as $code => $currency_data ) {
+				if ( $code === $default_currency ) {
+					continue; // Skip default currency, already added
+				}
+
+				$rate = null;
+				if ( method_exists( $multi_currency, 'get_currency_rate' ) ) {
+					$rate = $multi_currency->get_currency_rate( $code );
+				}
+
+				if ( $rate && is_numeric( $rate ) && $rate > 0 ) {
+					$rates[ $code ] = floatval( $rate );
+				} elseif ( isset( $currency_data['rate'] ) && is_numeric( $currency_data['rate'] ) && $currency_data['rate'] > 0 ) {
+					$rates[ $code ] = floatval( $currency_data['rate'] );
+				}
+			}
+
+			return new WP_REST_Response(
+				array(
+					'success'         => true,
+					'default_currency' => $default_currency,
+					'rates'           => $rates,
+				),
+				200
+			);
+		} catch ( Exception $e ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Error retrieving exchange rates: ', 'afs-wcml-api' ) . $e->getMessage(),
+					'rates'   => array(),
+				),
+				200
+			);
+		}
 	}
 }
 
