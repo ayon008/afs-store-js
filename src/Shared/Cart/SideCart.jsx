@@ -123,7 +123,7 @@ const SideCart = ({ isOpen, onClose }) => {
                     </div>
                 </div>
                 {/* Content */}
-                <div className='max-h-[calc(100vh-195px)] min-h-[calc(100vh-195px)] overflow-y-scroll p-5 scroll-bar'>
+                <div className='flex-1 overflow-y-scroll p-5 scroll-bar'>
                     {
                         loading ? (
                             <div className='space-y-5'>
@@ -148,7 +148,7 @@ const SideCart = ({ isOpen, onClose }) => {
                         )
                     }
                 </div>
-                <div className='p-6 border-t border-t-gray-200 flex flex-col items-center justify-center gap-4 bg-gray-50'>
+                <div className='p-4 border-t border-t-gray-200 flex flex-col items-center justify-center gap-3 bg-gray-50 shrink-0'>
                     <div className='flex flex-col items-center gap-1'>
                         <div className='flex items-end gap-1 flex-wrap'>
                             <span className='text-[15px] uppercase leading-[100%] font-bold text-gray-700'>{t("subTotal")}</span>
