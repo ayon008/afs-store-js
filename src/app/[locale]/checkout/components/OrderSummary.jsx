@@ -1,6 +1,18 @@
 "use client";
 import React, { useRef } from "react";
-import { Truck, CreditCard, Receipt, ShieldCheck } from "lucide-react";
+import { Truck, CreditCard, Receipt, ShieldCheck, Tag, X } from "lucide-react";
+
+// Helper function to decode HTML entities
+const decodeEntities = (str = "") => {
+    if (!str) return str;
+    return str
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+};
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -23,7 +35,16 @@ const OrderSummary = ({
     cartTotal,
     totalTax,
     updatingTaxes = false,
-    isEuropeLocation = true // Default to Europe (TTC display)
+    isEuropeLocation = true, // Default to Europe (TTC display)
+    appliedCoupons = [],
+    couponDiscount = 0,
+    couponCode = '',
+    setCouponCode = () => {},
+    couponLoading = false,
+    couponError = '',
+    couponSuccess = '',
+    handleApplyCoupon = () => {},
+    handleRemoveCoupon = () => {}
 }) => {
     const summaryRef = useRef(null);
 
@@ -127,6 +148,81 @@ const OrderSummary = ({
 
                 {/* Summary Section - Fixed Bottom */}
                 <div className='flex-shrink-0 bg-gray-50'>
+                    {/* Coupon Section */}
+                    <div className='px-6 py-4 border-t border-dashed border-gray-300 bg-white'>
+                        <form onSubmit={handleApplyCoupon} className='space-y-3'>
+                            <div className='flex gap-2'>
+                                <input
+                                    type="text"
+                                    placeholder={t("enterCouponCode") || "Enter coupon code"}
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value)}
+                                    className='flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D98FF] focus:border-transparent transition-all bg-white'
+                                    disabled={couponLoading}
+                                />
+                                <button
+                                    type='submit'
+                                    disabled={couponLoading || !couponCode.trim()}
+                                    className='px-4 py-2 text-sm bg-[#1D98FF] text-white font-semibold rounded-lg hover:bg-[#1585e0] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200'
+                                >
+                                    {couponLoading ? (t("applying") || "Applying...") : (t("applyCoupon") || "Apply")}
+                                </button>
+                            </div>
+
+                            {couponError && (
+                                <div className='flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm'>
+                                    <X className='w-4 h-4' />
+                                    <p>{decodeEntities(couponError)}</p>
+                                </div>
+                            )}
+
+                            {couponSuccess && (
+                                <div className='flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm'>
+                                    <Tag className='w-4 h-4' />
+                                    <p>{couponSuccess}</p>
+                                </div>
+                            )}
+
+                            {appliedCoupons.length > 0 && (
+                                <div className='space-y-2'>
+                                    <p className='text-xs font-medium text-gray-700'>{t("appliedCoupons") || "Applied coupons"}</p>
+                                    <div className='flex flex-wrap gap-2'>
+                                        {appliedCoupons.map((coupon, index) => {
+                                            // Handle different coupon formats from WooCommerce
+                                            const couponCode = typeof coupon === 'string' ? coupon : (coupon.code || coupon);
+                                            const couponDiscount = coupon.totals?.total_discount 
+                                                ? (parseFloat(coupon.totals.total_discount) / 100).toFixed(2)
+                                                : null;
+                                            
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className='inline-flex items-center gap-2 bg-green-50 border border-green-300 text-green-800 px-2.5 py-1 rounded-full text-xs'
+                                                >
+                                                    <Tag className='w-3 h-3' />
+                                                    <span className='font-medium'>{couponCode}</span>
+                                                    {couponDiscount && (
+                                                        <span className='text-green-600 font-bold'>
+                                                            -{couponDiscount}{currencySymbol}
+                                                        </span>
+                                                    )}
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => handleRemoveCoupon(couponCode)}
+                                                        disabled={couponLoading}
+                                                        className='ml-1 hover:bg-red-100 rounded-full p-0.5 transition-colors disabled:opacity-50'
+                                                    >
+                                                        <X className='w-3 h-3 text-red-500' />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </form>
+                    </div>
+
                     {/* Price Breakdown */}
                     <div className='px-6 py-4 space-y-3 border-t border-dashed border-gray-300'>
                         {/* Subtotal */}
@@ -150,7 +246,7 @@ const OrderSummary = ({
                             <div className='flex items-center justify-between text-sm'>
                                 <span className='text-gray-500 flex items-center gap-1.5'>
                                     <Truck className='w-3.5 h-3.5' />
-                                    {shippingInfo.name}
+                                    {decodeEntities(shippingInfo.name)}
                                 </span>
                                 <span className='font-medium'>
                                     {shippingInfo.totalPrice === 0 ? (
@@ -174,6 +270,19 @@ const OrderSummary = ({
                                     ) : (
                                         `${totalTax ? parseFloat(totalTax).toFixed(2) : '0.00'}${currencySymbol}`
                                     )}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Coupon Discount */}
+                        {couponDiscount > 0 && (
+                            <div className='flex items-center justify-between text-sm'>
+                                <span className='text-gray-500 flex items-center gap-1.5'>
+                                    <Tag className='w-3.5 h-3.5' />
+                                    {t("discount") || "Discount"}
+                                </span>
+                                <span className='text-green-600 font-medium'>
+                                    -{couponDiscount.toFixed(2)}{currencySymbol}
                                 </span>
                             </div>
                         )}

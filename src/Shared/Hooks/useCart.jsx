@@ -71,6 +71,33 @@ const validateCartMetadata = (cart, currentMetadata) => {
     );
 };
 
+// Merge localStorage cart with WooCommerce cart data (coupons and discounts)
+// This allows us to keep localStorage items but show coupons applied in WooCommerce
+const mergeCartWithCoupons = (localCartDisplay, wooCommerceCart) => {
+    if (!localCartDisplay) return null;
+    if (!wooCommerceCart) return localCartDisplay;
+
+    // Get discount from WooCommerce (in cents)
+    const discount = wooCommerceCart.totals?.total_discount || 0;
+    
+    // Get coupons from WooCommerce
+    const coupons = wooCommerceCart.coupons || [];
+
+    // Calculate new total price with discount applied
+    const originalTotalPrice = localCartDisplay.totals?.total_price || 0;
+    const newTotalPrice = Math.max(0, originalTotalPrice - discount);
+
+    return {
+        ...localCartDisplay,
+        coupons: coupons,
+        totals: {
+            ...localCartDisplay.totals,
+            total_discount: discount,
+            total_price: newTotalPrice
+        }
+    };
+};
+
 // Convert localStorage cart to WooCommerce format for display
 const convertLocalStorageCartToDisplay = (localCart) => {
     if (!localCart || !localCart.items || localCart.items.length === 0) {
@@ -572,8 +599,39 @@ export const CartProvider = ({ children }) => {
                 // Small delay to ensure cookies are synchronized
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
+                // Load cart from localStorage first
                 await loadCart();
+
+                // Then fetch cart from WooCommerce to get coupons and discount
+                try {
+                    const response = await fetch('/api/cart', {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-store',
+                    });
+
+                    if (response.ok) {
+                        const wooCommerceCart = await response.json();
+                        
+                        // Get current cart state (from localStorage)
+                        const currentMetadata = getCurrentMetadata(locale);
+                        const localCart = getLocalStorageCart();
+                        
+                        if (localCart && validateCartMetadata(localCart, currentMetadata)) {
+                            const localCartDisplay = convertLocalStorageCartToDisplay(localCart);
+                            
+                            // Merge with WooCommerce cart data (coupons and discount)
+                            const mergedCart = mergeCartWithCoupons(localCartDisplay, wooCommerceCart);
+                            
+                            if (mergedCart) {
+                                setCart(mergedCart);
+                            }
+                        }
+                    }
+                } catch (fetchError) {
+                    console.warn('Failed to fetch cart from WooCommerce for coupons:', fetchError);
+                    // Continue with localStorage cart if fetch fails
+                }
             } else {
                 setError(result.error);
                 console.error('Apply coupon error:', result.error);
@@ -600,8 +658,39 @@ export const CartProvider = ({ children }) => {
                 // Small delay to ensure cookies are synchronized
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                // Then refresh full cart data (now getCart() calls WooCommerce directly with synced cookies)
+                // Load cart from localStorage first
                 await loadCart();
+
+                // Then fetch cart from WooCommerce to get updated coupons and discount
+                try {
+                    const response = await fetch('/api/cart', {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-store',
+                    });
+
+                    if (response.ok) {
+                        const wooCommerceCart = await response.json();
+                        
+                        // Get current cart state (from localStorage)
+                        const currentMetadata = getCurrentMetadata(locale);
+                        const localCart = getLocalStorageCart();
+                        
+                        if (localCart && validateCartMetadata(localCart, currentMetadata)) {
+                            const localCartDisplay = convertLocalStorageCartToDisplay(localCart);
+                            
+                            // Merge with WooCommerce cart data (coupons and discount)
+                            const mergedCart = mergeCartWithCoupons(localCartDisplay, wooCommerceCart);
+                            
+                            if (mergedCart) {
+                                setCart(mergedCart);
+                            }
+                        }
+                    }
+                } catch (fetchError) {
+                    console.warn('Failed to fetch cart from WooCommerce for coupons:', fetchError);
+                    // Continue with localStorage cart if fetch fails
+                }
             } else {
                 setError(result.error);
                 console.error('Remove coupon error:', result.error);

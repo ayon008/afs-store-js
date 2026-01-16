@@ -3,7 +3,17 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getLocaleValue } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 
-
+// Helper function to decode HTML entities
+const decodeEntities = (str = "") => {
+    if (!str) return str;
+    return str
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+};
 
 // Helper to parse set-cookie headers
 function parseSetCookieHeader(header) {
@@ -50,8 +60,6 @@ async function getWooCommerceCookies() {
 }
 
 export async function POST(request) {
-    const localeValue = await getLocaleValue();
-    const WC_STORE_URL = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/store/v1`;
     try {
         // Get WooCommerce cookies from browser
         const wooCookieHeader = await getWooCommerceCookies();
@@ -73,6 +81,9 @@ export async function POST(request) {
                 error: "Invalid coupon code"
             }, { status: 400 });
         }
+
+        // Use the same URL format as other cart endpoints (without locale in path)
+        const WC_STORE_URL = `${process.env.WP_BASE_URL}/wp-json/wc/store/v1`;
 
         // Make request to WooCommerce to remove coupon
         const response = await fetch(`${WC_STORE_URL}/cart/remove-coupon`, {
@@ -144,7 +155,29 @@ export async function POST(request) {
         }
 
         if (!response.ok) {
-            throw new Error(`Failed to remove coupon: ${response.status}`);
+            // Try to get error message from WooCommerce response
+            let errorMessage = `Failed to remove coupon: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    errorMessage = decodeEntities(errorData.message);
+                } else if (errorData.error) {
+                    errorMessage = decodeEntities(errorData.error);
+                } else if (typeof errorData === 'string') {
+                    errorMessage = decodeEntities(errorData);
+                }
+            } catch (e) {
+                // If response is not JSON, try to get text
+                try {
+                    const errorText = await response.text();
+                    if (errorText) {
+                        errorMessage = decodeEntities(errorText.substring(0, 200));
+                    }
+                } catch (textError) {
+                    // Keep default error message
+                }
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();

@@ -2,6 +2,18 @@
 import React from "react";
 import { useLocale } from "next-intl";
 
+// Helper function to decode HTML entities
+const decodeEntities = (str = "") => {
+    if (!str) return str;
+    return str
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+};
+
 const ShippingMethodsList = ({
     allShippingRates,
     selectedRateId,
@@ -66,7 +78,7 @@ const ShippingMethodsList = ({
                                             disabled={shippingLoading || updatingShipping}
                                             className="cursor-pointer"
                                         />
-                                        <label htmlFor={safeId} className="break-normal max-w-full cursor-pointer font-medium text-gray-900">{rate.name}</label>
+                                        <label htmlFor={safeId} className="break-normal max-w-full cursor-pointer font-medium text-gray-900">{decodeEntities(rate.name)}</label>
                                     </div>
                                     <div className='text-base text-[#111] font-semibold leading-[100%]'>
                                         {

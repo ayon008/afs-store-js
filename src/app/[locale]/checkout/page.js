@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import useCart from "@/Shared/Hooks/useCart";
-import { clearCart, getPaymentMethods, getCountryDetails } from "@/app/actions/Woo-Coommerce/getWooCommerce";
+import { clearCart, getPaymentMethods, getCountryDetails, applyCoupon, removeCoupon } from "@/app/actions/Woo-Coommerce/getWooCommerce";
 import { selectShippingRate } from "@/app/actions/Woo-Coommerce/Shop/Cart/cart";
 import { countriesList } from "@/lib/countriesList";
 import { WAREHOUSES } from "@/lib/countries-config";
@@ -26,6 +26,102 @@ const getCookie = (name) => {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
     return null;
+};
+
+// Helper functions for localStorage cart coupons
+const CART_STORAGE_KEY = 'afs_cart';
+
+const getLocalStorageCart = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const cartData = localStorage.getItem(CART_STORAGE_KEY);
+        return cartData ? JSON.parse(cartData) : null;
+    } catch (error) {
+        console.error('Error reading cart from localStorage:', error);
+        return null;
+    }
+};
+
+const saveLocalStorageCart = (cart) => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+    }
+};
+
+// Save coupons to localStorage cart
+const saveCouponsToLocalStorage = (coupons, discount, cart = null) => {
+    let localCart = getLocalStorageCart();
+    
+    // If cart doesn't exist but we have a cart object passed, use it
+    if (!localCart && cart && cart.items && cart.items.length > 0) {
+        // Create a minimal cart structure from the current cart
+        const currentMetadata = {
+            locale: cart.metadata?.locale || 'fr',
+            currency: cart.metadata?.currency || cart.totals?.currency_code || 'EUR',
+            location: cart.metadata?.location || '2682'
+        };
+        
+        localCart = {
+            items: cart.items.map(item => ({
+                id: item.id,
+                variation_id: item.variation_id || null,
+                quantity: item.quantity || 1,
+                variation: item.variation || {},
+                productData: item.productData || {}
+            })),
+            metadata: {
+                ...currentMetadata,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }
+        };
+
+    }
+    
+    if (localCart) {
+        const couponsToSave = coupons || [];
+        const discountToSave = discount || 0;
+        
+        localCart.coupons = couponsToSave;
+        localCart.couponDiscount = discountToSave;
+        
+        try {
+            saveLocalStorageCart(localCart);
+            
+            // Verify it was saved
+            const verifyCart = getLocalStorageCart();
+            const savedCoupons = verifyCart?.coupons || [];
+            const savedDiscount = verifyCart?.couponDiscount || 0;
+            
+
+            
+            return true;
+        } catch (error) {
+            console.error('[Checkout] Error saving coupons to localStorage:', error);
+            return false;
+        }
+    } else {
+        console.warn('[Checkout] ⚠️ Cannot save coupons: localStorage cart does not exist and no cart provided');
+        return false;
+    }
+};
+
+// Load coupons from localStorage cart
+const loadCouponsFromLocalStorage = () => {
+    const localCart = getLocalStorageCart();
+    if (localCart) {
+        const coupons = localCart.coupons || [];
+        const discount = localCart.couponDiscount || 0;
+
+        return {
+            coupons: coupons,
+            discount: discount
+        };
+    }
+    return { coupons: [], discount: 0 };
 };
 
 // Wrapper component to ensure NextIntl context is available
@@ -469,8 +565,14 @@ const CheckoutPageContent = () => {
     }, [watchFields.shipping_country, watchFields.billing_country]);
 
     // Ref to track last update to prevent infinite loops
-    const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '', state: '' });
+    const lastUpdateRef = React.useRef({ country: '', postcode: '', city: '', address: '', state: '', key: '' });
     const isUpdatingRef = React.useRef(false);
+    const isSyncingCartRef = React.useRef(false);
+    // Ref to access current appliedCoupons without causing re-renders
+    const appliedCouponsRef = React.useRef([]);
+    // Refs to store callback functions to avoid dependency issues
+    const syncCartAndUpdateTaxesRef = React.useRef(null);
+    const calculateShippingRatesRef = React.useRef(null);
 
     // State for shipping
     const [shippingLoading, setShippingLoading] = useState(false);
@@ -482,6 +584,21 @@ const CheckoutPageContent = () => {
     // State for dynamic tax calculation
     const [updatingTaxes, setUpdatingTaxes] = useState(false);
     const [apiCartItems, setApiCartItems] = useState([]);
+
+    // State for coupons
+    // Load coupons from localStorage on mount
+    const initialCoupons = typeof window !== 'undefined' ? loadCouponsFromLocalStorage() : { coupons: [], discount: 0 };
+    const [appliedCoupons, setAppliedCoupons] = useState(initialCoupons.coupons);
+    const [couponDiscount, setCouponDiscount] = useState(initialCoupons.discount);
+    const [couponCode, setCouponCode] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState('');
+    const [couponSuccess, setCouponSuccess] = useState('');
+
+    // Sync ref with state whenever appliedCoupons changes (but don't trigger callbacks)
+    useEffect(() => {
+        appliedCouponsRef.current = appliedCoupons;
+    }, [appliedCoupons]);
 
     // Helper to show notification with type
     const showNotification = (message, type = 'info') => {
@@ -496,6 +613,12 @@ const CheckoutPageContent = () => {
             return;
         }
 
+        // Prevent if already syncing cart
+        if (isSyncingCartRef.current) {
+            console.log('[Checkout] Cart sync in progress, skipping shipping calculation...');
+            return;
+        }
+
         // Check if we're already updating or if nothing has changed
         const currentKey = `${shippingCountry}-${addressData.billing_postcode || ''}-${addressData.billing_city || ''}`;
         if (isUpdatingRef.current || lastUpdateRef.current.key === currentKey) {
@@ -503,6 +626,7 @@ const CheckoutPageContent = () => {
         }
 
         try {
+            // Mark as updating BEFORE setting the key to prevent race conditions
             isUpdatingRef.current = true;
             lastUpdateRef.current.key = currentKey;
             setUpdatingShipping(true);
@@ -545,13 +669,7 @@ const CheckoutPageContent = () => {
                     }
                 }
 
-                console.log('[Checkout] Preparing item for shipping:', {
-                    id: item.id,
-                    variation_id: item.variation_id,
-                    hasVariationRaw: !!item._variationRaw && Object.keys(item._variationRaw || {}).length > 0,
-                    hasVariationArray: Array.isArray(item.variation) && item.variation.length > 0,
-                    variationData: variationData
-                });
+
 
                 return {
                     id: item.id,
@@ -563,7 +681,7 @@ const CheckoutPageContent = () => {
 
             // Get location from cart metadata (set when items were added)
             const cartLocation = cart?.metadata?.location || cart?._localStorage?.location;
-            console.log('[Checkout] Cart location:', cartLocation);
+
 
             // Call the shipping calculation API
             const response = await fetch('/api/shipping/calculate', {
@@ -641,14 +759,48 @@ const CheckoutPageContent = () => {
     }, [cart?.items, selectedRateId, setValue]);
 
     // Sync cart to WooCommerce and update taxes based on billing/shipping address
+    // This function preserves applied coupons by saving and reapplying them after sync
     const syncCartAndUpdateTaxes = useCallback(async (addressFields) => {
         // Need cart items to sync
         if (!cart?.items || cart.items.length === 0) {
             return;
         }
 
+        // Prevent multiple simultaneous calls
+        if (isSyncingCartRef.current) {
+            console.log('[Checkout] syncCartAndUpdateTaxes already in progress, skipping...');
+            return;
+        }
+
+        // Prevent if already updating shipping
+        if (isUpdatingRef.current) {
+            console.log('[Checkout] Shipping calculation in progress, skipping sync...');
+            return;
+        }
+
+        isSyncingCartRef.current = true;
         setUpdatingTaxes(true);
         try {
+            // Update the key to prevent duplicate calls
+            const shippingCountry = addressFields.shipping_country || addressFields.billing_country;
+            const currentState = shippingAddress
+                ? (addressFields.shipping_state || addressFields.billing_state || '')
+                : (addressFields.billing_state || '');
+            const syncKey = `${shippingCountry}-${currentState}-${addressFields.billing_postcode || addressFields.shipping_postcode}-${addressFields.billing_city || addressFields.shipping_city}`;
+            lastUpdateRef.current.key = syncKey;
+
+            // 0. Save current coupons before clearing cart (use ref to avoid dependency)
+            const savedCouponCodes = [];
+            const currentCoupons = appliedCouponsRef.current;
+            if (currentCoupons && currentCoupons.length > 0) {
+                // Extract coupon codes from appliedCoupons (can be string or object with code property)
+                savedCouponCodes.push(...currentCoupons.map(coupon => {
+                    if (typeof coupon === 'string') return coupon;
+                    return coupon.code || coupon;
+                }).filter(Boolean));
+            }
+
+
             // 1. Clear existing WooCommerce cart
             await fetch('/api/cart/clear', {
                 method: 'DELETE',
@@ -687,7 +839,27 @@ const CheckoutPageContent = () => {
                 });
             }
 
-            // 3. Update billing/shipping address to trigger tax recalculation
+            // 3. Reapply saved coupons after items are added
+            if (savedCouponCodes.length > 0) {
+
+                // Wait a bit for cart to be ready
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Reapply each coupon sequentially
+                for (const couponCode of savedCouponCodes) {
+                    try {
+                        const result = await applyCoupon(couponCode);
+                        // Small delay between coupon applications to avoid race conditions
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    } catch (error) {
+                        console.error(`[Checkout] Error reapplying coupon ${couponCode}:`, error);
+                    }
+                }
+                // Wait a bit more after all coupons are reapplied
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+
+            // 4. Update billing/shipping address to trigger tax recalculation
             const billingAddress = {
                 country: addressFields.billing_country || '',
                 state: addressFields.billing_state || '',
@@ -712,7 +884,7 @@ const CheckoutPageContent = () => {
                 }),
             });
 
-            // 4. Fetch updated cart with recalculated taxes
+            // 5. Fetch updated cart with recalculated taxes and coupons
             const cartResponse = await fetch('/api/cart', {
                 method: 'GET',
                 credentials: 'include',
@@ -732,19 +904,54 @@ const CheckoutPageContent = () => {
                         }))
                     });
                 }
+                // Update coupons and discount from WooCommerce cart
+                // Preserve localStorage coupons if API doesn't return them (they might not be synced yet)
+                const localCoupons = loadCouponsFromLocalStorage();
+                let finalCoupons = [];
+                let finalDiscount = 0;
+                
+                if (apiCart.coupons && Array.isArray(apiCart.coupons) && apiCart.coupons.length > 0) {
+                    // API has coupons - use them
+                    finalCoupons = apiCart.coupons;
+
+                } else if (localCoupons.coupons.length > 0) {
+                    // API doesn't have coupons, but localStorage does - preserve them
+                    finalCoupons = localCoupons.coupons;
+                }
+                
+                // Update both state and ref
+                appliedCouponsRef.current = finalCoupons;
+                setAppliedCoupons(finalCoupons);
+                
+                if (apiCart.totals?.total_discount) {
+                    finalDiscount = parseFloat(apiCart.totals.total_discount) / 100;
+                } else if (localCoupons.discount > 0) {
+                    finalDiscount = localCoupons.discount;
+                }
+                
+                setCouponDiscount(finalDiscount);
+                // Save to localStorage
+                saveCouponsToLocalStorage(finalCoupons, finalDiscount, cart);
             }
         } catch (error) {
             console.error('Error syncing cart for tax calculation:', error);
             // Silent failure - keep existing taxes
         } finally {
             setUpdatingTaxes(false);
+            isSyncingCartRef.current = false;
         }
     }, [cart?.items, cart?.metadata?.location, shippingAddress]);
 
+    // Store callbacks in refs to avoid dependency issues
+    useEffect(() => {
+        syncCartAndUpdateTaxesRef.current = syncCartAndUpdateTaxes;
+        calculateShippingRatesRef.current = calculateShippingRates;
+    }, [syncCartAndUpdateTaxes, calculateShippingRates]);
+
     // Debounced calculation of shipping rates and taxes - trigger on address change
     useEffect(() => {
-        // Skip if already updating
-        if (isUpdatingRef.current) {
+        // Skip if already updating or syncing
+        if (isUpdatingRef.current || isSyncingCartRef.current) {
             return;
         }
 
@@ -754,6 +961,11 @@ const CheckoutPageContent = () => {
             : watchFields.billing_country;
 
         const timer = setTimeout(() => {
+            // Skip if syncing started during the timeout
+            if (isSyncingCartRef.current || !syncCartAndUpdateTaxesRef.current || !calculateShippingRatesRef.current) {
+                return;
+            }
+
             // Calculate shipping rates and taxes if country is set
             if (shippingCountry) {
                 // Determine which state to use (shipping takes priority if different address)
@@ -766,10 +978,12 @@ const CheckoutPageContent = () => {
 
                 // Only calculate if something actually changed
                 if (lastUpdateRef.current.key !== currentKey) {
+                    // Don't update the key here - let the functions update it after execution
+                    // This prevents race conditions
                     // Calculate shipping rates
-                    calculateShippingRates(watchFields);
+                    calculateShippingRatesRef.current(watchFields);
                     // Sync cart and recalculate taxes based on new address (including state for US/CA)
-                    syncCartAndUpdateTaxes(watchFields);
+                    syncCartAndUpdateTaxesRef.current(watchFields);
                 }
             }
         }, 800); // Wait 800ms after user stops typing
@@ -784,9 +998,8 @@ const CheckoutPageContent = () => {
         watchFields.shipping_city,
         watchFields.billing_state,
         watchFields.shipping_state,
-        shippingAddress,
-        calculateShippingRates,
-        syncCartAndUpdateTaxes
+        shippingAddress
+        // Removed calculateShippingRates and syncCartAndUpdateTaxes from dependencies to prevent loops
     ]);
 
     const states = countryDetails?.states || [];
@@ -873,8 +1086,8 @@ const CheckoutPageContent = () => {
         return total;
     }, [selectedRateId, allShippingRates]);
 
-    // Total = subtotal + shipping
-    const cartTotal = sousTotal + selectedShippingCost;
+    // Total = subtotal + shipping - coupon discount
+    const cartTotal = Math.max(0, sousTotal + selectedShippingCost - couponDiscount);
 
     // Ref to track user's manual selection (local state takes priority)
     const userSelectedRateRef = React.useRef(null);
@@ -1097,6 +1310,104 @@ const CheckoutPageContent = () => {
         return 0;
     }, [apiCartItems, cart?.items]);
 
+    // Fetch coupons on initial load if cart is already synced
+    // Use a ref to track if we've already loaded coupons to avoid multiple loads
+    const couponsLoadedRef = React.useRef(false);
+    
+    useEffect(() => {
+        // Only fetch if we have cart items and haven't loaded coupons yet
+        if (cart?.items && cart.items.length > 0 && !couponsLoadedRef.current) {
+            couponsLoadedRef.current = true; // Mark as loaded to prevent multiple loads
+            
+            // First, try to load from localStorage
+            const localCoupons = loadCouponsFromLocalStorage();
+            
+            if (localCoupons.coupons.length > 0 || localCoupons.discount > 0) {
+                // Use localStorage coupons
+                appliedCouponsRef.current = localCoupons.coupons;
+                setAppliedCoupons(localCoupons.coupons);
+                setCouponDiscount(localCoupons.discount);
+                
+                // Also try to sync with WooCommerce in background (but don't overwrite if localStorage has coupons)
+                // This ensures WooCommerce is aware of the coupons
+                const syncWithWooCommerce = async () => {
+                    try {
+                        // Re-apply coupons to WooCommerce if they exist in localStorage
+                        for (const coupon of localCoupons.coupons) {
+                            const couponCode = typeof coupon === 'string' ? coupon : (coupon.code || coupon);
+                            if (couponCode) {
+                                try {
+                                    await applyCoupon(couponCode);
+                                    await new Promise(resolve => setTimeout(resolve, 300));
+                                } catch (error) {
+                                    // Silent fail - coupon may already be applied
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        // Silent fail - background sync
+                    }
+                };
+                // Sync in background without blocking
+                syncWithWooCommerce();
+            } else {
+                // If no localStorage coupons, try to load from WooCommerce
+                const fetchCoupons = async () => {
+                    try {
+                        const cartResponse = await fetch('/api/cart', {
+                            method: 'GET',
+                            credentials: 'include',
+                            cache: 'no-store',
+                        });
+                        if (cartResponse.ok) {
+                            const apiCart = await cartResponse.json();
+                            if (apiCart.coupons && Array.isArray(apiCart.coupons) && apiCart.coupons.length > 0) {
+                                const discount = apiCart.totals?.total_discount ? parseFloat(apiCart.totals.total_discount) / 100 : 0;
+                                appliedCouponsRef.current = apiCart.coupons;
+                                setAppliedCoupons(apiCart.coupons);
+                                setCouponDiscount(discount);
+                                // Save to localStorage
+                                saveCouponsToLocalStorage(apiCart.coupons, discount, cart);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching cart for coupons:', error);
+                    }
+                };
+                fetchCoupons();
+            }
+        }
+        
+        // Reset loaded flag if cart is cleared
+        if (!cart || !cart.items || cart.items.length === 0) {
+            couponsLoadedRef.current = false;
+        }
+    }, [cart?.items?.length]); // Only run when cart items change (removed appliedCoupons.length and couponDiscount to prevent loops)
+
+    // Clear coupon success message after 5 seconds (increased to give user time to see it)
+    useEffect(() => {
+        if (couponSuccess) {
+            const timer = setTimeout(() => {
+                setCouponSuccess('');
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [couponSuccess]);
+
+    // Reset coupons when cart is cleared
+    useEffect(() => {
+        if (!cart || !cart.items || cart.items.length === 0) {
+            appliedCouponsRef.current = [];
+            setAppliedCoupons([]);
+            setCouponDiscount(0);
+            setCouponCode('');
+            setCouponError('');
+            setCouponSuccess('');
+            // Clear from localStorage
+            saveCouponsToLocalStorage([], 0, cart);
+        }
+    }, [cart?.items?.length]);
+
     // Clear cart if locale changes (user navigated to different language checkout)
     // Use a ref to track the previous locale to detect actual changes
     const previousLocaleRef = React.useRef(null);
@@ -1150,6 +1461,182 @@ const CheckoutPageContent = () => {
         }
     };
 
+    // Helper to fetch cart and update coupons/discount
+    const fetchCartAndUpdateCoupons = async () => {
+        try {
+            // First, check if we have coupons in localStorage (preserve them if API doesn't return them yet)
+            const localCoupons = loadCouponsFromLocalStorage();
+            
+            const cartResponse = await fetch('/api/cart', {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store',
+            });
+            if (cartResponse.ok) {
+                const apiCart = await cartResponse.json();
+                const apiCoupons = (apiCart.coupons && Array.isArray(apiCart.coupons)) ? apiCart.coupons : [];
+                const discount = apiCart.totals?.total_discount ? parseFloat(apiCart.totals.total_discount) / 100 : 0;
+                
+                // Use API coupons if available, otherwise preserve localStorage coupons
+                // This prevents losing coupons that were just applied but not yet returned by WooCommerce
+                let coupons = apiCoupons;
+                if (apiCoupons.length === 0 && localCoupons.coupons.length > 0) {
+                    // API doesn't have coupons yet, but we have them in localStorage - preserve them
+                    coupons = localCoupons.coupons;
+                }
+                
+                // Use API discount if available, otherwise use localStorage discount
+                const finalDiscount = discount > 0 ? discount : (localCoupons.discount || 0);
+                
+                // Update state and ref
+                appliedCouponsRef.current = coupons;
+                setAppliedCoupons(coupons);
+                setCouponDiscount(finalDiscount);
+                
+                // Save to localStorage immediately with the final values (preserve coupons if API doesn't have them)
+                // Pass current cart context if localStorage cart doesn't exist
+                const saved = saveCouponsToLocalStorage(coupons, finalDiscount, cart);
+
+                
+                return { coupons, discount: finalDiscount };
+            } else {
+                console.error('[Checkout] Failed to fetch cart:', cartResponse.status);
+            }
+        } catch (error) {
+            console.error('Error fetching cart for coupons:', error);
+        }
+        
+        // If API call failed, return localStorage coupons as fallback
+        const localCoupons = loadCouponsFromLocalStorage();
+        return { coupons: localCoupons.coupons, discount: localCoupons.discount };
+    };
+
+    // Handle coupon application
+    const handleApplyCoupon = async (e) => {
+        e?.preventDefault();
+        if (!couponCode.trim()) return;
+
+        setCouponLoading(true);
+        setCouponError('');
+        setCouponSuccess('');
+
+        try {
+            // Ensure cart is synced to WooCommerce before applying coupon
+            // Only sync if not already syncing to avoid loops
+            const shippingCountry = watchFields.shipping_country || watchFields.billing_country;
+            if (shippingCountry && cart?.items && cart.items.length > 0 && !isSyncingCartRef.current) {
+                // Sync cart first to ensure it exists in WooCommerce
+                // syncCartAndUpdateTaxes now preserves coupons, so it's safe to call
+                await syncCartAndUpdateTaxes(watchFields);
+                // Wait a bit for sync to complete
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            const couponCodeToApply = couponCode.trim();
+            const result = await applyCoupon(couponCodeToApply);
+            
+            if (result.success) {
+                setCouponSuccess(t("couponApplied") || "Coupon applied successfully!");
+                setCouponCode('');
+                
+                // Immediately save the coupon code to localStorage as a fallback
+                // This ensures the coupon is saved even if API doesn't return it immediately
+                const currentCoupons = appliedCouponsRef.current || [];
+                const newCoupons = [...currentCoupons];
+                // Check if coupon already exists
+                const couponExists = newCoupons.some(c => {
+                    const code = typeof c === 'string' ? c : (c.code || c);
+                    return code.toLowerCase() === couponCodeToApply.toLowerCase();
+                });
+                if (!couponExists) {
+                    newCoupons.push(couponCodeToApply);
+                    appliedCouponsRef.current = newCoupons;
+                    setAppliedCoupons(newCoupons);
+                    // Save to localStorage immediately
+                    saveCouponsToLocalStorage(newCoupons, couponDiscount, cart);
+                }
+                
+                // Wait longer for cookies to sync and WooCommerce to process the coupon
+                // WooCommerce needs time to update the cart session
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Fetch cart to get updated coupons and discount from WooCommerce
+                // This will update the discount amount and verify the coupon is applied
+                let couponResult = { coupons: [], discount: 0 };
+                let found = false;
+                
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    couponResult = await fetchCartAndUpdateCoupons();
+                    
+                    if (couponResult.coupons && couponResult.coupons.length > 0) {
+                        found = true;
+                        break;
+                    }
+                    
+                    if (attempt < 3) {
+                        const delay = attempt * 500; // 500ms, 1000ms
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+                
+                // Don't call update-billing here as it can trigger syncCartAndUpdateTaxes via useEffect
+                // The useEffect will handle tax recalculation when needed
+            } else {
+                setCouponError(result.error || t("invalidCoupon") || "Invalid coupon code");
+            }
+        } catch (error) {
+            console.error('Apply coupon error:', error);
+            setCouponError(error.message || t("errorApplyingCoupon") || "Error applying coupon");
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    // Handle coupon removal
+    const handleRemoveCoupon = async (couponCodeToRemove) => {
+        setCouponLoading(true);
+        setCouponError('');
+        setCouponSuccess('');
+
+        try {
+            const result = await removeCoupon(couponCodeToRemove);
+            
+            if (result.success) {
+                // Immediately remove from localStorage as well
+                const currentCoupons = appliedCouponsRef.current || [];
+                const updatedCoupons = currentCoupons.filter(c => {
+                    const code = typeof c === 'string' ? c : (c.code || c);
+                    return code.toLowerCase() !== couponCodeToRemove.toLowerCase();
+                });
+                appliedCouponsRef.current = updatedCoupons;
+                setAppliedCoupons(updatedCoupons);
+                setCouponDiscount(0); // Reset discount, will be updated from API
+                // Save to localStorage immediately
+                saveCouponsToLocalStorage(updatedCoupons, 0, cart);
+
+                
+                // Wait a bit for cookies to sync
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Fetch cart to get updated coupons and discount from WooCommerce
+                // This will verify the removal and update the discount
+                const couponResult = await fetchCartAndUpdateCoupons();
+
+                
+                // Don't call update-billing here as it can trigger syncCartAndUpdateTaxes via useEffect
+                // The useEffect will handle tax recalculation when needed
+            } else {
+                console.error('Remove coupon error:', result.error);
+                setCouponError(result.error || t("errorRemovingCoupon") || "Error removing coupon");
+            }
+        } catch (error) {
+            console.error('Remove coupon error:', error);
+            setCouponError(error.message || t("errorRemovingCoupon") || "Error removing coupon");
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
     const onSubmit = async (data) => {
 
         // Prevent submission if cart is empty
@@ -1181,6 +1668,19 @@ const CheckoutPageContent = () => {
                 const syncResult = await syncCartToAPI();
                 if (!syncResult.success) {
                     throw new Error(syncResult.error || 'Failed to sync cart');
+                }
+                
+                // Update coupons and discount from synced cart
+                if (syncResult.data) {
+                    if (syncResult.data.coupons && Array.isArray(syncResult.data.coupons)) {
+                        appliedCouponsRef.current = syncResult.data.coupons;
+                        setAppliedCoupons(syncResult.data.coupons);
+                    }
+                    if (syncResult.data.totals?.total_discount) {
+                        setCouponDiscount(parseFloat(syncResult.data.totals.total_discount) / 100);
+                    } else {
+                        setCouponDiscount(0);
+                    }
                 }
 
                 // Step 2: Select shipping rate if available
@@ -1447,6 +1947,15 @@ const CheckoutPageContent = () => {
                         totalTax={totalTax}
                         updatingTaxes={updatingTaxes}
                         isEuropeLocation={isEuropeLocation}
+                        appliedCoupons={appliedCoupons}
+                        couponDiscount={couponDiscount}
+                        couponCode={couponCode}
+                        setCouponCode={setCouponCode}
+                        couponLoading={couponLoading}
+                        couponError={couponError}
+                        couponSuccess={couponSuccess}
+                        handleApplyCoupon={handleApplyCoupon}
+                        handleRemoveCoupon={handleRemoveCoupon}
                     />
                 </div>
 

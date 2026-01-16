@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle, X, ShoppingCart, Truck, CreditCard, Tag, Package } from 'lucide-react';
+import { CheckCircle, ShoppingCart, Truck, CreditCard, Package } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import useCart from '@/Shared/Hooks/useCart';
@@ -37,25 +37,13 @@ const Cart = () => {
     }, []);
 
     // Shipping rates will be calculated at checkout
-    const [couponCode, setCouponCode] = useState('');
-    const [couponLoading, setCouponLoading] = useState(false);
-    const [couponError, setCouponError] = useState('');
-    const [couponSuccess, setCouponSuccess] = useState('');
-
     const {
-        handleApplyCoupon,
-        handleRemoveCoupon,
-        getAppliedCoupons,
-        getDiscountTotal,
         getCurrencySymbol,
         getTotalPrice,
         getSubtotal,
         getTotalTax,
         cart,
     } = useCart();
-
-    const appliedCoupons = getAppliedCoupons();
-    const discountTotal = getDiscountTotal();
     // const totalPrice = getTotalPrice();
     const currencySymbol = getCurrencySymbol();
 
@@ -68,40 +56,6 @@ const Cart = () => {
     const total = parseFloat(getTotalPrice()) || 0;
 
 
-    const handleCouponSubmit = async (e) => {
-        e.preventDefault();
-        if (!couponCode.trim()) return;
-
-        setCouponLoading(true);
-        setCouponError('');
-        setCouponSuccess('');
-
-        const result = await handleApplyCoupon(couponCode);
-
-        if (result.success) {
-            setCouponSuccess(t("couponApplied"));
-            setCouponCode('');
-        } else {
-            setCouponError(result.error || t("invalidCoupon"));
-        }
-
-        setCouponLoading(false);
-    };
-
-    const handleRemoveCouponClick = async (code) => {
-        setCouponLoading(true);
-        setCouponError('');
-        setCouponSuccess(''); // Clear success message when removing coupon
-
-        const result = await handleRemoveCoupon(code);
-
-        if (!result.success) {
-            setCouponError(result.error || t("errorRemovingCoupon"));
-        }
-        // No success message when removing - just clear the banner
-
-        setCouponLoading(false);
-    };
 
     // cartItems
     const cartItems = cart?.items || [];
@@ -136,15 +90,6 @@ const Cart = () => {
 
     return (
         <div className="bg-white">
-            {/* Success Notification */}
-            {
-                couponSuccess && (
-                    <div className='py-4 px-6 flex items-center gap-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-md my-8 mx-auto max-w-[1600px] animate-slideDown'>
-                        <CheckCircle className='w-5 h-5 text-green-600' />
-                        <span className='text-green-800 text-lg font-medium'>{t("couponApplied")}</span>
-                    </div>
-                )
-            }
 
             {/* Main Cart Container */}
             <div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8'>
@@ -187,69 +132,6 @@ const Cart = () => {
                         </div>
                     </div>
 
-                    {/* Coupon Section */}
-                    <div className='bg-white rounded-lg shadow-lg border border-gray-100 p-6 space-y-4'>
-                        <div className='flex items-center gap-3 mb-4'>
-                            <div className='w-10 h-10 bg-[#000000] rounded-lg flex items-center justify-center'>
-                                <Tag className='w-5 h-5 text-white' />
-                            </div>
-                            <h3 className='text-lg font-semibold text-gray-900'>{t("haveCoupon")}</h3>
-                        </div>
-
-                        <form onSubmit={handleCouponSubmit} className='flex flex-col sm:flex-row gap-3'>
-                            <input
-                                type="text"
-                                name='coupon-code'
-                                placeholder={t("enterCouponCode")}
-                                value={couponCode}
-                                onChange={(e) => setCouponCode(e.target.value)}
-                                className='flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D98FF] focus:border-transparent transition-all bg-white'
-                                disabled={couponLoading}
-                            />
-                            <button
-                                type='submit'
-                                disabled={couponLoading || !couponCode.trim()}
-                                className='px-6 py-3 bg-[#1D98FF] text-white font-semibold rounded-lg hover:bg-[#1585e0] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg'
-                            >
-                                {couponLoading ? t("applying") : t("applyCoupon")}
-                            </button>
-                        </form>
-
-                        {couponError && (
-                            <div className='flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2 rounded-lg'>
-                                <X className='w-4 h-4' />
-                                <p className='text-sm'>{couponError}</p>
-                            </div>
-                        )}
-
-                        {appliedCoupons.length > 0 && (
-                            <div className='bg-green-50 rounded-lg p-4'>
-                                <p className='text-sm font-medium text-gray-700 mb-2'>{t("appliedCoupons")}</p>
-                                <div className='flex flex-wrap gap-2'>
-                                    {appliedCoupons.map((coupon, index) => (
-                                        <div
-                                            key={index}
-                                            className='inline-flex items-center gap-2 bg-white border border-green-300 text-green-800 px-3 py-1.5 rounded-full text-sm'
-                                        >
-                                            <Tag className='w-3 h-3' />
-                                            <span className='font-medium'>{coupon.code}</span>
-                                            <span className='text-green-600 font-bold'>
-                                                -{(coupon.totals?.total_discount / 100 || 0).toFixed(2)}€
-                                            </span>
-                                            <button
-                                                type='button'
-                                                onClick={() => handleRemoveCouponClick(coupon.code)}
-                                                disabled={couponLoading}
-                                                className='ml-1 hover:bg-red-100 rounded-full p-0.5 transition-colors disabled:opacity-50'
-                                            >
-                                                <X className='w-3.5 h-3.5 text-red-500' />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
                     </div>
                     {/* Right Side - Cart Totals */}
                     <div className='hidden lg:block flex-1'>
@@ -277,14 +159,6 @@ const Cart = () => {
                                     <div className='flex items-center justify-between'>
                                         <span className='text-base text-gray-600'>{t("tax") || "Tax"}</span>
                                         <span className='text-base text-[#111] font-semibold'>{total_tax}{currencySymbol}</span>
-                                    </div>
-                                )}
-
-                                {/* Discount */}
-                                {parseFloat(discountTotal) > 0 && (
-                                    <div className='flex items-center justify-between'>
-                                        <span className='text-base text-gray-600'>{t("discount")}</span>
-                                        <span className='text-base text-green-600 font-semibold'>-{discountTotal}{currencySymbol}</span>
                                     </div>
                                 )}
 

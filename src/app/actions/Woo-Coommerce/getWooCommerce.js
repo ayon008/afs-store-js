@@ -1,6 +1,6 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getAuthenticatedUser } from "../WC/Auth/getAuth";
 import { getWooCommerceCookies } from "./Cookies/cookie-handler";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -872,27 +872,41 @@ export async function removeCartItem(itemKey) {
 
 // apply coupon
 export async function applyCoupon(couponCode) {
-    const localeValue = await getLocaleValue();
     try {
-
         // Validation
         if (!couponCode || couponCode.trim() === '') {
             return { success: false, error: 'Please enter a coupon code' };
         }
 
-        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/apply-coupon`, {
+        // Use Next.js API route instead of calling WooCommerce directly
+        // Get the base URL from headers or environment
+        const headersList = await headers();
+        const host = headersList.get('host') || 'localhost:3000';
+        const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
+        const apiUrl = `${baseUrl}/api/cart/apply-coupon`;
+
+        // Get cookies from the request to forward them to the API route
+        // This is critical for WooCommerce to identify the correct cart session
+        const cookieStore = await cookies();
+        const allCookies = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...(allCookies ? { 'Cookie': allCookies } : {}),
             },
             body: JSON.stringify({
                 code: couponCode.trim()
             }),
+            credentials: 'include', // Important for cookie forwarding
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to apply coupon: ${response.status}`);
+            const errorData = await response.json().catch(() => ({ error: `Failed to apply coupon: ${response.status}` }));
+            throw new Error(errorData.error || `Failed to apply coupon: ${response.status}`);
         }
 
         const result = await response.json();
@@ -1008,27 +1022,41 @@ export async function clearCart() {
 
 
 export async function removeCoupon(couponCode) {
-    const localeValue = await getLocaleValue();
     try {
-
         // Validation
         if (!couponCode || couponCode.trim() === '') {
             return { success: false, error: 'Invalid coupon code' };
         }
 
-        const response = await fetch(`${WC_STORE_URL}/${localeValue}/cart/remove-coupon`, {
+        // Use Next.js API route instead of calling WooCommerce directly
+        // Get the base URL from headers or environment
+        const headersList = await headers();
+        const host = headersList.get('host') || 'localhost:3000';
+        const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
+        const apiUrl = `${baseUrl}/api/cart/remove-coupon`;
+
+        // Get cookies from the request to forward them to the API route
+        // This is critical for WooCommerce to identify the correct cart session
+        const cookieStore = await cookies();
+        const allCookies = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...(allCookies ? { 'Cookie': allCookies } : {}),
             },
             body: JSON.stringify({
                 code: couponCode.trim()
             }),
+            credentials: 'include', // Important for cookie forwarding
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to remove coupon: ${response.status}`);
+            const errorData = await response.json().catch(() => ({ error: `Failed to remove coupon: ${response.status}` }));
+            throw new Error(errorData.error || `Failed to remove coupon: ${response.status}`);
         }
 
         const result = await response.json();

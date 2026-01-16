@@ -2,6 +2,18 @@
 
 import { Truck } from 'lucide-react';
 
+// Helper function to decode HTML entities
+const decodeEntities = (str = "") => {
+    if (!str) return str;
+    return str
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+};
+
 /**
  * ShippingMethodCard - Modern shipping method selection card
  * @param {object} rate - Shipping rate data
@@ -76,7 +88,7 @@ const ShippingMethodCard = ({
         {/* Shipping Info */}
         <div className='flex-1 min-w-0'>
           <p className='font-medium text-[#111] text-sm lg:text-base truncate'>
-            {rate.name}
+            {decodeEntities(rate.name)}
           </p>
         </div>
 

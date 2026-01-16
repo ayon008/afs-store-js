@@ -2,6 +2,18 @@
 import React, { useEffect } from "react";
 import { Truck, MapPin, Clock, CheckCircle2 } from "lucide-react";
 
+// Helper function to decode HTML entities
+const decodeEntities = (str = "") => {
+    if (!str) return str;
+    return str
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+};
+
 const ShippingMethods = ({
     allShippingRates,
     selectedRateId,
@@ -76,11 +88,11 @@ const ShippingMethods = ({
                                 <CheckCircle2 className='w-5 h-5 text-green-600' />
                             </div>
                             <div>
-                                <span className='font-semibold text-gray-900'>{singleRate.name}</span>
+                                <span className='font-semibold text-gray-900'>{decodeEntities(singleRate.name)}</span>
                                 {singleRate.delivery_time && (
                                     <div className='flex items-center gap-1 mt-0.5 text-sm text-gray-500'>
                                         <Clock className='w-3.5 h-3.5' />
-                                        <span>{singleRate.delivery_time}</span>
+                                        <span>{decodeEntities(singleRate.delivery_time)}</span>
                                     </div>
                                 )}
                             </div>
@@ -112,7 +124,7 @@ const ShippingMethods = ({
                         <h3 className='text-2xl font-bold text-white'>{t("shippingMethods")}</h3>
                         {selectedShipping && (
                             <p className='text-sm text-gray-300 mt-1'>
-                                {selectedShipping.name} - {selectedShipping.isFree
+                                {decodeEntities(selectedShipping.name)} - {selectedShipping.isFree
                                     ? <span className='text-green-400 font-medium'>{t("free")}</span>
                                     : <span className='text-white font-medium'>{selectedShipping.price.toFixed(2)}{cart?.totals?.currency_symbol || '€'}</span>
                                 }
@@ -197,7 +209,7 @@ const ShippingMethods = ({
                                                     <div className='flex-1 min-w-0'>
                                                         <div className='flex items-center gap-2'>
                                                             <span className={`font-semibold ${isSelected ? 'text-[#1D98FF]' : 'text-gray-900'}`}>
-                                                                {rate.name}
+                                                                {decodeEntities(rate.name)}
                                                             </span>
                                                             {isSelected && (
                                                                 <CheckCircle2 className='w-4 h-4 text-[#1D98FF]' />
@@ -206,7 +218,7 @@ const ShippingMethods = ({
                                                         {rate.delivery_time && (
                                                             <div className='flex items-center gap-1 mt-1 text-sm text-gray-500'>
                                                                 <Clock className='w-3.5 h-3.5' />
-                                                                <span>{rate.delivery_time}</span>
+                                                                <span>{decodeEntities(rate.delivery_time)}</span>
                                                             </div>
                                                         )}
                                                     </div>
