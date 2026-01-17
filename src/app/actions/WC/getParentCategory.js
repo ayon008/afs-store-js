@@ -1,6 +1,6 @@
 "use server"
 
-import { getLocaleValue } from "../Woo-Coommerce/getWooCommerce";
+import { getLocale } from "next-intl/server";
 
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET
@@ -10,12 +10,12 @@ const authHeader = Buffer
 
 // get All the parent Categories
 export const getParentCategory = async (slug) => {
-    const localeValue = await getLocaleValue();
+    const locale = await getLocale()
     if (!slug || typeof slug !== "string") {
         throw new Error("A valid category slug must be provided.");
     }
 
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(slug)}`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(slug)}&lang=${locale}`;
 
     try {
         const response = await fetch(url, {
@@ -29,10 +29,10 @@ export const getParentCategory = async (slug) => {
         // Check if response is OK and is JSON
         const contentType = response.headers.get('content-type') || '';
         const isJson = contentType.includes('application/json');
-        
+
         if (!response.ok) {
             const errorText = await response.text().catch(() => "");
-            
+
             // If error is HTML (like 500 error page), truncate it
             let errorMessage = `WooCommerce API error: ${response.status} ${response.statusText}`;
             if (errorText) {
@@ -42,8 +42,8 @@ export const getParentCategory = async (slug) => {
                     errorMessage += ' - HTML error page received';
                 } else {
                     // It's text, include first 200 chars
-                    const truncatedError = errorText.length > 200 
-                        ? errorText.substring(0, 200) + '...' 
+                    const truncatedError = errorText.length > 200
+                        ? errorText.substring(0, 200) + '...'
                         : errorText;
                     errorMessage += ` — ${truncatedError}`;
                 }

@@ -86,5 +86,9 @@ export const routing = defineRouting({
             en: '/my-account/logout',
             fr: '/mon-compte/deconnexion'
         },
+        '/screw-size': {
+            en: '/screw-size',
+            fr: '/detail-et-dimensions-foils-planches'
+        }
     }
 })
