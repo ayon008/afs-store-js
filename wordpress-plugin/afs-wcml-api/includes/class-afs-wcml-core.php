@@ -30,6 +30,13 @@ class AFS_WCML_Core {
 	public $price_sync;
 
 	/**
+	 * ACF Sync instance.
+	 *
+	 * @var AFS_WCML_ACF_Sync
+	 */
+	public $acf_sync;
+
+	/**
 	 * Admin instance.
 	 *
 	 * @var AFS_WCML_Admin
@@ -70,7 +77,8 @@ class AFS_WCML_Core {
 	public function __construct() {
 		$this->prices     = new AFS_WCML_Prices();
 		$this->price_sync = new AFS_WCML_Price_Sync( $this->prices );
-		$this->admin      = new AFS_WCML_Admin( $this->prices, $this->price_sync );
+		$this->acf_sync   = new AFS_WCML_ACF_Sync();
+		$this->admin      = new AFS_WCML_Admin( $this->prices, $this->price_sync, $this->acf_sync );
 		$this->api        = new AFS_WCML_REST_API( $this->prices );
 		$this->csv_import = new AFS_WCML_CSV_Import( $this->prices );
 

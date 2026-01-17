@@ -689,6 +689,363 @@
 		// Initial pagination render
 		renderPagination();
 
+		// =============================================
+		// ACF Sync functionality
+		// =============================================
+		
+		// Debug: Check if we're on ACF sync page
+		if ($('#afs-wcml-save-acf-settings').length > 0) {
+			console.log('ACF Sync page detected, handlers will be attached');
+			
+			// Test handler attachment
+			$('#afs-wcml-save-acf-settings').on('click.test', function() {
+				console.log('Button click detected - handler is working');
+			});
+		}
+
+		/**
+		 * Sync single product ACF fields
+		 */
+		function syncSingleProductACF(productId, $button) {
+			// Check if admin object exists
+			if (typeof afs_wcml_admin === 'undefined') {
+				alert('Erreur: Configuration AJAX non disponible.');
+				return;
+			}
+			var $row = $button.closest('tr');
+			var wasNotSynced = $row.hasClass('not-synced-row');
+
+			$button.addClass('afs-wcml-spinning').prop('disabled', true);
+			if ($row.length) {
+				$row.addClass('afs-wcml-loading');
+			}
+
+			$.ajax({
+				url: afs_wcml_admin.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'afs_wcml_sync_product_acf',
+					nonce: afs_wcml_admin.nonce,
+					product_id: productId,
+					sync_mode: 'copy'
+				},
+				success: function(response) {
+					$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+					if ($row.length) {
+						$row.removeClass('afs-wcml-loading');
+					}
+
+					if (response.success) {
+						if ($row.length) {
+							$row.removeClass('not-synced-row').addClass('synced-row');
+							var $actionsCell = $row.find('.column-actions');
+							$actionsCell.html('<span class="afs-wcml-synced-badge"><span class="dashicons dashicons-yes-alt"></span> OK</span>');
+							$row.find('.field-mismatch').removeClass('field-mismatch').addClass('field-match');
+						}
+
+						if (wasNotSynced) {
+							var $unsyncCount = $('#afs-wcml-acf-unsync-count');
+							var currentUnsync = parseInt($unsyncCount.text(), 10) || 0;
+							if (currentUnsync > 0) {
+								$unsyncCount.text(currentUnsync - 1);
+								if (currentUnsync - 1 === 0) {
+									$unsyncCount.closest('.afs-wcml-status-item')
+										.removeClass('status-warning')
+										.addClass('status-ok');
+								}
+							}
+
+							var $syncedCount = $('#afs-wcml-acf-synced-count');
+							if ($syncedCount.length) {
+								var currentSynced = parseInt($syncedCount.text(), 10) || 0;
+								$syncedCount.text(currentSynced + 1);
+							}
+						}
+					} else {
+						alert(response.data.message || 'Erreur lors de la synchronisation.');
+					}
+				},
+				error: function(xhr, status, error) {
+					$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+					if ($row.length) {
+						$row.removeClass('afs-wcml-loading');
+					}
+					alert('Erreur: ' + error);
+				}
+			});
+		}
+
+		/**
+		 * Sync all products ACF fields
+		 */
+		function syncAllProductsACF(syncUnsyncedOnly) {
+			// Check if admin object exists
+			if (typeof afs_wcml_admin === 'undefined') {
+				alert('Erreur: Configuration AJAX non disponible.');
+				return;
+			}
+			
+			var $progress = $('#afs-wcml-acf-sync-progress');
+			var $progressFill = $progress.find('.afs-wcml-progress-fill');
+			var $progressText = $progress.find('.afs-wcml-progress-text');
+			var $results = $('#afs-wcml-acf-sync-results');
+			var $resultsContent = $results.find('.afs-wcml-results-content');
+			var $button = syncUnsyncedOnly ? $('#afs-wcml-sync-unsynced-acf-only') : $('#afs-wcml-sync-all-acf');
+			var $otherButton = syncUnsyncedOnly ? $('#afs-wcml-sync-all-acf') : $('#afs-wcml-sync-unsynced-acf-only');
+
+			$button.addClass('afs-wcml-spinning').prop('disabled', true);
+			if ($otherButton.length) {
+				$otherButton.prop('disabled', true);
+			}
+			$progress.show();
+			$results.hide();
+			$resultsContent.html('');
+
+			var batchSize = 10;
+			var offset = 0;
+			var totalSynced = 0;
+			var totalErrors = 0;
+			var allResults = [];
+			var totalToProcess = 0;
+
+			function processBatch() {
+				$.ajax({
+					url: afs_wcml_admin.ajax_url,
+					type: 'POST',
+					data: {
+						action: 'afs_wcml_sync_all_acf',
+						nonce: afs_wcml_admin.nonce,
+						batch_size: batchSize,
+						offset: offset,
+						sync_unsynced_only: syncUnsyncedOnly ? 1 : 0,
+						include_variations: true,
+						sync_mode: 'copy'
+					},
+					success: function(response) {
+						if (response.success) {
+							var data = response.data;
+							
+							if (offset === 0) {
+								totalToProcess = data.total || 0;
+							}
+							
+							totalSynced += data.synced ? data.synced.length : 0;
+							totalErrors += data.errors ? data.errors.length : 0;
+
+							var processed = offset + data.processed;
+							var total = totalToProcess || data.total || 1;
+							var percent = Math.min(100, Math.round((processed / total) * 100));
+							$progressFill.css('width', percent + '%');
+
+							var progressMsg = 'Traitement de ' + processed + '/' + total + ' produits...';
+							$progressText.text(progressMsg);
+
+							if (data.synced) {
+								data.synced.forEach(function(item) {
+									allResults.push('<div class="success">✓ ' + (item.message || 'Produit ' + (item.product_id || item.variation_id) + ' synchronisé') + '</div>');
+								});
+							}
+							if (data.errors) {
+								data.errors.forEach(function(item) {
+									allResults.push('<div class="error">✗ ' + (typeof item === 'string' ? item : (item.error || 'Erreur')) + '</div>');
+								});
+							}
+
+							if (!data.complete && data.processed > 0) {
+								offset += batchSize;
+								processBatch();
+							} else {
+								$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+								if ($otherButton.length) {
+									$otherButton.prop('disabled', false);
+								}
+								$progressFill.css('width', '100%');
+								$progressText.text('Synchronisation terminée ! ' + totalSynced + ' synchronisations, ' + totalErrors + ' erreurs.');
+
+								if (allResults.length > 0) {
+									$resultsContent.html(allResults.slice(0, 50).join(''));
+									if (allResults.length > 50) {
+										$resultsContent.append('<div>... et ' + (allResults.length - 50) + ' autres</div>');
+									}
+								} else {
+									$resultsContent.html('<div class="success">Synchronisation terminée !</div>');
+								}
+								$results.show();
+
+								setTimeout(function() {
+									location.reload();
+								}, 3000);
+							}
+						} else {
+							$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+							if ($otherButton.length) {
+								$otherButton.prop('disabled', false);
+							}
+							$progressText.text('Erreur lors de la synchronisation.');
+							alert(response.data ? response.data.message : 'Erreur lors de la synchronisation.');
+						}
+					},
+					error: function(xhr, status, error) {
+						$button.removeClass('afs-wcml-spinning').prop('disabled', false);
+						if ($otherButton.length) {
+							$otherButton.prop('disabled', false);
+						}
+						$progressText.text('Erreur: ' + error);
+					}
+				});
+			}
+
+			processBatch();
+		}
+
+		/**
+		 * Handle save ACF settings
+		 */
+		function handleSaveACFSettings(e, $button) {
+			if (e) {
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			
+			console.log('Save button clicked!'); // Debug
+			
+			// Check if afs_wcml_admin is defined
+			if (typeof afs_wcml_admin === 'undefined') {
+				alert('Erreur: Configuration AJAX non disponible. Veuillez recharger la page.');
+				console.error('afs_wcml_admin is undefined');
+				return false;
+			}
+			
+			console.log('afs_wcml_admin is defined, proceeding...'); // Debug
+			
+			// Collect selected fields
+			var fields = [];
+			$('input[name="acf_fields[]"]:checked').each(function() {
+				var fieldValue = $(this).val();
+				if (fieldValue) {
+					fields.push(fieldValue);
+				}
+			});
+			var autoSync = $('#acf_auto_sync').is(':checked') ? 1 : 0;
+
+			console.log('Fields to save:', fields.length, 'Auto sync:', autoSync); // Debug
+
+			// Show loading state
+			$button.addClass('afs-wcml-spinning').prop('disabled', true);
+			var originalText = $button.html();
+			$button.html('<span class="spinner is-active" style="float:none;margin:0;"></span> Sauvegarde...');
+
+			// Prepare AJAX data
+			var ajaxData = {
+				action: 'afs_wcml_save_acf_sync_settings',
+				nonce: afs_wcml_admin.nonce,
+				fields: fields,
+				auto_sync: autoSync
+			};
+
+			console.log('Sending AJAX request:', ajaxData); // Debug
+
+			$.ajax({
+				url: afs_wcml_admin.ajax_url,
+				type: 'POST',
+				data: ajaxData,
+				dataType: 'json',
+				timeout: 30000,
+				success: function(response) {
+					console.log('AJAX success response:', response); // Debug
+					$button.removeClass('afs-wcml-spinning').prop('disabled', false).html(originalText);
+					
+					if (response && response.success) {
+						alert('Paramètres sauvegardés avec succès.');
+						setTimeout(function() {
+							location.reload();
+						}, 500);
+					} else {
+						var errorMsg = 'Erreur inconnue';
+						if (response && response.data && response.data.message) {
+							errorMsg = response.data.message;
+						}
+						alert('Erreur lors de la sauvegarde: ' + errorMsg);
+						console.error('Save settings error:', response);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error('AJAX error:', xhr, status, error); // Debug
+					$button.removeClass('afs-wcml-spinning').prop('disabled', false).html(originalText);
+					
+					var errorMsg = 'Erreur AJAX: ' + error;
+					if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						errorMsg = xhr.responseJSON.data.message;
+					} else if (xhr.responseText) {
+						try {
+							var jsonResponse = JSON.parse(xhr.responseText);
+							if (jsonResponse.data && jsonResponse.data.message) {
+								errorMsg = jsonResponse.data.message;
+							}
+						} catch (e) {
+							errorMsg = 'Erreur: ' + xhr.status + ' ' + xhr.statusText;
+						}
+					}
+					alert(errorMsg);
+					console.error('AJAX Error details:', {
+						status: xhr.status,
+						statusText: xhr.statusText,
+						responseText: xhr.responseText,
+						error: error
+					});
+				}
+			});
+			
+			return false;
+		}
+
+		/**
+		 * Attach save button handlers
+		 */
+		// Direct binding (works if element exists)
+		$('#afs-wcml-save-acf-settings').off('click.save-acf').on('click.save-acf', function(e) {
+			console.log('Direct handler triggered');
+			handleSaveACFSettings(e, $(this));
+			return false;
+		});
+		
+		// Delegation (works for dynamically added elements)
+		$(document).off('click', '#afs-wcml-save-acf-settings').on('click', '#afs-wcml-save-acf-settings', function(e) {
+			console.log('Delegated handler triggered');
+			handleSaveACFSettings(e, $(this));
+			return false;
+		});
+
+		// Event handlers for ACF sync
+		$(document).on('click', '.afs-wcml-sync-single-acf', function(e) {
+			e.preventDefault();
+			var productId = $(this).data('product-id');
+			if (productId) {
+				syncSingleProductACF(productId, $(this));
+			}
+		});
+
+		$('#afs-wcml-sync-all-acf').on('click', function(e) {
+			e.preventDefault();
+			if (confirm('Voulez-vous synchroniser les champs ACF de tous les produits ? Cette opération peut prendre du temps.')) {
+				syncAllProductsACF(false);
+			}
+		});
+
+		$('#afs-wcml-sync-unsynced-acf-only').on('click', function(e) {
+			e.preventDefault();
+			var unsyncedCount = parseInt($('#afs-wcml-acf-unsync-count').text(), 10) || 0;
+			var confirmMsg = 'Voulez-vous synchroniser uniquement les ' + unsyncedCount + ' produit(s)/variation(s) non synchronisé(s) ?';
+			if (confirm(confirmMsg)) {
+				syncAllProductsACF(true);
+			}
+		});
+
+		$('#afs-wcml-refresh-acf-status').on('click', function(e) {
+			e.preventDefault();
+			location.reload();
+		});
+
 	});
 
 })(jQuery);
