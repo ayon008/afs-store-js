@@ -37,16 +37,25 @@ class AFS_WCML_Admin {
 	private $acf_sync;
 
 	/**
+	 * Location Stock Sync instance.
+	 *
+	 * @var AFS_WCML_Location_Stock_Sync
+	 */
+	private $location_stock_sync;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param AFS_WCML_Prices     $prices     Prices instance.
-	 * @param AFS_WCML_Price_Sync $price_sync Price sync instance.
-	 * @param AFS_WCML_ACF_Sync  $acf_sync   ACF sync instance.
+	 * @param AFS_WCML_Prices                $prices             Prices instance.
+	 * @param AFS_WCML_Price_Sync           $price_sync         Price sync instance.
+	 * @param AFS_WCML_ACF_Sync             $acf_sync           ACF sync instance.
+	 * @param AFS_WCML_Location_Stock_Sync $location_stock_sync Location stock sync instance.
 	 */
-	public function __construct( $prices, $price_sync = null, $acf_sync = null ) {
+	public function __construct( $prices, $price_sync = null, $acf_sync = null, $location_stock_sync = null ) {
 		$this->prices = $prices;
 		$this->price_sync = $price_sync;
 		$this->acf_sync = $acf_sync;
+		$this->location_stock_sync = $location_stock_sync;
 		$this->init_hooks();
 	}
 
@@ -74,20 +83,20 @@ class AFS_WCML_Admin {
 
 		add_submenu_page(
 			'woocommerce',
-			__( 'Suivi des Prix Multi-Langue', 'afs-wcml-api' ),
-			__( 'Suivi Prix WCML', 'afs-wcml-api' ),
-			'manage_woocommerce',
-			'afs-wcml-price-tracking',
-			array( $this, 'render_tracking_page' )
-		);
-
-		add_submenu_page(
-			'woocommerce',
 			__( 'Synchronisation Champs ACF', 'afs-wcml-api' ),
 			__( 'Sync Champs ACF', 'afs-wcml-api' ),
 			'manage_woocommerce',
 			'afs-wcml-acf-sync',
 			array( $this, 'render_acf_sync_page' )
+		);
+
+		add_submenu_page(
+			'woocommerce',
+			__( 'Synchronisation Stock par Location', 'afs-wcml-api' ),
+			__( 'Sync Stock Location', 'afs-wcml-api' ),
+			'manage_woocommerce',
+			'afs-wcml-location-stock-sync',
+			array( $this, 'render_location_stock_sync_page' )
 		);
 	}
 
@@ -117,11 +126,33 @@ class AFS_WCML_Admin {
 			true
 		);
 
+		// Enqueue price sync script only on price sync page
+		if ( strpos( $hook, 'afs-wcml-price-sync' ) !== false ) {
+			wp_enqueue_script(
+				'afs-wcml-price-sync',
+				AFS_WCML_API_PLUGIN_URL . 'assets/js/price-sync.js',
+				array( 'jquery', 'afs-wcml-admin' ),
+				AFS_WCML_API_VERSION,
+				true
+			);
+		}
+
 		// Enqueue ACF sync script only on ACF sync page
 		if ( strpos( $hook, 'afs-wcml-acf-sync' ) !== false ) {
 			wp_enqueue_script(
 				'afs-wcml-acf-sync',
 				AFS_WCML_API_PLUGIN_URL . 'assets/js/acf-sync.js',
+				array( 'jquery', 'afs-wcml-admin' ),
+				AFS_WCML_API_VERSION,
+				true
+			);
+		}
+
+		// Enqueue location stock sync script only on location stock sync page
+		if ( strpos( $hook, 'afs-wcml-location-stock-sync' ) !== false ) {
+			wp_enqueue_script(
+				'afs-wcml-location-stock-sync',
+				AFS_WCML_API_PLUGIN_URL . 'assets/js/location-stock-sync.js',
 				array( 'jquery', 'afs-wcml-admin' ),
 				AFS_WCML_API_VERSION,
 				true
@@ -192,53 +223,28 @@ class AFS_WCML_Admin {
 		// Get ALL products with detailed price info.
 		$all_data = array();
 		$total_all = 0;
-		$total_synced = 0;
-		$total_unsync = 0;
+		// Defer sync status counts to AJAX for faster page load
+		$total_synced = null; // Will be loaded via AJAX
+		$total_unsync = null; // Will be loaded via AJAX
 		$total_products = 0;
 		$total_variations = 0;
 
+		// Get initial data for counts only.
+		$initial_data = array();
 		if ( $this->price_sync ) {
-			// Get all products (for display).
-			$all_data = $this->price_sync->get_products_price_comparison( array(
-				'per_page'           => 50,
+			// Get initial data for display (20 products) - only this query on page load.
+			$initial_data = $this->price_sync->get_products_price_comparison( array(
+				'per_page'           => 20,
 				'page'               => 1,
 				'sync_status'        => '', // All products.
 				'include_variations' => true,
 			) );
-			$total_all = isset( $all_data['total'] ) ? $all_data['total'] : 0;
+			$total_all = isset( $initial_data['total'] ) ? $initial_data['total'] : 0;
 
-			// Count synced vs unsynced.
-			if ( ! empty( $all_data['products'] ) ) {
-				foreach ( $all_data['products'] as $product ) {
-					if ( $product['is_synced'] ) {
-						$total_synced++;
-					} else {
-						$total_unsync++;
-					}
-					if ( $product['is_variation'] ) {
-						$total_variations++;
-					} else {
-						$total_products++;
-					}
-				}
-			}
-
-			// Get accurate total counts using separate queries.
-			$synced_data = $this->price_sync->get_products_price_comparison( array(
-				'per_page'           => 1,
-				'page'               => 1,
-				'sync_status'        => 'synced',
-				'include_variations' => true,
-			) );
-			$total_synced = isset( $synced_data['total'] ) ? $synced_data['total'] : 0;
-
-			$unsync_data = $this->price_sync->get_products_price_comparison( array(
-				'per_page'           => 1,
-				'page'               => 1,
-				'sync_status'        => 'not_synced',
-				'include_variations' => true,
-			) );
-			$total_unsync = isset( $unsync_data['total'] ) ? $unsync_data['total'] : 0;
+			// NOTE: Sync status counts are now loaded via AJAX to avoid slow page load
+			// See price-sync.js loadSyncStatusCounts() function
+		} else {
+			$total_all = 0;
 		}
 
 		?>
@@ -312,40 +318,38 @@ class AFS_WCML_Admin {
 						</div>
 						<div class="afs-wcml-status-item status-info">
 							<span class="afs-wcml-status-label"><?php esc_html_e( 'Total produits/variations', 'afs-wcml-api' ); ?></span>
-							<span class="afs-wcml-status-value" id="afs-wcml-total-count"><?php echo esc_html( $total_all ); ?></span>
-						</div>
-						<div class="afs-wcml-status-item status-ok">
-							<span class="afs-wcml-status-label"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></span>
-							<span class="afs-wcml-status-value" id="afs-wcml-synced-count"><?php echo esc_html( $total_synced ); ?></span>
-						</div>
-						<div class="afs-wcml-status-item <?php echo $total_unsync > 0 ? 'status-warning' : 'status-ok'; ?>">
-							<span class="afs-wcml-status-label"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></span>
-							<span class="afs-wcml-status-value" id="afs-wcml-unsync-count"><?php echo esc_html( $total_unsync ); ?></span>
-						</div>
+						<span class="afs-wcml-status-value" id="afs-wcml-total-count"><?php echo esc_html( $total_all ); ?></span>
+					</div>
+					<div class="afs-wcml-status-item status-ok">
+						<span class="afs-wcml-status-label"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></span>
+						<span class="afs-wcml-status-value" id="afs-wcml-synced-count"><span class="spinner is-active" style="float: none; margin: 0;"></span></span>
+					</div>
+					<div class="afs-wcml-status-item" id="afs-wcml-unsync-status-item">
+						<span class="afs-wcml-status-label"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></span>
+						<span class="afs-wcml-status-value" id="afs-wcml-unsync-count"><span class="spinner is-active" style="float: none; margin: 0;"></span></span>
 					</div>
 				</div>
+			</div>
 
-				<!-- Actions Card -->
-				<div class="afs-wcml-card">
-					<h2><?php esc_html_e( 'Actions', 'afs-wcml-api' ); ?></h2>
+			<!-- Actions Card -->
+			<div class="afs-wcml-card">
+				<h2><?php esc_html_e( 'Actions', 'afs-wcml-api' ); ?></h2>
 
-					<div class="afs-wcml-actions">
-						<button type="button" class="button button-primary button-large" id="afs-wcml-sync-all">
-							<span class="dashicons dashicons-update"></span>
-							<?php esc_html_e( 'Synchroniser tous les produits', 'afs-wcml-api' ); ?>
-						</button>
+				<div class="afs-wcml-actions">
+					<button type="button" class="button button-primary button-large" id="afs-wcml-sync-all">
+						<span class="dashicons dashicons-update"></span>
+						<?php esc_html_e( 'Synchroniser tous les produits', 'afs-wcml-api' ); ?>
+					</button>
 
-						<?php if ( $total_unsync > 0 ) : ?>
-						<button type="button" class="button button-primary button-large" id="afs-wcml-sync-unsynced-only">
-							<span class="dashicons dashicons-update"></span>
-							<?php esc_html_e( 'Synchroniser uniquement les non synchronisés', 'afs-wcml-api' ); ?>
-							<span class="afs-wcml-count-badge" style="margin-left: 8px;"><?php echo esc_html( $total_unsync ); ?></span>
-						</button>
-						<?php endif; ?>
+					<button type="button" class="button button-primary button-large" id="afs-wcml-sync-unsynced-only" style="display: none;">
+						<span class="dashicons dashicons-update"></span>
+						<?php esc_html_e( 'Synchroniser uniquement les non synchronisés', 'afs-wcml-api' ); ?>
+						<span class="afs-wcml-count-badge" id="afs-wcml-sync-unsynced-badge" style="margin-left: 8px;">0</span>
+					</button>
 
-						<button type="button" class="button button-secondary" id="afs-wcml-refresh-status">
-							<span class="dashicons dashicons-visibility"></span>
-							<?php esc_html_e( 'Actualiser', 'afs-wcml-api' ); ?>
+					<button type="button" class="button button-secondary" id="afs-wcml-refresh-status">
+						<span class="dashicons dashicons-visibility"></span>
+						<?php esc_html_e( 'Actualiser', 'afs-wcml-api' ); ?>
 						</button>
 					</div>
 
@@ -363,17 +367,80 @@ class AFS_WCML_Admin {
 				</div>
 			</div>
 
+			<!-- Filters -->
+			<div class="afs-wcml-card afs-wcml-filters-card">
+				<h2><?php esc_html_e( 'Filtres', 'afs-wcml-api' ); ?></h2>
+				<div class="afs-wcml-filters">
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-price-sync-filter-search"><?php esc_html_e( 'Rechercher', 'afs-wcml-api' ); ?></label>
+						<input type="text" id="afs-wcml-price-sync-filter-search" placeholder="<?php esc_attr_e( 'Nom du produit...', 'afs-wcml-api' ); ?>" />
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-price-sync-filter-type"><?php esc_html_e( 'Type de produit', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-price-sync-filter-type">
+							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
+							<option value="simple"><?php esc_html_e( 'Simple', 'afs-wcml-api' ); ?></option>
+							<option value="variable"><?php esc_html_e( 'Variable', 'afs-wcml-api' ); ?></option>
+							<option value="variation"><?php esc_html_e( 'Variation', 'afs-wcml-api' ); ?></option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-price-sync-filter-status"><?php esc_html_e( 'Statut sync', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-price-sync-filter-status">
+							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
+							<option value="synced"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></option>
+							<option value="not_synced"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-price-sync-filter-per-page"><?php esc_html_e( 'Par page', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-price-sync-filter-per-page">
+							<option value="10">10</option>
+							<option value="20" selected>20</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group afs-wcml-filter-actions">
+						<button type="button" class="button button-primary" id="afs-wcml-price-sync-apply-filters">
+							<span class="dashicons dashicons-search"></span>
+							<?php esc_html_e( 'Rechercher', 'afs-wcml-api' ); ?>
+						</button>
+						<button type="button" class="button button-secondary" id="afs-wcml-price-sync-reset-filters">
+							<?php esc_html_e( 'Réinitialiser', 'afs-wcml-api' ); ?>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Results Summary -->
+			<div class="afs-wcml-results-summary">
+				<span id="afs-wcml-price-sync-results-count">
+					<?php
+					printf(
+						/* translators: %d: number of products */
+						esc_html__( '%d produit(s) trouvé(s)', 'afs-wcml-api' ),
+						isset( $initial_data['total'] ) ? $initial_data['total'] : 0
+					);
+					?>
+				</span>
+				<div class="afs-wcml-pagination" id="afs-wcml-price-sync-pagination-top"></div>
+			</div>
+
 			<!-- ALL Products Table -->
 			<div class="afs-wcml-card afs-wcml-card-full afs-wcml-tracking-table-wrap">
 				<h2>
 					<?php esc_html_e( 'Tous les produits', 'afs-wcml-api' ); ?>
-					<span class="afs-wcml-count-badge"><?php echo esc_html( $total_all ); ?></span>
+					<span class="afs-wcml-count-badge" id="afs-wcml-price-sync-total-display"><?php echo esc_html( $total_all ); ?></span>
 					<?php if ( $total_unsync > 0 ) : ?>
-						<span class="afs-wcml-count-badge warning"><?php echo esc_html( $total_unsync ); ?> <?php esc_html_e( 'à synchroniser', 'afs-wcml-api' ); ?></span>
+						<span class="afs-wcml-count-badge warning" id="afs-wcml-price-sync-unsync-display"><?php echo esc_html( $total_unsync ); ?> <?php esc_html_e( 'à synchroniser', 'afs-wcml-api' ); ?></span>
 					<?php endif; ?>
 				</h2>
 
-				<?php if ( ! empty( $all_data['products'] ) ) : ?>
+				<div id="afs-wcml-price-sync-loader" style="text-align: center; padding: 20px; display: none;">
+					<span class="spinner is-active" style="float: none;"></span>
+					<p><?php esc_html_e( 'Chargement...', 'afs-wcml-api' ); ?></p>
+				</div>
 				<div class="afs-wcml-table-scroll">
 					<table class="wp-list-table widefat striped" id="afs-wcml-sync-table">
 						<thead>
@@ -410,35 +477,33 @@ class AFS_WCML_Admin {
 								<?php endforeach; ?>
 							</tr>
 						</thead>
-						<tbody>
-							<?php foreach ( $all_data['products'] as $product ) : ?>
-							<?php $this->render_sync_row( $product, $currency_codes, $languages, $default_lang ); ?>
-							<?php endforeach; ?>
+						<tbody id="afs-wcml-price-sync-body">
+							<?php if ( ! empty( $initial_data['products'] ) ) : ?>
+								<?php foreach ( $initial_data['products'] as $product ) : ?>
+									<?php $this->render_sync_row( $product, $currency_codes, $languages, $default_lang ); ?>
+								<?php endforeach; ?>
+							<?php else : ?>
+								<tr class="no-items"><td colspan="100"><?php esc_html_e( 'Aucun produit trouvé.', 'afs-wcml-api' ); ?></td></tr>
+							<?php endif; ?>
 						</tbody>
 					</table>
 				</div>
 
-				<?php if ( $total_all > 50 ) : ?>
-				<p class="afs-wcml-more-products">
-					<?php
-					printf(
-						esc_html__( 'Affichage des 50 premiers produits sur %d. Utilisez la page de suivi complète pour voir tous les produits.', 'afs-wcml-api' ),
-						$total_all
-					);
-					?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=afs-wcml-price-tracking' ) ); ?>">
-						<?php esc_html_e( 'Voir tous les produits', 'afs-wcml-api' ); ?>
-					</a>
-				</p>
-				<?php endif; ?>
-
-				<?php else : ?>
-				<div class="afs-wcml-no-products">
-					<span class="dashicons dashicons-info"></span>
-					<p><?php esc_html_e( 'Aucun produit trouvé.', 'afs-wcml-api' ); ?></p>
-				</div>
-				<?php endif; ?>
+				<!-- Pagination Bottom -->
+				<div class="afs-wcml-pagination" id="afs-wcml-price-sync-pagination-bottom"></div>
 			</div>
+
+			<!-- Hidden data for JS -->
+			<script type="text/javascript">
+				var afs_wcml_price_sync_data = <?php echo wp_json_encode( array(
+					'currencies'   => $currency_codes,
+					'languages'    => array_keys( $languages ),
+					'default_lang' => $default_lang,
+					'total'        => isset( $initial_data['total'] ) ? $initial_data['total'] : 0,
+					'pages'        => isset( $initial_data['pages'] ) ? $initial_data['pages'] : 1,
+					'current_page' => 1,
+				) ); ?>;
+			</script>
 
 			<!-- Manual Sync by Product ID -->
 			<div class="afs-wcml-card afs-wcml-card-full">
@@ -469,18 +534,33 @@ class AFS_WCML_Admin {
 	private function render_sync_row( $product, $currencies, $languages, $default_lang ) {
 		$is_synced = isset( $product['is_synced'] ) ? $product['is_synced'] : false;
 		$row_class = $is_synced ? 'synced-row' : 'not-synced-row';
+		$product_id = $product['product_id'];
+		$is_variation = $product['is_variation'] ?? false;
+		
+		// Get default currency
+		$default_currency = $this->prices->get_default_currency();
 		?>
-		<tr class="<?php echo esc_attr( $row_class ); ?>" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
+		<tr class="<?php echo esc_attr( $row_class ); ?>" data-product-id="<?php echo esc_attr( $product_id ); ?>">
 			<td class="column-product">
 				<strong>
 					<a href="<?php echo esc_url( $product['edit_url'] ); ?>" target="_blank">
 						<?php echo esc_html( $product['product_name'] ); ?>
 					</a>
 				</strong>
-				<?php if ( $product['is_variation'] && ! empty( $product['parent_name'] ) ) : ?>
+				<?php if ( ! empty( $product['frontend_urls'] ) ) : ?>
+					<br>
+					<?php foreach ( $product['frontend_urls'] as $url_lang => $frontend_url ) : ?>
+						<?php if ( ! empty( $frontend_url ) ) : ?>
+							<a href="<?php echo esc_url( $frontend_url ); ?>" target="_blank" style="font-size: 11px; color: #2271b1; text-decoration: none; margin-right: 8px;">
+								<?php echo esc_html( strtoupper( $url_lang ) ); ?>
+							</a>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				<?php endif; ?>
+				<?php if ( $is_variation && ! empty( $product['parent_name'] ) ) : ?>
 					<br><small class="parent-name"><?php echo esc_html( $product['parent_name'] ); ?></small>
 				<?php endif; ?>
-				<br><small class="product-id">ID: <?php echo esc_html( $product['product_id'] ); ?></small>
+				<br><small class="product-id">ID: <?php echo esc_html( $product_id ); ?></small>
 			</td>
 			<td class="column-type">
 				<span class="afs-wcml-type-badge <?php echo esc_attr( $product['product_type'] ); ?>">
@@ -510,26 +590,71 @@ class AFS_WCML_Admin {
 
 			<?php
 			// Translation prices for each language (except default).
+			// Fetch translations directly using WPML
+			$element_type = $is_variation ? 'post_product_variation' : 'post_product';
+			$trid = apply_filters( 'wpml_element_trid', null, $product_id, $element_type );
+			$all_translations = $trid ? apply_filters( 'wpml_get_element_translations', array(), $trid, $element_type ) : array();
+			
 			foreach ( $languages as $lang_code => $lang_data ) :
 				if ( $lang_code === $default_lang ) {
 					continue;
 				}
 
-				$trans_data = isset( $product['translations'][ $lang_code ] ) ? $product['translations'][ $lang_code ] : null;
+				// Get translated product ID directly from WPML
+				$trans_id = null;
+				if ( isset( $all_translations[ $lang_code ] ) && isset( $all_translations[ $lang_code ]->element_id ) ) {
+					$trans_id = (int) $all_translations[ $lang_code ]->element_id;
+				}
 
 				foreach ( $currencies as $currency ) :
-					if ( ! $trans_data ) :
+					if ( ! $trans_id ) :
 					?>
 						<td class="column-currency trans-price no-translation">
 							<span class="price-empty" title="<?php esc_attr_e( 'Pas de traduction', 'afs-wcml-api' ); ?>">-</span>
 						</td>
 					<?php
 					else :
-						$price_info = isset( $trans_data['prices'][ $currency ] ) ? $trans_data['prices'][ $currency ] : array();
-						$regular = isset( $price_info['regular_price'] ) ? $price_info['regular_price'] : '';
-						$sale = isset( $price_info['sale_price'] ) ? $price_info['sale_price'] : '';
-						$matches = isset( $price_info['matches'] ) ? $price_info['matches'] : false;
-						$has_price = ! empty( $regular );
+						// Fetch prices directly from translation product
+						if ( $currency === $default_currency ) {
+							// Default currency - use WooCommerce methods
+							$trans_product = wc_get_product( $trans_id );
+							if ( $trans_product ) {
+								$regular = $trans_product->get_regular_price();
+								$sale = $trans_product->get_sale_price();
+							} else {
+								$regular = get_post_meta( $trans_id, '_regular_price', true );
+								$sale = get_post_meta( $trans_id, '_sale_price', true );
+							}
+						} else {
+							// Multi-currency - direct meta
+							$regular = get_post_meta( $trans_id, '_regular_price_' . $currency, true );
+							$sale = get_post_meta( $trans_id, '_sale_price_' . $currency, true );
+						}
+						
+						// Normalize
+						$regular = ( $regular !== null && $regular !== '' && $regular !== false ) ? (string) $regular : '';
+						$sale = ( $sale !== null && $sale !== '' && $sale !== false ) ? (string) $sale : '';
+						$regular = trim( $regular );
+						$sale = trim( $sale );
+						
+						// Fallback to source price if translation has no price set
+						if ( $regular === '' && isset( $product['source_prices'][ $currency ]['regular_price'] ) ) {
+							$regular = (string) $product['source_prices'][ $currency ]['regular_price'];
+						}
+						if ( $sale === '' && isset( $product['source_prices'][ $currency ]['sale_price'] ) ) {
+							$sale = (string) $product['source_prices'][ $currency ]['sale_price'];
+						}
+						
+						// Check if price is valid
+						$has_price = false;
+						if ( $regular !== '' ) {
+							$regular_normalized = str_replace( ',', '.', $regular );
+							$has_price = is_numeric( $regular_normalized ) && (float) $regular_normalized >= 0;
+						}
+
+						// Check if prices match source
+						$source_regular = isset( $product['source_prices'][ $currency ]['regular_price'] ) ? (string) $product['source_prices'][ $currency ]['regular_price'] : '';
+						$matches = ( $regular === $source_regular );
 
 						$cell_class = 'column-currency trans-price';
 						if ( ! $has_price ) {
@@ -543,7 +668,7 @@ class AFS_WCML_Admin {
 						<td class="<?php echo esc_attr( $cell_class ); ?>">
 							<?php if ( $has_price ) : ?>
 								<span class="price-regular"><?php echo esc_html( $regular ); ?></span>
-								<?php if ( ! empty( $sale ) ) : ?>
+								<?php if ( ! empty( trim( $sale ) ) && is_numeric( str_replace( ',', '.', $sale ) ) ) : ?>
 									<br><span class="price-sale"><?php echo esc_html( $sale ); ?></span>
 								<?php endif; ?>
 							<?php else : ?>
@@ -558,313 +683,7 @@ class AFS_WCML_Admin {
 
 			<td class="column-actions">
 				<?php if ( ! $is_synced ) : ?>
-					<button type="button" class="button button-small button-primary afs-wcml-sync-single" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
-						<span class="dashicons dashicons-update"></span>
-						<?php esc_html_e( 'Sync', 'afs-wcml-api' ); ?>
-					</button>
-				<?php else : ?>
-					<span class="afs-wcml-synced-badge">
-						<span class="dashicons dashicons-yes-alt"></span>
-						<?php esc_html_e( 'OK', 'afs-wcml-api' ); ?>
-					</span>
-				<?php endif; ?>
-			</td>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * Render price tracking page.
-	 */
-	public function render_tracking_page() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'Vous n\'avez pas les permissions nécessaires.', 'afs-wcml-api' ) );
-		}
-
-		// Get active languages and currencies.
-		$languages = apply_filters( 'wpml_active_languages', array() );
-		$default_currency = $this->prices->get_default_currency();
-		// Get all currencies including default (EUR).
-		$active_currencies = $this->prices->get_all_currencies();
-		$currency_codes = array_keys( $active_currencies );
-
-		// Get initial data.
-		$initial_data = array();
-		if ( $this->price_sync ) {
-			$initial_data = $this->price_sync->get_products_price_comparison( array(
-				'per_page' => 20,
-				'page'     => 1,
-			) );
-		}
-
-		?>
-		<div class="wrap afs-wcml-tracking-wrap">
-			<h1><?php esc_html_e( 'Suivi des Prix Multi-Langue', 'afs-wcml-api' ); ?></h1>
-
-			<div class="afs-wcml-info-box">
-				<h3><?php esc_html_e( 'Comparaison des prix', 'afs-wcml-api' ); ?></h3>
-				<p><?php esc_html_e( 'Cette page affiche une comparaison détaillée des prix entre le produit source et ses traductions pour toutes les devises actives.', 'afs-wcml-api' ); ?></p>
-				<ul>
-					<li><span class="afs-wcml-legend-match"></span> <?php esc_html_e( 'Prix synchronisé (identique à la source)', 'afs-wcml-api' ); ?></li>
-					<li><span class="afs-wcml-legend-mismatch"></span> <?php esc_html_e( 'Prix non synchronisé (différent de la source)', 'afs-wcml-api' ); ?></li>
-					<li><span class="afs-wcml-legend-empty"></span> <?php esc_html_e( 'Prix non défini', 'afs-wcml-api' ); ?></li>
-				</ul>
-			</div>
-
-			<!-- Filters -->
-			<div class="afs-wcml-card afs-wcml-filters-card">
-				<h2><?php esc_html_e( 'Filtres', 'afs-wcml-api' ); ?></h2>
-				<div class="afs-wcml-filters">
-					<div class="afs-wcml-filter-group">
-						<label for="afs-wcml-filter-search"><?php esc_html_e( 'Rechercher', 'afs-wcml-api' ); ?></label>
-						<input type="text" id="afs-wcml-filter-search" placeholder="<?php esc_attr_e( 'Nom du produit...', 'afs-wcml-api' ); ?>" />
-					</div>
-
-					<div class="afs-wcml-filter-group">
-						<label for="afs-wcml-filter-type"><?php esc_html_e( 'Type de produit', 'afs-wcml-api' ); ?></label>
-						<select id="afs-wcml-filter-type">
-							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
-							<option value="simple"><?php esc_html_e( 'Produits simples', 'afs-wcml-api' ); ?></option>
-							<option value="variable"><?php esc_html_e( 'Produits variables', 'afs-wcml-api' ); ?></option>
-							<option value="variation"><?php esc_html_e( 'Variations', 'afs-wcml-api' ); ?></option>
-						</select>
-					</div>
-
-					<div class="afs-wcml-filter-group">
-						<label for="afs-wcml-filter-status"><?php esc_html_e( 'Statut sync', 'afs-wcml-api' ); ?></label>
-						<select id="afs-wcml-filter-status">
-							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
-							<option value="synced"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></option>
-							<option value="not_synced"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></option>
-						</select>
-					</div>
-
-					<div class="afs-wcml-filter-group">
-						<label for="afs-wcml-filter-per-page"><?php esc_html_e( 'Par page', 'afs-wcml-api' ); ?></label>
-						<select id="afs-wcml-filter-per-page">
-							<option value="10">10</option>
-							<option value="20" selected>20</option>
-							<option value="50">50</option>
-							<option value="100">100</option>
-						</select>
-					</div>
-
-					<div class="afs-wcml-filter-group afs-wcml-filter-actions">
-						<button type="button" class="button button-primary" id="afs-wcml-apply-filters">
-							<span class="dashicons dashicons-search"></span>
-							<?php esc_html_e( 'Filtrer', 'afs-wcml-api' ); ?>
-						</button>
-						<button type="button" class="button button-secondary" id="afs-wcml-reset-filters">
-							<?php esc_html_e( 'Réinitialiser', 'afs-wcml-api' ); ?>
-						</button>
-					</div>
-				</div>
-			</div>
-
-			<!-- Results Summary -->
-			<div class="afs-wcml-results-summary">
-				<span id="afs-wcml-results-count">
-					<?php
-					printf(
-						/* translators: %d: number of products */
-						esc_html__( '%d produit(s) trouvé(s)', 'afs-wcml-api' ),
-						isset( $initial_data['total'] ) ? $initial_data['total'] : 0
-					);
-					?>
-				</span>
-				<div class="afs-wcml-pagination" id="afs-wcml-pagination-top"></div>
-			</div>
-
-			<!-- Products Table -->
-			<div class="afs-wcml-card afs-wcml-card-full afs-wcml-tracking-table-wrap">
-				<div id="afs-wcml-tracking-loader" style="display: none;">
-					<span class="spinner is-active"></span>
-					<?php esc_html_e( 'Chargement...', 'afs-wcml-api' ); ?>
-				</div>
-
-				<table class="wp-list-table widefat fixed striped" id="afs-wcml-tracking-table">
-					<thead>
-						<tr>
-							<th class="column-product" rowspan="2"><?php esc_html_e( 'Produit', 'afs-wcml-api' ); ?></th>
-							<th class="column-type" rowspan="2"><?php esc_html_e( 'Type', 'afs-wcml-api' ); ?></th>
-							<th class="column-source" colspan="<?php echo count( $currency_codes ); ?>">
-								<?php esc_html_e( 'Prix Source', 'afs-wcml-api' ); ?>
-								<span class="afs-wcml-lang-badge source" id="afs-wcml-source-lang">FR</span>
-							</th>
-							<?php foreach ( $languages as $lang_code => $lang_data ) : ?>
-								<?php if ( $lang_code !== apply_filters( 'wpml_default_language', 'en' ) ) : ?>
-								<th class="column-translation" colspan="<?php echo count( $currency_codes ); ?>">
-									<?php echo esc_html( strtoupper( $lang_code ) ); ?>
-								</th>
-								<?php endif; ?>
-							<?php endforeach; ?>
-							<th class="column-actions" rowspan="2"><?php esc_html_e( 'Actions', 'afs-wcml-api' ); ?></th>
-						</tr>
-						<tr>
-							<?php
-							// Source currencies.
-							foreach ( $currency_codes as $currency ) :
-							?>
-								<th class="column-currency"><?php echo esc_html( $currency ); ?></th>
-							<?php endforeach; ?>
-
-							<?php
-							// Translation currencies for each language.
-							foreach ( $languages as $lang_code => $lang_data ) :
-								if ( $lang_code === apply_filters( 'wpml_default_language', 'en' ) ) {
-									continue;
-								}
-								foreach ( $currency_codes as $currency ) :
-							?>
-								<th class="column-currency"><?php echo esc_html( $currency ); ?></th>
-							<?php
-								endforeach;
-							endforeach;
-							?>
-						</tr>
-					</thead>
-					<tbody id="afs-wcml-tracking-body">
-						<?php if ( ! empty( $initial_data['products'] ) ) : ?>
-							<?php foreach ( $initial_data['products'] as $product ) : ?>
-								<?php $this->render_tracking_row( $product, $currency_codes, $languages ); ?>
-							<?php endforeach; ?>
-						<?php else : ?>
-							<tr class="no-items">
-								<td colspan="100"><?php esc_html_e( 'Aucun produit trouvé.', 'afs-wcml-api' ); ?></td>
-							</tr>
-						<?php endif; ?>
-					</tbody>
-				</table>
-			</div>
-
-			<!-- Pagination -->
-			<div class="afs-wcml-results-summary bottom">
-				<span id="afs-wcml-results-count-bottom">
-					<?php
-					printf(
-						esc_html__( '%d produit(s) trouvé(s)', 'afs-wcml-api' ),
-						isset( $initial_data['total'] ) ? $initial_data['total'] : 0
-					);
-					?>
-				</span>
-				<div class="afs-wcml-pagination" id="afs-wcml-pagination-bottom"></div>
-			</div>
-		</div>
-
-		<!-- Hidden data for JS -->
-		<script type="text/javascript">
-			var afs_wcml_tracking_data = <?php echo wp_json_encode( array(
-				'currencies'   => $currency_codes,
-				'languages'    => array_keys( $languages ),
-				'default_lang' => apply_filters( 'wpml_default_language', 'en' ),
-				'total'        => isset( $initial_data['total'] ) ? $initial_data['total'] : 0,
-				'pages'        => isset( $initial_data['pages'] ) ? $initial_data['pages'] : 1,
-				'current_page' => 1,
-			) ); ?>;
-		</script>
-		<?php
-	}
-
-	/**
-	 * Render a single tracking table row.
-	 *
-	 * @param array $product      Product data.
-	 * @param array $currencies   Currency codes.
-	 * @param array $languages    Active languages.
-	 */
-	private function render_tracking_row( $product, $currencies, $languages ) {
-		$default_lang = apply_filters( 'wpml_default_language', 'en' );
-		$row_class = $product['is_synced'] ? 'synced-row' : 'not-synced-row';
-		?>
-		<tr class="<?php echo esc_attr( $row_class ); ?>" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
-			<td class="column-product">
-				<strong>
-					<a href="<?php echo esc_url( $product['edit_url'] ); ?>" target="_blank">
-						<?php echo esc_html( $product['product_name'] ); ?>
-					</a>
-				</strong>
-				<?php if ( $product['is_variation'] && ! empty( $product['parent_name'] ) ) : ?>
-					<br><small><?php echo esc_html( $product['parent_name'] ); ?></small>
-				<?php endif; ?>
-				<br><small>ID: <?php echo esc_html( $product['product_id'] ); ?></small>
-			</td>
-			<td class="column-type">
-				<span class="afs-wcml-type-badge <?php echo esc_attr( $product['product_type'] ); ?>">
-					<?php echo esc_html( ucfirst( $product['product_type'] ) ); ?>
-				</span>
-			</td>
-
-			<?php
-			// Source prices.
-			foreach ( $currencies as $currency ) :
-				$price_data = isset( $product['source_prices'][ $currency ] ) ? $product['source_prices'][ $currency ] : array();
-				$regular = isset( $price_data['regular_price'] ) ? $price_data['regular_price'] : '';
-				$sale = isset( $price_data['sale_price'] ) ? $price_data['sale_price'] : '';
-				$has_price = ! empty( $regular );
-			?>
-				<td class="column-currency source-price <?php echo $has_price ? '' : 'empty-price'; ?>">
-					<?php if ( $has_price ) : ?>
-						<span class="price-regular"><?php echo esc_html( $regular ); ?></span>
-						<?php if ( ! empty( $sale ) ) : ?>
-							<br><span class="price-sale"><?php echo esc_html( $sale ); ?></span>
-						<?php endif; ?>
-					<?php else : ?>
-						<span class="price-empty">-</span>
-					<?php endif; ?>
-				</td>
-			<?php endforeach; ?>
-
-			<?php
-			// Translation prices for each language.
-			foreach ( $languages as $lang_code => $lang_data ) :
-				if ( $lang_code === $default_lang ) {
-					continue;
-				}
-
-				$trans_data = isset( $product['translations'][ $lang_code ] ) ? $product['translations'][ $lang_code ] : null;
-
-				foreach ( $currencies as $currency ) :
-					if ( ! $trans_data ) :
-					?>
-						<td class="column-currency trans-price no-translation">
-							<span class="price-empty">-</span>
-						</td>
-					<?php
-					else :
-						$price_info = isset( $trans_data['prices'][ $currency ] ) ? $trans_data['prices'][ $currency ] : array();
-						$regular = isset( $price_info['regular_price'] ) ? $price_info['regular_price'] : '';
-						$sale = isset( $price_info['sale_price'] ) ? $price_info['sale_price'] : '';
-						$matches = isset( $price_info['matches'] ) ? $price_info['matches'] : false;
-						$has_price = ! empty( $regular );
-
-						$cell_class = 'column-currency trans-price';
-						if ( ! $has_price ) {
-							$cell_class .= ' empty-price';
-						} elseif ( $matches ) {
-							$cell_class .= ' price-match';
-						} else {
-							$cell_class .= ' price-mismatch';
-						}
-					?>
-						<td class="<?php echo esc_attr( $cell_class ); ?>">
-							<?php if ( $has_price ) : ?>
-								<span class="price-regular"><?php echo esc_html( $regular ); ?></span>
-								<?php if ( ! empty( $sale ) ) : ?>
-									<br><span class="price-sale"><?php echo esc_html( $sale ); ?></span>
-								<?php endif; ?>
-							<?php else : ?>
-								<span class="price-empty">-</span>
-							<?php endif; ?>
-						</td>
-					<?php
-					endif;
-				endforeach;
-			endforeach;
-			?>
-
-			<td class="column-actions">
-				<?php if ( ! $product['is_synced'] ) : ?>
-					<button type="button" class="button button-small afs-wcml-sync-single" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
+					<button type="button" class="button button-small button-primary afs-wcml-sync-single" data-product-id="<?php echo esc_attr( $product_id ); ?>">
 						<span class="dashicons dashicons-update"></span>
 						<?php esc_html_e( 'Sync', 'afs-wcml-api' ); ?>
 					</button>
@@ -1423,6 +1242,402 @@ class AFS_WCML_Admin {
 						<span class="dashicons dashicons-yes-alt" style="font-size: 12px;"></span>
 						<?php esc_html_e( 'Synchronisé', 'afs-wcml-api' ); ?>
 					</small>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Render location stock sync page.
+	 */
+	public function render_location_stock_sync_page() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'Vous n\'avez pas les permissions nécessaires.', 'afs-wcml-api' ) );
+		}
+
+		if ( ! $this->location_stock_sync ) {
+			wp_die( esc_html__( 'Classe Location Stock Sync non disponible.', 'afs-wcml-api' ) );
+		}
+
+		// Get active languages.
+		$languages = apply_filters( 'wpml_active_languages', array() );
+		$default_lang = apply_filters( 'wpml_default_language', 'en' );
+
+		// Clear cache first to ensure we get only allowed locations.
+		$this->location_stock_sync->clear_locations_cache();
+		
+		// Get all locations (only Europe 2682 and North America 2683).
+		$locations = $this->location_stock_sync->get_all_locations();
+
+		// Get sync settings.
+		$auto_sync_enabled = $this->location_stock_sync->is_auto_sync_enabled();
+
+		// Get initial data.
+		$initial_data = array();
+		$total_all = 0;
+		$total_synced = 0;
+		$total_unsync = 0;
+
+		if ( ! empty( $locations ) ) {
+			$initial_data = $this->location_stock_sync->get_products_location_stock_comparison( array(
+				'per_page'           => 20,
+				'page'               => 1,
+				'sync_status'        => '',
+				'include_variations' => true,
+			) );
+			$total_all = isset( $initial_data['total'] ) ? $initial_data['total'] : 0;
+			$total_synced = isset( $initial_data['synced_count'] ) ? $initial_data['synced_count'] : 0;
+			$total_unsync = isset( $initial_data['unsynced_count'] ) ? $initial_data['unsynced_count'] : 0;
+		}
+
+		?>
+		<div class="wrap afs-wcml-sync-wrap afs-wcml-location-stock-sync-wrap">
+			<h1><?php esc_html_e( 'Synchronisation des Stocks par Location WCMLIM', 'afs-wcml-api' ); ?></h1>
+
+			<div class="afs-wcml-info-box">
+				<h3><?php esc_html_e( 'Comment ça marche ?', 'afs-wcml-api' ); ?></h3>
+				<p><?php esc_html_e( 'Cette fonctionnalité synchronise les quantités par location WCMLIM entre les différentes traductions de vos produits. Les quantités sont copiées identiquement de la langue source vers toutes les traductions.', 'afs-wcml-api' ); ?></p>
+				<ul>
+					<li><span class="afs-wcml-legend-match"></span> <?php esc_html_e( 'Stock synchronisé (identique à la source)', 'afs-wcml-api' ); ?></li>
+					<li><span class="afs-wcml-legend-mismatch"></span> <?php esc_html_e( 'Stock non synchronisé (différent de la source)', 'afs-wcml-api' ); ?></li>
+					<li><span class="afs-wcml-legend-empty"></span> <?php esc_html_e( 'Stock vide', 'afs-wcml-api' ); ?></li>
+				</ul>
+			</div>
+
+			<div class="afs-wcml-cards">
+				<!-- Settings Card -->
+				<div class="afs-wcml-card afs-wcml-card-wide">
+					<h2><?php esc_html_e( 'Paramètres de synchronisation', 'afs-wcml-api' ); ?></h2>
+					
+					<div style="margin-bottom: 20px;">
+						<label class="afs-wcml-toggle">
+							<input type="checkbox" name="location_stock_auto_sync" id="location_stock_auto_sync" value="1" <?php checked( $auto_sync_enabled ); ?> />
+							<span class="afs-wcml-toggle-slider"></span>
+						</label>
+						<label for="location_stock_auto_sync" style="margin-left: 10px;">
+							<?php esc_html_e( 'Synchronisation automatique', 'afs-wcml-api' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Activer pour synchroniser automatiquement les stocks par location quand vous sauvegardez un produit.', 'afs-wcml-api' ); ?>
+						</p>
+					</div>
+
+					<button type="button" class="button button-primary" id="afs-wcml-save-location-stock-settings">
+						<?php esc_html_e( 'Sauvegarder les paramètres', 'afs-wcml-api' ); ?>
+					</button>
+				</div>
+
+				<!-- Status Card -->
+				<div class="afs-wcml-card afs-wcml-card-wide">
+					<h2><?php esc_html_e( 'État de la synchronisation', 'afs-wcml-api' ); ?></h2>
+
+					<div class="afs-wcml-status-grid">
+						<div class="afs-wcml-status-item">
+							<span class="afs-wcml-status-label"><?php esc_html_e( 'Locations détectées', 'afs-wcml-api' ); ?></span>
+							<span class="afs-wcml-status-value"><?php echo count( $locations ); ?></span>
+							<span class="afs-wcml-status-detail">
+								<?php
+								if ( ! empty( $locations ) ) {
+									echo esc_html( implode( ', ', $locations ) );
+								} else {
+									esc_html_e( 'Aucune location trouvée', 'afs-wcml-api' );
+								}
+								?>
+							</span>
+						</div>
+						<div class="afs-wcml-status-item status-info">
+							<span class="afs-wcml-status-label"><?php esc_html_e( 'Total produits/variations', 'afs-wcml-api' ); ?></span>
+							<span class="afs-wcml-status-value" id="afs-wcml-location-stock-total-count"><?php echo esc_html( $total_all ); ?></span>
+						</div>
+						<div class="afs-wcml-status-item status-ok">
+							<span class="afs-wcml-status-label"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></span>
+							<span class="afs-wcml-status-value" id="afs-wcml-location-stock-synced-count"><?php echo esc_html( $total_synced ); ?></span>
+						</div>
+						<div class="afs-wcml-status-item status-warning">
+							<span class="afs-wcml-status-label"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></span>
+							<span class="afs-wcml-status-value" id="afs-wcml-location-stock-unsynced-count"><?php echo esc_html( $total_unsync ); ?></span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Actions Card -->
+				<div class="afs-wcml-card">
+					<h2><?php esc_html_e( 'Actions', 'afs-wcml-api' ); ?></h2>
+					<button type="button" class="button button-primary button-large" id="afs-wcml-sync-all-location-stock">
+						<span class="dashicons dashicons-update"></span>
+						<?php esc_html_e( 'Synchroniser tous les produits', 'afs-wcml-api' ); ?>
+					</button>
+					<p class="description" style="margin-top: 10px;">
+						<?php esc_html_e( 'Synchronise les stocks par location de tous les produits et variations. Cette opération peut prendre du temps.', 'afs-wcml-api' ); ?>
+					</p>
+				</div>
+			</div>
+
+			<?php if ( empty( $locations ) ) : ?>
+			<div class="notice notice-warning" style="margin: 20px 0; padding: 15px;">
+				<p>
+					<strong><?php esc_html_e( '⚠️ Aucune location WCMLIM trouvée', 'afs-wcml-api' ); ?></strong><br>
+					<?php esc_html_e( 'Le plugin WCMLIM (WooCommerce Multi-Locations Inventory Management) ne semble pas être installé ou aucune location n\'a été configurée.', 'afs-wcml-api' ); ?>
+				</p>
+			</div>
+			<?php else : ?>
+
+			<!-- Filters -->
+			<div class="afs-wcml-card afs-wcml-filters-card">
+				<h2><?php esc_html_e( 'Filtres', 'afs-wcml-api' ); ?></h2>
+				<div class="afs-wcml-filters">
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-location-stock-filter-search"><?php esc_html_e( 'Rechercher', 'afs-wcml-api' ); ?></label>
+						<input type="text" id="afs-wcml-location-stock-filter-search" placeholder="<?php esc_attr_e( 'Nom du produit...', 'afs-wcml-api' ); ?>" />
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-location-stock-filter-type"><?php esc_html_e( 'Type de produit', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-location-stock-filter-type">
+							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
+							<option value="simple"><?php esc_html_e( 'Produits simples', 'afs-wcml-api' ); ?></option>
+							<option value="variable"><?php esc_html_e( 'Produits variables', 'afs-wcml-api' ); ?></option>
+							<option value="variation"><?php esc_html_e( 'Variations', 'afs-wcml-api' ); ?></option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-location-stock-filter-status"><?php esc_html_e( 'Statut sync', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-location-stock-filter-status">
+							<option value=""><?php esc_html_e( 'Tous', 'afs-wcml-api' ); ?></option>
+							<option value="synced"><?php esc_html_e( 'Synchronisés', 'afs-wcml-api' ); ?></option>
+							<option value="not_synced"><?php esc_html_e( 'Non synchronisés', 'afs-wcml-api' ); ?></option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group">
+						<label for="afs-wcml-location-stock-filter-per-page"><?php esc_html_e( 'Par page', 'afs-wcml-api' ); ?></label>
+						<select id="afs-wcml-location-stock-filter-per-page">
+							<option value="10">10</option>
+							<option value="20" selected>20</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
+					</div>
+					<div class="afs-wcml-filter-group afs-wcml-filter-actions">
+						<button type="button" class="button button-primary" id="afs-wcml-location-stock-apply-filters">
+							<span class="dashicons dashicons-search"></span>
+							<?php esc_html_e( 'Filtrer', 'afs-wcml-api' ); ?>
+						</button>
+						<button type="button" class="button button-secondary" id="afs-wcml-location-stock-reset-filters">
+							<?php esc_html_e( 'Réinitialiser', 'afs-wcml-api' ); ?>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Results Summary -->
+			<div class="afs-wcml-results-summary">
+				<span id="afs-wcml-location-stock-results-count">
+					<?php
+					printf(
+						/* translators: %d: number of products */
+						esc_html__( '%d produit(s) trouvé(s)', 'afs-wcml-api' ),
+						isset( $initial_data['total'] ) ? $initial_data['total'] : 0
+					);
+					?>
+				</span>
+				<div class="afs-wcml-pagination" id="afs-wcml-location-stock-pagination-top"></div>
+			</div>
+
+			<!-- Products Table -->
+			<div class="afs-wcml-card afs-wcml-card-full afs-wcml-tracking-table-wrap">
+				<h2>
+					<?php esc_html_e( 'Tous les produits', 'afs-wcml-api' ); ?>
+					<span class="afs-wcml-count-badge" id="afs-wcml-location-stock-total-display-count"><?php echo esc_html( $total_all ); ?></span>
+					<?php if ( $total_unsync > 0 ) : ?>
+						<span class="afs-wcml-count-badge warning" id="afs-wcml-location-stock-unsync-display-count"><?php echo esc_html( $total_unsync ); ?> <?php esc_html_e( 'à synchroniser', 'afs-wcml-api' ); ?></span>
+					<?php endif; ?>
+				</h2>
+
+				<div id="afs-wcml-location-stock-loader" style="display: none;">
+					<span class="spinner is-active"></span>
+					<?php esc_html_e( 'Chargement...', 'afs-wcml-api' ); ?>
+				</div>
+				<div class="afs-wcml-table-scroll">
+					<table class="wp-list-table widefat striped" id="afs-wcml-location-stock-sync-table">
+						<thead>
+							<tr>
+								<th class="column-product"><?php esc_html_e( 'Produit', 'afs-wcml-api' ); ?></th>
+								<th class="column-type"><?php esc_html_e( 'Type', 'afs-wcml-api' ); ?></th>
+							<?php foreach ( $locations as $location_id ) : ?>
+								<?php
+								// Get location label.
+								$location_label = '';
+								if ( $location_id == 2682 ) {
+									$location_label = __( 'Europe', 'afs-wcml-api' );
+								} elseif ( $location_id == 2683 ) {
+									$location_label = __( 'Amérique du Nord', 'afs-wcml-api' );
+								} else {
+									$location_label = sprintf( __( 'Location %d', 'afs-wcml-api' ), $location_id );
+								}
+								?>
+								<th class="column-location">
+									<?php echo esc_html( $location_label ); ?>
+									<br>
+									<small style="font-weight: normal; font-size: 11px; color: #646970;">
+										<?php esc_html_e( 'ID:', 'afs-wcml-api' ); ?> <?php echo esc_html( $location_id ); ?>
+									</small>
+									<br>
+									<small style="font-weight: normal;">
+										<span class="afs-wcml-lang-badge source"><?php echo esc_html( strtoupper( $default_lang ) ); ?></span>
+										<?php foreach ( $languages as $lang_code => $lang_data ) : ?>
+											<?php if ( $lang_code !== $default_lang ) : ?>
+												<span class="afs-wcml-lang-badge"><?php echo esc_html( strtoupper( $lang_code ) ); ?></span>
+											<?php endif; ?>
+										<?php endforeach; ?>
+									</small>
+								</th>
+							<?php endforeach; ?>
+								<th class="column-actions"><?php esc_html_e( 'Actions', 'afs-wcml-api' ); ?></th>
+							</tr>
+						</thead>
+						<tbody id="afs-wcml-location-stock-sync-body">
+							<?php if ( ! empty( $initial_data['products'] ) ) : ?>
+								<?php foreach ( $initial_data['products'] as $product ) : ?>
+									<?php $this->render_location_stock_sync_row( $product, $languages, $default_lang, $locations ); ?>
+								<?php endforeach; ?>
+							<?php else : ?>
+								<tr class="no-items"><td colspan="100"><?php esc_html_e( 'Aucun produit trouvé.', 'afs-wcml-api' ); ?></td></tr>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Pagination Bottom -->
+				<div class="afs-wcml-pagination" id="afs-wcml-location-stock-pagination-bottom"></div>
+			</div>
+			<?php endif; ?>
+		</div>
+
+		<script type="text/javascript">
+			var afs_wcml_location_stock_sync_data = <?php echo wp_json_encode( array(
+				'locations'    => $locations,
+				'languages'    => array_keys( $languages ),
+				'default_lang' => $default_lang,
+				'total'        => isset( $initial_data['total'] ) ? $initial_data['total'] : 0,
+				'pages'        => isset( $initial_data['pages'] ) ? $initial_data['pages'] : 1,
+				'current_page' => 1,
+				'per_page'     => 20,
+			) ); ?>;
+		</script>
+		<?php
+	}
+
+	/**
+	 * Render a single location stock sync row.
+	 *
+	 * @param array $product      Product data.
+	 * @param array $languages    Active languages.
+	 * @param string $default_lang Default language code.
+	 * @param array $locations    Location IDs.
+	 */
+	private function render_location_stock_sync_row( $product, $languages, $default_lang, $locations ) {
+		$is_synced = isset( $product['is_synced'] ) ? $product['is_synced'] : false;
+		$row_class = $is_synced ? 'synced-row' : 'not-synced-row';
+		
+		// Get frontend URL for default language.
+		$frontend_url = isset( $product['frontend_urls'][ $default_lang ] ) ? $product['frontend_urls'][ $default_lang ] : ( isset( $product['frontend_urls'] ) && ! empty( $product['frontend_urls'] ) ? reset( $product['frontend_urls'] ) : '' );
+		?>
+		<tr class="<?php echo esc_attr( $row_class ); ?>" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
+			<td class="column-product">
+				<strong>
+					<?php if ( $frontend_url ) : ?>
+						<a href="<?php echo esc_url( $frontend_url ); ?>" target="_blank">
+							<?php echo esc_html( $product['product_name'] ); ?>
+						</a>
+					<?php else : ?>
+						<?php echo esc_html( $product['product_name'] ); ?>
+					<?php endif; ?>
+				</strong>
+				<?php if ( $product['is_variation'] && ! empty( $product['parent_name'] ) ) : ?>
+					<br><small class="parent-name"><?php echo esc_html( $product['parent_name'] ); ?></small>
+				<?php endif; ?>
+				<br><small class="product-id">ID: <?php echo esc_html( $product['product_id'] ); ?></small>
+			</td>
+			<td class="column-type">
+				<span class="afs-wcml-type-badge <?php echo esc_attr( $product['product_type'] ); ?>">
+					<?php echo esc_html( ucfirst( $product['product_type'] ) ); ?>
+				</span>
+			</td>
+
+			<?php foreach ( $locations as $location_id ) : ?>
+				<?php
+				$location_data = null;
+				foreach ( $product['locations'] as $loc ) {
+					if ( $loc['location_id'] === $location_id ) {
+						$location_data = $loc;
+						break;
+					}
+				}
+				?>
+				<td class="column-location">
+					<?php if ( $location_data ) : ?>
+						<div style="padding: 5px;">
+							<!-- Source (default language) -->
+							<div style="margin-bottom: 8px; padding: 5px; background: #f8fbff; border-left: 3px solid #2271b1; border-radius: 3px;">
+								<strong style="font-size: 10px; display: block; margin-bottom: 3px;">
+									<?php echo esc_html( strtoupper( $default_lang ) ); ?>
+								</strong>
+								<div style="font-size: 11px;">
+									<span style="color: #646970;">Stock:</span> <strong><?php echo esc_html( $location_data['source']['stock'] ); ?></strong><br>
+									<span style="color: #646970;">Disponible:</span> <strong><?php echo esc_html( $location_data['source']['available'] ); ?></strong>
+								</div>
+							</div>
+
+							<!-- Translations -->
+							<?php foreach ( $languages as $lang_code => $lang_data ) : ?>
+								<?php if ( $lang_code === $default_lang ) : ?>
+									<?php continue; ?>
+								<?php endif; ?>
+
+								<?php
+								$trans_data = isset( $location_data['translations'][ $lang_code ] ) ? $location_data['translations'][ $lang_code ] : null;
+								$trans_is_synced = $trans_data ? $trans_data['is_synced'] : false;
+								$border_color = $trans_is_synced ? '#00a32a' : '#d63638';
+								$bg_color = $trans_is_synced ? '#edfaef' : '#fcf0f1';
+								?>
+								<div style="margin-bottom: 8px; padding: 5px; border-left: 3px solid <?php echo esc_attr( $border_color ); ?>; background: <?php echo esc_attr( $bg_color ); ?>; border-radius: 3px;">
+									<strong style="font-size: 10px; display: block; margin-bottom: 3px;">
+										<?php echo esc_html( strtoupper( $lang_code ) ); ?>
+										<?php if ( $trans_is_synced ) : ?>
+											<span style="color: #00a32a; font-size: 9px;">✓</span>
+										<?php else : ?>
+											<span style="color: #d63638; font-size: 9px;">✗</span>
+										<?php endif; ?>
+									</strong>
+									<?php if ( $trans_data ) : ?>
+										<div style="font-size: 11px;">
+											<span style="color: #646970;">Stock:</span> <strong><?php echo esc_html( $trans_data['stock'] ); ?></strong><br>
+											<span style="color: #646970;">Disponible:</span> <strong><?php echo esc_html( $trans_data['available'] ); ?></strong>
+										</div>
+									<?php else : ?>
+										<div style="font-size: 10px; color: #a7aaad; font-style: italic;">
+											<?php esc_html_e( 'Pas de traduction', 'afs-wcml-api' ); ?>
+										</div>
+									<?php endif; ?>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					<?php else : ?>
+						<span class="price-empty">-</span>
+					<?php endif; ?>
+				</td>
+			<?php endforeach; ?>
+
+			<td class="column-actions">
+				<button type="button" class="button button-small button-primary afs-wcml-sync-single-location-stock" data-product-id="<?php echo esc_attr( $product['product_id'] ); ?>">
+					<span class="dashicons dashicons-update"></span>
+					<?php esc_html_e( 'Sync', 'afs-wcml-api' ); ?>
+				</button>
+				<?php if ( $is_synced ) : ?>
+					<span class="afs-wcml-synced-badge" style="margin-top: 5px; display: block;">
+						<span class="dashicons dashicons-yes-alt"></span>
+						<?php esc_html_e( 'OK', 'afs-wcml-api' ); ?>
+					</span>
 				<?php endif; ?>
 			</td>
 		</tr>

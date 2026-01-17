@@ -93,7 +93,7 @@ class AFS_WCML_Price_Sync {
 		add_action( 'wp_ajax_afs_wcml_sync_product_prices', array( $this, 'ajax_sync_product_prices' ) );
 		add_action( 'wp_ajax_afs_wcml_sync_all_prices', array( $this, 'ajax_sync_all_prices' ) );
 		add_action( 'wp_ajax_afs_wcml_get_sync_status', array( $this, 'ajax_get_sync_status' ) );
-		add_action( 'wp_ajax_afs_wcml_get_products_tracking', array( $this, 'ajax_get_products_tracking' ) );
+		add_action( 'wp_ajax_afs_wcml_get_products_price_sync', array( $this, 'ajax_get_products_price_sync' ) );
 	}
 
 	/**
@@ -1157,6 +1157,53 @@ class AFS_WCML_Price_Sync {
 	}
 
 	/**
+	 * Get frontend URL for a product.
+	 *
+	 * @param int    $product_id Product ID.
+	 * @param string $lang       Language code.
+	 * @return string Frontend URL.
+	 */
+	private function get_product_frontend_url( $product_id, $lang ) {
+		if ( ! $product_id ) {
+			return '';
+		}
+
+		// Switch to the correct language context for WPML
+		global $sitepress;
+		$original_lang = null;
+		if ( $sitepress ) {
+			$original_lang = $sitepress->get_current_language();
+			$sitepress->switch_lang( $lang );
+		}
+
+		// Get permalink for the product in the correct language
+		$permalink = get_permalink( $product_id );
+		
+		// Restore original language
+		if ( $sitepress && $original_lang ) {
+			$sitepress->switch_lang( $original_lang );
+		}
+
+		if ( ! $permalink ) {
+			return '';
+		}
+
+		// Replace site_url with HEADLESS_URL if defined
+		if ( defined( 'HEADLESS_URL' ) && ! empty( HEADLESS_URL ) ) {
+			$site_url = untrailingslashit( get_site_url() );
+			$headless_url = untrailingslashit( HEADLESS_URL );
+			$permalink = str_replace( $site_url, $headless_url, $permalink );
+		} else {
+			// Fallback to staging URL
+			$site_url = untrailingslashit( get_site_url() );
+			$headless_url = 'https://staging.afs-foiling.com';
+			$permalink = str_replace( $site_url, $headless_url, $permalink );
+		}
+
+		return $permalink;
+	}
+
+	/**
 	 * Get detailed price information for a single product.
 	 *
 	 * @param int   $product_id  Product ID.
@@ -1192,23 +1239,31 @@ class AFS_WCML_Price_Sync {
 		$source_prices = array();
 		$default_currency = $this->prices->get_default_currency();
 
-		// Default currency prices.
+		// Default currency prices - normalize to ensure they are strings
+		$source_regular = $product->get_regular_price();
+		$source_sale = $product->get_sale_price();
+		$source_price = $product->get_price();
+		
 		$source_prices[ $default_currency ] = array(
-			'regular_price' => $product->get_regular_price(),
-			'sale_price'    => $product->get_sale_price(),
-			'price'         => $product->get_price(),
+			'regular_price' => ( $source_regular !== '' && $source_regular !== null ) ? (string) $source_regular : '',
+			'sale_price'    => ( $source_sale !== '' && $source_sale !== null ) ? (string) $source_sale : '',
+			'price'         => ( $source_price !== '' && $source_price !== null ) ? (string) $source_price : '',
 		);
 
-		// Multi-currency prices.
+		// Multi-currency prices - normalize to ensure they are strings
 		foreach ( $currencies as $currency => $currency_data ) {
 			if ( $currency === $default_currency ) {
 				continue;
 			}
 
+			$curr_regular = get_post_meta( $product_id, '_regular_price_' . $currency, true );
+			$curr_sale = get_post_meta( $product_id, '_sale_price_' . $currency, true );
+			$curr_price = get_post_meta( $product_id, '_price_' . $currency, true );
+
 			$source_prices[ $currency ] = array(
-				'regular_price' => get_post_meta( $product_id, '_regular_price_' . $currency, true ),
-				'sale_price'    => get_post_meta( $product_id, '_sale_price_' . $currency, true ),
-				'price'         => get_post_meta( $product_id, '_price_' . $currency, true ),
+				'regular_price' => ( $curr_regular !== '' && $curr_regular !== null ) ? (string) $curr_regular : '',
+				'sale_price'    => ( $curr_sale !== '' && $curr_sale !== null ) ? (string) $curr_sale : '',
+				'price'         => ( $curr_price !== '' && $curr_price !== null ) ? (string) $curr_price : '',
 			);
 		}
 
@@ -1223,38 +1278,72 @@ class AFS_WCML_Price_Sync {
 
 			$trans_prices = array();
 
-			// Default currency.
-			$trans_regular = get_post_meta( $trans_id, '_regular_price', true );
-			$trans_sale = get_post_meta( $trans_id, '_sale_price', true );
-			$trans_price = get_post_meta( $trans_id, '_price', true );
+			// Default currency: use wc_get_product so WCML filters return the effective price
+			// (e.g. when the translation inherits from source or uses custom prices).
+			$trans_product = wc_get_product( $trans_id );
+			if ( $trans_product ) {
+				$trans_regular = $trans_product->get_regular_price();
+				$trans_sale    = $trans_product->get_sale_price();
+				$trans_price   = $trans_product->get_price();
+			} else {
+				$trans_regular = get_post_meta( $trans_id, '_regular_price', true );
+				$trans_sale    = get_post_meta( $trans_id, '_sale_price', true );
+				$trans_price   = get_post_meta( $trans_id, '_price', true );
+			}
+
+			// Normalize
+			$source_regular = (string) ( $source_prices[ $default_currency ]['regular_price'] ?? '' );
+			$source_sale    = (string) ( $source_prices[ $default_currency ]['sale_price'] ?? '' );
+			$source_price   = (string) ( $source_prices[ $default_currency ]['price'] ?? '' );
+			$trans_regular  = ( $trans_regular !== '' && $trans_regular !== null ) ? (string) $trans_regular : '';
+			$trans_sale     = ( $trans_sale !== '' && $trans_sale !== null ) ? (string) $trans_sale : '';
+			$trans_price    = ( $trans_price !== '' && $trans_price !== null ) ? (string) $trans_price : '';
+
+			// Show translation price if set, otherwise source (always display a value)
+			$display_regular = $trans_regular !== '' ? $trans_regular : $source_regular;
+			$display_sale    = $trans_sale !== '' ? $trans_sale : $source_sale;
+			$display_price   = $trans_price !== '' ? $trans_price : $source_price;
+
+			$matches = ( $source_regular === $trans_regular || ( $trans_regular === '' && $source_regular === '' ) );
 
 			$trans_prices[ $default_currency ] = array(
-				'regular_price' => $trans_regular,
-				'sale_price'    => $trans_sale,
-				'price'         => $trans_price,
-				'matches'       => ( $source_prices[ $default_currency ]['regular_price'] == $trans_regular ),
+				'regular_price' => $display_regular,
+				'sale_price'    => $display_sale,
+				'price'         => $display_price,
+				'matches'       => $matches,
 			);
 
-			if ( ! $trans_prices[ $default_currency ]['matches'] ) {
+			if ( ! $matches ) {
 				$is_synced = false;
 			}
 
-			// Multi-currency.
+			// Multi-currency: direct meta, fallback to source
 			foreach ( $currencies as $currency => $currency_data ) {
 				if ( $currency === $default_currency ) {
 					continue;
 				}
 
 				$curr_regular = get_post_meta( $trans_id, '_regular_price_' . $currency, true );
-				$curr_sale = get_post_meta( $trans_id, '_sale_price_' . $currency, true );
-				$curr_price = get_post_meta( $trans_id, '_price_' . $currency, true );
+				$curr_sale    = get_post_meta( $trans_id, '_sale_price_' . $currency, true );
+				$curr_price   = get_post_meta( $trans_id, '_price_' . $currency, true );
 
-				$matches = ( $source_prices[ $currency ]['regular_price'] == $curr_regular );
+				$source_curr_regular = (string) ( $source_prices[ $currency ]['regular_price'] ?? '' );
+				$source_curr_sale    = (string) ( $source_prices[ $currency ]['sale_price'] ?? '' );
+				$source_curr_price   = (string) ( $source_prices[ $currency ]['price'] ?? '' );
+				$curr_regular        = ( $curr_regular !== '' && $curr_regular !== null ) ? (string) $curr_regular : '';
+				$curr_sale           = ( $curr_sale !== '' && $curr_sale !== null ) ? (string) $curr_sale : '';
+				$curr_price          = ( $curr_price !== '' && $curr_price !== null ) ? (string) $curr_price : '';
+
+				$matches = ( $source_curr_regular === $curr_regular || ( $curr_regular === '' && $source_curr_regular === '' ) );
+
+				$display_curr_regular = $curr_regular !== '' ? $curr_regular : $source_curr_regular;
+				$display_curr_sale    = $curr_sale !== '' ? $curr_sale : $source_curr_sale;
+				$display_curr_price   = $curr_price !== '' ? $curr_price : $source_curr_price;
 
 				$trans_prices[ $currency ] = array(
-					'regular_price' => $curr_regular,
-					'sale_price'    => $curr_sale,
-					'price'         => $curr_price,
+					'regular_price' => $display_curr_regular,
+					'sale_price'    => $display_curr_sale,
+					'price'         => $display_curr_price,
 					'matches'       => $matches,
 				);
 
@@ -1291,6 +1380,17 @@ class AFS_WCML_Price_Sync {
 			}
 		}
 
+		// Get frontend URLs for source and translations
+		$frontend_urls = array();
+		$frontend_urls[ $source_lang ] = $this->get_product_frontend_url( $product_id, $source_lang );
+
+		foreach ( $translations as $lang => $trans_id ) {
+			if ( (int) $trans_id === (int) $product_id ) {
+				continue; // Skip source
+			}
+			$frontend_urls[ $lang ] = $this->get_product_frontend_url( $trans_id, $lang );
+		}
+
 		return array(
 			'product_id'         => $product_id,
 			'product_name'       => $product_name,
@@ -1303,13 +1403,14 @@ class AFS_WCML_Price_Sync {
 			'translations'       => $translation_prices,
 			'is_synced'          => $is_synced,
 			'edit_url'           => get_edit_post_link( $product_id, 'raw' ),
+			'frontend_urls'      => $frontend_urls,
 		);
 	}
 
 	/**
-	 * AJAX: Get products for tracking page.
+	 * AJAX: Get products for price sync page.
 	 */
-	public function ajax_get_products_tracking() {
+	public function ajax_get_products_price_sync() {
 		check_ajax_referer( 'afs_wcml_sync_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -1326,6 +1427,12 @@ class AFS_WCML_Price_Sync {
 		);
 
 		$data = $this->get_products_price_comparison( $args );
+		
+		// Get languages for rendering - only pass language codes as array, not the full WPML object
+		$default_lang = apply_filters( 'wpml_default_language', 'en' );
+		$data['default_lang'] = $default_lang;
+		// Note: $data['languages'] is already correctly set as array_keys() by get_products_price_comparison()
+		
 		wp_send_json_success( $data );
 	}
 }

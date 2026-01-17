@@ -1216,3 +1216,64 @@ add_action('rest_api_init', function () {
         )
     );
 });
+
+/**
+ * Replace site URLs with HEADLESS_URL in emails
+ * Uses HEADLESS_URL constant from wp-config.php
+ */
+add_filter('site_url', 'afs_replace_url_in_emails', 999, 4);
+add_filter('home_url', 'afs_replace_url_in_emails', 999, 4);
+
+function afs_replace_url_in_emails($url, $path, $scheme, $blog_id) {
+    // Only replace URLs when sending emails
+    if (!afs_is_email_context()) {
+        return $url;
+    }
+    
+    // Check if HEADLESS_URL is defined
+    if (!defined('HEADLESS_URL') || empty(HEADLESS_URL)) {
+        return $url;
+    }
+    
+    $current_site_url = untrailingslashit(get_site_url($blog_id));
+    $headless_url = untrailingslashit(HEADLESS_URL);
+    
+    // Simple string replacement
+    return str_replace($current_site_url, $headless_url, $url);
+}
+
+/**
+ * Detect if we're in an email sending context
+ */
+function afs_is_email_context() {
+    // Check WooCommerce email actions
+    if (did_action('woocommerce_email_header') || 
+        did_action('woocommerce_email_footer') ||
+        doing_action('woocommerce_email_header') ||
+        doing_action('woocommerce_email_footer')) {
+        return true;
+    }
+    
+    // Check WordPress email actions
+    if (did_action('phpmailer_init') || 
+        doing_action('phpmailer_init')) {
+        return true;
+    }
+    
+    // Check if we're filtering email content
+    $filters = [
+        'woocommerce_email_heading',
+        'woocommerce_email_message',
+        'woocommerce_email_footer_text',
+        'wp_mail',
+        'wp_mail_content_type',
+    ];
+    
+    foreach ($filters as $filter) {
+        if (doing_filter($filter) || did_action($filter)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
