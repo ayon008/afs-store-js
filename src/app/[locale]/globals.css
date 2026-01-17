@@ -224,6 +224,131 @@ body {
 }
 
 /* Blur overlay is now handled inline in the component */
+/* .product_name{
+color: #111;
+font-size: clamp(1.25rem,1.0093rem+0.7407vw,1.75rem);
+font-weight: 600;
+line-height: 100%; 
+} */
+
+
+.product_dimantion {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+
+
+/* Dimensions*/
+.specs-wrapper {
+width: 100%;
+height: 100%;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 4px;
+font-family: 'Alliance No.2', sans-serif;
+}
+
+.specs-header {
+align-self: stretch;
+padding: 10px 0 16px clamp(11.875rem, 9.7685rem + 6.4815vw, 16.25rem);
+border-bottom: 1px solid #333333;
+display: inline-flex;
+gap: 20px;
+justify-content: flex-start;
+align-items: flex-end;
+flex-wrap: nowrap;
+}
+
+.specs-header .cell {
+  flex: 1 1 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999999;
+  line-height: 14px;
+  word-wrap: break-word;
+  min-width: 149px;
+}
+
+.specs-row {
+  align-self: stretch;
+  padding: 10px 0;
+  border-bottom: 1px solid #333333;
+  display: inline-flex;
+  gap: 20px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.specs-row .title {
+  width: clamp(10.625rem, 8.5185rem + 6.4815vw, 15rem);
+  font-size: clamp(1.125rem, 0.9028rem + 0.3472vw, 1.25rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #111111;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+
+.row-data {
+  flex: 1 1 0;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.row-data .cell {
+  flex: 1 1 0;
+  font-size: clamp(1rem, 0.7778rem + 0.3472vw, 1.125rem);
+  font-weight: 500;
+  color: #111111;
+  line-height: 100%;
+  word-wrap: break-word;
+}
+
+
+
+
+.subtext, .sub-label{
+color: #B3B3B3;
+ font-size: 12px;
+ font-family: Alliance No.2;
+ font-weight: 600;
+ line-height: 12px;
+ word-wrap: break-word
+    
+}
+
+
+.table-container {
+    overflow-y: auto;
+    cursor: grab;
+    user-select: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-container:active {
+    cursor: grabbing;
+}
+
+@media only screen and (max-width: 767px) {
+
+.table-container:not(:last-of-type) {
+    margin-bottom: 20px
+}
+
+.product_name{
+    font-size: 22px;
+    
+}
+}
 
 
 

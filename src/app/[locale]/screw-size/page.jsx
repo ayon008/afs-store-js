@@ -1,5 +1,4 @@
 "use client";
-import { alliance } from "@/fonts/Alliance";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
@@ -19,102 +18,38 @@ const BreadCums = () => {
 
 
 
-const Table = ({ title, tableRow, tableHead, className }) => {
+const Table = ({ title, tableRow, tableHead }) => {
     return (
-        // <div className="table-container">
-        //     <div className="specs-wrapper">
-        //         <div className="specs-header">
-        //             {tableHead?.map((item) => {
-        //                 return (
-        //                     <div className="cell w-[150px]" key={item} dangerouslySetInnerHTML={{ __html: item }}></div>
-        //                 )
-        //             })}
-        //         </div>
-        //         {tableRow?.map((item) => {
-        //             return (
-        //                 <div className="specs-row min-w-full" key={item.name}>
-        //                     <div className="title">{item.name}</div>
-        //                     <div className="row-data">
-        //                         {item.value?.map((singleItem) => {
-        //                             return (
-        //                                 <div className="cell w-[150px] bg-green-500" key={singleItem}>{singleItem}</div>
-        //                             )
-        //                         })}
-        //                     </div>
-        //                 </div>
-        //             )
-        //         })}
-        //     </div>
-        // </div>
-        <div className="table-container">
-            <div className="specs-wrapper" data-category="foil">
-                <div className="specs-header">
-                    <div className="cell">
-                        Surface (cm<sup>2</sup>)
+        <div class="product_dimantion min-w-full overflow-x-auto overflow-y-hidden">
+            <h3 class="product_name text-[clamp(1.25rem,1.0093rem+0.7407vw,1.75rem)] font-semibold">
+                {title}
+            </h3>
+            <div class="table-container">
+                <div class="specs-wrapper" data-category="foil">
+                    <div class="specs-header">
+                        {tableHead?.map((item) => {
+                            return (
+                                <div className="cell" key={item} dangerouslySetInnerHTML={{ __html: item }}></div>
+                            )
+                        })}
                     </div>
-
-                    <div className="cell">Wingspan (mm)</div>
-                    <div className="cell">Aspect Ratio</div>
-                    <div className="cell">Maximum heart rate (mm)</div>
-                    <div className="cell">Maximum thickness (mm)</div>
-
-                    <div className="cell multi-line">
-                        <div>Length (mm)</div>
-                        <div className="subtext">(Wing trailing edge / Fuselage end)</div>
-                    </div>
-
-                    <div className="cell">Construction</div>
-                    <div className="cell">Weight (kg)</div>
-                    <div className="cell">Screws</div>
-                </div>
-
-                <div className="specs-row">
-                    <div className="title">Avion Silk 650</div>
-                    <div className="row-data">
-                        <div className="cell">650</div>
-                        <div className="cell">720</div>
-                        <div className="cell">8</div>
-                        <div className="cell">115</div>
-                        <div className="cell">13,7</div>
-                        <div className="cell">572</div>
-                        <div className="cell">UHM Carbone / Ame corecell</div>
-                        <div className="cell">0.9</div>
-                        <div className="cell">THAT</div>
-                    </div>
-                </div>
-
-                <div className="specs-row">
-                    <div className="title">Avion Silk 850</div>
-                    <div className="row-data">
-                        <div className="cell">850</div>
-                        <div className="cell">824</div>
-                        <div className="cell">8</div>
-                        <div className="cell">134</div>
-                        <div className="cell">16</div>
-                        <div className="cell">555</div>
-                        <div className="cell">UHM Carbone / Ame corecell</div>
-                        <div className="cell">0.96</div>
-                        <div className="cell">THAT</div>
-                    </div>
-                </div>
-
-                <div className="specs-row">
-                    <div className="title">Avion Silk 1050</div>
-                    <div className="row-data">
-                        <div className="cell">1050</div>
-                        <div className="cell">916</div>
-                        <div className="cell">8</div>
-                        <div className="cell">150</div>
-                        <div className="cell">17,9</div>
-                        <div className="cell">538</div>
-                        <div className="cell">UHM Carbone / Ame corecell</div>
-                        <div className="cell">1.0</div>
-                        <div className="cell">THAT</div>
-                    </div>
+                    {tableRow?.map((item) => {
+                        return (
+                            <div class="specs-row" key={item.name}>
+                                <div class="title">{item.name}</div>
+                                <div class="row-data">
+                                    {item.value?.map((singleItem) => {
+                                        return (
+                                            <div class="cell" key={singleItem}>{singleItem}</div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         </div>
-
     )
 }
 
@@ -129,8 +64,7 @@ const Page = () => {
     const data = [
         {
             id: 0,
-            name: "Foil Characteristic - AFS",
-            tables: [],
+            name: "Caractéristique Foil - AFS",
         }
     ]
 
@@ -157,18 +91,30 @@ const Page = () => {
                         return (
                             <div key={item.id}>
                                 <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">{item.name}</h2>
+                                {item.id === 0 &&
+                                    <div className="mt-16 space-y-16">
+                                        <Table title="Aile monoblock Silk"
+                                            tableRow={[
+                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "Uhm Carbone / Ame Corecell", "0.9", "NA"] },
+                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
+                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Wingspan (MM)", "ASPECT RATIO", "MAXIMUM HEART RATE (MM)", "MAXIMUM THICKNESS (MM)", "LENGTH (MM) <br/> <small>(WING TRAILING EDGE / FUSELAGE END)</small>", "Construction", "Weight (KG)", "Screws"]} />
+                                        <Table title="Aile monoblock Silk"
+                                            tableRow={[
+                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "Uhm Carbone / Ame Corecell", "0.9", "NA"] },
+                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
+                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Wingspan (MM)", "ASPECT RATIO", "MAXIMUM HEART RATE (MM)", "MAXIMUM THICKNESS (MM)", "LENGTH (MM) <br/> <small>(WING TRAILING EDGE / FUSELAGE END)</small>", "Construction", "Weight (KG)", "Screws"]} />
+                                    </div>
+                                }
                             </div>
                         )
                     })
                 }
             </div>
-            <div className="my-16">
-                <Table title="Family Monoblock Silk"
-                    tableRow={[
-                        { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "Uhm Carbone / Ame Corecell", "0.9", "that"] },
-                    ]}
-                    tableHead={["SURFACE (CM<sup>2</sup>)", "Wingspan (MM)", "ASPECT RATIO", "MAXIMUM HEART RATE (MM)", "MAXIMUM THICKNESS (MM)", "LENGTH (MM) <br/> <small>(WING TRAILING EDGE / FUSELAGE END)</small>", "Construction", "Weight (KG)", "Screws"]} />
-            </div>
+
         </div>
     )
 }
