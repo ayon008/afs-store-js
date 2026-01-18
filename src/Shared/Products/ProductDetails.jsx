@@ -155,8 +155,9 @@ const ProductDetails = ({ data, variations }) => {
     // Watch all form values
     const watchedValues = watch();
 
-    // Check if product has variations
-    const hasVariations = attributes && attributes.length > 0;
+    // Only treat as variable when WooCommerce type is "variable" AND we have actual variations.
+    // Simple products can have attributes (e.g. Taille for display/filtering) without variations.
+    const hasVariations = data?.type === 'variable' && Array.isArray(variations) && variations.length > 0;
 
     // Check if all variations are selected
     const allVariationsSelected = hasVariations
@@ -165,6 +166,7 @@ const ProductDetails = ({ data, variations }) => {
 
     // Auto-fetch price when all variations are selected
     useEffect(() => {
+        if (!hasVariations) return;
         if (!attributes || attributes.length === 0) return;
         if (!allVariationsSelected) {
             // Reset price when selections change
@@ -284,7 +286,7 @@ const ProductDetails = ({ data, variations }) => {
         };
 
         fetchVariationPrice();
-    }, [allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
+    }, [hasVariations, allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
 
     const a = useTranslations("profile")
 
@@ -612,6 +614,7 @@ const ProductDetails = ({ data, variations }) => {
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5`}>
                     <div className="flex flex-col gap-4">
+                        {hasVariations && (
                         <table>
                             <tbody className="flex flex-col gap-5">
                                 {attributes?.map((singleAttribute, index) => {
@@ -670,6 +673,7 @@ const ProductDetails = ({ data, variations }) => {
                                 })}
                             </tbody>
                         </table>
+                        )}
                     </div>
 
                     <div className='space-y-4'>
