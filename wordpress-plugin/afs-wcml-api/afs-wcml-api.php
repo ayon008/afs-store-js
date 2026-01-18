@@ -3,7 +3,7 @@
  * Plugin Name: AFS WCML Manual Pricing
  * Plugin URI: https://afs-foiling.com
  * Description: Plugin personnalisé pour gérer les prix manuels par devise avec WooCommerce Multilingual (WCML). Permet de définir des prix fixes par devise (USD, EUR, GBP) qui sont persistés et utilisés dans le panier, checkout, commandes et remboursements.
- * Version: 2.0.19
+ * Version: 2.0.27
  * Author: AFS
  * Author URI: https://afs-foiling.com
  * Text Domain: afs-wcml-api
@@ -22,11 +22,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AFS_WCML_API_VERSION', '2.0.19' );
+define( 'AFS_WCML_API_VERSION', '2.0.27' );
 define( 'AFS_WCML_API_PLUGIN_FILE', __FILE__ );
 define( 'AFS_WCML_API_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AFS_WCML_API_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'AFS_WCML_API_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+
+// Define headless frontend URL (can be overridden in wp-config.php).
+if ( ! defined( 'HEADLESS_URL' ) ) {
+	define( 'HEADLESS_URL', 'https://staging.afs-foiling.com' );
+}
 
 /**
  * Main plugin class.
@@ -125,6 +130,7 @@ final class AFS_WCML_API {
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-core.php';
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-price-sync.php';
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-acf-sync.php';
+		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-location-stock-sync.php';
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-admin.php';
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-api.php';
 		require_once AFS_WCML_API_PLUGIN_DIR . 'includes/class-afs-wcml-csv-import.php';
