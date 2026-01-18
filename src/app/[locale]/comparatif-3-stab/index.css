@@ -1,0 +1,105 @@
+.calculator-container {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.title {
+    font-family: "alliance no.2", sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 55px;
+    color: rgb(17, 17, 17);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 55px;
+    color: rgb(17, 17, 17);
+    margin-bottom: 10px;
+}
+
+.form-group small {
+    display: block;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    color: rgba(17, 17, 17, 0.75);
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    font-family: "alliance no.2", sans-serif;
+    font-size: 22px;
+    line-height: 26px;
+    font-weight: 400;
+    color: rgba(17, 17, 17, 0.75);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    font-family: "alliance no.2", sans-serif;
+    font-size: 22px;
+    line-height: 26px;
+    font-weight: 400;
+    color: #fff;
+    background-color: rgb(17, 17, 17);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.results {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+.results-container {
+    display: grid;
+    gap: 20px;
+}
+
+.result-item {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.result-item ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.result-item ul li {
+    margin-bottom: 5px;
+    font-family: "alliance no.2", sans-serif;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 400;
+    color: rgba(17, 17, 17, 0.75);
+}
