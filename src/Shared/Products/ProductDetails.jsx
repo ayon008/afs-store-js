@@ -1,17 +1,21 @@
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
-import { ArrowUpRight, Diamond, X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import Image from 'next/image';
-import PopUp from '../PopUp/PopUp';
 import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
 import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { getStockStatusForLocation } from './utils/stockUtils';
+
+// Import new sub-components
+import ProductHeader from './components/ProductHeader';
+import ProductForm from './components/ProductForm';
+import ProductPurchaseSection from './components/ProductPurchaseSection';
+import ProductInfo from './components/ProductInfo';
+import ExpertAdvice from './components/ExpertAdvice';
+import CompatibilityModal from './components/CompatibilityModal';
+import GradeModal from './components/GradeModal';
+import CalendlyModal from './components/CalendlyModal';
 import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 
@@ -32,10 +36,6 @@ const updatePriceInHtml = (priceHtml, newPrice) => {
     return updatedHtml;
 };
 
-
-
-
-
 function decodeHtml(html) {
     if (typeof window === 'undefined') return html;
     const txt = document.createElement('textarea');
@@ -48,6 +48,15 @@ const ProductDetails = ({ data, variations }) => {
     const [priceLoading, setPriceLoading] = useState(false);
     const [addingToCart, setAddingToCart] = useState(false);
 
+    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
+    const [selectedCountry, setSelectedCountry] = useState('FR');
+    const [currencySymbol, setCurrencySymbol] = useState('€'); // Default to EUR to avoid hydration mismatch
+    const [gradeOpen, setGradeOpen] = useState(false);
+    const [selectedGrade, setSelectedGrade] = useState("A");
+    const [telephonePopUp, setTelephonePopUp] = useState(false);
+    const calendlyContainerRef = React.useRef(null);
+    const [isOpen, setOpen] = useState(false); // For CompatibilityModal
+
     const { register, handleSubmit, watch } = useForm();
     const [variationPrice, setVariationPrice] = useState(null);
     const [variationId, setVariationId] = useState(null);
@@ -56,9 +65,11 @@ const ProductDetails = ({ data, variations }) => {
     const [matchedVariation, setMatchedVariation] = useState(null);
 
     const t = useTranslations("product");
+    const a = useTranslations("profile");
 
     // Check if product is in stock (base product)
-    const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
+    // const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
+    const { isInStock: baseInStock } = getStockStatusForLocation(data, location);
 
     // Final stock check: base product AND selected variation must be in stock
     // const isInStock = baseInStock && variationInStock;
@@ -75,13 +86,7 @@ const ProductDetails = ({ data, variations }) => {
     const priceExclTax = data?.price_excl_tax || data?.price || 0;
     const attributes = data?.attributes;
     const productId = data?.id;
-    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
-    const [selectedCountry, setSelectedCountry] = useState('FR');
-    const [currencySymbol, setCurrencySymbol] = useState('€'); // Default to EUR to avoid hydration mismatch
-    const [gradeOpen, setGradeOpen] = useState(false);
-    const [selectedGrade, setSelectedGrade] = useState("A");
-    const [telephonePopUp, setTelephonePopUp] = useState(false);
-    const calendlyContainerRef = React.useRef(null);
+
 
     const gradeImage = [
         { grade: "A", images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont@2x.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-6.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-8.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-11.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-12.png`] },
@@ -99,7 +104,6 @@ const ProductDetails = ({ data, variations }) => {
 
     const sliderImage = gradeImage.find((item) => item.grade === selectedGrade)?.images;
 
-
     const used = attributes?.find((item) => item?.name === "Grade") ? true : false;
 
     // Get location and country from cookies and determine tax display mode
@@ -110,7 +114,7 @@ const ProductDetails = ({ data, variations }) => {
         } else {
             setLocation(WAREHOUSES.EUROPE);
         }
-        
+
         const cookieCountry = Cookies.get('selected_country');
         if (cookieCountry) {
             setSelectedCountry(cookieCountry);
@@ -129,16 +133,13 @@ const ProductDetails = ({ data, variations }) => {
     const isEuropeLocation = location === WAREHOUSES.EUROPE;
 
     // Calculate the correct price to display based on location
-    // Europe (2682): TTC (price_incl_tax)
-    // North America (2683): HT (price_excl_tax)
     const displayPrice = useMemo(() => {
         if (isEuropeLocation) {
             // Europe: Use TTC (price_incl_tax)
-            // Si price_incl_tax n'est pas disponible, recalculer à partir du HT
             if (priceInclTax && parseFloat(priceInclTax) > 0) {
                 return parseFloat(priceInclTax);
             } else if (priceExclTax && parseFloat(priceExclTax) > 0) {
-                // Recalculer TTC à partir du HT et du pays sélectionné
+                // Recalculate TTC from HT
                 return calculatePriceWithVat(parseFloat(priceExclTax), selectedCountry);
             }
             return 0;
@@ -157,7 +158,6 @@ const ProductDetails = ({ data, variations }) => {
     const watchedValues = watch();
 
     // Only treat as variable when WooCommerce type is "variable" AND we have actual variations.
-    // Simple products can have attributes (e.g. Taille for display/filtering) without variations.
     const hasVariations = data?.type === 'variable' && Array.isArray(variations) && variations.length > 0;
 
     // Check if all variations are selected
@@ -234,19 +234,15 @@ const ProductDetails = ({ data, variations }) => {
 
                     // Get selected country from cookie for accurate VAT calculation
                     const selectedCountry = Cookies.get('selected_country') || 'FR';
-                    
+
                     // Get current location to determine tax display mode
                     const currentLocation = Cookies.get('location') || WAREHOUSES.EUROPE;
                     const isEuropeLoc = currentLocation === WAREHOUSES.EUROPE;
-                    
+
                     // Recalculate price with correct VAT for selected country
-                    // WooCommerce may not have VAT rates configured for all countries
                     const basePrice = parseFloat(matchedVariation.price) || 0;
                     const priceInclTax = parseFloat(matchedVariation.price_incl_tax) || basePrice;
-                    
-                    // Calculate the correct price to display based on location
-                    // Europe (2682): TTC (price_incl_tax)
-                    // North America (2683): HT (price)
+
                     let displayVariationPrice;
                     if (isEuropeLoc) {
                         // Europe: Use TTC - recalculate with correct VAT for selected country
@@ -265,12 +261,10 @@ const ProductDetails = ({ data, variations }) => {
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
                     setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);
-                    // Check if the variation is in stock
-                    const stockStatus = matchedVariation.stock_status;
-                    const variationStock = stockStatus
-                        ? stockStatus === 'instock'
-                        : (matchedVariation.in_stock === true || matchedVariation.is_in_stock === true || matchedVariation.purchasable !== false);
-                    setVariationInStock(variationStock);
+
+                    // Check if the variation is in stock using multi-location logic
+                    const { isInStock } = getStockStatusForLocation(matchedVariation, currentLocation);
+                    setVariationInStock(isInStock);
                 } else {
                     setVariationPrice(null);
                     setVariationId(null);
@@ -289,7 +283,6 @@ const ProductDetails = ({ data, variations }) => {
         fetchVariationPrice();
     }, [hasVariations, allVariationsSelected, JSON.stringify(watchedValues), productId, attributes]);
 
-    const a = useTranslations("profile")
 
     // Decode HTML entities
     const decodeHtmlEntities = (text) => {
@@ -305,12 +298,9 @@ const ProductDetails = ({ data, variations }) => {
             return {};
         }
 
-        // Use slug for API compatibility (WooCommerce Store API expects "pa_taille" not "Taille")
-        // Each attribute has: { id, name: "Taille", slug: "pa_taille", option: "M" }
         const formattedVariations = {};
 
         variationAttributes.forEach((attr) => {
-            // Prefer slug over name for API calls
             const attrKey = attr.slug || attr.name || '';
             const attrValue = attr.option || '';
             if (attrKey && attrValue) {
@@ -323,8 +313,6 @@ const ProductDetails = ({ data, variations }) => {
 
     // Handle add to cart
     const onSubmit = async (formData) => {
-        // For variable products: require variationPrice and isInStock
-        // For simple products: only require baseInStock
         if (hasVariations) {
             if (!variationPrice || !isInStock) return;
         } else {
@@ -341,7 +329,10 @@ const ProductDetails = ({ data, variations }) => {
 
         // Check if adding 1 more would exceed stock
         if (stockQuantity !== null && stockQuantity !== undefined) {
-            if (currentQuantityInCart >= stockQuantity) {
+            const currentItem = hasVariations ? matchedVariation : data;
+            const { backordersAllowed } = getStockStatusForLocation(currentItem, location);
+
+            if (!backordersAllowed && currentQuantityInCart >= stockQuantity) {
                 alert(t("stockLimitReached") || `Vous ne pouvez pas ajouter plus de ${stockQuantity} exemplaire(s) de ce produit. Quantité disponible : ${stockQuantity}.`);
                 return;
             }
@@ -357,8 +348,6 @@ const ProductDetails = ({ data, variations }) => {
             // For variable products, if formattedVariations is empty but we have watchedValues, use those
             let finalVariations = formattedVariations;
             if (hasVariations && Object.keys(formattedVariations).length === 0 && Object.keys(watchedValues).length > 0) {
-                // Use watchedValues as fallback - these are the form values selected by user
-                // WooCommerce expects attribute slugs (e.g., "pa_color") not names (e.g., "Color")
                 finalVariations = {};
                 attributes.forEach(attr => {
                     if (watchedValues[attr.name]) {
@@ -393,12 +382,9 @@ const ProductDetails = ({ data, variations }) => {
                 productData
             );
 
-            // Only show alert if there's an actual error (success is explicitly false)
-            // Don't show alert if success is true or if result is undefined/null
             if (result && result.success === false && result.error) {
                 alert(decodeHtmlEntities(result.error) || 'Une erreur est survenue lors de l\'ajout au panier.');
             }
-            // If success is true, the cart should open automatically via useCart hook
         } catch (error) {
             console.error('Error adding to cart:', error);
             alert(decodeHtmlEntities(error?.message) || 'Une erreur est survenue lors de l\'ajout au panier.');
@@ -406,8 +392,6 @@ const ProductDetails = ({ data, variations }) => {
             setAddingToCart(false);
         }
     };
-
-    const [isOpen, setOpen] = useState(false);
 
     // Get current quantity in cart for this product/variation (recalculate when variationId changes)
     const currentQuantityInCart = useMemo(() => {
@@ -423,8 +407,16 @@ const ProductDetails = ({ data, variations }) => {
 
     // Check if stock limit is reached (recalculate when currentQuantityInCart or stockQuantity changes)
     const isStockLimitReached = useMemo(() => {
+        // Use multi-location stock logic to check backorder status
+        const currentItem = hasVariations ? matchedVariation : data;
+        const { backordersAllowed } = getStockStatusForLocation(currentItem, location);
+
+        if (backordersAllowed) {
+            return false; // No limit if backorders are allowed
+        }
+
         return stockQuantity !== null && stockQuantity !== undefined && currentQuantityInCart >= stockQuantity;
-    }, [stockQuantity, currentQuantityInCart]);
+    }, [stockQuantity, currentQuantityInCart, hasVariations, matchedVariation, data, location]);
 
     // Button is ready only when: all variations selected + price loaded + in stock + stock limit not reached
     const isButtonReady = hasVariations
@@ -491,7 +483,23 @@ const ProductDetails = ({ data, variations }) => {
 
                 // stock check
                 const inStock = relevantVariations.some(v => {
-                    if (!v.inStock) return false;
+                    // Use multi-location check on the variation object
+                    // We need the full variation object, but v is from variationIndex which is simplified.
+                    // We need to look up the original variation from `variations` array.
+                    const fullVariation = variations.find(originalV => {
+                        // Simple equality check of attributes (v.attrs vs originalV.attributes)
+                        // But since we can't easily link back, maybe we should have stored ID in variationIndex.
+                        // Optimization: let's assume if attributes match, it's the one.
+                        return Object.entries(v.attrs).every(([k, val]) => {
+                            const attr = originalV.attributes.find(a => a.name === k);
+                            return attr && attr.option === val;
+                        });
+                    });
+
+                    if (!fullVariation) return false;
+
+                    const { isInStock: varInStock } = getStockStatusForLocation(fullVariation, location);
+                    if (!varInStock) return false;
 
                     return Object.entries(v.attrs).every(([key, value]) => {
                         if (!testSelection[key]) return true;
@@ -587,182 +595,55 @@ const ProductDetails = ({ data, variations }) => {
         };
     }, [telephonePopUp]);
 
-
-
-
     return (
         <>
             <div>
-                <h1 className="text-[clamp(2rem,1.6547rem+0.7203vw,2.375rem)] font-bold leading-[100%] lg:mt-3">{data?.name}</h1>
-                <div className='mt-2 mb-3 text-[15px] leading-[22px] font-semibold' dangerouslySetInnerHTML={{ __html: short_description }} />
-                {/* Show price: HTML for variable products, formatted price for simple products */}
-                {hasVariations ? (
-                    <div className='text-lg leading-[29px] font-bold mb-6' dangerouslySetInnerHTML={{ __html: price }} />
-                ) : (
-                    displayPrice > 0 && (
-                        <div className='text-lg leading-[29px] font-bold mb-6'>
-                            {parseFloat(displayPrice)?.toFixed(2)}{currencySymbol}
-                        </div>
-                    )
-                )}
-                {
-                    compatibilite && <button onClick={() => setOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer flex items-center'>
-                        <span>{t("size")}</span>
-                        <span className='inline'><ArrowUpRight className='inline ml-1' size={'1.1rem'} strokeWidth={2.5} /></span>
-                    </button>
-                }
+                <ProductHeader
+                    name={data?.name}
+                    shortDescription={short_description}
+                    priceHtml={price}
+                    displayPrice={displayPrice}
+                    currencySymbol={currencySymbol}
+                    hasVariations={hasVariations}
+                    t={t}
+                    compatibilite={compatibilite}
+                    setOpen={setOpen}
+                />
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className={`space-y-[30px] mt-5`}>
-                    <div className="flex flex-col gap-4">
-                        {hasVariations && (
-                        <table>
-                            <tbody className="flex flex-col gap-5">
-                                {attributes?.map((singleAttribute, index) => {
-                                    const fieldName = singleAttribute.name;
-                                    const selectedValue = watch(fieldName);
-                                    return (
-                                        <tr key={index} className="flex flex-col gap-[6px]">
-                                            <th className="font-bold text-left p-0!">
-                                                {fieldName === "Grade" &&
-                                                    <button onClick={() => setGradeOpen(true)} className='text-[#1D98FF] text-base leading-[100%] font-semibold cursor-pointer flex items-center mb-5'>
-                                                        <span>{t("Grade")}</span>
-                                                        <span className='inline'><ArrowUpRight className='inline ml-1' size={'1.1rem'} strokeWidth={2.5} /></span>
-                                                    </button>
-                                                }
-                                                <label className='font-semibold text-base leading-[100%] text-left'>
-                                                    {singleAttribute?.name}
-                                                    {selectedValue && (
-                                                        <span className="">
-                                                            {" "} : {decodeHtml(selectedValue)}
-                                                        </span>
-                                                    )}
-                                                </label>
-                                            </th>
-                                            <td>
-                                                <ul className="flex flex-wrap gap-1">
-                                                    {singleAttribute.options?.map((singleOption, idx) => {
-                                                        const inStock = optionAvailability[singleAttribute.name]?.[singleOption] ?? true;
-                                                        const selected = watch(fieldName) === singleOption;
-                                                        return (
-                                                            <li key={idx}>
-                                                                <label
-                                                                    className={`text-base leading-[130%] border-[2px] border-[#111]! cursor-pointer px-2 py-1 flex items-center justify-center font-semibold rounded-[34px]
-                    ${selected
-                                                                            ? "bg-[#111] text-white"
-                                                                            : "border-[#111] text-[#111]"
-                                                                        }
-                    ${!inStock ? "opacity-50 line-through cursor-not-allowed" : ""}
-                `}
-                                                                >
-                                                                    <input
-                                                                        type="radio"
-                                                                        value={singleOption}
-                                                                        {...register(fieldName, { required: true })}
-                                                                        className="hidden"
-                                                                        disabled={!inStock} // prevent selecting unavailable option
-                                                                    />
-                                                                    {decodeHtml(singleOption)}
-                                                                </label>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        )}
-                    </div>
+                    <ProductForm
+                        hasVariations={hasVariations}
+                        attributes={attributes}
+                        watch={watch}
+                        register={register}
+                        optionAvailability={optionAvailability}
+                        decodeHtml={decodeHtml}
+                        setGradeOpen={setGradeOpen}
+                        t={t}
+                    />
 
-                    <div className='space-y-4'>
-                        {/* Price Loading */}
-                        {priceLoading && allVariationsSelected && (
-                            <span className='text-[#111] font-bold text-[24px] leading-[110%] block opacity-50'>
-                                {t("loading")}
-                            </span>
-                        )}
-
-                        {/* Price for variations */}
-                        {hasVariations && variationPrice && !priceLoading && variationInStock && (
-                            <div className='space-y-1'>
-                                <span className='text-[#111] font-bold text-[24px] leading-[110%] block'>
-                                    {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
-                                </span>
-                                <span className='text-base font-semibold text-[#111]'>
-                                    {
-                                        // Amérique du Nord (2683) : afficher stock_for_usa
-                                        location === WAREHOUSES.USA && matchedVariation?.acf?.stock_for_usa ?
-                                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.stock_for_usa}</>
-                                            :
-                                            // Europe (2682) : afficher date_de_livraison_estimee_from_dolibarr
-                                            isEuropeLocation && matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr &&
-                                            <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}
-                                            </>
-                                    }
-                                </span>
-                            </div>
-                        )}
-
-                        {/* Stock info for simple products */}
-                        {!hasVariations && (() => {
-                            const shouldShowStockUSA = !!(location === WAREHOUSES.USA && acf?.stock_for_usa);
-                            const shouldShowStockEU = !!(isEuropeLocation && acf?.date_de_livraison_estimee_from_dolibarr);
-                            const shouldShowStock = shouldShowStockUSA || shouldShowStockEU;
-                            
-                            return shouldShowStock ? (
-                                <span className='text-base font-semibold text-[#111]'>
-                                    {
-                                        // Amérique du Nord (2683) : afficher stock_for_usa
-                                        shouldShowStockUSA ?
-                                            <>{t("stock_usd_acf")} : {acf?.stock_for_usa}</>
-                                            :
-                                            // Europe (2682) : afficher date_de_livraison_estimee_from_dolibarr
-                                            shouldShowStockEU ?
-                                            <>{t("stock_fr_acf")} : {acf?.date_de_livraison_estimee_from_dolibarr}</>
-                                            :
-                                            null
-                                    }
-                                </span>
-                            ) : null;
-                        })()}
-
-                        {/* Select variations message */}
-                        {/* {!allVariationsSelected && attributes?.length > 0 && (
-                            <p className='text-gray-500 text-sm'>{t("select")}</p>
-                        )} */}
-
-                        {/* Out of Stock Message - for variable products */}
-                        {hasVariations && allVariationsSelected && !isInStock && !priceLoading && (
-                            <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )}
-
-                        {/* Out of Stock Message - for simple products */}
-                        {!hasVariations && !baseInStock && (
-                            <p className='text-red-500 font-semibold text-sm'>{t("stock")}</p>
-                        )}
-
-                        {/* Stock Limit Reached Message */}
-                        {/* {isStockLimitReached && isInStock && (
-                            <p className='text-red-500 font-semibold text-sm'>
-                                {t("stockLimitReached") || `Quantité maximale atteinte (${stockQuantity} disponible${stockQuantity > 1 ? 's' : ''})`}
-                            </p>
-                        )} */}
-
-                        {/* Button */}
-                        <button
-                            disabled={!isButtonReady || addingToCart}
-                            className={`text-base leading-[100%] uppercase font-bold w-full rounded-sm min-h-[46px] flex items-center justify-center cursor-pointer ${isButtonReady && !addingToCart ? "bg-[#1D98FF] text-white" : "bg-[#1D98FF]/50 text-white cursor-not-allowed"}`}
-                            type="submit"
-                        >
-                            {addingToCart
-                                ? t("buy")
-                                : t("buy")
-                            }
-                        </button>
-                    </div>
+                    <ProductPurchaseSection
+                        hasVariations={hasVariations}
+                        variationPrice={variationPrice}
+                        priceLoading={priceLoading}
+                        variationInStock={variationInStock}
+                        currencySymbol={currencySymbol}
+                        location={location}
+                        warehouses={WAREHOUSES}
+                        matchedVariation={matchedVariation}
+                        acf={acf}
+                        isEuropeLocation={isEuropeLocation}
+                        baseInStock={baseInStock}
+                        allVariationsSelected={allVariationsSelected}
+                        isInStock={isInStock}
+                        isStockLimitReached={isStockLimitReached}
+                        stockQuantity={stockQuantity}
+                        isButtonReady={isButtonReady}
+                        addingToCart={addingToCart}
+                        t={t}
+                        attributes={attributes}
+                    />
                 </form>
 
                 {/* Other Details */}
@@ -798,177 +679,35 @@ const ProductDetails = ({ data, variations }) => {
                         <p onClick={() => setTelephonePopUp(true)} className='text-sm flex items-center cursor-pointer leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
                     <div className='2xl:w-[40%] w-0 bg-[url("https://afs-foiling.com/fr/wp-content/uploads/2025/06/bg_img-1.png")] bg-contain bg-center bg-no-repeat'>
-                        <Image src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/06/image-33-1.png.webp`} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
+                        <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
                     </div>
                 </div>
             </div>
 
+            {/* Modals */}
+            <CompatibilityModal
+                isOpen={isOpen}
+                setOpen={setOpen}
+                content={compatibilite}
+                t={t}
+            />
 
-            {/* Pop Up */}
-            <PopUp isOpen={isOpen} fn={setOpen}>
-                <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[920px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll p-5 relative mx-auto rounded-[4px]'>
-                    <div className='global-b-bottom-d pb-2'>
-                        {/* Absolute Button for closing Pop Up */}
-                        <button onClick={() => setOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer '>
-                            <X className="w-4 h-4" />
-                        </button>
-                        <h2 className='text-[clamp(1.375rem,1.1448rem+0.4802vw,1.625rem)] leading-[100%] font-bold'>{t("guide")}</h2>
-                    </div>
-                    <div className='lg:mt-4 mt-0'>
-                        <div
-                            className="scroll-bar faq"
-                            dangerouslySetInnerHTML={{ __html: compatibilite }}
-                        />
-                    </div>
-                </div>
-            </PopUp>
-            {/* Guide PopUp */}
+            {used && (
+                <GradeModal
+                    isOpen={gradeOpen}
+                    setOpen={setGradeOpen}
+                    selectedGrade={selectedGrade}
+                    setSelectedGrade={setSelectedGrade}
+                    sliderImages={sliderImage}
+                    t={t}
+                />
+            )}
 
-            {
-                used && (
-                    <PopUp isOpen={gradeOpen} fn={setGradeOpen}>
-                        <div onClick={(e) => e.stopPropagation()} className='max-w-[1120px] w-[95%] max-h-[80vh] overflow-x-hidden overflow-y-scroll scroll-bar relative mx-auto rounded-[4px] bg-white -z-20'>
-                            <button onClick={() => setGradeOpen(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer'>
-                                <X className="w-4 h-4 lg:text-black text-white z-10" />
-                            </button>
-                            {/* Content */}
-                            <div className='flex items-stretch gap-1 lg:flex-row flex-col'>
-                                {/* Slider */}
-                                <div className='flex-1 lg:w-1/2 w-full bg-[#111]'>
-                                    <Swiper
-                                        modules={[Navigation]}
-                                        navigation
-                                        slidesPerView={1}
-                                        spaceBetween={0}
-                                        className="swiper-grade w-full h-full"
-                                    >
-                                        {
-                                            sliderImage?.map((item, index) => {
-                                                return (
-                                                    <SwiperSlide key={index} className='w-full h-full'>
-                                                        <div className="w-full h-full">
-                                                            <Image src={item} className='w-full h-full object-contain' alt={`Grade ${selectedGrade}`} width={100} height={100} />
-                                                        </div>
-                                                    </SwiperSlide>
-                                                )
-                                            })
-                                        }
-                                    </Swiper>
-                                </div>
-                                {/* Content */}
-                                <div className='flex-1 space-y-[30px] lg:px-5 lg:py-10 p-5 bg-white'>
-                                    <div className='space-y-[10px]'>
-                                        <h2 className='global-h2'>{t("Our grades")}</h2>
-                                        <p className='lg:text-lg text-base leading-[110%] font-semibold text-[#111111bf]'>
-                                            {t("Grade-p")}
-                                        </p>
-                                    </div>
-
-                                    <div className='flex flex-col gap-[10px]'>
-
-                                        {/* Grade A */}
-                                        <label className="cursor-pointer block">
-                                            <input
-                                                type="radio"
-                                                name="grade"
-                                                value="A"
-                                                checked={selectedGrade === "A"}
-                                                onChange={() => setSelectedGrade("A")}
-                                                className="peer hidden"
-                                            />
-
-                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-2
-                      peer-checked:bg-[#1D98FF] peer-checked:text-white transition">
-                                                <svg className='flex-[20px_0_0]' xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M10 12.5L8 10.3L8.6 9.29999M6 5.5H18L21 10.5L12.5 20C12.4348 20.0665 12.357 20.1194 12.2712 20.1554C12.1853 20.1915 12.0931 20.2101 12 20.2101C11.9069 20.2101 11.8147 20.1915 11.7288 20.1554C11.643 20.1194 11.5652 20.0665 11.5 20L3 10.5L6 5.5Z" stroke={selectedGrade === "A" ? "#fff" : "#1D98FF"} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-
-                                                <div className="space-y-1">
-                                                    <h3 className="text-lg font-bold leading-[100%]">Grade A</h3>
-                                                    <p className="text-base leading-[110%] opacity-80">
-                                                        {t("grade_a_p")}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </label>
-
-                                        {/* Grade B */}
-                                        <label className="cursor-pointer block">
-                                            <input
-                                                type="radio"
-                                                name="grade"
-                                                value="B"
-                                                checked={selectedGrade === "B"}
-                                                onChange={() => setSelectedGrade("B")}
-                                                className="peer sr-only"
-                                            />
-
-                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-3
-                      peer-checked:bg-[#111] peer-checked:text-white transition">
-                                                <input
-                                                    type="radio"
-                                                    tabIndex={-1}
-                                                    checked={selectedGrade === "B"}
-                                                    readOnly
-                                                    className="mt-1 accent-[#1D98FF] pointer-events-none"
-                                                />
-
-                                                <div className="space-y-1">
-                                                    <h3 className="text-lg font-bold leading-[100%]">Grade B</h3>
-                                                    <p className="text-base leading-[110%] opacity-80">
-                                                        {t("grade_b_p")}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </label>
-
-                                        {/* Grade C */}
-                                        <label className="cursor-pointer block">
-                                            <input
-                                                type="radio"
-                                                name="grade"
-                                                value="C"
-                                                checked={selectedGrade === "C"}
-                                                onChange={() => setSelectedGrade("C")}
-                                                className="peer sr-only"
-                                            />
-
-                                            <div className="px-5 py-4 rounded-[20px] border border-[#111] flex items-start gap-3
-                      peer-checked:bg-[#111] peer-checked:text-white transition">
-                                                <input
-                                                    type="radio"
-                                                    tabIndex={-1}
-                                                    checked={selectedGrade === "C"}
-                                                    readOnly
-                                                    className="mt-1 accent-[#1D98FF] pointer-events-none"
-                                                />
-
-                                                <div className="space-y-1">
-                                                    <h3 className="text-lg font-bold leading-[100%]">Grade C</h3>
-                                                    <p className="text-base leading-[110%] opacity-80">
-                                                        {t("grade_c_p")}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </label>
-
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </PopUp>
-                    // Telephone PopUp
-                )
-            }
-            <PopUp isOpen={telephonePopUp} fn={setTelephonePopUp}>
-                <div onClick={(e) => e.stopPropagation()} className='bg-white max-w-[649px] w-[95%] h-fit overflow-x-hidden  p-5 relative mx-auto rounded-[4px] overflow-hidden'>
-                    <button onClick={() => setTelephonePopUp(false)} className='border border-black rounded-full w-fit h-fit p-[5px] absolute top-[10px] right-4 cursor-pointer z-10'>
-                        <X className="w-4 h-4" />
-                    </button>
-                    <div className='pt-6 h-[80vh]'>
-                        <div ref={calendlyContainerRef} style={{ minWidth: "320px", height: "100%" }}></div>
-                    </div>
-                </div>
-            </PopUp>
+            <CalendlyModal
+                isOpen={telephonePopUp}
+                setOpen={setTelephonePopUp}
+                containerRef={calendlyContainerRef}
+            />
         </>
     );
 };

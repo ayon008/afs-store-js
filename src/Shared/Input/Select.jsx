@@ -22,8 +22,9 @@ const Select = ({ label, id, register, error, registerPage = false, value, show 
                 </label>
 
                 <select
-                    {...register}
+                    {...(register || {})}
                     id={id}
+                    value={value !== undefined && value !== null ? value : ''}
                     className={`border border-[#BFBFBF] rounded-[4px] w-full py-3 px-3 focus:outline-none text-lg leading-[23px] text-black font-semibold bg-white appearance-none cursor-pointer
                     ${error ? "border-red-500" : ""}`}
                     disabled={!show}

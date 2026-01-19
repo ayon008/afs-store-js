@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef } from "react";
+import { Controller } from "react-hook-form";
 import { Truck, CreditCard, Receipt, ShieldCheck, Tag, X } from "lucide-react";
 
 // Helper function to decode HTML entities
@@ -28,6 +29,7 @@ const OrderSummary = ({
     register,
     errors,
     isSubmitting,
+    isPlaceOrderDisabled = false,
     onSubmit,
     t,
     currencySymbol,
@@ -44,7 +46,8 @@ const OrderSummary = ({
     couponError = '',
     couponSuccess = '',
     handleApplyCoupon = () => {},
-    handleRemoveCoupon = () => {}
+    handleRemoveCoupon = () => {},
+    control
 }) => {
     const summaryRef = useRef(null);
 
@@ -323,24 +326,49 @@ const OrderSummary = ({
                     {/* Terms & Submit */}
                     <div className='px-6 pb-6 pt-2 space-y-4 border-t border-dashed border-gray-300 bg-white'>
                         {/* Terms Checkbox */}
-                        <label className='flex items-start gap-3 cursor-pointer group'>
-                            <div className='relative flex-shrink-0 mt-0.5'>
-                                <input
-                                    {...register("terms", { required: t("termsRequired") })}
-                                    type="checkbox"
-                                    id="terms"
-                                    className='peer sr-only'
-                                />
-                                <div className='w-5 h-5 rounded-md border-2 border-gray-300 bg-white peer-checked:bg-[#1D98FF] peer-checked:border-[#1D98FF] transition-all duration-200 flex items-center justify-center'>
-                                    <svg className='w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={3}>
-                                        <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
-                                    </svg>
-                                </div>
-                            </div>
-                            <span className='text-xs text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors'>
-                                {t("terms")}
-                            </span>
-                        </label>
+                        <Controller
+                            name="terms"
+                            control={control}
+                            rules={{ required: t("termsRequired") }}
+                            render={({ field }) => {
+                                const handleChange = (e) => {
+                                    const checked = e.target.checked;
+                                    field.onChange(checked);
+                                    if (process.env.NODE_ENV === 'development') {
+                                        console.log('[Checkout] Terms checkbox changed:', checked, 'field.value will be:', checked);
+                                    }
+                                };
+                                
+                                return (
+                                    <label className='flex items-start gap-3 cursor-pointer group'>
+                                        <div className='relative flex-shrink-0 mt-0.5'>
+                                            <input
+                                                type="checkbox"
+                                                id="terms"
+                                                name={field.name}
+                                                ref={field.ref}
+                                                checked={field.value === true}
+                                                onChange={handleChange}
+                                                onBlur={field.onBlur}
+                                                className='peer sr-only'
+                                            />
+                                            <div className={`w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
+                                                field.value === true ? 'bg-[#1D98FF] border-[#1D98FF]' : 'border-gray-300 bg-white'
+                                            }`}>
+                                                <svg className={`w-3 h-3 text-white transition-opacity ${
+                                                    field.value === true ? 'opacity-100' : 'opacity-0'
+                                                }`} fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={3}>
+                                                    <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <span className='text-xs text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors'>
+                                            {t("terms")}
+                                        </span>
+                                    </label>
+                                );
+                            }}
+                        />
                         {errors.terms && (
                             <p className="text-red-500 text-xs -mt-2 animate-slideDown">{errors.terms.message}</p>
                         )}
@@ -353,7 +381,7 @@ const OrderSummary = ({
                             <button
                                 type="submit"
                                 onClick={onSubmit}
-                                disabled={isSubmitting || !watchFields.terms}
+                                disabled={isSubmitting || isPlaceOrderDisabled}
                                 className='
                                     w-full py-4 bg-[#1D98FF] text-white font-semibold rounded-xl
                                     disabled:opacity-50 disabled:cursor-not-allowed

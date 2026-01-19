@@ -58,6 +58,9 @@ export default function CheckoutMonetico({
         shipping_state: customerData.shipping_state || customerData.shipping?.state || customerData.billing_state || customerData.billing?.state || '',
         shipping_postcode: customerData.shipping_postcode || customerData.shipping?.postcode || customerData.billing_postcode || customerData.billing?.postcode || '',
         order_comments: customerData.order_comments || '',
+        // Survey - use survey_other if "other" is selected
+        survey: customerData.survey === 'other' && customerData.survey_other ? customerData.survey_other : customerData.survey || '',
+        survey_other: customerData.survey_other || '',
         line_items: cartData.lineItems || [],
         shipping_lines: cartData.shippingLines || [],
         payment_method: 'monetico',

@@ -38,7 +38,6 @@ const Input = ({
                     {...register}
                     type={type}
                     id={id}
-                    defaultValue={value}
                     placeholder={placeholder}
                     className={`
                         border border-[#BFBFBF] rounded-[4px] w-full py-3 px-3
