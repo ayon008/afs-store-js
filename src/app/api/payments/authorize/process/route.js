@@ -216,6 +216,18 @@ export async function POST(req) {
       line_items: orderData.line_items,
       shipping_lines: orderData.shipping_lines || [],
       customer_note: orderData.order_comments || '',
+      // Get survey value - use survey_other if "other" is selected
+      meta_data: (() => {
+        const surveyValue = orderData.survey === 'other' && orderData.survey_other 
+          ? orderData.survey_other 
+          : orderData.survey || '';
+        return surveyValue ? [
+          {
+            key: 'survey',
+            value: surveyValue
+          }
+        ] : [];
+      })(),
     };
 
     let order;

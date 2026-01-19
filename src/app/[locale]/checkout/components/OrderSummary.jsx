@@ -28,6 +28,7 @@ const OrderSummary = ({
     register,
     errors,
     isSubmitting,
+    isPlaceOrderDisabled = false,
     onSubmit,
     t,
     currencySymbol,
@@ -353,7 +354,7 @@ const OrderSummary = ({
                             <button
                                 type="submit"
                                 onClick={onSubmit}
-                                disabled={isSubmitting || !watchFields.terms}
+                                disabled={isSubmitting || isPlaceOrderDisabled}
                                 className='
                                     w-full py-4 bg-[#1D98FF] text-white font-semibold rounded-xl
                                     disabled:opacity-50 disabled:cursor-not-allowed

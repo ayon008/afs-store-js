@@ -1194,7 +1194,7 @@ const CheckoutPageContent = () => {
         }
 
         // Check if "Autre" is selected but survey_other is empty
-        if (watchFields.survey === t("surveyOptions.other")) {
+        if (watchFields.survey === "other") {
             if (isEmpty(watchFields.survey_other)) {
                 return true;
             }
@@ -1246,6 +1246,102 @@ const CheckoutPageContent = () => {
         shippingAddress,
         allShippingRates,
         selectedRateId
+    ]);
+
+    // Check if Place Order button should be disabled (same validation as PayPal)
+    const isPlaceOrderDisabled = useMemo(() => {
+        // Helper function to check if a field is empty
+        const isEmpty = (value) => {
+            if (value === null || value === undefined) return true;
+            if (typeof value === 'string' && value.trim() === '') return true;
+            return false;
+        };
+
+        // Check if terms are not accepted
+        if (!watchFields.terms) {
+            return true;
+        }
+
+        // Check required billing fields
+        const requiredFields = {
+            billing_first_name: watchFields.billing_first_name,
+            billing_last_name: watchFields.billing_last_name,
+            billing_country: watchFields.billing_country,
+            billing_address_1: watchFields.billing_address_1,
+            billing_city: watchFields.billing_city,
+            billing_postcode: watchFields.billing_postcode,
+            billing_email: watchFields.billing_email,
+            survey: watchFields.survey
+        };
+
+        for (const [fieldName, fieldValue] of Object.entries(requiredFields)) {
+            if (isEmpty(fieldValue)) {
+                return true;
+            }
+        }
+
+        // Validate email format
+        if (watchFields.billing_email) {
+            const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+            if (!emailRegex.test(watchFields.billing_email.trim())) {
+                return true;
+            }
+        }
+
+        // Check if "Autre" is selected but survey_other is empty
+        if (watchFields.survey === "other") {
+            if (isEmpty(watchFields.survey_other)) {
+                return true;
+            }
+        }
+
+        // Check shipping address fields if shipping address is different
+        if (shippingAddress) {
+            const shippingFields = {
+                shipping_first_name: watchFields.shipping_first_name,
+                shipping_last_name: watchFields.shipping_last_name,
+                shipping_country: watchFields.shipping_country,
+                shipping_address_1: watchFields.shipping_address_1,
+                shipping_city: watchFields.shipping_city,
+                shipping_postcode: watchFields.shipping_postcode
+            };
+
+            for (const [fieldName, fieldValue] of Object.entries(shippingFields)) {
+                if (isEmpty(fieldValue)) {
+                    return true;
+                }
+            }
+        }
+
+        // Check if shipping method is selected (only if shipping rates are available)
+        if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
+            if (!selectedRateId) {
+                return true;
+            }
+        }
+
+        return false;
+    }, [
+        watchFields.terms,
+        watchFields.billing_first_name,
+        watchFields.billing_last_name,
+        watchFields.billing_country,
+        watchFields.billing_address_1,
+        watchFields.billing_city,
+        watchFields.billing_postcode,
+        watchFields.billing_email,
+        watchFields.survey,
+        watchFields.survey_other,
+        watchFields.shipping_first_name,
+        watchFields.shipping_last_name,
+        watchFields.shipping_country,
+        watchFields.shipping_address_1,
+        watchFields.shipping_city,
+        watchFields.shipping_postcode,
+        shippingAddress,
+        allShippingRates,
+        selectedRateId,
+        t
     ]);
 
     // Handle shipping rate selection (local state only, sync happens at order submission)
@@ -1738,7 +1834,10 @@ const CheckoutPageContent = () => {
                         total: (parseFloat(selectedRate.price || 0) / 100).toString()
                     }] : [],
                     // Order notes
-                    order_comments: data.order_comments || ''
+                    order_comments: data.order_comments || '',
+                    // Survey - use survey_other if "other" is selected
+                    survey: data.survey === "other" && data.survey_other ? data.survey_other : data.survey || '',
+                    survey_other: data.survey_other || ''
                 };
 
                 const response = await fetch('/api/orders', {
@@ -1939,6 +2038,7 @@ const CheckoutPageContent = () => {
                         register={register}
                         errors={errors}
                         isSubmitting={isSubmitting}
+                        isPlaceOrderDisabled={isPlaceOrderDisabled}
                         onSubmit={handleSubmit(onSubmit)}
                         t={t}
                         currencySymbol={currencySymbol}
@@ -1994,7 +2094,7 @@ const CheckoutPageContent = () => {
                         <button
                             type="button"
                             onClick={handleSubmit(onSubmit)}
-                            disabled={isSubmitting || !watchFields.terms}
+                            disabled={isSubmitting || isPlaceOrderDisabled}
                             className='
                                 w-full py-3 bg-[#1D98FF] text-white font-semibold rounded-lg
                                 flex items-center justify-center gap-2

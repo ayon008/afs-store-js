@@ -41,6 +41,11 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
+    // Get survey value - use survey_other if "other" is selected
+    const surveyValue = data.survey === 'other' && data.survey_other 
+      ? data.survey_other 
+      : data.survey || '';
+
     // Map the incoming data to WooCommerce order structure
     const orderData = {
       payment_method: data.payment_method,
@@ -72,6 +77,12 @@ export async function POST(req) {
       shipping_lines: data.shipping_lines || [],
       customer_note: data.order_comments || '',
       status: data.payment_method === 'bacs' ? 'on-hold' : 'pending',
+      meta_data: surveyValue ? [
+        {
+          key: 'survey',
+          value: surveyValue
+        }
+      ] : [],
     };
 
     // Build the API URL

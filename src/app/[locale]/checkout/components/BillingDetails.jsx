@@ -149,17 +149,17 @@ const BillingDetails = ({
                             { value: "Article de blog ou revue en ligne", label: t("surveyOptions.blog") },
                             { value: "Lien direct (j'ai tapé l'adresse du site)", label: t("surveyOptions.direct") },
                             { value: "Publicité Display/Bannière", label: t("surveyOptions.display") },
-                            { value: "Autre (veuillez préciser)", label: t("surveyOptions.other") },
+                            { value: "other", label: t("surveyOptions.other") },
                         ]}
                         placeholder={t("surveyPlaceholder")}
                     />
-                    {watchFields.survey === "Autre (veuillez préciser)" && (
+                    {watchFields.survey === "other" && (
                         <Input
                             label={t("pleaseSpecify")}
                             type="text"
                             id="survey_other"
                             register={register("survey_other", {
-                                required: watchFields.survey === "Autre (veuillez préciser)" ? t("pleaseSpecify") : false
+                                required: watchFields.survey === "other" ? t("required") : false
                             })}
                             error={getFieldError("survey_other")}
                             value={watchFields.survey_other}
