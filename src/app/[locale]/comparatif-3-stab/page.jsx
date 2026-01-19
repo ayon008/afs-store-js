@@ -129,7 +129,7 @@ const Page = () => {
                             </optgroup>
                         </select>
                     </div>
-                    <button type="button" onClick={calculateCompatibility}>Calculer</button>
+                    <button type="button" className='btn' onClick={calculateCompatibility}>Calculer</button>
                 </form>
                 {showResults && (
                     <div className="results">

@@ -19,28 +19,44 @@ const BreadCums = () => {
 
 
 const Table = ({ title, tableRow, tableHead }) => {
+    const t = useTranslations("screw");
+
     return (
-        <div class="product_dimantion min-w-full overflow-x-auto overflow-y-hidden">
-            <h3 class="product_name text-[clamp(1.25rem,1.0093rem+0.7407vw,1.75rem)] font-semibold">
-                {title}
+        <div className="product_dimantion min-w-full overflow-x-auto overflow-y-hidden">
+            <h3 className="product_name text-[clamp(1.25rem,1.0093rem+0.7407vw,1.75rem)] font-semibold">
+                {t(title)}
             </h3>
-            <div class="table-container">
-                <div class="specs-wrapper" data-category="foil">
-                    <div class="specs-header">
+            <div className="table-container">
+                <div className="specs-wrapper" data-category="foil">
+                    <div className="specs-header">
                         {tableHead?.map((item, i) => {
+                            const raw = t(item);
+                            const needsRich = /<\s*(small|sup|br)\s*>/i.test(raw);
                             return (
-                                <div className="cell" key={i} dangerouslySetInnerHTML={{ __html: item }}></div>
+                                <div className="cell" key={i}>
+                                    {
+                                        i === 0 ? t.rich(item, {
+                                            sup: (chunks) => <sup>{chunks}</sup>,
+                                        }) : needsRich
+                                            ? t.rich(item, {
+                                                small: (chunks) => (
+                                                    <small>{chunks}</small>
+                                                ),
+                                            })
+                                            : t(item)
+                                    }
+                                </div>
                             )
                         })}
                     </div>
                     {tableRow?.map((item, i) => {
                         return (
-                            <div class="specs-row" key={i}>
-                                <div class="title">{item.name}</div>
-                                <div class="row-data">
+                            <div className="specs-row" key={i}>
+                                <div className="title">{item.name}</div>
+                                <div className="row-data">
                                     {item.value?.map((singleItem, i) => {
                                         return (
-                                            <div class="cell" key={i}>{singleItem}</div>
+                                            <div className="cell" key={i}>{singleItem}</div>
                                         )
                                     })}
                                 </div>
@@ -57,6 +73,8 @@ const Table = ({ title, tableRow, tableHead }) => {
 const Page = () => {
     const [selectedId, setSelectedId] = useState(0);
 
+    const t = useTranslations("screw")
+
     const handleClick = (id) => {
         setSelectedId(id);
     }
@@ -64,11 +82,11 @@ const Page = () => {
     const data = [
         {
             id: 0,
-            name: "Caractéristique Foil - AFS",
+            name: t("Caractéristique Foil - AFS"),
         },
         {
             id: 1,
-            name: "Caractéristique Foil - AFS",
+            name: t("Caractéristique Foil - AFS"),
         },
         {
             id: 2,
@@ -82,18 +100,20 @@ const Page = () => {
         <div className="global-padding pt-4 max-w-[1920px] mx-auto min-h-screen global-margin">
             <BreadCums />
             <h1 className="global-h1 lg:mt-20 mt-10">
-                Details and <br className="hidden lg:block" /> dimensions of <br className="hidden lg:block" /> foils/boards
+                {t.rich("Détail et dimensions Foils / Planches", {
+                    br: () => <br className="hidden lg:block" />
+                })}
             </h1>
             <div className="mt-10 w-full border-b border-[#111] pb-[6px] flex items-center gap-6 flex-wrap">
                 <button
                     id="0"
                     onClick={() => handleClick(0)}
                     className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 0 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>
-                    ALL <sup>(20)</sup>
+                    {t("ALL")} <sup>(20)</sup>
                 </button>
                 <button id="1" onClick={() => handleClick(1)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 1 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>FOIL <sup>(13)</sup></button>
-                <button id="2" onClick={() => handleClick(2)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 2 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>Planche<sup>(1)</sup></button>
-                <button id="3" onClick={() => handleClick(3)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 3 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>Gamme précédente <sup>(6)</sup></button>
+                <button id="2" onClick={() => handleClick(2)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 2 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>{t("Planche")}<sup>(1)</sup></button>
+                <button id="3" onClick={() => handleClick(3)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 3 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>{t("Gamme précédente")} <sup>(6)</sup></button>
             </div>
             <div className="mt-16">
                 {
@@ -182,7 +202,7 @@ const Page = () => {
                                                     value: ["1735", "1050", "6.3", "205", "22", "HR Carbone / Ame corecell", "0.8", "M8x20mm Torx40 tête fraisée"]
                                                 },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
                                         {/* 9th Table */}
                                         <Table
@@ -212,7 +232,7 @@ const Page = () => {
                                                 { name: "Silk HA 40", value: ["145", "405", "11.3", "43", "6.5", "HR Carbone", "0.09", "M6x12mm Torx 30 tête fraisée"] },
                                                 { name: "Silk HA 43", value: ["155", "430", "10.6", "43", "6.5", "HR Carbone", "0.09", "M6x12mm Torx 30 tête fraisée"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
 
                                         {/* 11th table */}
@@ -223,7 +243,7 @@ const Page = () => {
                                                 { name: "Ultra glide 41", value: ["123", "410", "13.7", "41", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
                                                 { name: "Ultra glide 43", value: ["133", "430", "13.7", "43", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
 
                                         {/* 12th table */}
@@ -238,7 +258,7 @@ const Page = () => {
                                             tableHead={["Longueur (cm)", "Largeur (cm)", "Épaisseur max (cm)", "Volume (litre)", "Construction", "Rail", "Poids (kg)"]}
                                         />
 
-                                        <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">Gamme précédente ( performer / flyer v1)</h2>
+                                        <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">{t("Gamme précédente ( performer / flyer v1)")}</h2>
 
                                         <Table
                                             title="Stabilisateur Performer Surf"
@@ -246,7 +266,7 @@ const Page = () => {
                                                 { name: "Performer Surf 160", value: ["160", "361", "8.1", "82", "8.9", "HR Carbone", "0.14", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                                 { name: "Performer Surf 190", value: ["190", "384", "7.7", "66.5", "9.4", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
                                         />
                                         <Table
                                             title="Stabilisateurs Performer RS"
@@ -254,7 +274,7 @@ const Page = () => {
                                                 { name: "Performer RS 230", value: ["230", "435", "8.2", "58.8", "7.10", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                                 { name: "Performer RS 260", value: ["260", "480", "8.8", "58.8", "7.10", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous fuselages"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
                                         />
 
                                         <Table
@@ -282,7 +302,7 @@ const Page = () => {
                                                 { name: "Flyer 1000", value: ["1000", "840", "7.1", "139", "19.5", "HR Carbone", "3.1", "25mm Fuselage Performer"] },
                                                 { name: "Flyer 1300", value: ["1300", "1000", "7.7", "133", "20", "HR Carbone", "3.0", "25mm Fuselage Performer"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids foil complet (kg)", "Taille des vis"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids foil complet (kg)", "Taille des vis"]}
                                         />
 
                                         <Table
@@ -295,7 +315,7 @@ const Page = () => {
                                                 { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", "HR Carbone / Âme corecell", "1.02", "25mm Fuselage Performer"] },
                                                 { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", "HR Carbone / Âme corecell", "1.2", "25mm Fuselage Performer"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
                                         />
 
                                         <Table
@@ -305,7 +325,7 @@ const Page = () => {
                                                 { name: "Pure 900", value: ["900", "880", "9", "130", "12", "600", "UHM Kevlar Carbone", "1.8", "M8x45mm Torx 45"] },
                                                 { name: "Pure HA 800", value: ["800", "1000", "13", "100", "11.6", "592", "UHM Kevlar Carbone", "1.35", "M8x45mm Torx 45"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Longueur (mm)", "Construction", "Poids (kg)", "Taille des vis mât"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Longueur (mm)", "Construction", "Poids (kg)", "Taille des vis mât"]}
                                         />
                                     </div>
                                 </>}
@@ -390,7 +410,7 @@ const Page = () => {
                                                     value: ["1735", "1050", "6.3", "205", "22", "HR Carbone / Ame corecell", "0.8", "M8x20mm Torx40 tête fraisée"]
                                                 },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
                                         {/* 9th Table */}
                                         <Table
@@ -420,7 +440,7 @@ const Page = () => {
                                                 { name: "Silk HA 40", value: ["145", "405", "11.3", "43", "6.5", "HR Carbone", "0.09", "M6x12mm Torx 30 tête fraisée"] },
                                                 { name: "Silk HA 43", value: ["155", "430", "10.6", "43", "6.5", "HR Carbone", "0.09", "M6x12mm Torx 30 tête fraisée"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
 
                                         {/* 11th table */}
@@ -431,7 +451,7 @@ const Page = () => {
                                                 { name: "Ultra glide 41", value: ["123", "410", "13.7", "41", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
                                                 { name: "Ultra glide 43", value: ["133", "430", "13.7", "43", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
                                             ]}
-                                            tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
                                     </div>
                                 }
@@ -454,7 +474,7 @@ const Page = () => {
                                 {
                                     item.id === 3 && (
                                         <div className="mt-16 space-y-16">
-                                            <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">Gamme précédente ( performer / flyer v1)</h2>
+                                            <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">{t("Gamme précédente ( performer / flyer v1)")}</h2>
 
                                             <Table
                                                 title="Stabilisateur Performer Surf"
@@ -462,7 +482,7 @@ const Page = () => {
                                                     { name: "Performer Surf 160", value: ["160", "361", "8.1", "82", "8.9", "HR Carbone", "0.14", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                                     { name: "Performer Surf 190", value: ["190", "384", "7.7", "66.5", "9.4", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                                 ]}
-                                                tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
+                                                tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
                                             />
                                             <Table
                                                 title="Stabilisateurs Performer RS"
@@ -470,7 +490,7 @@ const Page = () => {
                                                     { name: "Performer RS 230", value: ["230", "435", "8.2", "58.8", "7.10", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous les fuselages"] },
                                                     { name: "Performer RS 260", value: ["260", "480", "8.8", "58.8", "7.10", "HR Carbone", "0.16", "16mm (fuselage Performer)", "Tous fuselages"] },
                                                 ]}
-                                                tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect ratio", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
+                                                tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis", "Compatibilité"]}
                                             />
 
                                             <Table
@@ -498,7 +518,7 @@ const Page = () => {
                                                     { name: "Flyer 1000", value: ["1000", "840", "7.1", "139", "19.5", "HR Carbone", "3.1", "25mm Fuselage Performer"] },
                                                     { name: "Flyer 1300", value: ["1300", "1000", "7.7", "133", "20", "HR Carbone", "3.0", "25mm Fuselage Performer"] },
                                                 ]}
-                                                tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids foil complet (kg)", "Taille des vis"]}
+                                                tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids foil complet (kg)", "Taille des vis"]}
                                             />
 
                                             <Table
@@ -511,7 +531,7 @@ const Page = () => {
                                                     { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", "HR Carbone / Âme corecell", "1.02", "25mm Fuselage Performer"] },
                                                     { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", "HR Carbone / Âme corecell", "1.2", "25mm Fuselage Performer"] },
                                                 ]}
-                                                tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
+                                                tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
                                             />
 
                                             <Table
@@ -521,7 +541,7 @@ const Page = () => {
                                                     { name: "Pure 900", value: ["900", "880", "9", "130", "12", "600", "UHM Kevlar Carbone", "1.8", "M8x45mm Torx 45"] },
                                                     { name: "Pure HA 800", value: ["800", "1000", "13", "100", "11.6", "592", "UHM Kevlar Carbone", "1.35", "M8x45mm Torx 45"] },
                                                 ]}
-                                                tableHead={["Surface (cm²)", "Envergure (mm)", "Aspect Ratio", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Longueur (mm)", "Construction", "Poids (kg)", "Taille des vis mât"]}
+                                                tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Longueur (mm)", "Construction", "Poids (kg)", "Taille des vis mât"]}
                                             />
                                         </div>
                                     )

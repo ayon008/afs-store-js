@@ -1,3 +1,5 @@
+import { getWordPressBaseUrl } from "@/lib/url-utils";
+
 export const data = [
     {
         "Aile Avant": "Enduro 700",
@@ -11,7 +13,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -25,7 +27,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -39,7 +41,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -53,7 +55,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -67,7 +69,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -81,7 +83,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "80",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -95,7 +97,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -109,7 +111,7 @@ export const data = [
         "Freestyle": "64",
         "Freerace": "60",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -123,7 +125,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "70",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -137,7 +139,7 @@ export const data = [
         "Freestyle": "66",
         "Freerace": "69",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -151,7 +153,7 @@ export const data = [
         "Freestyle": "69",
         "Freerace": "71",
         "Wave": "97",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -165,7 +167,7 @@ export const data = [
         "Freestyle": "68",
         "Freerace": "68",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -179,7 +181,7 @@ export const data = [
         "Freestyle": "67",
         "Freerace": "67",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -193,7 +195,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -207,7 +209,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -221,7 +223,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -235,7 +237,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -249,7 +251,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -263,7 +265,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "80",
         "Wave": "81",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -277,7 +279,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "80",
         "Wave": "81",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -291,7 +293,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "75",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -305,7 +307,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "80",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -319,7 +321,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "85",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -333,7 +335,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "90",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -347,7 +349,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "85",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -361,7 +363,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "80",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -375,7 +377,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -389,7 +391,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -403,7 +405,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -417,7 +419,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -431,7 +433,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -445,7 +447,7 @@ export const data = [
         "Freestyle": "21",
         "Freerace": "69",
         "Wave": "83",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -459,7 +461,7 @@ export const data = [
         "Freestyle": "22",
         "Freerace": "70",
         "Wave": "84",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -473,7 +475,7 @@ export const data = [
         "Freestyle": "15",
         "Freerace": "62",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -487,7 +489,7 @@ export const data = [
         "Freestyle": "16",
         "Freerace": "63",
         "Wave": "86",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -501,7 +503,7 @@ export const data = [
         "Freestyle": "17",
         "Freerace": "64",
         "Wave": "87",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -515,7 +517,7 @@ export const data = [
         "Freestyle": "18",
         "Freerace": "65",
         "Wave": "88",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -529,7 +531,7 @@ export const data = [
         "Freestyle": "19",
         "Freerace": "67",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -543,7 +545,7 @@ export const data = [
         "Freestyle": "20",
         "Freerace": "68",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -557,7 +559,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -571,7 +573,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -585,7 +587,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -599,7 +601,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -613,7 +615,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -627,7 +629,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -641,7 +643,7 @@ export const data = [
         "Freestyle": "22",
         "Freerace": "49",
         "Wave": "84",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -655,7 +657,7 @@ export const data = [
         "Freestyle": "14",
         "Freerace": "50",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -669,7 +671,7 @@ export const data = [
         "Freestyle": "15",
         "Freerace": "51",
         "Wave": "86",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -683,7 +685,7 @@ export const data = [
         "Freestyle": "16",
         "Freerace": "53",
         "Wave": "87",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -697,7 +699,7 @@ export const data = [
         "Freestyle": "17",
         "Freerace": "54",
         "Wave": "88",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -711,7 +713,7 @@ export const data = [
         "Freestyle": "18",
         "Freerace": "55",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -725,7 +727,7 @@ export const data = [
         "Freestyle": "19",
         "Freerace": "56",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Enduro 1600GLT",
@@ -739,7 +741,7 @@ export const data = [
         "Freestyle": "100",
         "Freerace": "100",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1.png`
     },
     {
         "Aile Avant": "Enduro 1600GLT",
@@ -753,7 +755,7 @@ export const data = [
         "Freestyle": "99",
         "Freerace": "99",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Enduro 1600GLT",
@@ -767,7 +769,7 @@ export const data = [
         "Freestyle": "98",
         "Freerace": "98",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -781,7 +783,7 @@ export const data = [
         "Freestyle": "",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -795,7 +797,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -809,7 +811,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -823,7 +825,7 @@ export const data = [
         "Freestyle": "99",
         "Freerace": "99",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -837,7 +839,7 @@ export const data = [
         "Freestyle": "98",
         "Freerace": "89",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -851,7 +853,7 @@ export const data = [
         "Freestyle": "100",
         "Freerace": "100",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -865,7 +867,7 @@ export const data = [
         "Freestyle": "90",
         "Freerace": "90",
         "Wave": "78",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -879,7 +881,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -893,7 +895,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -907,7 +909,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -921,7 +923,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -935,7 +937,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Pure 700",
@@ -949,7 +951,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Pure 900",
@@ -963,7 +965,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -977,7 +979,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -991,7 +993,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1005,7 +1007,7 @@ export const data = [
         "Freestyle": "100",
         "Freerace": "99",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1019,7 +1021,7 @@ export const data = [
         "Freestyle": "99",
         "Freerace": "90",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1033,7 +1035,7 @@ export const data = [
         "Freestyle": "98",
         "Freerace": "100",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1047,7 +1049,7 @@ export const data = [
         "Freestyle": "90",
         "Freerace": "90",
         "Wave": "78",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1061,7 +1063,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1075,7 +1077,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1089,7 +1091,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1103,7 +1105,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1117,7 +1119,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Pure 900",
@@ -1131,7 +1133,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1145,7 +1147,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1159,7 +1161,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1173,7 +1175,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1187,7 +1189,7 @@ export const data = [
         "Freestyle": "22",
         "Freerace": "75",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1201,7 +1203,7 @@ export const data = [
         "Freestyle": "30",
         "Freerace": "70",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1215,7 +1217,7 @@ export const data = [
         "Freestyle": "21",
         "Freerace": "81",
         "Wave": "78",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1229,7 +1231,7 @@ export const data = [
         "Freestyle": "20",
         "Freerace": "80",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1243,7 +1245,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1257,7 +1259,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1271,7 +1273,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1285,7 +1287,7 @@ export const data = [
         "Freestyle": "29",
         "Freerace": "79",
         "Wave": "82",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1299,7 +1301,7 @@ export const data = [
         "Freestyle": "17",
         "Freerace": "78",
         "Wave": "81",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -1313,7 +1315,7 @@ export const data = [
         "Freestyle": "18",
         "Freerace": "77",
         "Wave": "77",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1327,7 +1329,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1341,7 +1343,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1355,7 +1357,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1369,7 +1371,7 @@ export const data = [
         "Freestyle": "22",
         "Freerace": "75",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1383,7 +1385,7 @@ export const data = [
         "Freestyle": "30",
         "Freerace": "70",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1397,7 +1399,7 @@ export const data = [
         "Freestyle": "21",
         "Freerace": "81",
         "Wave": "78",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1411,7 +1413,7 @@ export const data = [
         "Freestyle": "20",
         "Freerace": "80",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1425,7 +1427,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1439,7 +1441,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1453,7 +1455,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1467,7 +1469,7 @@ export const data = [
         "Freestyle": "29",
         "Freerace": "79",
         "Wave": "82",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1481,7 +1483,7 @@ export const data = [
         "Freestyle": "17",
         "Freerace": "78",
         "Wave": "81",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -1495,7 +1497,7 @@ export const data = [
         "Freestyle": "18",
         "Freerace": "77",
         "Wave": "77",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1509,7 +1511,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1523,7 +1525,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1537,7 +1539,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1551,7 +1553,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1565,7 +1567,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1579,7 +1581,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1593,7 +1595,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1607,7 +1609,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "79",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1621,7 +1623,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "75",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1635,7 +1637,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "70",
         "Wave": "97",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1649,7 +1651,7 @@ export const data = [
         "Freestyle": "66",
         "Freerace": "85",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1663,7 +1665,7 @@ export const data = [
         "Freestyle": "67",
         "Freerace": "81",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -1677,7 +1679,7 @@ export const data = [
         "Freestyle": "68",
         "Freerace": "80",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1691,7 +1693,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1705,7 +1707,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1719,7 +1721,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1733,7 +1735,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1747,7 +1749,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1761,7 +1763,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1775,7 +1777,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1789,7 +1791,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "75",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1803,7 +1805,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "80",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1817,7 +1819,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "82",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1831,7 +1833,7 @@ export const data = [
         "Freestyle": "64",
         "Freerace": "85",
         "Wave": "97",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1845,7 +1847,7 @@ export const data = [
         "Freestyle": "63",
         "Freerace": "84",
         "Wave": "95",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -1859,7 +1861,7 @@ export const data = [
         "Freestyle": "62",
         "Freerace": "83",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1873,7 +1875,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1887,7 +1889,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1901,7 +1903,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1915,7 +1917,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1929,7 +1931,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1943,7 +1945,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1957,7 +1959,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1971,7 +1973,7 @@ export const data = [
         "Freestyle": "55",
         "Freerace": "69",
         "Wave": "95",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1985,7 +1987,7 @@ export const data = [
         "Freestyle": "56",
         "Freerace": "71",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -1999,7 +2001,7 @@ export const data = [
         "Freestyle": "57",
         "Freerace": "78",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -2013,7 +2015,7 @@ export const data = [
         "Freestyle": "58",
         "Freerace": "79",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -2027,7 +2029,7 @@ export const data = [
         "Freestyle": "59",
         "Freerace": "80",
         "Wave": "94",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -2041,7 +2043,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "70",
         "Wave": "93",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2055,7 +2057,7 @@ export const data = [
         "Freestyle": "80",
         "Freerace": "80",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2069,7 +2071,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "70",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2083,7 +2085,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "60",
         "Wave": "75",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2097,7 +2099,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2111,7 +2113,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2125,7 +2127,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2139,7 +2141,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2153,7 +2155,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2167,7 +2169,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2181,7 +2183,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2195,7 +2197,7 @@ export const data = [
         "Freestyle": "50",
         "Freerace": "71",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2209,7 +2211,7 @@ export const data = [
         "Freestyle": "54",
         "Freerace": "69",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Evo 950",
@@ -2223,7 +2225,7 @@ export const data = [
         "Freestyle": "55",
         "Freerace": "65",
         "Wave": "84",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2237,7 +2239,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "80",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2251,7 +2253,7 @@ export const data = [
         "Freestyle": "66",
         "Freerace": "75",
         "Wave": "75",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2265,7 +2267,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "70",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2279,7 +2281,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2293,7 +2295,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2307,7 +2309,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2321,7 +2323,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2335,7 +2337,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2349,7 +2351,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2363,7 +2365,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2377,7 +2379,7 @@ export const data = [
         "Freestyle": "50",
         "Freerace": "78",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2391,7 +2393,7 @@ export const data = [
         "Freestyle": "54",
         "Freerace": "79",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Evo 1250",
@@ -2405,7 +2407,7 @@ export const data = [
         "Freestyle": "55",
         "Freerace": "65",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2419,7 +2421,7 @@ export const data = [
         "Freestyle": "65",
         "Freerace": "80",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2433,7 +2435,7 @@ export const data = [
         "Freestyle": "66",
         "Freerace": "75",
         "Wave": "75",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2447,7 +2449,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "70",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2461,7 +2463,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2475,7 +2477,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2489,7 +2491,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2503,7 +2505,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2517,7 +2519,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2531,7 +2533,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2545,7 +2547,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2559,7 +2561,7 @@ export const data = [
         "Freestyle": "50",
         "Freerace": "78",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2573,7 +2575,7 @@ export const data = [
         "Freestyle": "54",
         "Freerace": "79",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Evo 1450",
@@ -2587,7 +2589,7 @@ export const data = [
         "Freestyle": "55",
         "Freerace": "65",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2601,7 +2603,7 @@ export const data = [
         "Freestyle": "60",
         "Freerace": "70",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2615,7 +2617,7 @@ export const data = [
         "Freestyle": "56",
         "Freerace": "65",
         "Wave": "75",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2629,7 +2631,7 @@ export const data = [
         "Freestyle": "55",
         "Freerace": "60",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2643,7 +2645,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2657,7 +2659,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2671,7 +2673,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2685,7 +2687,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2699,7 +2701,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2713,7 +2715,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2727,7 +2729,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2741,7 +2743,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2755,7 +2757,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Evo 1650",
@@ -2769,7 +2771,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo HA750",
@@ -2783,7 +2785,7 @@ export const data = [
         "Freestyle": "100",
         "Freerace": "100",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Evo HA750",
@@ -2797,7 +2799,7 @@ export const data = [
         "Freestyle": "99",
         "Freerace": "99",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Evo HA750",
@@ -2811,7 +2813,7 @@ export const data = [
         "Freestyle": "98",
         "Freerace": "98",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1.png`
     },
     {
         "Aile Avant": "Evo HA1000",
@@ -2825,7 +2827,7 @@ export const data = [
         "Freestyle": "100",
         "Freerace": "100",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Evo HA1000",
@@ -2839,7 +2841,7 @@ export const data = [
         "Freestyle": "99",
         "Freerace": "99",
         "Wave": "99",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Evo HA1000",
@@ -2853,7 +2855,7 @@ export const data = [
         "Freestyle": "98",
         "Freerace": "98",
         "Wave": "98",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2867,7 +2869,7 @@ export const data = [
         "Freestyle": "40",
         "Freerace": "55",
         "Wave": "60",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2881,7 +2883,7 @@ export const data = [
         "Freestyle": "45",
         "Freerace": "60",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2895,7 +2897,7 @@ export const data = [
         "Freestyle": "50",
         "Freerace": "50",
         "Wave": "65",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2909,7 +2911,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2923,7 +2925,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2937,7 +2939,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2951,7 +2953,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2965,7 +2967,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2979,7 +2981,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -2993,7 +2995,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -3007,7 +3009,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -3021,7 +3023,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Flyer 1500",
@@ -3035,7 +3037,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3049,7 +3051,7 @@ export const data = [
         "Freestyle": "40",
         "Freerace": "55",
         "Wave": "60",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3063,7 +3065,7 @@ export const data = [
         "Freestyle": "45",
         "Freerace": "59",
         "Wave": "65",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3077,7 +3079,7 @@ export const data = [
         "Freestyle": "50",
         "Freerace": "60",
         "Wave": "70",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3091,7 +3093,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3105,7 +3107,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3119,7 +3121,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3133,7 +3135,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3147,7 +3149,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3161,7 +3163,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3175,7 +3177,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3189,7 +3191,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3203,7 +3205,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Flyer 1800",
@@ -3217,7 +3219,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3231,7 +3233,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_S_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_S_0001.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3245,7 +3247,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/Cruise_M_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/Cruise_M_0001.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3259,7 +3261,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Cruise_L_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Cruise_L_0001.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3273,7 +3275,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/afs-advanced-stab-145-2.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3287,7 +3289,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab150_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab150_1.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3301,7 +3303,7 @@ export const data = [
         "Freestyle": "70",
         "Freerace": "80",
         "Wave": "79",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/stab135_1-ha.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/stab135_1-ha.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3315,7 +3317,7 @@ export const data = [
         "Freestyle": "71",
         "Freerace": "81",
         "Wave": "78",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/01/stab165_1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/01/stab165_1.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3329,7 +3331,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_132_0001.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3343,7 +3345,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_142_0002.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3357,7 +3359,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "0",
         "Wave": "0",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2023/04/F_SILK_stab_152_0003.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3371,7 +3373,7 @@ export const data = [
         "Freestyle": "69",
         "Freerace": "79",
         "Wave": "97",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_38.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3385,7 +3387,7 @@ export const data = [
         "Freestyle": "68",
         "Freerace": "68",
         "Wave": "85",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/02/Stab__Top_Silk_HA_40.png`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3399,7 +3401,7 @@ export const data = [
         "Freestyle": "67",
         "Freerace": "67",
         "Wave": "80",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2024/10/Stab__Top_Silk_HA_43-1.webp`
     },
     {
         "Aile Avant": "Ultra 750",
@@ -3413,7 +3415,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "80",
         "Wave": "100",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Silk 1050",
@@ -3427,7 +3429,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "79",
         "Wave": "91",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Silk 850",
@@ -3441,7 +3443,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "81",
         "Wave": "93",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Silk 650",
@@ -3455,7 +3457,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "83",
         "Wave": "94",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Enduro 700",
@@ -3469,7 +3471,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "82",
         "Wave": "95",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Enduro 900",
@@ -3483,7 +3485,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "80",
         "Wave": "92",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Enduro 1100",
@@ -3497,7 +3499,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "79",
         "Wave": "90",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Enduro 1300",
@@ -3511,7 +3513,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "78",
         "Wave": "89",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Pure HA800",
@@ -3525,7 +3527,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "81",
         "Wave": "88",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "Pure HA1100",
@@ -3539,7 +3541,7 @@ export const data = [
         "Freestyle": "0",
         "Freerace": "79",
         "Wave": "87",
-        "Image": "https://afs-foiling.com/fr/wp-content/uploads/2025/04/UGlide_0002-1-1.png"
+        "Image": `${getWordPressBaseUrl()}/wp-content/uploads/2025/04/UGlide_0002-1-1.png`
     },
     {
         "Aile Avant": "",

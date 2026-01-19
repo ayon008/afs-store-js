@@ -13,9 +13,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import SearchOverlay from "./search";
 import Cookies from 'js-cookie';
-import Notification from "../Notification/Notification";
 import LocationLanguageModal from "../LocationLanguageModal/LocationLanguageModal";
-import { getCountryByCode, DEFAULT_COUNTRY, WAREHOUSES } from "@/lib/countries-config";
+import { getCountryByCode, WAREHOUSES } from "@/lib/countries-config";
 
 const Navbar = ({ NAV_LINKS }) => {
   const t = useTranslations("common");
@@ -817,8 +816,8 @@ const Navbar = ({ NAV_LINKS }) => {
                               </Link>
                             </li>
                             <li className="cursor-pointer"><Link href={locale === 'fr' ? "/reprise-materiel" : "/equipment-recovery"}>{t("Equipment trade-in")}</Link></li>
-                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Foil specifications")}</Link></li>
-                            <li className="cursor-pointer"><Link href={locale === 'fr' ? "" : ""}>{t("Screw size")}</Link></li>
+                            <li className="cursor-pointer"><Link href='/screw-size'>{t("Foil specifications")}</Link></li>
+                            <li className="cursor-pointer"><Link href='/screw-size'>{t("Screw size")}</Link></li>
                           </ul>
                         </div>
                       </div>
@@ -1074,19 +1073,19 @@ const Navbar = ({ NAV_LINKS }) => {
                     {t("Choose")}
                   </p>
                   <ul className="mt-4 text-[16px] font-semibold tracking-wide text-[#111]">
-                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>
+                    <li className="cursor-pointer"><Link href="/blog/mast-comparison-afs" onClick={handleCloseDesktopMenu}>
                       {t("Mast comparison (Coming Soon)")}
                     </Link></li>
-                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>
+                    <li className="cursor-pointer"><Link href="/blog/afs-and-afs-advanced-board-construction" onClick={handleCloseDesktopMenu}>
                       {t("Board construction (Coming Soon)")}
                     </Link></li>
-                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>
+                    <li className="cursor-pointer"><Link href="/equipment-recovery" onClick={handleCloseDesktopMenu}>
                       {t("Equipment trade-in")}
                     </Link></li>
-                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>
+                    <li className="cursor-pointer"><Link href="/screw-size" onClick={handleCloseDesktopMenu}>
                       {t("Foil specifications")}
                     </Link></li>
-                    <li className="cursor-pointer"><Link href="/" onClick={handleCloseDesktopMenu}>
+                    <li className="cursor-pointer"><Link href="/screw-size" onClick={handleCloseDesktopMenu}>
                       {t("Screw size")}
                     </Link></li>
                   </ul>

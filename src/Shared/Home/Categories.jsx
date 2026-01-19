@@ -44,7 +44,7 @@ export default async function CategorySection() {
       alt_text: "surf foil",
     },
     {
-      slug: "foiling/sup-foil",
+      slug: "foiling/sup-foil-foiling",
       image:
         `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/01/afs-downwind.jpeg`,
       alt_text: "sup foil",
@@ -61,9 +61,9 @@ export default async function CategorySection() {
       alt_text: "windsurf",
     },
     {
-      slug: "windfoiling",
+      slug: "foiling/wakefoil",
       image:
-        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/afs-windfoil.jpg`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/07/wake-foil-cat.jpg`,
       alt_text: "windfoil",
     },
     {

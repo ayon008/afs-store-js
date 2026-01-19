@@ -12,6 +12,7 @@ import { Navigation } from 'swiper/modules';
 import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 
 // Helper function to update price in WooCommerce HTML
@@ -797,7 +798,7 @@ const ProductDetails = ({ data, variations }) => {
                         <p onClick={() => setTelephonePopUp(true)} className='text-sm flex items-center cursor-pointer leading-4 font-semibold mt-8 uppercase text-[#3F98FF]'>{t("phone")} <ArrowUpRight className='inline w-4 h-4' /></p>
                     </div>
                     <div className='2xl:w-[40%] w-0 bg-[url("https://afs-foiling.com/fr/wp-content/uploads/2025/06/bg_img-1.png")] bg-contain bg-center bg-no-repeat'>
-                        <Image src={'https://afs-foiling.com/fr/wp-content/uploads/2025/06/image-33-1.png.webp'} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
+                        <Image src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/06/image-33-1.png.webp`} className='aspect-[1] w-full h-full object-cover' alt='' width={200} height={200} />
                     </div>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getWordPressBaseUrl } from "@/lib/url-utils";
 
 const BreadCums = async () => {
   const t = await getTranslations("breadcum");
@@ -128,7 +129,7 @@ export default async function Wing() {
             <img
               loading="lazy"
               decoding="async"
-              src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-4-1.png"
+              src={`${getWordPressBaseUrl()}/wp-content/uploads/2024/01/image-4-1.png`}
               className="w-full"
             />
             <span>{t("Store in Bordeaux")}</span>
@@ -156,7 +157,7 @@ export default async function Wing() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="https://afs-foiling.com/fr/wp-content/uploads/2024/01/image-1-5.png"
+                  src={`${getWordPressBaseUrl()}/wp-content/uploads/2024/01/image-1-5.png`}
                   className="w-full"
                 />
                 <span>{t("gliss")}</span>

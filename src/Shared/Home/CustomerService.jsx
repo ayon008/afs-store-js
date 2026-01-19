@@ -13,7 +13,7 @@ import { Link } from "@/i18n/navigation";
 
 
 const AmbassadorsCard = ({ data }) => {
-  const { title, description, url } = data;
+  const { title, description, url, href } = data;
   const t = useTranslations("home")
   return (
     <div className="bg-[#F7F7F7] md:max-w-[340px] h-auto lg:max-w-[430px] lg:h-[320px] max-w-full w-full flex lg:flex-row flex-col-reverse  lg:items-stretch items-start rounded-[4px] overflow-hidden group relative">
@@ -27,8 +27,8 @@ const AmbassadorsCard = ({ data }) => {
         </p>
 
         <Link
-          href="/text"
-          className="flex items-center gap-1 text-[#00000080] font-bold uppercase block lg:hidden"
+          href={href}
+          className="flex items-center gap-1 text-[#00000080] font-bold uppercase lg:hidden"
         >
           <span>{t("see-more")}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -54,7 +54,7 @@ const AmbassadorsCard = ({ data }) => {
 
       {/* Overlay */}
       <div className="absolute inset-4 group-hover:inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 lg:flex hidden items-center justify-center text-white text-lg font-bold uppercase leading-[24px]">
-        <div className="flex items-center gap-1 border-b-2 border-white cursor-pointer opacity-0 group-hover:opacity-100 delay-300 transition-opacity duration-300">
+        <Link href={href} className="flex items-center gap-1 border-b-2 border-white cursor-pointer opacity-0 group-hover:opacity-100 delay-300 transition-opacity duration-300">
           <span>{t("see-more")}</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
@@ -63,7 +63,7 @@ const AmbassadorsCard = ({ data }) => {
               strokeWidth="3"
             />
           </svg>
-        </div>
+        </Link>
       </div>
     </div>
   );
@@ -80,27 +80,32 @@ export default function CustomerService() {
       title: "Best match stab",
       description: t("best"),
       url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/04/Alan-fedit-74-1-scaled.jpeg`,
+      href: "/best-match-stab",
     },
     {
       title: t("foil"),
       description: t("foil-des"),
       url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/06/comparateur.png`,
+      href: "/foil-configurator",
     },
     {
       title: t("compare"),
       description: t("compare-des"),
       url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2023/04/Capture-decran-2025-06-05-a-16.07.13.png`,
+      href: "/comparison-3-stab",
     },
     {
       title: t("equip"),
       description: t("equip-des"),
       url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/11/Gwen-WB-d-lite-.jpg`,
+      href: "/reprise-materiel",
     },
     {
       title: t("need"),
       description:
         t("need-des"),
       url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/00107169-bombannes-adultes-wingfoil.webp`,
+      href: "/need-advice",
     },
   ];
 

@@ -37,7 +37,7 @@ export default function AboutVideoSection() {
         
         <div className="relative overflow-hidden rounded-sm">
           <Image
-            src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/12/image-3-2.png`}
+            src={`${getWordPressBaseUrl()}/wp-content/uploads/2026/01/sddefault-1.png`}
             className="rounded-sm bg-white"
             alt="Tour"
             width={1000}

@@ -89,6 +89,14 @@ export const routing = defineRouting({
         '/screw-size': {
             en: '/screw-size',
             fr: '/detail-et-dimensions-foils-planches'
+        },
+        '/comparatif-3-stab': {
+            en: '/comparison-3-stab',
+            fr: '/comparatif-3-stab'
+        },
+        '/best-match-stab':{
+            en: '/best-match-stab',
+            fr: '/best-match-stab'
         }
     }
 })
