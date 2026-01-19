@@ -5,6 +5,7 @@ import useCart from '../Hooks/useCart';
 import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
+import { getStockStatusForLocation } from './utils/stockUtils';
 
 // Import new sub-components
 import ProductHeader from './components/ProductHeader';
@@ -45,6 +46,15 @@ const ProductDetails = ({ data, variations }) => {
     const [priceLoading, setPriceLoading] = useState(false);
     const [addingToCart, setAddingToCart] = useState(false);
 
+    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
+    const [selectedCountry, setSelectedCountry] = useState('FR');
+    const [currencySymbol, setCurrencySymbol] = useState('€'); // Default to EUR to avoid hydration mismatch
+    const [gradeOpen, setGradeOpen] = useState(false);
+    const [selectedGrade, setSelectedGrade] = useState("A");
+    const [telephonePopUp, setTelephonePopUp] = useState(false);
+    const calendlyContainerRef = React.useRef(null);
+    const [isOpen, setOpen] = useState(false); // For CompatibilityModal
+
     const { register, handleSubmit, watch } = useForm();
     const [variationPrice, setVariationPrice] = useState(null);
     const [variationId, setVariationId] = useState(null);
@@ -56,7 +66,8 @@ const ProductDetails = ({ data, variations }) => {
     const a = useTranslations("profile");
 
     // Check if product is in stock (base product)
-    const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
+    // const baseInStock = data?.stock_status === 'instock' || data?.in_stock === true;
+    const { isInStock: baseInStock } = getStockStatusForLocation(data, location);
 
     // Final stock check: base product AND selected variation must be in stock
     // const isInStock = baseInStock && variationInStock;
@@ -73,14 +84,7 @@ const ProductDetails = ({ data, variations }) => {
     const priceExclTax = data?.price_excl_tax || data?.price || 0;
     const attributes = data?.attributes;
     const productId = data?.id;
-    const [location, setLocation] = useState(WAREHOUSES.EUROPE);
-    const [selectedCountry, setSelectedCountry] = useState('FR');
-    const [currencySymbol, setCurrencySymbol] = useState('€'); // Default to EUR to avoid hydration mismatch
-    const [gradeOpen, setGradeOpen] = useState(false);
-    const [selectedGrade, setSelectedGrade] = useState("A");
-    const [telephonePopUp, setTelephonePopUp] = useState(false);
-    const calendlyContainerRef = React.useRef(null);
-    const [isOpen, setOpen] = useState(false); // For CompatibilityModal
+
 
     const gradeImage = [
         { grade: "A", images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont@2x.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-6.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-8.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-11.png`, `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/10/right_cont-12.png`] },
@@ -255,12 +259,10 @@ const ProductDetails = ({ data, variations }) => {
                     setVariationId(matchedVariation.id);
                     // Store the variation attributes for cart submission
                     setVariationAttributes([...matchedVariation.attributes, ...missingAttributeData] || null);
-                    // Check if the variation is in stock
-                    const stockStatus = matchedVariation.stock_status;
-                    const variationStock = stockStatus
-                        ? stockStatus === 'instock'
-                        : (matchedVariation.in_stock === true || matchedVariation.is_in_stock === true || matchedVariation.purchasable !== false);
-                    setVariationInStock(variationStock);
+
+                    // Check if the variation is in stock using multi-location logic
+                    const { isInStock } = getStockStatusForLocation(matchedVariation, currentLocation);
+                    setVariationInStock(isInStock);
                 } else {
                     setVariationPrice(null);
                     setVariationId(null);
@@ -325,7 +327,10 @@ const ProductDetails = ({ data, variations }) => {
 
         // Check if adding 1 more would exceed stock
         if (stockQuantity !== null && stockQuantity !== undefined) {
-            if (currentQuantityInCart >= stockQuantity) {
+            const currentItem = hasVariations ? matchedVariation : data;
+            const { backordersAllowed } = getStockStatusForLocation(currentItem, location);
+
+            if (!backordersAllowed && currentQuantityInCart >= stockQuantity) {
                 alert(t("stockLimitReached") || `Vous ne pouvez pas ajouter plus de ${stockQuantity} exemplaire(s) de ce produit. Quantité disponible : ${stockQuantity}.`);
                 return;
             }
@@ -400,8 +405,16 @@ const ProductDetails = ({ data, variations }) => {
 
     // Check if stock limit is reached (recalculate when currentQuantityInCart or stockQuantity changes)
     const isStockLimitReached = useMemo(() => {
+        // Use multi-location stock logic to check backorder status
+        const currentItem = hasVariations ? matchedVariation : data;
+        const { backordersAllowed } = getStockStatusForLocation(currentItem, location);
+
+        if (backordersAllowed) {
+            return false; // No limit if backorders are allowed
+        }
+
         return stockQuantity !== null && stockQuantity !== undefined && currentQuantityInCart >= stockQuantity;
-    }, [stockQuantity, currentQuantityInCart]);
+    }, [stockQuantity, currentQuantityInCart, hasVariations, matchedVariation, data, location]);
 
     // Button is ready only when: all variations selected + price loaded + in stock + stock limit not reached
     const isButtonReady = hasVariations
@@ -468,7 +481,23 @@ const ProductDetails = ({ data, variations }) => {
 
                 // stock check
                 const inStock = relevantVariations.some(v => {
-                    if (!v.inStock) return false;
+                    // Use multi-location check on the variation object
+                    // We need the full variation object, but v is from variationIndex which is simplified.
+                    // We need to look up the original variation from `variations` array.
+                    const fullVariation = variations.find(originalV => {
+                        // Simple equality check of attributes (v.attrs vs originalV.attributes)
+                        // But since we can't easily link back, maybe we should have stored ID in variationIndex.
+                        // Optimization: let's assume if attributes match, it's the one.
+                        return Object.entries(v.attrs).every(([k, val]) => {
+                            const attr = originalV.attributes.find(a => a.name === k);
+                            return attr && attr.option === val;
+                        });
+                    });
+
+                    if (!fullVariation) return false;
+
+                    const { isInStock: varInStock } = getStockStatusForLocation(fullVariation, location);
+                    if (!varInStock) return false;
 
                     return Object.entries(v.attrs).every(([key, value]) => {
                         if (!testSelection[key]) return true;

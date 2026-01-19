@@ -1,4 +1,5 @@
 import React from 'react';
+import { getStockDisplayMessage, WAREHOUSES } from '../utils/stockUtils';
 
 const ProductPurchaseSection = ({
     hasVariations,
@@ -7,7 +8,7 @@ const ProductPurchaseSection = ({
     variationInStock,
     currencySymbol,
     location,
-    warehouses,
+    warehouses, // This prop might be redundant now if we import WAREHOUSES, but keeping for compatibility
     matchedVariation,
     acf,
     isEuropeLocation,
@@ -23,19 +24,21 @@ const ProductPurchaseSection = ({
 }) => {
     // Helper to determine if we should show stock for simplified products
     const renderSimpleProductStock = () => {
-        const shouldShowStockUSA = !!(location === warehouses.USA && acf?.stock_for_usa);
-        const shouldShowStockEU = !!(isEuropeLocation && acf?.date_de_livraison_estimee_from_dolibarr);
-        const shouldShowStock = shouldShowStockUSA || shouldShowStockEU;
+        const message = getStockDisplayMessage({ acf }, location);
+        const shouldShowStockUSA = location === (warehouses?.USA || WAREHOUSES.USA);
+        const shouldShowStockEU = location === (warehouses?.EUROPE || WAREHOUSES.EUROPE);
 
-        return shouldShowStock ? (
+        if (!message) return null;
+
+        return (
             <span className='text-base font-semibold text-[#111]'>
                 {shouldShowStockUSA ? (
-                    <>{t("stock_usd_acf")} : {acf?.stock_for_usa}</>
+                    <>{t("stock_usd_acf")} : {message}</>
                 ) : shouldShowStockEU ? (
-                    <>{t("stock_fr_acf")} : {acf?.date_de_livraison_estimee_from_dolibarr}</>
+                    <>{t("stock_fr_acf")} : {message}</>
                 ) : null}
             </span>
-        ) : null;
+        );
     };
 
     return (
@@ -54,11 +57,19 @@ const ProductPurchaseSection = ({
                         {parseFloat(variationPrice)?.toFixed(2)}{currencySymbol}
                     </span>
                     <span className='text-base font-semibold text-[#111]'>
-                        {location === warehouses.USA && matchedVariation?.acf?.stock_for_usa ? (
-                            <>{t("stock_usd_acf")} : {matchedVariation?.acf?.stock_for_usa}</>
-                        ) : isEuropeLocation && matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr && (
-                            <>{t("stock_fr_acf")} : {matchedVariation?.acf?.date_de_livraison_estimee_from_dolibarr}</>
-                        )}
+                        {(() => {
+                            const message = getStockDisplayMessage(matchedVariation, location);
+                            const shouldShowStockUSA = location === (warehouses?.USA || WAREHOUSES.USA);
+                            const shouldShowStockEU = location === (warehouses?.EUROPE || WAREHOUSES.EUROPE);
+
+                            if (!message) return null;
+
+                            return shouldShowStockUSA ? (
+                                <>{t("stock_usd_acf")} : {message}</>
+                            ) : shouldShowStockEU ? (
+                                <>{t("stock_fr_acf")} : {message}</>
+                            ) : null;
+                        })()}
                     </span>
                 </div>
             )}
@@ -86,8 +97,8 @@ const ProductPurchaseSection = ({
             <button
                 disabled={!isButtonReady || addingToCart}
                 className={`text-base leading-[100%] uppercase font-bold w-full rounded-sm min-h-[46px] flex items-center justify-center cursor-pointer ${isButtonReady && !addingToCart
-                        ? "bg-[#1D98FF] text-white"
-                        : "bg-[#1D98FF]/50 text-white cursor-not-allowed"
+                    ? "bg-[#1D98FF] text-white"
+                    : "bg-[#1D98FF]/50 text-white cursor-not-allowed"
                     }`}
                 type="submit"
             >
