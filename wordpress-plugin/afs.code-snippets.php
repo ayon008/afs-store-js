@@ -1225,6 +1225,11 @@ add_filter('site_url', 'afs_replace_url_in_emails', 999, 4);
 add_filter('home_url', 'afs_replace_url_in_emails', 999, 4);
 
 function afs_replace_url_in_emails($url, $path, $scheme, $blog_id) {
+    // Safety check: return early if URL is empty or not a string
+    if (empty($url) || !is_string($url)) {
+        return $url;
+    }
+    
     // Only replace URLs when sending emails
     if (!afs_is_email_context()) {
         return $url;
@@ -1235,17 +1240,36 @@ function afs_replace_url_in_emails($url, $path, $scheme, $blog_id) {
         return $url;
     }
     
-    $current_site_url = untrailingslashit(get_site_url($blog_id));
-    $headless_url = untrailingslashit(HEADLESS_URL);
+    // Safety check: ensure blog_id is valid
+    if ($blog_id === null) {
+        $blog_id = get_current_blog_id();
+    }
     
-    // Simple string replacement
-    return str_replace($current_site_url, $headless_url, $url);
+    try {
+        $current_site_url = untrailingslashit(get_site_url($blog_id));
+        $headless_url = untrailingslashit(HEADLESS_URL);
+        
+        // Only replace if URLs are different and valid
+        if ($current_site_url && $headless_url && $current_site_url !== $headless_url) {
+            return str_replace($current_site_url, $headless_url, $url);
+        }
+    } catch (Exception $e) {
+        // Log error but don't break the site
+        error_log('AFS URL replacement error: ' . $e->getMessage());
+    }
+    
+    return $url;
 }
 
 /**
  * Detect if we're in an email sending context
  */
 function afs_is_email_context() {
+    // Safety check: ensure WordPress is fully loaded
+    if (!function_exists('did_action') || !function_exists('doing_action') || !function_exists('doing_filter')) {
+        return false;
+    }
+    
     // Check WooCommerce email actions
     if (did_action('woocommerce_email_header') || 
         did_action('woocommerce_email_footer') ||

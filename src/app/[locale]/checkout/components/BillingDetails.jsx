@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { User } from "lucide-react";
+import { Controller } from "react-hook-form";
 import Input from "@/Shared/Input/Input";
 import CountrySelect from "@/Shared/Input/DropDown";
 import Select from "@/Shared/Input/Select";
@@ -13,7 +14,8 @@ const BillingDetails = ({
     countryDetails,
     states,
     countriesList,
-    t
+    t,
+    control
 }) => {
     return (
         <div className='bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden'>
@@ -132,26 +134,33 @@ const BillingDetails = ({
                         value={watchFields.billing_phone}
                         checkout={true}
                     />
-                    <Select
-                        checkout={true}
-                        label={t("survey")}
-                        id='survey'
-                        register={register("survey", { required: t("required") })}
-                        error={getFieldError("survey")}
-                        value={watchFields.survey}
-                        options={[
-                            { value: 'Recherche Google/Bing', label: t("surveyOptions.google") },
-                            { value: 'facebook', label: t("surveyOptions.facebook") },
-                            { value: 'instagram', label: t("surveyOptions.instagram") },
-                            { value: 'youtube', label: t("surveyOptions.youtube") },
-                            { value: 'Publicité Google (Google Ads)', label: t("surveyOptions.googleAds") },
-                            { value: "Recommandation d'un ami ou d'un membre de la famille", label: t("surveyOptions.recommendation") },
-                            { value: "Article de blog ou revue en ligne", label: t("surveyOptions.blog") },
-                            { value: "Lien direct (j'ai tapé l'adresse du site)", label: t("surveyOptions.direct") },
-                            { value: "Publicité Display/Bannière", label: t("surveyOptions.display") },
-                            { value: "other", label: t("surveyOptions.other") },
-                        ]}
-                        placeholder={t("surveyPlaceholder")}
+                    <Controller
+                        name="survey"
+                        control={control}
+                        rules={{ required: t("required") }}
+                        render={({ field }) => (
+                            <Select
+                                checkout={true}
+                                label={t("survey")}
+                                id='survey'
+                                register={field}
+                                error={getFieldError("survey")}
+                                value={field.value}
+                                options={[
+                                    { value: 'Recherche Google/Bing', label: t("surveyOptions.google") },
+                                    { value: 'facebook', label: t("surveyOptions.facebook") },
+                                    { value: 'instagram', label: t("surveyOptions.instagram") },
+                                    { value: 'youtube', label: t("surveyOptions.youtube") },
+                                    { value: 'Publicité Google (Google Ads)', label: t("surveyOptions.googleAds") },
+                                    { value: "Recommandation d'un ami ou d'un membre de la famille", label: t("surveyOptions.recommendation") },
+                                    { value: "Article de blog ou revue en ligne", label: t("surveyOptions.blog") },
+                                    { value: "Lien direct (j'ai tapé l'adresse du site)", label: t("surveyOptions.direct") },
+                                    { value: "Publicité Display/Bannière", label: t("surveyOptions.display") },
+                                    { value: "other", label: t("surveyOptions.other") },
+                                ]}
+                                placeholder={t("surveyPlaceholder")}
+                            />
+                        )}
                     />
                     {watchFields.survey === "other" && (
                         <Input

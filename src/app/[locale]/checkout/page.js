@@ -7,7 +7,7 @@ import { countriesList } from "@/lib/countriesList";
 import { WAREHOUSES } from "@/lib/countries-config";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
@@ -167,9 +167,10 @@ const CheckoutPageContent = () => {
         reset,
         trigger,
         setValue,
+        control,
         formState: { errors }
     } = useForm({
-        mode: 'onTouched',
+        mode: 'onChange', // Changed from 'onTouched' to 'onChange' to detect changes immediately
         defaultValues: {
             billing_first_name: '',
             billing_last_name: '',
@@ -201,7 +202,16 @@ const CheckoutPageContent = () => {
     // Don't check shipping address by default - user must explicitly check it
     // Removed the useEffect that auto-checks shipping address
 
+    // Use a ref to track if form has been initialized to avoid multiple resets
+    const formInitializedRef = useRef(false);
+
     useEffect(() => {
+        // Only initialize once on mount, or when cart address changes from null to a value
+        // Don't reset if form was already initialized and user has entered data
+        if (formInitializedRef.current) {
+            return; // Form already initialized, don't reset
+        }
+
         // Get selected country from cookie (from "Choose your location")
         const selectedCountryFromCookie = getCookie('selected_country');
         
@@ -246,14 +256,26 @@ const CheckoutPageContent = () => {
         // Only reset if we have at least one address or a country to pre-fill
         if (Object.keys(formValues).length > 0) {
             reset(formValues);
+            formInitializedRef.current = true;
         }
-    }, [reset, cartShippingAddress, cartBillingAddress, trigger]);
+    }, [reset, cartShippingAddress, cartBillingAddress]);
 
     // Note: Cart stays in localStorage during checkout
     // We only sync to WooCommerce API when the order is submitted
     // Shipping rates are calculated via a separate API call based on country selection
 
     const watchFields = watch();
+    // Also watch survey and terms separately to ensure they're tracked
+    const surveyValue = watch("survey");
+    const termsValue = watch("terms");
+    // Watch billing fields directly to ensure they're detected
+    const billingFirstName = watch("billing_first_name");
+    const billingLastName = watch("billing_last_name");
+    const billingEmail = watch("billing_email");
+    const billingCountry = watch("billing_country");
+    const billingAddress = watch("billing_address_1");
+    const billingCity = watch("billing_city");
+    const billingPostcode = watch("billing_postcode");
 
     // Get error message only if field has been touched or form has been submitted
     const getFieldError = (fieldName) => {
@@ -1163,7 +1185,12 @@ const CheckoutPageContent = () => {
         };
 
         // Check if terms are not accepted
-        if (!watchFields.terms) {
+        // Use termsValue directly to ensure checkbox updates are detected
+        // For checkboxes, React Hook Form returns true when checked, false when unchecked
+        const currentTerms = termsValue !== undefined ? termsValue : (watchFields.terms !== undefined ? watchFields.terms : false);
+        
+        // Explicitly check if terms is true (checkbox is checked)
+        if (currentTerms !== true) {
             return true;
         }
 
@@ -1227,6 +1254,7 @@ const CheckoutPageContent = () => {
 
         return false;
     }, [
+        termsValue,
         watchFields.terms,
         watchFields.billing_first_name,
         watchFields.billing_last_name,
@@ -1258,24 +1286,64 @@ const CheckoutPageContent = () => {
         };
 
         // Check if terms are not accepted
-        if (!watchFields.terms) {
+        // Use termsValue directly to ensure checkbox updates are detected
+        // For checkboxes, React Hook Form returns true when checked, false when unchecked
+        const currentTerms = termsValue !== undefined ? termsValue : (watchFields.terms !== undefined ? watchFields.terms : false);
+        
+        // Explicitly check if terms is true (checkbox is checked)
+        if (currentTerms !== true) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('[Checkout] Terms not accepted', {
+                    termsValue,
+                    watchFieldsTerms: watchFields.terms,
+                    currentTerms,
+                    type: typeof currentTerms,
+                    isTrue: currentTerms === true,
+                    isFalse: currentTerms === false
+                });
+            }
             return true;
         }
 
         // Check required billing fields
+        // Use surveyValue directly to ensure Controller updates are detected
+        // Use direct watch values to ensure they're detected even if watchFields is stale
+        const currentSurvey = surveyValue || watchFields.survey;
         const requiredFields = {
-            billing_first_name: watchFields.billing_first_name,
-            billing_last_name: watchFields.billing_last_name,
-            billing_country: watchFields.billing_country,
-            billing_address_1: watchFields.billing_address_1,
-            billing_city: watchFields.billing_city,
-            billing_postcode: watchFields.billing_postcode,
-            billing_email: watchFields.billing_email,
-            survey: watchFields.survey
+            billing_first_name: billingFirstName !== undefined ? billingFirstName : watchFields.billing_first_name,
+            billing_last_name: billingLastName !== undefined ? billingLastName : watchFields.billing_last_name,
+            billing_country: billingCountry !== undefined ? billingCountry : watchFields.billing_country,
+            billing_address_1: billingAddress !== undefined ? billingAddress : watchFields.billing_address_1,
+            billing_city: billingCity !== undefined ? billingCity : watchFields.billing_city,
+            billing_postcode: billingPostcode !== undefined ? billingPostcode : watchFields.billing_postcode,
+            billing_email: billingEmail !== undefined ? billingEmail : watchFields.billing_email,
+            survey: currentSurvey
         };
 
         for (const [fieldName, fieldValue] of Object.entries(requiredFields)) {
             if (isEmpty(fieldValue)) {
+                // Debug: log which field is missing
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`[Checkout] Field missing: ${fieldName}`, {
+                        value: fieldValue,
+                        type: typeof fieldValue,
+                        isNull: fieldValue === null,
+                        isUndefined: fieldValue === undefined,
+                        isEmptyString: fieldValue === '',
+                        directWatch: fieldName === 'billing_first_name' ? billingFirstName : 
+                                   fieldName === 'billing_last_name' ? billingLastName :
+                                   fieldName === 'billing_email' ? billingEmail :
+                                   fieldName === 'billing_country' ? billingCountry :
+                                   fieldName === 'billing_address_1' ? billingAddress :
+                                   fieldName === 'billing_city' ? billingCity :
+                                   fieldName === 'billing_postcode' ? billingPostcode : null,
+                        watchFieldsSnapshot: {
+                            billing_first_name: watchFields.billing_first_name,
+                            billing_last_name: watchFields.billing_last_name,
+                            billing_email: watchFields.billing_email
+                        }
+                    });
+                }
                 return true;
             }
         }
@@ -1284,13 +1352,20 @@ const CheckoutPageContent = () => {
         if (watchFields.billing_email) {
             const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
             if (!emailRegex.test(watchFields.billing_email.trim())) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] Invalid email format');
+                }
                 return true;
             }
         }
 
         // Check if "Autre" is selected but survey_other is empty
-        if (watchFields.survey === "other") {
+        const currentSurveyValue = surveyValue || watchFields.survey;
+        if (currentSurveyValue === "other") {
             if (isEmpty(watchFields.survey_other)) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] Survey "other" selected but survey_other is empty');
+                }
                 return true;
             }
         }
@@ -1308,6 +1383,9 @@ const CheckoutPageContent = () => {
 
             for (const [fieldName, fieldValue] of Object.entries(shippingFields)) {
                 if (isEmpty(fieldValue)) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log(`[Checkout] Shipping field missing: ${fieldName}`, fieldValue);
+                    }
                     return true;
                 }
             }
@@ -1316,13 +1394,35 @@ const CheckoutPageContent = () => {
         // Check if shipping method is selected (only if shipping rates are available)
         if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
             if (!selectedRateId) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] Shipping method not selected', { allShippingRates, selectedRateId });
+                }
                 return true;
             }
         }
 
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[Checkout] All validations passed, button should be enabled', {
+                survey: surveyValue || watchFields.survey,
+                terms: termsValue !== undefined ? termsValue : watchFields.terms,
+                termsValue,
+                watchFieldsTerms: watchFields.terms,
+                selectedRateId,
+                shippingAddress
+            });
+        }
         return false;
     }, [
+        termsValue,
+        termsValue,
         watchFields.terms,
+        billingFirstName,
+        billingLastName,
+        billingEmail,
+        billingCountry,
+        billingAddress,
+        billingCity,
+        billingPostcode,
         watchFields.billing_first_name,
         watchFields.billing_last_name,
         watchFields.billing_country,
@@ -1330,6 +1430,7 @@ const CheckoutPageContent = () => {
         watchFields.billing_city,
         watchFields.billing_postcode,
         watchFields.billing_email,
+        surveyValue,
         watchFields.survey,
         watchFields.survey_other,
         watchFields.shipping_first_name,
@@ -1976,6 +2077,7 @@ const CheckoutPageContent = () => {
                                 states={states}
                                 countriesList={countriesList}
                                 t={t}
+                                control={control}
                             />
 
                             {/* Shipping Details */}
@@ -2040,6 +2142,7 @@ const CheckoutPageContent = () => {
                         isSubmitting={isSubmitting}
                         isPlaceOrderDisabled={isPlaceOrderDisabled}
                         onSubmit={handleSubmit(onSubmit)}
+                        control={control}
                         t={t}
                         currencySymbol={currencySymbol}
                         sousTotal={sousTotal}
