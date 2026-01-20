@@ -5,11 +5,9 @@ import { Link } from "@/i18n/navigation";
 import { getPosts } from "@/lib/wp";
 
 /* ----------------------------- News Card ----------------------------- */
-const NewsCard = async ({ article }) => {
+export const NewsCard = async ({ article }) => {
   const category = article.categories?.[0];
-  const t = await getTranslations("home");
   const b = await getTranslations("blog");
-  const locale = await getLocale();
 
   return (
     <article className="flex flex-col justify-between gap-[24px] lg:gap-10 py-5 border-t-2 border-b-2 border-t-[#00000026] border-b-[#00000026]">
@@ -69,6 +67,8 @@ const News = async () => {
     console.error("Error fetching blog posts:", error);
     blogs = [];
   }
+
+  console.log(blogs);
 
   return (
     <div className="mx-auto max-w-[1920px] global-padding global-margin">

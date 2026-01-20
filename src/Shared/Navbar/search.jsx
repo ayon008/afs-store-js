@@ -218,7 +218,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                 href={getProductRoute(locale, slug)}
                                             >
                                                 <div className='flex flex-col gap-[10px] text-center'>
-                                                    <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />
+                                                    <Image src={image} width={200} height={200} alt={name} className='w-full h-full aspect-[1] object-contain' />
                                                     <font className='text-[#111] text-lg uppercase leading-[100%] font-bold'>{name}</font>
                                                 </div>
                                                 <div className='text-[#111] text-sm leading-[100%] text-center' dangerouslySetInnerHTML={{ __html: priceHtml }} />
@@ -267,7 +267,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                                     href={getProductRoute(locale, slug)}
                                                 >
                                                     <div className='flex flex-col gap-[10px] text-center'>
-                                                        <Image src={image} width={100} height={100} alt={name} className='w-full h-full aspect-[1] object-contain' />
+                                                        <Image src={image} width={200} height={200} alt={name} className='w-full h-full aspect-[1] object-contain' />
                                                         <font className='text-[#111] text-lg uppercase leading-[100%] font-bold'>{name}</font>
                                                     </div>
                                                     {priceHtml ? (

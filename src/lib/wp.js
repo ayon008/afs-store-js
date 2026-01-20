@@ -4,13 +4,14 @@
 import { getLocale } from "next-intl/server";
 import { normalizeWordPressUrl } from "./url-utils";
 
-const WP_BASE_URL = process.env.WP_BASE_URL;
+const WP_BASE_URL = process.env.WP_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!WP_BASE_URL) {
     console.warn('[wp] WP_BASE_URL is not set. Configure it in environment variables.');
 }
 
 export async function getPosts(options = {}) {
+
     if (!WP_BASE_URL) {
         throw new Error('WP_BASE_URL not configured');
     }

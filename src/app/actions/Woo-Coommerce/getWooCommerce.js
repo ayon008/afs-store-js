@@ -271,7 +271,7 @@ export async function logout() {
 
 export const getCountryDetails = async (country) => {
     const localeValue = await getLocaleValue();
-    const url = `${process.env.WP_BASE_URL}/${localeValue}/wp-json/wc/v3/data/countries/${country}`;
+    const url = `${process.env.WP_BASE_URL}/wp-json/wc/v3/data/countries/${country}`;
     try {
         const response = await fetch(url, {
             headers: { Authorization: `Basic ${authHeader}` },

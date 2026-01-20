@@ -1,5 +1,4 @@
 "use client"
-import { useParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
@@ -125,7 +124,7 @@ const SingleProduct = ({ data, variations }) => {
                                         href={finalUrl}
                                         className="text-[#999999]"
                                     >
-                                       {"... /"} {item?.name}
+                                        {"... /"} {item?.name}
                                     </Link>
 
                                     <span
@@ -300,34 +299,33 @@ const SingleProduct = ({ data, variations }) => {
                                             )
                                         })
                                     }
-
-                                    {/* Pagination */}
-                                    <div className='absolute left-0 right-0 bottom-0 px-3 py-[10px] w-full z-50 backdrop-blur-[4px] border border-gray-200 rounded-[4px] items-center justify-center bg-white/20 gap-2 md:flex hidden max-w-fit mx-auto'>
-                                        {
-                                            images?.map((singleImage, index) => {
-                                                const isActive = activeIndex === index || default_slide === index;
-                                                return (
-                                                    <div
-                                                        onClick={() => swiperRef.current?.slideTo(index)}
-                                                        key={singleImage?.id}
-                                                        className={`overflow-hidden rounded-[4px] relative cursor-pointer transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-50'}`}
-                                                    >
-                                                        <Image src={singleImage?.src} width={54} height={54} alt='' className='w-[54px] h-[54px] aspect-[1]' />
-                                                        {
-                                                            singleImage?.video &&
-                                                            <span onClick={() => setOpen(true)} className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
-                                                                <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                    <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>
-                                                                    <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
-                                                                </svg>
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
                                 </Swiper>
+                                {/* Pagination */}
+                                <div className='relative px-3 py-[10px] w-full z-50 backdrop-blur-[4px] border border-gray-200 rounded-[4px] items-center justify-center bg-white/20 gap-2 md:flex hidden max-w-fit mx-auto'>
+                                    {
+                                        images?.map((singleImage, index) => {
+                                            const isActive = activeIndex === index || default_slide === index;
+                                            return (
+                                                <div
+                                                    onClick={() => swiperRef.current?.slideTo(index)}
+                                                    key={singleImage?.id}
+                                                    className={`overflow-hidden rounded-[4px] relative cursor-pointer transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-50'}`}
+                                                >
+                                                    <Image src={singleImage?.src} width={54} height={54} alt='' className='w-[54px] h-[54px] aspect-[1]' />
+                                                    {
+                                                        singleImage?.video &&
+                                                        <span onClick={() => setOpen(true)} className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+                                                            <svg width="20" height="20" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <rect x="1.5" y="1.5" width="53" height="53" rx="26.5" stroke="white" strokeWidth="3" strokeDasharray="10 10"></rect>
+                                                                <path d="M37 26.2679C38.3333 27.0377 38.3333 28.9623 37 29.7321L25 36.6603C23.6667 37.4301 22 36.4678 22 34.9282L22 21.0718C22 19.5322 23.6667 18.5699 25 19.3397L37 26.2679Z" fill="white"></path>
+                                                            </svg>
+                                                        </span>
+                                                    }
+                                                </div>
+                                            )
+                                        })
+                                    }
+                                </div>
                                 {/* Navigation Button */}
                                 <button
                                     id="customPrev"

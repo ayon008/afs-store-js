@@ -7,6 +7,9 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
 import { Link } from "@/i18n/navigation";
 import { getTranslatedCategoryPath, getCategoryRoutePrefix } from '@/lib/product-routes';
+import CustomerService from '@/Shared/Home/CustomerService';
+import BlogSlide from '@/Shared/Products/BlogSlide';
+import { getPosts } from '@/lib/wp';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://afs-foiling.com';
 
@@ -33,7 +36,7 @@ export async function generateCategoryMetadata(slug) {
     // Get translated category paths
     const enPath = await getTranslatedCategoryPath(slug, 'en');
     const frPath = await getTranslatedCategoryPath(slug, 'fr');
-    
+
     const enUrl = `${BASE_URL}${enPath}`;
     const frUrl = `${BASE_URL}${frPath}`;
     const currentUrl = isEnglish ? enUrl : frUrl;
@@ -133,22 +136,54 @@ export default async function CategoryPage({ slug }) {
         );
     };
 
+
+
+    let blogs = [];
+
+    try {
+        blogs = await getPosts({
+            fetchAll: false,
+            orderby: "date",
+            order: "desc",
+            per_page: 4,
+            locale: locale,
+            page: 1,
+        });
+    } catch (error) {
+        console.error("Error fetching blog posts:", error);
+        blogs = [];
+    }
+
+
+    console.log(blogs);
+
+
     return (
         <div className='global-margin'>
-            <div className='lg:h-[75vh] h-[50vh] max-h-[540px] lg:max-h-[720px] w-full relative mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] bg-no-repeat bg-cover bg-center'
-                style={{ backgroundImage: `url(${image})` }}
-            >
-                <div className='global-padding pt-4 max-w-[1920px] mx-auto'>
-                    <BreadCums />
-                    <div>
-                        <h1 className='global-h2 text-white absolute bottom-8'>
-                            {category?.name}
-                        </h1>
+            <div className='global-margin'>
+                <div className='lg:h-[75vh] h-[50vh] max-h-[540px] lg:max-h-[720px] w-full relative mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] bg-no-repeat bg-cover bg-center'
+                    style={{ backgroundImage: `url(${image})` }}
+                >
+                    <div className='global-padding pt-4 max-w-[1920px] mx-auto'>
+                        <BreadCums />
+                        <div>
+                            <h1 className='global-h2 text-white absolute bottom-8'>
+                                {category?.name}
+                            </h1>
+                        </div>
                     </div>
                 </div>
+                <div>
+                    <Products childCategories={childCategories} id={category?.id} />
+                </div>
             </div>
-            <div>
-                <Products childCategories={childCategories} id={category?.id} />
+            <div className=''>
+                <div className='global-margin'>
+                    <CustomerService />
+                </div>
+                <div className='global-padding'>
+                    <BlogSlide data={blogs} />
+                </div>
             </div>
         </div>
     );

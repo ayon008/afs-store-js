@@ -17,6 +17,8 @@ import CompatibilityModal from './components/CompatibilityModal';
 import GradeModal from './components/GradeModal';
 import CalendlyModal from './components/CalendlyModal';
 import { getWordPressBaseUrl } from '@/lib/url-utils';
+import { ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 
 
 // Helper function to update price in WooCommerce HTML

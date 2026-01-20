@@ -113,50 +113,52 @@ export default function CustomerService() {
   return (
     <section className="max-w-[1920px] mx-auto global-padding global-margin">
       <h2 className="global-h2 mb-8">{t("service")}</h2>
-      <Swiper
-        modules={[Navigation]}
-        spaceBetween={20}
-        slidesPerView={1}
-        breakpoints={{
-          768: {
-            slidesPerView: 'auto',
-            spaceBetween: 24,
-          },
-          1024: {
-            slidesPerView: 'auto',
-            spaceBetween: 40,
-          },
-        }}
-        navigation={{
-          nextEl: "#customNext",
-          prevEl: "#customPrev",
-        }}
-        watchSlidesProgress={true}
-        watchOverflow={true}
-        observer={true}
-        observeParents={true}
-        onSlideChange={(swiper) => {
-          setIsBeginning(swiper.isBeginning);
-          setIsEnd(swiper.isEnd);
-        }}
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-          setIsBeginning(swiper.isBeginning);
-          setIsEnd(swiper.isEnd);
-        }}
-        onResize={(swiper) => {
-          swiper.update();
-          setIsBeginning(swiper.isBeginning);
-          setIsEnd(swiper.isEnd);
-        }}
-        className=""
-      >
-        {CustomerServiceData.map((item) => (
-          <SwiperSlide key={item.title} className="md:!w-auto md:!max-w-[640px]">
-            <AmbassadorsCard data={item} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+      <div className="w-full">
+        <Swiper
+          modules={[Navigation]}
+          spaceBetween={20}
+          slidesPerView={1}
+          breakpoints={{
+            768: {
+              slidesPerView: 'auto',
+              spaceBetween: 24,
+            },
+            1024: {
+              slidesPerView: 'auto',
+              spaceBetween: 40,
+            },
+          }}
+          navigation={{
+            nextEl: "#customNext",
+            prevEl: "#customPrev",
+          }}
+          watchSlidesProgress={true}
+          watchOverflow={true}
+          observer={true}
+          observeParents={true}
+          onSlideChange={(swiper) => {
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          onResize={(swiper) => {
+            swiper.update();
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          className=""
+        >
+          {CustomerServiceData.map((item) => (
+            <SwiperSlide key={item.title} className="md:!w-auto md:!max-w-[640px]">
+              <AmbassadorsCard data={item} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
       <div className="flex items-center justify-center gap-4 mt-10">
         <button
           id="customPrev"

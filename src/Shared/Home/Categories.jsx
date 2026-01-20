@@ -57,7 +57,7 @@ export default async function CategorySection() {
     {
       slug: "foiling/parawing",
       image:
-        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2022/07/ahd-windsurf.jpg`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2025/07/parawing.jpg`,
       alt_text: "windsurf",
     },
     {

@@ -1,6 +1,6 @@
 "use client";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useState } from "react";
 
 
@@ -43,7 +43,7 @@ const Table = ({ title, tableRow, tableHead }) => {
                                                     <small>{chunks}</small>
                                                 ),
                                             })
-                                            : t(item)
+                                            : item ? t(item) : item
                                     }
                                 </div>
                             )
@@ -96,6 +96,9 @@ const Page = () => {
         }
     ]
 
+    const locale = useLocale();
+    const fr = "fr";
+
     return (
         <div className="global-padding pt-4 max-w-[1920px] mx-auto min-h-screen global-margin">
             <BreadCums />
@@ -109,10 +112,10 @@ const Page = () => {
                     id="0"
                     onClick={() => handleClick(0)}
                     className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 0 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>
-                    {t("ALL")} <sup>(20)</sup>
+                    {t("ALL")} <sup>(22)</sup>
                 </button>
                 <button id="1" onClick={() => handleClick(1)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 1 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>FOIL <sup>(13)</sup></button>
-                <button id="2" onClick={() => handleClick(2)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 2 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>{t("Planche")}<sup>(1)</sup></button>
+                <button id="2" onClick={() => handleClick(2)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 2 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>{t("Planche")}<sup>(3)</sup></button>
                 <button id="3" onClick={() => handleClick(3)} className={`font-bold text-[18px] uppercase leading-[20px] cursor-pointer transition-colors hover:text-[#1D98FF] duration-200 ${selectedId === 3 ? 'text-[#1D98FF]' : 'text-[#111]'}`}>{t("Gamme précédente")} <sup>(6)</sup></button>
             </div>
             <div className="mt-16">
@@ -129,7 +132,7 @@ const Page = () => {
                                                 { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
                                                 { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
                                         {/* 2nd table */}
                                         <Table title="Aile Silk Démontable"
                                             tableRow={[
@@ -142,7 +145,25 @@ const Page = () => {
                                             tableRow={[
                                                 { name: "Ultra 750", value: ["750", "1024", "14", "95", "12.3", "579", "UHM et HM Carbone", "1.2", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+
+                                        {/*  */}
+                                        <Table title="Ultra Aile Avant"
+                                            tableRow={[
+                                                {
+                                                    name: "Ultra 600",
+                                                    value: ["600", "980", "16", "84", "10.8", "UHM et HM Carbone"]
+                                                },
+                                                {
+                                                    name: "Ultra 750",
+                                                    value: ["750", "1060", "15", "95", "12.3", "UHM et HM Carbone"]
+                                                },
+                                                {
+                                                    name: "Ultra 900",
+                                                    value: ["900", "1120", "14", "106", "13.9", "UHM et HM Carbone"]
+                                                }
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction"]} />
 
                                         {/* 4th table */}
                                         <Table title="Aile Enduro"
@@ -168,7 +189,7 @@ const Page = () => {
                                                 { name: "Pure 700", value: ["700", "820", "9.6", "112", "11.5", "574mm", "HM Carbone", "1.2", "NA"] },
                                                 { name: "Pure 900", value: ["880", "900", "9.2", "137", "14.1", "555mm", "HM Carbone", "1.7", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
 
                                         {/* 6th Table */}
                                         <Table title="Aile Evo"
@@ -208,17 +229,19 @@ const Page = () => {
                                         <Table
                                             title="Mâts Fuselink"
                                             tableRow={[
-                                                { name: "80 HR", value: ["80 cm", "135", "16 (±0.1)", "Carbone HR / Âme Corecell", "1.6", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "80 HM", value: ["80 cm", "120", "15 (±0.1)", "Carbone HM / Âme Corecell", "1.9", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 HM", value: ["85 cm", "120", "15 (±0.1)", "Carbone HM / Âme Corecell", "1.6", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "80 UHM", value: ["80 cm", "115", "13.8 (±0.1)", "Carbone UHM / Âme Corecell", "2", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 UHM", value: ["85 cm", "115", "13.5 (±0.1)", "Carbone UHM / Âme Corecell", "2", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "95 UHM", value: ["95 cm", "115", "14.0 (±0.1)", "Carbone UHM / Ame Corecell", "2.3", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "95 UHM RACE", value: ["95 cm", "120", "12.3 (±0.1)", "Carbone UHM / Monolithique", "2.3", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "75 UHM SKINNY", value: ["75 cm", "100", "12.8 (±0.1)", "Carbone UHM / Âme Corecell", "1.5", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 UHM Skinny", value: ["85 cm", "105", "13.2 (±0.1)", "Carbone UHM / Monolithique", "1.9", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
+                                                { name: "80 HR", value: ["80 cm", "135mm", "16mm (+-0.1mm)", `Carbone HR / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "2x M8x45mm Torx 40"] },
+                                                { name: "80 HM", value: ["80 cm", "120mm", "15 (+-0.1mm)", `Carbone HM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 HM", value: ["85 cm", "120mm", "15 (+-0.1mm)", `Carbone HM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "75 UHM", value: ["75 cm", "100mm", "12.8 (±0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "80 UHM", value: ["80 cm", "115mm", "13.8 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 UHM", value: ["85 cm", "115mm", "13.5 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "2 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "80 UHM Skinny", value: ["80", "105mm", "13.2 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "1.9 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 UHM Skinny", value: ["85", "105mm", "13.2 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "2 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "95 UHM", value: ["95 cm", "115mm", "14.0 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "2.05 kg", "0.5°", "M8x45mm Torx 40"] },
+                                                { name: "95 UHM RACE", value: ["95 cm", "120mm", "12.3 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "2.5°", "M8x45mm Torx 40"] },
+                                                // { name: "75 UHM SKINNY", value: ["75 cm", "100", "12.8 (±0.1)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "1.5", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
                                             ]}
-                                            tableHead={["Longueur", "Corde minimum (mm)", "Epaisseur minimum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["Longueur", "corde", "esp", "Construction", "Poids (kg)", "Rake", "screw-size"]}
                                         />
                                         {/* 10th Table */}
 
@@ -239,11 +262,21 @@ const Page = () => {
                                         <Table
                                             title="Stabilisateur Ultra Glide"
                                             tableRow={[
-                                                { name: "Ultra glide 39", value: ["113", "390", "13.9", "39", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
-                                                { name: "Ultra glide 41", value: ["123", "410", "13.7", "41", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
-                                                { name: "Ultra glide 43", value: ["133", "430", "13.7", "43", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
+                                                { name: "Ultra glide 43", value: ["133", "430", "13.7", "48.3(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 41", value: ["123", "410", "13.8", "46(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 39", value: ["113", "390", "13.9", "44(mm)", "4.5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
                                             ]}
                                             tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                        />
+                                        <Table
+                                            title="Stabilisateur U Curve"
+                                            tableRow={[
+                                                { name: "U-CARVE 130", value: ["130", "360", "10", "68", "5", `HR Carbone + HM Carbone / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "12mm Torx 30", ""] },
+                                                { name: "U-CARVE 140", value: ["140", "375", "10", "72", "5", `HR Carbone + HM Carbone / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "12mm Torx 30", ""] },
+                                                { name: "U-CARVE 150", value: ["150", "390", "10", "76", "5", `HR Carbone + HM Carbone / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "12mm Torx 30", ""] },
+                                                { name: "U-CARVE 160", value: ["160", "400", "10", "80", "5", `HR Carbone + HM Carbone / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "12mm Torx 30", ""] },
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "corde", "esp", "Construction", "Poids (kg)", "screw-size", "Compatibilité"]}
                                         />
 
                                         {/* 12th table */}
@@ -251,11 +284,51 @@ const Page = () => {
                                             title="Caractéristiques planche AFS Advanced"
                                             tableRow={[
                                                 {
+                                                    name: "",
+                                                    value: ["5.6", "20.5", "75L", "Carbone / Glass"]
+                                                },
+                                                {
+                                                    name: "",
+                                                    value: ["6’0", "22", "90L", "Carbone Or Glass"],
+                                                },
+                                                {
+                                                    name: "",
+                                                    value: ["6.3 ", "22.5", "100L", "Carbone Or Glass"],
+                                                }
+                                            ]}
+                                            tableHead={["Longueur (in/cm)", "Largeur (cm)", "Volume (litre)", "Construction"]}
+                                        />
+                                        <Table
+                                            title="Dock Star"
+                                            tableRow={[
+                                                {
                                                     name: "Dock Star",
                                                     value: ["83", "38.5", "3", "7L", "Carbone pré-preg / Mousse Corecell Haute densité / double stringer", "Rail US 250mm", "1.75"]
                                                 },
                                             ]}
                                             tableHead={["Longueur (cm)", "Largeur (cm)", "Épaisseur max (cm)", "Volume (litre)", "Construction", "Rail", "Poids (kg)"]}
+                                        />
+                                        <Table
+                                            title="Fly One 2026"
+                                            tableRow={[
+                                                {
+                                                    name: "Fly One S",
+                                                    value: [`5'8"`, "", "", "90L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                },
+                                                {
+                                                    name: "Fly One M",
+                                                    value: [`6'0"`, "", "", "105L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                },
+                                                {
+                                                    name: "Fly One L",
+                                                    value: [`6'2"`, "", "", "115L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                },
+                                                {
+                                                    name: "Fly One XL",
+                                                    value: [`6'4"`, "", "", "125L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                },
+                                            ]}
+                                            tableHead={["Longueur", "Largeur (cm)", "Épaisseur max (cm)", "Volume (litre)", "Construction", "Rail", "Poids (kg)", ""]}
                                         />
 
                                         <h2 className="lg:text-[32px] leading-[110%] font-bold text-[#111] text-[24px]">{t("Gamme précédente ( performer / flyer v1)")}</h2>
@@ -308,12 +381,12 @@ const Page = () => {
                                         <Table
                                             title="Aile Performer"
                                             tableRow={[
-                                                { name: "Performer 750", value: ["750", "750", "7.5", "118", "11.88", "HR Carbone / Âme corecell", "0.62", "25mm Fuselage Performer"] },
-                                                { name: "Performer 950", value: ["950", "840", "7.4", "133.65", "12.28", "HR Carbone / Âme corecell", "0.62", "25mm Fuselage Performer"] },
-                                                { name: "Performer 1250", value: ["1250", "950", "7.2", "165", "17.9", "HR Carbone / Âme corecell", "0.70", "25mm Fuselage Performer"] },
-                                                { name: "Performer 1450", value: ["1450", "970", "6.5", "187", "19.1", "HR Carbone / Âme corecell", "0.92", "25mm Fuselage Performer"] },
-                                                { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", "HR Carbone / Âme corecell", "1.02", "25mm Fuselage Performer"] },
-                                                { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", "HR Carbone / Âme corecell", "1.2", "25mm Fuselage Performer"] },
+                                                { name: "Performer 750", value: ["750", "750", "7.5", "118", "11.88", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.62", "25mm Fuselage Performer"] },
+                                                { name: "Performer 950", value: ["950", "840", "7.4", "133.65", "12.28", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.62", "25mm Fuselage Performer"] },
+                                                { name: "Performer 1250", value: ["1250", "950", "7.2", "165", "17.9", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.70", "25mm Fuselage Performer"] },
+                                                { name: "Performer 1450", value: ["1450", "970", "6.5", "187", "19.1", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.92", "25mm Fuselage Performer"] },
+                                                { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "1.02", "25mm Fuselage Performer"] },
+                                                { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "1.2", "25mm Fuselage Performer"] },
                                             ]}
                                             tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
                                         />
@@ -337,7 +410,7 @@ const Page = () => {
                                                 { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
                                                 { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
                                         {/* 2nd table */}
                                         <Table title="Aile Silk Démontable"
                                             tableRow={[
@@ -350,7 +423,24 @@ const Page = () => {
                                             tableRow={[
                                                 { name: "Ultra 750", value: ["750", "1024", "14", "95", "12.3", "579", "UHM et HM Carbone", "1.2", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+
+                                        <Table title="Ultra Aile Avant"
+                                            tableRow={[
+                                                {
+                                                    name: "Ultra 600",
+                                                    value: ["600", "980", "16", "84", "10.8", "UHM et HM Carbone"]
+                                                },
+                                                {
+                                                    name: "Ultra 750",
+                                                    value: ["750", "1060", "15", "95", "12.3", "UHM et HM Carbone"]
+                                                },
+                                                {
+                                                    name: "Ultra 900",
+                                                    value: ["900", "1120", "14", "106", "13.9", "UHM et HM Carbone"]
+                                                }
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction"]} />
 
                                         {/* 4th table */}
                                         <Table title="Aile Enduro"
@@ -376,7 +466,7 @@ const Page = () => {
                                                 { name: "Pure 700", value: ["700", "820", "9.6", "112", "11.5", "574mm", "HM Carbone", "1.2", "NA"] },
                                                 { name: "Pure 900", value: ["880", "900", "9.2", "137", "14.1", "555mm", "HM Carbone", "1.7", "NA"] },
                                             ]}
-                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <br/> <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
 
                                         {/* 6th Table */}
                                         <Table title="Aile Evo"
@@ -416,17 +506,19 @@ const Page = () => {
                                         <Table
                                             title="Mâts Fuselink"
                                             tableRow={[
-                                                { name: "80 HR", value: ["80 cm", "135", "16 (±0.1)", "Carbone HR / Âme Corecell", "1.6", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "80 HM", value: ["80 cm", "120", "15 (±0.1)", "Carbone HM / Âme Corecell", "1.9", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 HM", value: ["85 cm", "120", "15 (±0.1)", "Carbone HM / Âme Corecell", "1.6", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "80 UHM", value: ["80 cm", "115", "13.8 (±0.1)", "Carbone UHM / Âme Corecell", "2", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 UHM", value: ["85 cm", "115", "13.5 (±0.1)", "Carbone UHM / Âme Corecell", "2", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "95 UHM", value: ["95 cm", "115", "14.0 (±0.1)", "Carbone UHM / Ame Corecell", "2.3", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "95 UHM RACE", value: ["95 cm", "120", "12.3 (±0.1)", "Carbone UHM / Monolithique", "2.3", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "75 UHM SKINNY", value: ["75 cm", "100", "12.8 (±0.1)", "Carbone UHM / Âme Corecell", "1.5", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
-                                                { name: "85 UHM Skinny", value: ["85 cm", "105", "13.2 (±0.1)", "Carbone UHM / Monolithique", "1.9", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
+                                                { name: "80 HR", value: ["80 cm", "135mm", "16mm (+-0.1mm)", `Carbone HR / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "2x M8x45mm Torx 40"] },
+                                                { name: "80 HM", value: ["80 cm", "120mm", "15 (+-0.1mm)", `Carbone HM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 HM", value: ["85 cm", "120mm", "15 (+-0.1mm)", `Carbone HM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "75 UHM", value: ["75 cm", "100mm", "12.8 (±0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "80 UHM", value: ["80 cm", "115mm", "13.8 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 UHM", value: ["85 cm", "115mm", "13.5 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "2 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "80 UHM Skinny", value: ["80", "105mm", "13.2 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "1.9 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "85 UHM Skinny", value: ["85", "105mm", "13.2 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "2 kg", "0", "M8x45mm Torx 40"] },
+                                                { name: "95 UHM", value: ["95 cm", "115mm", "14.0 (+-0.1mm)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "2.05 kg", "0.5°", "M8x45mm Torx 40"] },
+                                                { name: "95 UHM RACE", value: ["95 cm", "120mm", "12.3 (+-0.1mm)", `Carbone UHM / ${locale === "fr" ? "Monolithique" : "Monolithic"}`, "", "2.5°", "M8x45mm Torx 40"] },
+                                                // { name: "75 UHM SKINNY", value: ["75 cm", "100", "12.8 (±0.1)", `Carbone UHM / ${locale === fr ? "Âme Corecell" : "Corecell core"}`, "1.5", "M8x45mm Torx 40 tête fraisée (mât/fuselage)\nM8x30mm Torx 45 tête bombée (mat/platine)"] },
                                             ]}
-                                            tableHead={["Longueur", "Corde minimum (mm)", "Epaisseur minimum (mm)", "Construction", "Poids (kg)", "Visserie"]}
+                                            tableHead={["Longueur", "corde", "esp", "Construction", "Poids (kg)", "Rake", "screw-size"]}
                                         />
                                         {/* 10th Table */}
 
@@ -447,19 +539,31 @@ const Page = () => {
                                         <Table
                                             title="Stabilisateur Ultra Glide"
                                             tableRow={[
-                                                { name: "Ultra glide 39", value: ["113", "390", "13.9", "39", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
-                                                { name: "Ultra glide 41", value: ["123", "410", "13.7", "41", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
-                                                { name: "Ultra glide 43", value: ["133", "430", "13.7", "43", "5", "HM Carbone / Âme HM Carbone", "0.1", "M6x12mm Torx 30 tête fraisée"] },
+                                                { name: "Ultra glide 43", value: ["133", "430", "13.7", "48.3(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 41", value: ["123", "410", "13.8", "46(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 39", value: ["113", "390", "13.9", "44(mm)", "4.5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
                                             ]}
                                             tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "Visserie"]}
                                         />
+
+                                        <Table
+                                            title="Stabilisateur U Curve"
+                                            tableRow={[
+                                                { name: "Ultra glide 43", value: ["133", "430", "13.7", "48.3(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 41", value: ["123", "410", "13.8", "46(mm)", "5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                                { name: "Ultra glide 39", value: ["113", "390", "13.9", "44(mm)", "4.5mm", `HM Carbone / ${locale === "fr" ? "Âme HM Carbone" : "HM Carbon Core"}`, "", "12mm Torx 30"] },
+                                            ]}
+                                            tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Construction", "Poids (kg)", "screw-size", "Compatibilité"]}
+                                        />
+
                                     </div>
                                 }
                                 {
                                     item.id === 2 && (
                                         <div className="mt-16 space-y-16">
+
                                             <Table
-                                                title="Caractéristiques planche AFS Advanced"
+                                                title="Dock Star"
                                                 tableRow={[
                                                     {
                                                         name: "Dock Star",
@@ -467,6 +571,47 @@ const Page = () => {
                                                     },
                                                 ]}
                                                 tableHead={["Longueur (cm)", "Largeur (cm)", "Épaisseur max (cm)", "Volume (litre)", "Construction", "Rail", "Poids (kg)"]}
+                                            />
+
+                                            <Table
+                                                title="Caractéristiques planche AFS Advanced"
+                                                tableRow={[
+                                                    {
+                                                        name: "",
+                                                        value: ["5.6", "20.5", "75L", "Carbone / Glass"]
+                                                    },
+                                                    {
+                                                        name: "",
+                                                        value: ["6’0", "22", "90L", "Carbone Or Glass"],
+                                                    },
+                                                    {
+                                                        name: "",
+                                                        value: ["6.3 ", "22.5", "100L", "Carbone Or Glass"],
+                                                    }
+                                                ]}
+                                                tableHead={["Longueur (in/cm)", "Largeur (cm)", "Volume (litre)", "Construction"]}
+                                            />
+                                            <Table
+                                                title="Fly One 2026"
+                                                tableRow={[
+                                                    {
+                                                        name: "Fly One S",
+                                                        value: [`5'8"`, "", "", "90L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                    },
+                                                    {
+                                                        name: "Fly One M",
+                                                        value: [`6'0"`, "", "", "105L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                    },
+                                                    {
+                                                        name: "Fly One L",
+                                                        value: [`6'2"`, "", "", "115L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                    },
+                                                    {
+                                                        name: "Fly One XL",
+                                                        value: [`6'4"`, "", "", "125L", `${locale === "fr" ? "Fiber de verre" : "Fiberglass"} / sandwitch PVC`, "Double US 250mm", "", "Insert / Pads"]
+                                                    },
+                                                ]}
+                                                tableHead={["Longueur", "Largeur (cm)", "Épaisseur max (cm)", "Volume (litre)", "Construction", "Rail", "Poids (kg)", ""]}
                                             />
                                         </div>
                                     )
@@ -524,12 +669,12 @@ const Page = () => {
                                             <Table
                                                 title="Aile Performer"
                                                 tableRow={[
-                                                    { name: "Performer 750", value: ["750", "750", "7.5", "118", "11.88", "HR Carbone / Âme corecell", "0.62", "25mm Fuselage Performer"] },
-                                                    { name: "Performer 950", value: ["950", "840", "7.4", "133.65", "12.28", "HR Carbone / Âme corecell", "0.62", "25mm Fuselage Performer"] },
-                                                    { name: "Performer 1250", value: ["1250", "950", "7.2", "165", "17.9", "HR Carbone / Âme corecell", "0.70", "25mm Fuselage Performer"] },
-                                                    { name: "Performer 1450", value: ["1450", "970", "6.5", "187", "19.1", "HR Carbone / Âme corecell", "0.92", "25mm Fuselage Performer"] },
-                                                    { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", "HR Carbone / Âme corecell", "1.02", "25mm Fuselage Performer"] },
-                                                    { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", "HR Carbone / Âme corecell", "1.2", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 750", value: ["750", "750", "7.5", "118", "11.88", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.62", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 950", value: ["950", "840", "7.4", "133.65", "12.28", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.62", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 1250", value: ["1250", "950", "7.2", "165", "17.9", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.70", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 1450", value: ["1450", "970", "6.5", "187", "19.1", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "0.92", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 1950", value: ["1950", "990", "5.9", "207", "19.4", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "1.02", "25mm Fuselage Performer"] },
+                                                    { name: "Performer 1900", value: ["1900", "1025", "5.7", "225", "21", `HR Carbone / ${locale === fr ? "Âme corecell" : "Corecell core"}`, "1.2", "25mm Fuselage Performer"] },
                                                 ]}
                                                 tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Épaisseur maximum (mm)", "Construction", "Poids (kg)", "Taille des vis"]}
                                             />
