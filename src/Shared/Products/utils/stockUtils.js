@@ -17,6 +17,7 @@ export const getStockStatusForLocation = (product, locationId) => {
 
     const locId = parseInt(locationId);
 
+
     // 1. Get stock level for location from meta_data
     // Meta keys are typically "wcmlim_stock_at_{id}" (sometimes with underscore prefix in DB, but API usually exposes it clean or as matches)
     // We check both "_wcmlim_stock_at_..." and "wcmlim_stock_at_..." just in case.
@@ -34,32 +35,23 @@ export const getStockStatusForLocation = (product, locationId) => {
     const stockQuantity = stockValue !== undefined && stockValue !== null && stockValue !== '' ? parseInt(stockValue) : 0;
 
     // 2. Check Backorders
-    // User mentioned backorder is also meta data. 
-    // We'll check for location specific backorder first, then global WCMLIM backorder, then standard WC backorder.
+    // Strict WCMLIM logic: Only check location specific backorder.
+    // Do NOT fallback to standard WC backorders (as per user request).
 
-    // Potential keys for backorder:
-    // "wcmlim_allow_backorder_at_{id}" (Confirmed by user)
-    // "_wcmlim_allow_backorder_at_{id}"
+    let backordersAllowed = false;
 
-    // Standard WC backorder values: 'yes', 'no', 'notify'
-    // WCMLIM values: 'Yes', 'No'
-
-    let backorderStatus = 'no'; // default
-
-    // Try location specific
     const backorderLocKey = `wcmlim_allow_backorder_at_${locId}`;
     let backorderMeta = findMeta(backorderLocKey) ?? findMeta(`_${backorderLocKey}`);
 
     if (backorderMeta) {
         // specific string 'Yes' or 'yes'
-        backorderStatus = (backorderMeta.toString().toLowerCase() === 'yes') ? 'yes' : 'no';
-    } else {
-        // Fallback to standard WooCommerce backorder status
-        // product.backorders might be directly on object or in meta
-        backorderStatus = product.backorders || findMeta('_backorders') || 'no';
+        const val = backorderMeta.toString().toLowerCase();
+        if (val === 'yes') {
+            backordersAllowed = true;
+        }
     }
-
-    const backordersAllowed = backorderStatus === 'yes' || backorderStatus === 'notify' || product.backorders_allowed === true;
+    // If "No" or missing, backordersAllowed remains false.
+    // No fallback to global settings.
 
     // 3. Determine "In Stock"
     // In stock if quantity > 0 OR backorders are allowed
