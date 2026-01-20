@@ -236,16 +236,22 @@
     "5th": "2 to 3 years warranty",
     "6th": "Worldwide delivery",
     "7th": "Tax refund available",
-    "about": "About Us",
+    "about": "ABOUT US",
     "accept": "I accept the privacy policy and terms of use",
     "client": "Service Client",
     "copy": "Foil and Co., All rights are reserved. ©2025",
     "email": "Enter your email address to subscribe to our newsletters",
+    "newsletterTitle": "Subscribe to our newsletter",
+    "newsletterDescription": "We will not send you spam, we will only inform you of a new product or event.",
     "li-1": "<item1><link1>Foil Configurator</link1></item1><item><link2>Best match stab</link2></item><item><link3>Comparator 3 stabs / front wing</link3></item><item><link4>Mast comparison</link4></item><item><link5>Board Construction</link5></item><item><link6>Equipment</link6></item><item><link7>Recovery</link7></item><item><link8>Foil Characteristics</link8></item><item><link9>Screw Size</link9></item>",
-    "li-2": "<item1><link1>Afs advance</link1></item1>\n      <item><link2>Made in france</link2></item>\n      <item><link3>Notice</link3></item>\n      <item><link4>Team</link4></item>\n      <item><link5>Join Us</link5></item>\n      <item><link6>Legal Notices</link6></item>\n      <item><link7>General terms and conditions of sale</link7></item>\n      <item><link8>Privacy Policy</link8></item>",
+    "li-2": "<item1><link1>Legal Notices</link1></item1>\n      <item><link2>General terms and conditions of sale</link2></item>\n      <item><link3>Privacy Policy</link3></item>",
     "li-3": " <item1><link1>Afs advance</link1></item1>\n      <item><link2>Made in france</link2></item>\n      <item><link3>Notice</link3></item>\n      <item><link4>Team</link4></item>\n      <item><link5>Join Us</link5></item>\n      <item><link6>Legal Notices</link6></item>",
     "tools": "Purchasing tools",
-    "Universe": "Universe"
+    "Universe": "Universe",
+    "social": "AFS",
+    "li-social": "<item1><link1>Instagram</link1></item1>\n      <item><link2>Facebook</link2></item>\n      <item><link3>YouTube</link3></item>\n      <item><link4>WhatsApp</link4></item>",
+    "mostSearched": "MOST SEARCHED",
+    "li-most-searched": "<item1><link1>WINGFOIL EQUIPMENT</link1></item1>\n      <item><link2>DOWNWIND EQUIPMENT</link2></item>\n      <item><link3>WINGFOIL PACK</link3></item>"
   },
   "Form": {
     "title": "Form"

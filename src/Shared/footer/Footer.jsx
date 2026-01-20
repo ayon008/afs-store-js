@@ -1,22 +1,18 @@
 'use client'
 import { useGSAP } from '@gsap/react';
 import { ChevronDown } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from "gsap"
 import { useTranslations } from 'next-intl';
-import { getWordPressBaseUrl } from '@/lib/url-utils';
 
 const Footer = () => {
     const [first, setFirst] = useState(false);
     const [second, setSecond] = useState(false);
     const [third, setThird] = useState(false);
-    const [fourth, setFourth] = useState(false);
     const contentRef = useRef(null);
     const contentRef2 = useRef(null);
     const contentRef3 = useRef(null);
-    const contentRef4 = useRef(null);
 
     // Initialize accordions: closed on mobile, open on desktop
     useEffect(() => {
@@ -27,19 +23,16 @@ const Footer = () => {
                     setFirst(false);
                     setSecond(false);
                     setThird(false);
-                    setFourth(false);
 
                     // Ensure content is visible on desktop
                     if (contentRef.current) contentRef.current.style.height = 'auto';
                     if (contentRef2.current) contentRef2.current.style.height = 'auto';
                     if (contentRef3.current) contentRef3.current.style.height = 'auto';
-                    if (contentRef4.current) contentRef4.current.style.height = 'auto';
                 } else {
                     // On mobile, ensure all accordions are closed (height: 0)
                     if (contentRef.current) contentRef.current.style.height = '0px';
                     if (contentRef2.current) contentRef2.current.style.height = '0px';
                     if (contentRef3.current) contentRef3.current.style.height = '0px';
-                    if (contentRef4.current) contentRef4.current.style.height = '0px';
                 }
             }
         };
@@ -142,34 +135,6 @@ const Footer = () => {
 
         return () => ctx.revert();
     }, { dependencies: [third] });
-
-    useGSAP(() => {
-        if (!contentRef4.current || !isMobile()) return;
-        const ctx = gsap.context(() => {
-            const element = contentRef4.current;
-            // On mobile, start with height 0 if closed
-            if (!fourth && element.style.height !== '0px') {
-                element.style.height = '0px';
-                return;
-            }
-            const targetHeight = fourth ? element.scrollHeight : 0;
-
-            gsap.to(element, {
-                height: targetHeight,
-                duration: 0.5,
-                ease: "power2.inOut",
-                onComplete: () => {
-                    if (fourth) {
-                        element.style.height = "auto";
-                    } else {
-                        element.style.height = "0px";
-                    }
-                }
-            });
-        }, contentRef4);
-
-        return () => ctx.revert();
-    }, { dependencies: [fourth] });
 
     const t = useTranslations("footer");
 
@@ -297,154 +262,111 @@ const Footer = () => {
             </div>
             {/* lower Section */}
             <div className='max-w-[1440px] mx-auto global-padding py-20 flex lg:flex-row flex-col justify-between items-start lg:gap-20 gap-10'>
-                <div className='max-w-[360px]'>
-                    <Image src={`${getWordPressBaseUrl()}/wp-content/uploads/2025/12/svgviewer-output-36.svg`} width={172} height={144} alt='Logo-Afs' className='mb-10' />
-                    <div className="news-letter max-w-[360px] w-full flex flex-col gap-4">
-                        <h3 className="text-[16px] font-bold leading-[1.1] text-[#404040]">
-                            {t("email")}
-                        </h3>
+                {/* Colonne gauche : Newsletter + AFS */}
+                <div className='lg:flex-[1.4] flex-1 flex flex-col gap-10'>
+                    <div className='max-w-[600px]'>
+                        <div className="news-letter max-w-[600px] w-full flex flex-col gap-4">
+                            <h3 className="text-[80px] font-bold leading-[0.9] tracking-tighter text-[#111] mb-5">
+                                {t("newsletterTitle")}
+                            </h3>
+                            <p className="text-[16px] text-[#111] leading-[1.5] font-normal mb-6">
+                                {t("newsletterDescription")}
+                            </p>
 
-                        <form className="flex flex-col gap-3 text-black">
-                            <div className="flex border border-[#111] rounded-[4px] relative">
-                                <label className="absolute text-[14px] bg-[#f0f0f0] text-[#999999] top-[-8.4px] left-[16px] font-semibold">
-                                    E-mail
-                                </label>
-                                <input
-                                    type="email"
-                                    placeholder="person@gmail.com"
-                                    className="w-full px-4 py-3 placeholder-[#999999] font-semibold outline-none rounded-[4px]"
-                                    required
-                                />
-                                <button
-                                    type="submit"
-                                    className="w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center cursor-pointer"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="23"
-                                        height="20"
-                                        viewBox="0 0 23 20"
-                                        fill="none"
+                            <form className="flex flex-col gap-3 text-black">
+                                <div className="flex border border-[#111] rounded-[4px] relative">
+                                    <label className="absolute text-[14px] bg-[#f0f0f0] text-[#999999] top-[-8.4px] left-[16px] font-semibold">
+                                        EMAIL
+                                    </label>
+                                    <input
+                                        type="email"
+                                        placeholder="person@email.com"
+                                        className="w-full px-4 py-3 placeholder-[#999999] font-semibold outline-none rounded-[4px]"
+                                        required
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center cursor-pointer"
                                     >
-                                        <path
-                                            d="M21.3286 9.9999L1.27141 9.9999M21.3286 9.9999L12.7326 18.5713M21.3286 9.9999L12.7326 1.42847"
-                                            stroke="#808080"
-                                            strokeWidth="1.5"
-                                            strokeLinecap="square"
-                                        ></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <span className='flex items-start gap-1 text-[#999] text-lg font-lg leading-[100%]'>
-                                <input type='checkbox' className='' />
-                                <label htmlFor="">{t("accept")}</label>
-                            </span>
-                        </form>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="23"
+                                            height="20"
+                                            viewBox="0 0 23 20"
+                                            fill="none"
+                                        >
+                                            <path
+                                                d="M21.3286 9.9999L1.27141 9.9999M21.3286 9.9999L12.7326 18.5713M21.3286 9.9999L12.7326 1.42847"
+                                                stroke="#808080"
+                                                strokeWidth="1.5"
+                                                strokeLinecap="square"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span className='flex items-start gap-1 text-[#999] text-lg font-lg leading-[100%]'>
+                                    <input type='checkbox' className='' />
+                                    <label htmlFor="">{t("accept")}</label>
+                                </span>
+                            </form>
+                        </div>
                     </div>
-                </div>
-                <div className='lg:flex-1 w-full grid lg:grid-cols-4 grid-cols-1 lg:gap-5 lg:border-none border rounded-sm overflow-hidden'>
+                    {/* Section AFS - Réseaux sociaux */}
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFirst(!first); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("Universe")}
-                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${first ? 'rotate-180' : ''}`} />
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setThird(!third); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-[18px] text-[#111] leading-[100%] uppercase mb-6'>{t("social")}
+                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${third ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            <li className='pt-5'>
-                                <Link href={``} className=''>Wingfoil</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Downwind</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Prone Foil</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Sup Foil</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Dockstart</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Parawing</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Wakefoil</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Windfoil</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Sup</Link>
-                            </li>
-                            <li>
-                                <Link href={''} className=''>Windsurf</Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setSecond(!second); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("client")}
-                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${second ? 'rotate-180' : ''}`} />
-                        </h3>
-                        <ul ref={contentRef2} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            {t.rich("li-1", {
-                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
-                                item: (chunks) => <li>{chunks}</li>,
+                        <ul ref={contentRef3} className='text-[16px] text-[#111] leading-[1.6] flex flex-col gap-2.5 lg:h-auto h-0 overflow-hidden font-normal'>
+                            {t.rich("li-social", {
+                                item1: (chunks) => <li className="pt-0 uppercase">{chunks}</li>,
+                                item: (chunks) => <li className="uppercase">{chunks}</li>,
 
-                                link1: (chunks) => <Link href="/foil-configurator">{chunks}</Link>,
-                                link2: (chunks) => <Link href="/best-match-stab">{chunks}</Link>,
-                                link3: (chunks) => <Link href="/comparator">{chunks}</Link>,
-                                link4: (chunks) => <Link href="/mast-comparison">{chunks}</Link>,
-                                link5: (chunks) => <Link href="/board-construction">{chunks}</Link>,
-                                link6: (chunks) => <Link href="/equipment">{chunks}</Link>,
-                                link7: (chunks) => <Link href="/recovery">{chunks}</Link>,
-                                link8: (chunks) => <Link href="/foil-characteristics">{chunks}</Link>,
-                                link9: (chunks) => <Link href="/screw-size">{chunks}</Link>
+                                link1: (chunks) => <Link href="https://www.instagram.com/afsfoils/" target="_blank" rel="noopener noreferrer">{chunks}</Link>,
+                                link2: (chunks) => <Link href="https://www.facebook.com/afsfoils/" target="_blank" rel="noopener noreferrer">{chunks}</Link>,
+                                link3: (chunks) => <Link href="https://www.youtube.com/channel/UCv-LqvRBRFQWBSJSeIZK_5g" target="_blank" rel="noopener noreferrer">{chunks}</Link>,
+                                link4: (chunks) => <Link href="https://www.whatsapp.com/channel/0029VaR5sep0Qeajo7HHEQ32" target="_blank" rel="noopener noreferrer">{chunks}</Link>
                             })}
                         </ul>
                     </div>
+                </div>
+                {/* Colonne droite : A PROPOS + LE PLUS RECHERCHE */}
+                <div className='flex-1 flex flex-col lg:gap-[60px] gap-10 lg:border-none border rounded-sm overflow-hidden'>
                     <div className='w-full lg:p-0 p-4 lg:border-none border-b'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setThird(!third); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("about")}
-                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${third ? 'rotate-180' : ''}`} />
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setSecond(!second); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-[18px] text-[#111] leading-[100%] uppercase mb-6'>{t("about")}
+                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${second ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef3} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
+                        <ul ref={contentRef2} className='text-[16px] text-[#111] leading-[1.6] flex flex-col gap-2.5 lg:h-auto h-0 overflow-hidden font-normal'>
                             {t.rich("li-2", {
-                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
-                                item: (chunks) => <li>{chunks}</li>,
+                                item1: (chunks) => <li className="pt-0 uppercase">{chunks}</li>,
+                                item: (chunks) => <li className="uppercase">{chunks}</li>,
 
-                                link1: (chunks) => <Link href="/afs-advance">{chunks}</Link>,
-                                link2: (chunks) => <Link href="/made-in-france">{chunks}</Link>,
-                                link3: (chunks) => <Link href="/notice">{chunks}</Link>,
-                                link4: (chunks) => <Link href="/team">{chunks}</Link>,
-                                link5: (chunks) => <Link href="/join-us">{chunks}</Link>,
-                                link6: (chunks) => <Link href="/legal-notices">{chunks}</Link>,
-                                link7: (chunks) => (
+                                link1: (chunks) => <Link href="/legal-notices">{chunks}</Link>,
+                                link2: (chunks) => (
                                     <Link href="/terms-and-conditions">{chunks}</Link>
                                 ),
-                                link8: (chunks) => <Link href="/privacy-policy">{chunks}</Link>
+                                link3: (chunks) => <Link href="/privacy-policy">{chunks}</Link>
                             })}
                         </ul>
                     </div>
                     <div className='w-full lg:p-0 p-4'>
-                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFourth(!fourth); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-base text-[#111] leading-[100%]'>{t("tools")}
-                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${fourth ? 'rotate-180' : ''}`} />
+                        <h3 onClick={() => { if (typeof window !== 'undefined' && window.innerWidth < 1024) setFirst(!first); }} className='flex items-center lg:cursor-default cursor-pointer font-bold text-[18px] text-[#111] leading-[100%] uppercase mb-6'>{t("mostSearched")}
+                            <ChevronDown className={`inline ml-auto duration-300 transition-all ease-out lg:hidden block ${first ? 'rotate-180' : ''}`} />
                         </h3>
-                        <ul ref={contentRef4} className='text-base text-[#111] leading-[120%] flex flex-col gap-3 lg:h-auto h-0 overflow-hidden'>
-                            {t.rich("li-3", {
-                                item1: (chunks) => <li className="pt-5">{chunks}</li>,
-                                item: (chunks) => <li>{chunks}</li>,
+                        <ul ref={contentRef} className='text-[16px] text-[#111] leading-[1.6] flex flex-col gap-2.5 lg:h-auto h-0 overflow-hidden font-normal'>
+                            {t.rich("li-most-searched", {
+                                item1: (chunks) => <li className="pt-0 uppercase">{chunks}</li>,
+                                item: (chunks) => <li className="uppercase">{chunks}</li>,
 
-                                link1: (chunks) => <Link href="/afs-advance">{chunks}</Link>,
-                                link2: (chunks) => <Link href="/made-in-france">{chunks}</Link>,
-                                link3: (chunks) => <Link href="/notice">{chunks}</Link>,
-                                link4: (chunks) => <Link href="/team">{chunks}</Link>,
-                                link5: (chunks) => <Link href="/join-us">{chunks}</Link>,
-                                link6: (chunks) => <Link href="/legal-notices">{chunks}</Link>
+                                link1: (chunks) => <Link href="">{chunks}</Link>,
+                                link2: (chunks) => <Link href="">{chunks}</Link>,
+                                link3: (chunks) => <Link href="">{chunks}</Link>
                             })}
                         </ul>
                     </div>
                 </div>
             </div>
             <div className='global-padding'>
-                <p className='text-base font-semibold pt-4 pb-5 global-border-top text-[#111111bf] leading-[100%]'>{t("copy")}</p>
+                <p className='text-[14px] font-bold pt-6 pb-6 global-border-top text-[#111] leading-[1.5] text-left'>{t("copy")}</p>
             </div>
         </footer>
     );
