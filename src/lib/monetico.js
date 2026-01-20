@@ -103,29 +103,36 @@ class MoneticoPayment {
 
     /**
      * Create the MAC string from payment data
-     * Field order MUST match Monetico's expected format exactly
+     * Field order MUST match Monetico's expected format exactly (v3.0)
+     * According to Monetico documentation, the order is:
+     * TPE, date, montant, reference, texte-libre, version, lgue, societe, mail
+     * 
+     * IMPORTANT: url_retour, url_retour_err, url_retour_ok are NOT included in MAC calculation
      */
     createMacString(data) {
-        // This is the exact field order that Monetico expects for MAC calculation
+        // This is the exact field order that Monetico expects for MAC calculation (v3.0)
+        // Order: TPE, date, montant, reference, texte-libre, version, lgue, societe, mail
         const fields = [
             'TPE',
             'date',
-            'lgue',
-            'mail',
             'montant',
             'reference',
-            'societe',
             'texte-libre',
-            'url_retour',
-            'url_retour_err',
-            'url_retour_ok',
-            'version'
+            'version',
+            'lgue',
+            'societe',
+            'mail'
         ]
 
         let macString = ''
         fields.forEach(field => {
             if (data[field] !== undefined && data[field] !== null) {
-                macString += `${field}=${data[field]}*`
+                // For empty values, use double asterisk according to Monetico spec
+                const value = data[field] === '' ? '**' : data[field]
+                macString += `${field}=${value}*`
+            } else {
+                // If field is missing, use double asterisk
+                macString += `${field}=***`
             }
         })
 

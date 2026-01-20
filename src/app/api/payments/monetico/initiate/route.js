@@ -4,13 +4,22 @@ import MoneticoPayment from '@/lib/monetico';
 
 export async function POST(req) {
   try {
-    const { orderId, customerData, cartData } = await req.json();
+    const { orderId, customerData, cartData, paymentMethod } = await req.json();
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
-    const config = getMoneticoConfig(orderId);
+    // Detect payment type from payment_method
+    // If payment_method contains 'x4' or 'split', use split payment
+    // Otherwise, use immediate payment
+    const paymentType = (paymentMethod && (
+      paymentMethod.toLowerCase().includes('x4') || 
+      paymentMethod.toLowerCase().includes('split') ||
+      paymentMethod.toLowerCase().includes('fractionné')
+    )) ? 'split' : 'immediate';
+
+    const config = getMoneticoConfig(orderId, paymentType);
     validateMoneticoConfig(config);
 
     const monetico = new MoneticoPayment(config);

@@ -106,13 +106,17 @@ export default function CheckoutMonetico({
         }
       };
 
+      // Get payment method from customerData to determine payment type
+      const paymentMethod = customerData.payment_method || 'monetico';
+
       const paymentResponse = await fetch('/api/payments/monetico/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId,
           customerData: moneticoCustomerData,
-          cartData
+          cartData,
+          paymentMethod // Pass payment method to detect split vs immediate
         })
       })
 

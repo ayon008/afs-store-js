@@ -25,7 +25,31 @@ export async function POST(req) {
     logMoneticoResponse(responseData, 'Confirmation');
 
     const orderId = responseData.reference;
-    const config = getMoneticoConfig(orderId);
+    
+    // Detect payment type from TPE in response
+    // Compare with configured TPEs to determine if it's split or immediate
+    const receivedTpe = responseData.TPE;
+    const immediateTpe = process.env.MONETICO_TPE_IMMEDIATE || process.env.MONETICO_TPE;
+    const splitTpe = process.env.MONETICO_TPE_SPLIT;
+    
+    // Determine payment type based on TPE match
+    let paymentType = 'immediate'; // default
+    if (splitTpe && receivedTpe === splitTpe) {
+      paymentType = 'split';
+    } else if (immediateTpe && receivedTpe === immediateTpe) {
+      paymentType = 'immediate';
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Monetico Response: Detected payment type', {
+        receivedTpe,
+        immediateTpe,
+        splitTpe,
+        paymentType
+      });
+    }
+    
+    const config = getMoneticoConfig(orderId, paymentType);
     const monetico = new MoneticoPayment(config);
 
     // Verify MAC

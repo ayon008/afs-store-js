@@ -43,10 +43,18 @@ export default function CheckoutPayPal({ cartData, getCustomerData, onSuccess, d
                 body: JSON.stringify({ cartData, customerData }),
             });
 
+            // Check content type before parsing JSON
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error('Non-JSON response from /api/orders/create:', text);
+                throw new Error(`Server error: ${res.status} ${res.statusText}`);
+            }
+
             const responseData = await res.json();
 
             if (!res.ok) {
-                throw new Error(responseData.message || 'Failed to create order');
+                throw new Error(responseData.error || responseData.message || 'Failed to create order');
             }
 
             setWooOrderId(responseData.wooOrderId);
@@ -77,10 +85,18 @@ export default function CheckoutPayPal({ cartData, getCustomerData, onSuccess, d
                 }),
             });
 
+            // Check content type before parsing JSON
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error('Non-JSON response from /api/orders/capture:', text);
+                throw new Error(`Server error: ${res.status} ${res.statusText}`);
+            }
+
             const details = await res.json();
 
             if (!res.ok) {
-                throw new Error(details.message || 'Failed to capture payment');
+                throw new Error(details.error || details.message || 'Failed to capture payment');
             }
 
             setLoading(false);

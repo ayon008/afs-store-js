@@ -1194,38 +1194,83 @@ const CheckoutPageContent = () => {
 
         // Explicitly check if terms is true (checkbox is checked)
         if (currentTerms !== true) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('[Checkout] PayPal: Terms not accepted', {
+                    termsValue,
+                    watchFieldsTerms: watchFields.terms,
+                    currentTerms,
+                    type: typeof currentTerms,
+                    isTrue: currentTerms === true,
+                    isFalse: currentTerms === false
+                });
+            }
             return true;
         }
 
         // Check required billing fields
+        // Use surveyValue directly to ensure Controller updates are detected
+        // Use direct watch values to ensure they're detected even if watchFields is stale
+        // Use || operator to fallback to watchFields (handles both undefined and empty string)
+        const currentSurvey = surveyValue || watchFields.survey;
         const requiredFields = {
-            billing_first_name: watchFields.billing_first_name,
-            billing_last_name: watchFields.billing_last_name,
-            billing_country: watchFields.billing_country,
-            billing_address_1: watchFields.billing_address_1,
-            billing_city: watchFields.billing_city,
-            billing_postcode: watchFields.billing_postcode,
-            billing_email: watchFields.billing_email,
-            survey: watchFields.survey
+            billing_first_name: billingFirstName || watchFields.billing_first_name,
+            billing_last_name: billingLastName || watchFields.billing_last_name,
+            billing_country: billingCountry || watchFields.billing_country,
+            billing_address_1: billingAddress || watchFields.billing_address_1,
+            billing_city: billingCity || watchFields.billing_city,
+            billing_postcode: billingPostcode || watchFields.billing_postcode,
+            billing_email: billingEmail || watchFields.billing_email,
+            survey: currentSurvey
         };
 
         for (const [fieldName, fieldValue] of Object.entries(requiredFields)) {
             if (isEmpty(fieldValue)) {
+                // Debug: log which field is missing
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`[Checkout] PayPal: Field missing: ${fieldName}`, {
+                        value: fieldValue,
+                        type: typeof fieldValue,
+                        isNull: fieldValue === null,
+                        isUndefined: fieldValue === undefined,
+                        isEmptyString: fieldValue === '',
+                        directWatch: fieldName === 'billing_first_name' ? billingFirstName :
+                            fieldName === 'billing_last_name' ? billingLastName :
+                                fieldName === 'billing_email' ? billingEmail :
+                                    fieldName === 'billing_country' ? billingCountry :
+                                        fieldName === 'billing_address_1' ? billingAddress :
+                                            fieldName === 'billing_city' ? billingCity :
+                                                fieldName === 'billing_postcode' ? billingPostcode : null,
+                        watchFieldsSnapshot: {
+                            billing_first_name: watchFields.billing_first_name,
+                            billing_last_name: watchFields.billing_last_name,
+                            billing_email: watchFields.billing_email
+                        }
+                    });
+                }
                 return true;
             }
         }
 
         // Validate email format
-        if (watchFields.billing_email) {
+        // Use the same email value that was checked in requiredFields
+        const emailToValidate = billingEmail || watchFields.billing_email;
+        if (emailToValidate) {
             const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-            if (!emailRegex.test(watchFields.billing_email.trim())) {
+            if (!emailRegex.test(String(emailToValidate).trim())) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] PayPal: Invalid email format', { emailToValidate });
+                }
                 return true;
             }
         }
 
         // Check if "Autre" is selected but survey_other is empty
-        if (watchFields.survey === "other") {
+        const currentSurveyValue = surveyValue || watchFields.survey;
+        if (currentSurveyValue === "other") {
             if (isEmpty(watchFields.survey_other)) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] PayPal: Survey "other" selected but survey_other is empty');
+                }
                 return true;
             }
         }
@@ -1243,6 +1288,12 @@ const CheckoutPageContent = () => {
 
             for (const [fieldName, fieldValue] of Object.entries(shippingFields)) {
                 if (isEmpty(fieldValue)) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log(`[Checkout] PayPal: Shipping field missing: ${fieldName}`, {
+                            value: fieldValue,
+                            shippingAddress
+                        });
+                    }
                     return true;
                 }
             }
@@ -1251,33 +1302,60 @@ const CheckoutPageContent = () => {
         // Check if shipping method is selected (only if shipping rates are available)
         if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
             if (!selectedRateId) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Checkout] PayPal: Shipping method not selected', {
+                        allShippingRatesLength: allShippingRates.length,
+                        selectedRateId
+                    });
+                }
                 return true;
             }
+        }
+
+        // All validations passed - PayPal should be enabled
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[Checkout] PayPal: All validations passed, button should be ENABLED', {
+                terms: currentTerms,
+                billingEmail: emailToValidate,
+                survey: currentSurveyValue,
+                selectedRateId,
+                shippingAddress
+            });
         }
 
         return false;
     }, [
         termsValue,
-        watchFields.terms,
-        watchFields.billing_first_name,
-        watchFields.billing_last_name,
-        watchFields.billing_country,
-        watchFields.billing_address_1,
-        watchFields.billing_city,
-        watchFields.billing_postcode,
-        watchFields.billing_email,
-        watchFields.survey,
-        watchFields.survey_other,
-        watchFields.shipping_first_name,
-        watchFields.shipping_last_name,
-        watchFields.shipping_country,
-        watchFields.shipping_address_1,
-        watchFields.shipping_city,
-        watchFields.shipping_postcode,
+        billingFirstName,
+        billingLastName,
+        billingCountry,
+        billingAddress,
+        billingCity,
+        billingPostcode,
+        billingEmail,
+        surveyValue,
+        watchFields, // Use entire watchFields object to ensure all changes are detected
         shippingAddress,
         allShippingRates,
         selectedRateId
     ]);
+
+    // Debug: Log PayPal disabled state changes
+    useEffect(() => {
+        console.log('[Checkout] PayPal disabled state:', isPayPalDisabled, {
+            termsValue,
+            billingEmail,
+            billingFirstName,
+            billingLastName,
+            billingCountry,
+            billingAddress,
+            billingCity,
+            billingPostcode,
+            surveyValue,
+            selectedRateId,
+            allShippingRatesLength: allShippingRates?.length || 0
+        });
+    }, [isPayPalDisabled, termsValue, billingEmail, billingFirstName, billingLastName, billingCountry, billingAddress, billingCity, billingPostcode, surveyValue, selectedRateId, allShippingRates]);
 
     // Check if Place Order button should be disabled (same validation as PayPal)
     const isPlaceOrderDisabled = useMemo(() => {
