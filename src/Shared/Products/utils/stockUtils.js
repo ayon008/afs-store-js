@@ -5,7 +5,7 @@ export const WAREHOUSES = {
 
 /**
  * Determines stock status for a specific location based on WCMLIM meta data.
- * 
+ *
  * @param {Object} product - The product or variation object
  * @param {number|string} locationId - The location ID (2682 for EU, 2683 for US)
  * @returns {Object} status - { isInStock, stockQuantity, backordersAllowed, message }
@@ -66,7 +66,7 @@ export const getStockStatusForLocation = (product, locationId) => {
 
 /**
  * Gets the display message for the stock status based on location rules.
- * 
+ *
  * @param {Object} product - The product or variation object
  * @param {number|string} locationId - The location ID
  * @returns {string|null} - The message to display or null
