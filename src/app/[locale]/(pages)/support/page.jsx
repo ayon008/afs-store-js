@@ -1,52 +1,95 @@
-import Head from "next/head";
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import RankMathHead from "@/Shared/SEO/RankMathHead";
+import { getRankMathHead } from "@/lib/rankmath-head";
+import { generateHreflangAlternates, mergeRankMathMetadata } from "@/lib/seo-utils";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://afs-foiling.com';
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const isEnglish = locale === 'en';
+  const supportPath = '/support';
+  const currentUrl = isEnglish ? `${BASE_URL}${supportPath}` : `${BASE_URL}/fr${supportPath}`;
+
+  // Base metadata (fallback if Rank Math is unavailable)
+  const baseMetadata = {
+    title: isEnglish ? "AFS Support" : "Support AFS",
+    description: isEnglish
+      ? "AFS Support – Contact our team for any technical issues, guidance, or assistance with your AFS products."
+      : "Support AFS – Contactez notre équipe pour toute question technique, conseil ou assistance concernant vos produits AFS.",
+    keywords: "AFS, support, foiling, help, SAV, assistance",
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: currentUrl,
+      languages: generateHreflangAlternates(supportPath),
+    },
+    openGraph: {
+      type: "website",
+      title: isEnglish ? "AFS Support" : "Support AFS",
+      description: isEnglish
+        ? "Reach out to AFS Support for technical help, product assistance, and expert guidance."
+        : "Contactez le support AFS pour toute aide technique, assistance produit et conseils d'experts.",
+      url: currentUrl,
+      siteName: "AFS",
+      locale: isEnglish ? 'en_US' : 'fr_FR',
+      alternateLocale: isEnglish ? 'fr_FR' : 'en_US',
+      images: [
+        {
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`,
+          alt: "AFS Support",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: isEnglish ? "AFS Support" : "Support AFS",
+      description: isEnglish
+        ? "Need help with your AFS gear? We're here for you."
+        : "Besoin d'aide avec votre équipement AFS ? Nous sommes là pour vous.",
+      images: [`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`],
+    },
+  };
+
+  // Fetch Rank Math metadata for support page
+  let rankMathData = null;
+  try {
+    const wpSupportPath = locale === 'fr' ? '/fr/support/' : '/support/';
+    rankMathData = await getRankMathHead(wpSupportPath, locale);
+  } catch (error) {
+    console.error('[Support SEO] Error fetching Rank Math data:', error);
+  }
+
+  // Merge Rank Math metadata with base metadata
+  if (rankMathData) {
+    return mergeRankMathMetadata(baseMetadata, rankMathData, {
+      languages: generateHreflangAlternates(supportPath),
+    });
+  }
+
+  return baseMetadata;
+}
 
 export default async function AfsSupport() {
   const t = await getTranslations("support");
+  const locale = await getLocale();
+
+  // Fetch Rank Math data for JSON-LD injection
+  let rankMathData = null;
+  try {
+    const wpSupportPath = locale === 'fr' ? '/fr/support/' : '/support/';
+    rankMathData = await getRankMathHead(wpSupportPath, locale);
+  } catch (error) {
+    console.error('[Support SEO] Error fetching Rank Math data for JSON-LD:', error);
+  }
 
   return (
     <>
-      <Head>
-        <title>{t("title")}</title>
-
-        {/* Basic SEO */}
-        <meta
-          name="description"
-          content="AFS Support – Contact our team for any technical issues, guidance, or assistance with your AFS products."
-        />
-        <meta name="robots" content="index, follow" />
-        <meta
-          name="keywords"
-          content="AFS, support, foiling, help, SAV, assistance"
-        />
-
-        {/* OG / Social Preview */}
-        <meta property="og:title" content="AFS Support" />
-        <meta
-          property="og:description"
-          content="Reach out to AFS Support for technical help, product assistance, and expert guidance."
-        />
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:image"
-          content={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}
-        />
-
-        {/* Twitter Preview */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AFS Support" />
-        <meta
-          name="twitter:description"
-          content="Need help with your AFS gear? We're here for you."
-        />
-        <meta
-          name="twitter:image"
-          content={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}
-        />
-      </Head>
+      {rankMathData && <RankMathHead data={rankMathData} />}
       <div className="bg-[#F0F0F0] min-h-[calc(100vh - 80px)] global-margin pb-[40px]">
         <Image
           src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2024/03/imgs.png`}

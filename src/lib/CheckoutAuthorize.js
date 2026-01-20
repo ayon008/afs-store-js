@@ -13,14 +13,14 @@ import SavedPaymentMethods from './AuthorizeNet/SavedPaymentMethods'
  *
  * @param {Object} props
  * @param {Object} props.cartData - Cart data with lineItems and shippingLines
- * @param {Object} props.customerData - Customer billing/shipping data
+ * @param {Function} props.getCustomerData - Callback to get current customer billing/shipping data
  * @param {Function} props.onSuccess - Callback on successful payment
  * @param {Function} props.onError - Callback on payment error
  * @param {boolean} props.disabled - Disable payment button
  */
 export default function CheckoutAuthorize({
   cartData,
-  customerData,
+  getCustomerData,
   onSuccess,
   onError,
   disabled = false,
@@ -39,10 +39,11 @@ export default function CheckoutAuthorize({
   const paymentFormRef = useRef(null)
   const [opaqueData, setOpaqueData] = useState(null)
 
-  // Get customer email for saved cards
-  const customerEmail = customerData.billing_email ||
-    customerData.billing?.email ||
-    customerData.email
+  // Get customer email for saved cards (get current value)
+  const currentCustomerData = getCustomerData ? getCustomerData() : {};
+  const customerEmail = currentCustomerData.billing_email ||
+    currentCustomerData.billing?.email ||
+    currentCustomerData.email
 
   /**
    * Handle payment method selection from saved cards
@@ -84,6 +85,9 @@ export default function CheckoutAuthorize({
    */
   const processPayment = async () => {
     if (disabled) return
+
+    // Get current form values at payment time
+    const customerData = getCustomerData ? getCustomerData() : {};
 
     // Validate terms acceptance
     if (!customerData.terms) {
@@ -127,7 +131,7 @@ export default function CheckoutAuthorize({
         billing_state: customerData.billing_state || customerData.billing?.state || '',
         billing_postcode: customerData.billing_postcode || customerData.billing?.postcode || '',
         billing_phone: customerData.billing_phone || customerData.billing?.phone || '',
-        billing_email: customerEmail,
+        billing_email: customerData.billing_email || customerData.billing?.email || customerData.email,
         shipping_first_name: customerData.shipping_first_name || customerData.shipping?.first_name || customerData.billing_first_name || customerData.billing?.first_name || '',
         shipping_last_name: customerData.shipping_last_name || customerData.shipping?.last_name || customerData.billing_last_name || customerData.billing?.last_name || '',
         shipping_company: customerData.shipping_company || customerData.shipping?.company || customerData.billing_company || customerData.billing?.company || '',

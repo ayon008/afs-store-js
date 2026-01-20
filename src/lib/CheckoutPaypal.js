@@ -4,8 +4,8 @@ import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Props: cartData, customerData (from checkout form state), disabled, setOrderProcessing, syncCartToAPI
-export default function CheckoutPayPal({ cartData, customerData, onSuccess, disabled = false, setOrderProcessing, syncCartToAPI }) {
+// Props: cartData, getCustomerData (callback to get checkout form state), disabled, setOrderProcessing, syncCartToAPI
+export default function CheckoutPayPal({ cartData, getCustomerData, onSuccess, disabled = false, setOrderProcessing, syncCartToAPI }) {
     const router = useRouter();
     const [wooOrderId, setWooOrderId] = useState(null);
     const [error, setError] = useState(null);
@@ -24,6 +24,9 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
         setLoading(true);
         // Show full-screen overlay
         if (setOrderProcessing) setOrderProcessing(true);
+
+        // Get current form values at payment time
+        const customerData = getCustomerData ? getCustomerData() : {};
 
         try {
             // Sync localStorage cart to WooCommerce API first

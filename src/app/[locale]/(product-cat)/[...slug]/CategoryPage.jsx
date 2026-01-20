@@ -10,6 +10,9 @@ import { getTranslatedCategoryPath, getCategoryRoutePrefix } from '@/lib/product
 import CustomerService from '@/Shared/Home/CustomerService';
 import BlogSlide from '@/Shared/Products/BlogSlide';
 import { getPosts } from '@/lib/wp';
+import RankMathHead from '@/Shared/SEO/RankMathHead';
+import { getRankMathHead, getCategoryPermalink } from '@/lib/rankmath-head';
+import { mergeRankMathMetadata } from '@/lib/seo-utils';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://afs-foiling.com';
 
@@ -65,7 +68,8 @@ export async function generateCategoryMetadata(slug) {
             ? `Explore our ${title} collection. Premium foiling equipment Made In France.`
             : `Découvrez notre collection ${title}. Équipement de foil premium Made In France.`);
 
-    return {
+    // Base metadata (fallback if Rank Math is unavailable)
+    const baseMetadata = {
         title: `${title} - AFS`,
         description,
         alternates: {
@@ -85,7 +89,33 @@ export async function generateCategoryMetadata(slug) {
                 alt: title,
             }] : [],
         },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${title} - AFS`,
+            description,
+            images: category.image?.src ? [category.image.src] : [],
+        },
     };
+
+    // Fetch Rank Math metadata if category ID is available
+    let rankMathData = null;
+    if (category.id) {
+        try {
+            const wpPermalink = await getCategoryPermalink(category.id, locale);
+            if (wpPermalink) {
+                rankMathData = await getRankMathHead(wpPermalink, locale);
+            }
+        } catch (error) {
+            console.error('[Category SEO] Error fetching Rank Math data:', error);
+        }
+    }
+
+    // Merge Rank Math metadata with base metadata
+    if (rankMathData) {
+        return mergeRankMathMetadata(baseMetadata, rankMathData, { languages });
+    }
+
+    return baseMetadata;
 }
 
 export default async function CategoryPage({ slug }) {
@@ -157,9 +187,22 @@ export default async function CategoryPage({ slug }) {
 
     console.log(blogs);
 
+    // Fetch Rank Math data for JSON-LD injection
+    let rankMathData = null;
+    if (category?.id) {
+        try {
+            const wpPermalink = await getCategoryPermalink(category.id, locale);
+            if (wpPermalink) {
+                rankMathData = await getRankMathHead(wpPermalink, locale);
+            }
+        } catch (error) {
+            console.error('[Category SEO] Error fetching Rank Math data for JSON-LD:', error);
+        }
+    }
 
     return (
         <div className='global-margin'>
+            {rankMathData && <RankMathHead data={rankMathData} />}
             <div className='global-margin'>
                 <div className='lg:h-[75vh] h-[50vh] max-h-[540px] lg:max-h-[720px] w-full relative mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] bg-no-repeat bg-cover bg-center'
                     style={{ backgroundImage: `url(${image})` }}

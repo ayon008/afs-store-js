@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 export default function CheckoutMonetico({
   cartData,
-  customerData,
+  getCustomerData,
   onSuccess,
   onError,
   disabled = false,
@@ -16,6 +16,14 @@ export default function CheckoutMonetico({
 
   const initiatePayment = async () => {
     if (disabled) return
+
+    // Get current form values at payment time
+    const customerData = getCustomerData ? getCustomerData() : {};
+
+    // Debug: Log customerData to trace form values
+    console.log('[Monetico] getCustomerData returned:', customerData);
+    console.log('[Monetico] billing_email:', customerData.billing_email);
+    console.log('[Monetico] billing?.email:', customerData.billing?.email);
 
     // Check if terms are accepted
     if (!customerData.terms) {
@@ -180,15 +188,14 @@ export default function CheckoutMonetico({
           <p className="text-sm">{error}</p>
         </div>
       )}
-      
+
       <button
         onClick={initiatePayment}
         disabled={disabled || loading}
-        className={`w-full py-3 px-4 rounded font-medium transition-colors ${
-          disabled || loading
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 text-white'
-        }`}
+        className={`w-full py-3 px-4 rounded font-medium transition-colors ${disabled || loading
+          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
       >
         {loading ? (
           <div className="flex items-center justify-center">

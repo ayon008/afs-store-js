@@ -8,7 +8,7 @@ import { WAREHOUSES } from "@/lib/countries-config";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import Notification from "@/Shared/Notification/Notification";
@@ -54,7 +54,7 @@ const saveLocalStorageCart = (cart) => {
 // Save coupons to localStorage cart
 const saveCouponsToLocalStorage = (coupons, discount, cart = null) => {
     let localCart = getLocalStorageCart();
-    
+
     // If cart doesn't exist but we have a cart object passed, use it
     if (!localCart && cart && cart.items && cart.items.length > 0) {
         // Create a minimal cart structure from the current cart
@@ -63,7 +63,7 @@ const saveCouponsToLocalStorage = (coupons, discount, cart = null) => {
             currency: cart.metadata?.currency || cart.totals?.currency_code || 'EUR',
             location: cart.metadata?.location || '2682'
         };
-        
+
         localCart = {
             items: cart.items.map(item => ({
                 id: item.id,
@@ -80,24 +80,24 @@ const saveCouponsToLocalStorage = (coupons, discount, cart = null) => {
         };
 
     }
-    
+
     if (localCart) {
         const couponsToSave = coupons || [];
         const discountToSave = discount || 0;
-        
+
         localCart.coupons = couponsToSave;
         localCart.couponDiscount = discountToSave;
-        
+
         try {
             saveLocalStorageCart(localCart);
-            
+
             // Verify it was saved
             const verifyCart = getLocalStorageCart();
             const savedCoupons = verifyCart?.coupons || [];
             const savedDiscount = verifyCart?.couponDiscount || 0;
-            
 
-            
+
+
             return true;
         } catch (error) {
             console.error('[Checkout] Error saving coupons to localStorage:', error);
@@ -136,7 +136,7 @@ const CheckoutPageContent = () => {
     const handleShow = event => {
         const isChecked = event.target.checked;
         setShippingAddress(isChecked);
-        
+
         // If unchecking, reset shipping fields to billing values
         if (!isChecked) {
             setValue('shipping_first_name', watchFields.billing_first_name || '');
@@ -167,6 +167,7 @@ const CheckoutPageContent = () => {
         reset,
         trigger,
         setValue,
+        getValues,
         control,
         formState: { errors }
     } = useForm({
@@ -214,10 +215,10 @@ const CheckoutPageContent = () => {
 
         // Get selected country from cookie (from "Choose your location")
         const selectedCountryFromCookie = getCookie('selected_country');
-        
+
         // Build form values object, merging both billing and shipping addresses
         const formValues = {};
-        
+
         // Add billing address if available
         if (cartBillingAddress) {
             formValues.billing_first_name = cartBillingAddress.first_name || '';
@@ -235,7 +236,7 @@ const CheckoutPageContent = () => {
             // If no cart billing address, pre-fill country from cookie
             formValues.billing_country = selectedCountryFromCookie;
         }
-        
+
         // Initialize shipping address with billing address by default
         // Only use cart shipping address if it's different from billing
         if (cartBillingAddress) {
@@ -252,7 +253,7 @@ const CheckoutPageContent = () => {
             // If no cart billing address, pre-fill shipping country from cookie
             formValues.shipping_country = selectedCountryFromCookie;
         }
-        
+
         // Only reset if we have at least one address or a country to pre-fill
         if (Object.keys(formValues).length > 0) {
             reset(formValues);
@@ -264,18 +265,20 @@ const CheckoutPageContent = () => {
     // We only sync to WooCommerce API when the order is submitted
     // Shipping rates are calculated via a separate API call based on country selection
 
-    const watchFields = watch();
+    // Use useWatch for proper form value subscription in production
+    // Unlike watch(), useWatch subscribes to form changes and triggers re-renders
+    const watchFields = useWatch({ control });
     // Also watch survey and terms separately to ensure they're tracked
-    const surveyValue = watch("survey");
-    const termsValue = watch("terms");
+    const surveyValue = useWatch({ control, name: "survey" });
+    const termsValue = useWatch({ control, name: "terms" });
     // Watch billing fields directly to ensure they're detected
-    const billingFirstName = watch("billing_first_name");
-    const billingLastName = watch("billing_last_name");
-    const billingEmail = watch("billing_email");
-    const billingCountry = watch("billing_country");
-    const billingAddress = watch("billing_address_1");
-    const billingCity = watch("billing_city");
-    const billingPostcode = watch("billing_postcode");
+    const billingFirstName = useWatch({ control, name: "billing_first_name" });
+    const billingLastName = useWatch({ control, name: "billing_last_name" });
+    const billingEmail = useWatch({ control, name: "billing_email" });
+    const billingCountry = useWatch({ control, name: "billing_country" });
+    const billingAddress = useWatch({ control, name: "billing_address_1" });
+    const billingCity = useWatch({ control, name: "billing_city" });
+    const billingPostcode = useWatch({ control, name: "billing_postcode" });
 
     // Get error message only if field has been touched or form has been submitted
     const getFieldError = (fieldName) => {
@@ -342,23 +345,23 @@ const CheckoutPageContent = () => {
         // Get currency from cart
         const currencySymbol = cart?.totals?.currency_symbol || '';
         const currencyCode = cart?.totals?.currency_code || '';
-        
+
         // Determine currency type - more comprehensive detection
-        const isUSD = currencySymbol === '$' || 
-                     currencySymbol === 'USD' ||
-                     currencySymbol?.toUpperCase() === 'USD' ||
-                     currencyCode?.toUpperCase() === 'USD' ||
-                     currencyCode === 'USD';
-        const isEUR = currencySymbol === '€' || 
-                     currencySymbol === 'EUR' ||
-                     currencySymbol?.toUpperCase() === 'EUR' ||
-                     currencyCode?.toUpperCase() === 'EUR' ||
-                     currencyCode === 'EUR';
-        const isGBP = currencySymbol === '£' || 
-                     currencySymbol === 'GBP' ||
-                     currencySymbol?.toUpperCase() === 'GBP' ||
-                     currencyCode?.toUpperCase() === 'GBP' ||
-                     currencyCode === 'GBP';
+        const isUSD = currencySymbol === '$' ||
+            currencySymbol === 'USD' ||
+            currencySymbol?.toUpperCase() === 'USD' ||
+            currencyCode?.toUpperCase() === 'USD' ||
+            currencyCode === 'USD';
+        const isEUR = currencySymbol === '€' ||
+            currencySymbol === 'EUR' ||
+            currencySymbol?.toUpperCase() === 'EUR' ||
+            currencyCode?.toUpperCase() === 'EUR' ||
+            currencyCode === 'EUR';
+        const isGBP = currencySymbol === '£' ||
+            currencySymbol === 'GBP' ||
+            currencySymbol?.toUpperCase() === 'GBP' ||
+            currencyCode?.toUpperCase() === 'GBP' ||
+            currencyCode === 'GBP';
 
         // Filter methods based on currency
         const filtered = methods.filter(method => {
@@ -366,25 +369,25 @@ const CheckoutPageContent = () => {
             if (!method || typeof method !== 'object') {
                 return false;
             }
-            
+
             // Only include enabled methods
             if (method.enabled !== true) {
                 return false;
             }
-            
+
             const methodId = method.id?.toLowerCase() || '';
             const methodTitle = method.title?.toLowerCase() || '';
 
             // USD: Only Authorize.Net - Check this FIRST before excluding generic credit cards
             if (isUSD) {
-                const isAuthorize = methodId === 'authnet' || 
-                                   methodId === 'authorize_net' ||
-                                   methodId === 'authorize-net' ||
-                                   methodId.includes('authnet') ||
-                                   methodId.includes('authorize') || 
-                                   methodTitle.includes('authorize') ||
-                                   methodTitle.includes('authorize.net') ||
-                                   methodTitle.includes('authorize net');
+                const isAuthorize = methodId === 'authnet' ||
+                    methodId === 'authorize_net' ||
+                    methodId === 'authorize-net' ||
+                    methodId.includes('authnet') ||
+                    methodId.includes('authorize') ||
+                    methodTitle.includes('authorize') ||
+                    methodTitle.includes('authorize.net') ||
+                    methodTitle.includes('authorize net');
                 if (isAuthorize) {
                     return true;
                 } else {
@@ -447,16 +450,16 @@ const CheckoutPageContent = () => {
                 return true;
             }
             // Include Authorize
-            if (methodId === 'authnet' || 
+            if (methodId === 'authnet' ||
                 methodId.includes('authnet') ||
-                methodId.includes('authorize') || 
+                methodId.includes('authorize') ||
                 methodTitle.includes('authorize')) {
                 return true;
             }
 
             return false;
         });
-        
+
         return filtered;
     };
 
@@ -466,7 +469,7 @@ const CheckoutPageContent = () => {
     const getPaymentMethodTranslation = (method) => {
         const methodId = method.id?.toLowerCase() || '';
         const methodTitle = method.title?.toLowerCase() || '';
-        
+
         // Check for Authorize
         if (methodId.includes('authorize') || methodTitle.includes('authorize')) {
             return {
@@ -474,7 +477,7 @@ const CheckoutPageContent = () => {
                 description: t("paymentMethods.authorizeDescription") || t("paymentMethods.cardDescription")
             };
         }
-        
+
         // Check for PayPal
         if (methodId === 'paypal' || methodId === 'ppcp-gateway' || methodTitle.includes('paypal')) {
             return {
@@ -482,7 +485,7 @@ const CheckoutPageContent = () => {
                 description: t("paymentMethods.paypalDescription")
             };
         }
-        
+
         // Check for Monetico variants (2x, 3x, 4x)
         if (methodId.includes('monetico') || methodTitle.includes('carte bancaire')) {
             // Check for specific variants first
@@ -510,7 +513,7 @@ const CheckoutPageContent = () => {
                 description: t("paymentMethods.cardDescription")
             };
         }
-        
+
         // Check for Bank Transfer
         if (methodId === 'bacs' || methodTitle.includes('virement bancaire') || methodTitle.includes('virement')) {
             return {
@@ -518,7 +521,7 @@ const CheckoutPageContent = () => {
                 description: t("paymentMethods.bankTransferDescription")
             };
         }
-        
+
         // Default fallback
         return {
             title: method.title,
@@ -866,7 +869,7 @@ const CheckoutPageContent = () => {
 
                 // Wait a bit for cart to be ready
                 await new Promise(resolve => setTimeout(resolve, 500));
-                
+
                 // Reapply each coupon sequentially
                 for (const couponCode of savedCouponCodes) {
                     try {
@@ -931,7 +934,7 @@ const CheckoutPageContent = () => {
                 const localCoupons = loadCouponsFromLocalStorage();
                 let finalCoupons = [];
                 let finalDiscount = 0;
-                
+
                 if (apiCart.coupons && Array.isArray(apiCart.coupons) && apiCart.coupons.length > 0) {
                     // API has coupons - use them
                     finalCoupons = apiCart.coupons;
@@ -940,17 +943,17 @@ const CheckoutPageContent = () => {
                     // API doesn't have coupons, but localStorage does - preserve them
                     finalCoupons = localCoupons.coupons;
                 }
-                
+
                 // Update both state and ref
                 appliedCouponsRef.current = finalCoupons;
                 setAppliedCoupons(finalCoupons);
-                
+
                 if (apiCart.totals?.total_discount) {
                     finalDiscount = parseFloat(apiCart.totals.total_discount) / 100;
                 } else if (localCoupons.discount > 0) {
                     finalDiscount = localCoupons.discount;
                 }
-                
+
                 setCouponDiscount(finalDiscount);
                 // Save to localStorage
                 saveCouponsToLocalStorage(finalCoupons, finalDiscount, cart);
@@ -1053,12 +1056,12 @@ const CheckoutPageContent = () => {
         if (!selectedRateId) {
             return 0;
         }
-        
+
         // If no rates available yet, return 0 (will recalculate when rates are loaded)
         if (allShippingRates.length === 0) {
             return 0;
         }
-        
+
         // selectedRateId is now in format "package_id:rate_id"
         // Note: rate_id can contain colons (e.g., "flat_rate:49"), so we need to split carefully
         const colonIndex = selectedRateId.indexOf(':');
@@ -1067,13 +1070,13 @@ const CheckoutPageContent = () => {
         }
         const packageId = selectedRateId.substring(0, colonIndex);
         const rateId = selectedRateId.substring(colonIndex + 1); // Everything after first colon
-        
+
         const selectedRate = allShippingRates.find(rate => {
             const rateMatches = rate.rate_id === rateId;
             const packageMatches = String(rate.package_id || 0) === String(packageId);
             return rateMatches && packageMatches;
         });
-        
+
         // If rate not found, return 0 (might be a timing issue, will recalculate)
         if (!selectedRate) {
             // Debug: log when rate is not found
@@ -1090,12 +1093,12 @@ const CheckoutPageContent = () => {
             });
             return 0;
         }
-        
+
         // Price and taxes are in cents, convert to decimal and add them
         const price = parseFloat(selectedRate.price || 0) / 100;
         const taxes = parseFloat(selectedRate.taxes || 0) / 100;
         const total = price + taxes;
-        
+
         // Debug: log successful calculation
         console.log('[Checkout] Shipping cost calculated:', {
             selectedRateId,
@@ -1104,7 +1107,7 @@ const CheckoutPageContent = () => {
             taxes,
             total
         });
-        
+
         return total;
     }, [selectedRateId, allShippingRates]);
 
@@ -1121,7 +1124,7 @@ const CheckoutPageContent = () => {
         if (allShippingRates.length === 1) {
             const singleRate = allShippingRates[0];
             if (!singleRate) return;
-            
+
             const singleRateValue = `${singleRate.package_id || 0}:${singleRate.rate_id}`;
             // Always force select the unique rate to ensure shipping cost is in total
             // Clear any user selection ref for unique method (auto-selected)
@@ -1148,7 +1151,7 @@ const CheckoutPageContent = () => {
             if (colonIndex !== -1) {
                 const packageId = userSelectedRateRef.current.substring(0, colonIndex);
                 const rateId = userSelectedRateRef.current.substring(colonIndex + 1);
-                const userSelected = allShippingRates.find(rate => 
+                const userSelected = allShippingRates.find(rate =>
                     rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
                 );
                 if (userSelected) {
@@ -1188,7 +1191,7 @@ const CheckoutPageContent = () => {
         // Use termsValue directly to ensure checkbox updates are detected
         // For checkboxes, React Hook Form returns true when checked, false when unchecked
         const currentTerms = termsValue !== undefined ? termsValue : (watchFields.terms !== undefined ? watchFields.terms : false);
-        
+
         // Explicitly check if terms is true (checkbox is checked)
         if (currentTerms !== true) {
             return true;
@@ -1289,7 +1292,7 @@ const CheckoutPageContent = () => {
         // Use termsValue directly to ensure checkbox updates are detected
         // For checkboxes, React Hook Form returns true when checked, false when unchecked
         const currentTerms = termsValue !== undefined ? termsValue : (watchFields.terms !== undefined ? watchFields.terms : false);
-        
+
         // Explicitly check if terms is true (checkbox is checked)
         if (currentTerms !== true) {
             if (process.env.NODE_ENV === 'development') {
@@ -1330,13 +1333,13 @@ const CheckoutPageContent = () => {
                         isNull: fieldValue === null,
                         isUndefined: fieldValue === undefined,
                         isEmptyString: fieldValue === '',
-                        directWatch: fieldName === 'billing_first_name' ? billingFirstName : 
-                                   fieldName === 'billing_last_name' ? billingLastName :
-                                   fieldName === 'billing_email' ? billingEmail :
-                                   fieldName === 'billing_country' ? billingCountry :
-                                   fieldName === 'billing_address_1' ? billingAddress :
-                                   fieldName === 'billing_city' ? billingCity :
-                                   fieldName === 'billing_postcode' ? billingPostcode : null,
+                        directWatch: fieldName === 'billing_first_name' ? billingFirstName :
+                            fieldName === 'billing_last_name' ? billingLastName :
+                                fieldName === 'billing_email' ? billingEmail :
+                                    fieldName === 'billing_country' ? billingCountry :
+                                        fieldName === 'billing_address_1' ? billingAddress :
+                                            fieldName === 'billing_city' ? billingCity :
+                                                fieldName === 'billing_postcode' ? billingPostcode : null,
                         watchFieldsSnapshot: {
                             billing_first_name: watchFields.billing_first_name,
                             billing_last_name: watchFields.billing_last_name,
@@ -1510,21 +1513,21 @@ const CheckoutPageContent = () => {
     // Fetch coupons on initial load if cart is already synced
     // Use a ref to track if we've already loaded coupons to avoid multiple loads
     const couponsLoadedRef = React.useRef(false);
-    
+
     useEffect(() => {
         // Only fetch if we have cart items and haven't loaded coupons yet
         if (cart?.items && cart.items.length > 0 && !couponsLoadedRef.current) {
             couponsLoadedRef.current = true; // Mark as loaded to prevent multiple loads
-            
+
             // First, try to load from localStorage
             const localCoupons = loadCouponsFromLocalStorage();
-            
+
             if (localCoupons.coupons.length > 0 || localCoupons.discount > 0) {
                 // Use localStorage coupons
                 appliedCouponsRef.current = localCoupons.coupons;
                 setAppliedCoupons(localCoupons.coupons);
                 setCouponDiscount(localCoupons.discount);
-                
+
                 // Also try to sync with WooCommerce in background (but don't overwrite if localStorage has coupons)
                 // This ensures WooCommerce is aware of the coupons
                 const syncWithWooCommerce = async () => {
@@ -1574,7 +1577,7 @@ const CheckoutPageContent = () => {
                 fetchCoupons();
             }
         }
-        
+
         // Reset loaded flag if cart is cleared
         if (!cart || !cart.items || cart.items.length === 0) {
             couponsLoadedRef.current = false;
@@ -1609,7 +1612,7 @@ const CheckoutPageContent = () => {
     // Use a ref to track the previous locale to detect actual changes
     const previousLocaleRef = React.useRef(null);
     const isInitialMount = React.useRef(true);
-    
+
     useEffect(() => {
         // Skip on initial mount - just store the current locale
         if (isInitialMount.current) {
@@ -1617,15 +1620,15 @@ const CheckoutPageContent = () => {
             previousLocaleRef.current = locale;
             return;
         }
-        
+
         // Only proceed if we have all required values
         if (!locale || !cart) {
             return;
         }
-        
+
         // Check if locale has actually changed from the previous value
         const localeChanged = previousLocaleRef.current !== null && previousLocaleRef.current !== locale;
-        
+
         // Only clear cart if locale actually changed and cart has items
         if (localeChanged && cart.items && cart.items.length > 0) {
             const clearCartForLocaleChange = async () => {
@@ -1645,7 +1648,7 @@ const CheckoutPageContent = () => {
 
             clearCartForLocaleChange();
         }
-        
+
         // Update previous locale after checking
         previousLocaleRef.current = locale;
     }, [locale, cart, handleClearCart, tCommon, loadCart]);
@@ -1663,7 +1666,7 @@ const CheckoutPageContent = () => {
         try {
             // First, check if we have coupons in localStorage (preserve them if API doesn't return them yet)
             const localCoupons = loadCouponsFromLocalStorage();
-            
+
             const cartResponse = await fetch('/api/cart', {
                 method: 'GET',
                 credentials: 'include',
@@ -1673,7 +1676,7 @@ const CheckoutPageContent = () => {
                 const apiCart = await cartResponse.json();
                 const apiCoupons = (apiCart.coupons && Array.isArray(apiCart.coupons)) ? apiCart.coupons : [];
                 const discount = apiCart.totals?.total_discount ? parseFloat(apiCart.totals.total_discount) / 100 : 0;
-                
+
                 // Use API coupons if available, otherwise preserve localStorage coupons
                 // This prevents losing coupons that were just applied but not yet returned by WooCommerce
                 let coupons = apiCoupons;
@@ -1681,20 +1684,20 @@ const CheckoutPageContent = () => {
                     // API doesn't have coupons yet, but we have them in localStorage - preserve them
                     coupons = localCoupons.coupons;
                 }
-                
+
                 // Use API discount if available, otherwise use localStorage discount
                 const finalDiscount = discount > 0 ? discount : (localCoupons.discount || 0);
-                
+
                 // Update state and ref
                 appliedCouponsRef.current = coupons;
                 setAppliedCoupons(coupons);
                 setCouponDiscount(finalDiscount);
-                
+
                 // Save to localStorage immediately with the final values (preserve coupons if API doesn't have them)
                 // Pass current cart context if localStorage cart doesn't exist
                 const saved = saveCouponsToLocalStorage(coupons, finalDiscount, cart);
 
-                
+
                 return { coupons, discount: finalDiscount };
             } else {
                 console.error('[Checkout] Failed to fetch cart:', cartResponse.status);
@@ -1702,7 +1705,7 @@ const CheckoutPageContent = () => {
         } catch (error) {
             console.error('Error fetching cart for coupons:', error);
         }
-        
+
         // If API call failed, return localStorage coupons as fallback
         const localCoupons = loadCouponsFromLocalStorage();
         return { coupons: localCoupons.coupons, discount: localCoupons.discount };
@@ -1731,11 +1734,11 @@ const CheckoutPageContent = () => {
 
             const couponCodeToApply = couponCode.trim();
             const result = await applyCoupon(couponCodeToApply);
-            
+
             if (result.success) {
                 setCouponSuccess(t("couponApplied") || "Coupon applied successfully!");
                 setCouponCode('');
-                
+
                 // Immediately save the coupon code to localStorage as a fallback
                 // This ensures the coupon is saved even if API doesn't return it immediately
                 const currentCoupons = appliedCouponsRef.current || [];
@@ -1752,30 +1755,30 @@ const CheckoutPageContent = () => {
                     // Save to localStorage immediately
                     saveCouponsToLocalStorage(newCoupons, couponDiscount, cart);
                 }
-                
+
                 // Wait longer for cookies to sync and WooCommerce to process the coupon
                 // WooCommerce needs time to update the cart session
                 await new Promise(resolve => setTimeout(resolve, 1500));
-                
+
                 // Fetch cart to get updated coupons and discount from WooCommerce
                 // This will update the discount amount and verify the coupon is applied
                 let couponResult = { coupons: [], discount: 0 };
                 let found = false;
-                
+
                 for (let attempt = 1; attempt <= 3; attempt++) {
                     couponResult = await fetchCartAndUpdateCoupons();
-                    
+
                     if (couponResult.coupons && couponResult.coupons.length > 0) {
                         found = true;
                         break;
                     }
-                    
+
                     if (attempt < 3) {
                         const delay = attempt * 500; // 500ms, 1000ms
                         await new Promise(resolve => setTimeout(resolve, delay));
                     }
                 }
-                
+
                 // Don't call update-billing here as it can trigger syncCartAndUpdateTaxes via useEffect
                 // The useEffect will handle tax recalculation when needed
             } else {
@@ -1797,7 +1800,7 @@ const CheckoutPageContent = () => {
 
         try {
             const result = await removeCoupon(couponCodeToRemove);
-            
+
             if (result.success) {
                 // Immediately remove from localStorage as well
                 const currentCoupons = appliedCouponsRef.current || [];
@@ -1811,15 +1814,15 @@ const CheckoutPageContent = () => {
                 // Save to localStorage immediately
                 saveCouponsToLocalStorage(updatedCoupons, 0, cart);
 
-                
+
                 // Wait a bit for cookies to sync
                 await new Promise(resolve => setTimeout(resolve, 500));
-                
+
                 // Fetch cart to get updated coupons and discount from WooCommerce
                 // This will verify the removal and update the discount
                 const couponResult = await fetchCartAndUpdateCoupons();
 
-                
+
                 // Don't call update-billing here as it can trigger syncCartAndUpdateTaxes via useEffect
                 // The useEffect will handle tax recalculation when needed
             } else {
@@ -1866,7 +1869,7 @@ const CheckoutPageContent = () => {
                 if (!syncResult.success) {
                     throw new Error(syncResult.error || 'Failed to sync cart');
                 }
-                
+
                 // Update coupons and discount from synced cart
                 if (syncResult.data) {
                     if (syncResult.data.coupons && Array.isArray(syncResult.data.coupons)) {
@@ -1889,7 +1892,7 @@ const CheckoutPageContent = () => {
                 }
                 const packageId = selectedRateId.substring(0, colonIndex);
                 const rateId = selectedRateId.substring(colonIndex + 1); // Everything after first colon
-                const selectedRate = allShippingRates.find(rate => 
+                const selectedRate = allShippingRates.find(rate =>
                     rate.rate_id === rateId && String(rate.package_id || 0) === String(packageId)
                 );
                 if (selectedRate) {
@@ -2112,6 +2115,8 @@ const CheckoutPageContent = () => {
                                 register={register}
                                 watchFields={watchFields}
                                 setValue={setValue}
+                                getValues={getValues}
+                                control={control}
                                 filteredPaymentMethods={filteredPaymentMethods}
                                 getPaymentMethodTranslation={getPaymentMethodTranslation}
                                 cart={cart}

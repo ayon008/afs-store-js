@@ -1,5 +1,5 @@
 import { Check, AlertCircle } from 'lucide-react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Input = ({
     label,
@@ -15,8 +15,8 @@ const Input = ({
     showValidation = false // New prop for showing validation icons
 }) => {
     // Track the actual input value internally for reliable validation feedback
-    // This fixes the production build issue where watchFields doesn't update properly
     const [internalValue, setInternalValue] = useState(value || '');
+    const inputRef = useRef(null);
 
     // Sync with external value prop when it changes (e.g., from form reset or initial load)
     useEffect(() => {
@@ -28,17 +28,40 @@ const Input = ({
     // Use internal value for validation display
     const showSuccess = internalValue && internalValue.length >= 2 && !error;
 
-    // Wrap the register's onChange to also update internal state
-    const wrappedRegister = register ? {
-        ...register,
-        onChange: (e) => {
-            setInternalValue(e.target.value);
-            // Call original onChange if it exists
-            if (register.onChange) {
-                register.onChange(e);
+    // Get register props - register() returns { onChange, onBlur, name, ref }
+    // When using Controller, register contains {onChange, onBlur, value, ref, name}
+    const registerProps = register || {};
+    const isControllerField = registerProps && typeof registerProps.onChange === 'function' && Object.prototype.hasOwnProperty.call(registerProps, 'value');
+    const { onChange: registerOnChange, onBlur: registerOnBlur, ref: registerRef, name: registerName, value: controllerValue, ...otherRegisterProps } = registerProps;
+    
+    // Use Controller value if available, otherwise use prop value
+    const actualValue = isControllerField ? (controllerValue !== undefined ? controllerValue : '') : (value !== undefined ? value : '');
+    
+    // Sync internal value with actual value
+    useEffect(() => {
+        if (actualValue !== undefined && actualValue !== null) {
+            setInternalValue(actualValue);
+        }
+    }, [actualValue]);
+    
+    // Handle input changes - combine React Hook Form's onChange with our internal state update
+    const handleChange = (e) => {
+        const newValue = e.target.value;
+        
+        // Call React Hook Form's onChange - Controller expects the value directly, register expects the event
+        if (registerOnChange) {
+            if (isControllerField) {
+                // Controller's onChange expects the value directly
+                registerOnChange(newValue);
+            } else {
+                // register's onChange expects the event
+                registerOnChange(e);
             }
         }
-    } : {};
+        
+        // Update our internal state for UI feedback
+        setInternalValue(newValue);
+    };
 
     return (
         <div>
@@ -58,10 +81,15 @@ const Input = ({
                 </label>
 
                 <input
-                    {...wrappedRegister}
+                    {...otherRegisterProps}
+                    ref={registerRef}
                     type={type}
                     id={id}
+                    name={registerName || id}
                     placeholder={placeholder}
+                    onChange={handleChange}
+                    onBlur={registerOnBlur}
+                    {...(isControllerField ? { value: actualValue } : { defaultValue: actualValue })}
                     className={`
                         border border-[#BFBFBF] rounded-[4px] w-full py-3 px-3
                         focus:outline-none focus:ring-2 focus:ring-[#1D98FF]/20 focus:border-[#1D98FF]
@@ -98,4 +126,3 @@ const Input = ({
 };
 
 export default Input;
-

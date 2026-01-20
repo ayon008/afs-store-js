@@ -1,10 +1,13 @@
 import { getPrice, getProductBySlug } from '@/app/actions/Woo-Coommerce/getWooCommerce';
 import NotFound from '@/Shared/NotFound/404';
 import SingleProduct from '@/Shared/Products/SingleProduct';
+import RankMathHead from '@/Shared/SEO/RankMathHead';
 import React from 'react';
 import { getLocale } from 'next-intl/server';
 import { getTranslatedProductSlug } from '@/lib/product-routes';
 import { getProductRoutePrefix } from '@/lib/product-routes';
+import { getRankMathHead, getProductPermalink } from '@/lib/rankmath-head';
+import { mergeRankMathMetadata } from '@/lib/seo-utils';
 import { redirect } from 'next/navigation';
 
 // Force dynamic rendering to ensure fresh data on each request (important for country-based VAT)
@@ -74,12 +77,13 @@ export async function generateMetadata({ params }) {
         'x-default': enUrl,
     };
 
+    // Base metadata (fallback if Rank Math is unavailable)
     const title = data.name || (isEnglish ? 'Product' : 'Produit');
     const description = data.short_description?.replace(/<[^>]*>/g, '') ||
                        data.description?.replace(/<[^>]*>/g, '').substring(0, 160) ||
                        '';
 
-    return {
+    const baseMetadata = {
         title: `${title} - AFS`,
         description,
         alternates: {
@@ -106,6 +110,26 @@ export async function generateMetadata({ params }) {
             images: data.images?.[0]?.src ? [data.images[0].src] : [],
         },
     };
+
+    // Fetch Rank Math metadata if product ID is available
+    let rankMathData = null;
+    if (data.id) {
+        try {
+            const wpPermalink = await getProductPermalink(data.id, locale);
+            if (wpPermalink) {
+                rankMathData = await getRankMathHead(wpPermalink, locale);
+            }
+        } catch (error) {
+            console.error('[Product SEO] Error fetching Rank Math data:', error);
+        }
+    }
+
+    // Merge Rank Math metadata with base metadata
+    if (rankMathData) {
+        return mergeRankMathMetadata(baseMetadata, rankMathData, { languages });
+    }
+
+    return baseMetadata;
 }
 
 const page = async ({ params }) => {
@@ -133,8 +157,22 @@ const page = async ({ params }) => {
         )
     }
 
+    // Fetch Rank Math data for JSON-LD injection
+    let rankMathData = null;
+    if (data.id) {
+        try {
+            const wpPermalink = await getProductPermalink(data.id, locale);
+            if (wpPermalink) {
+                rankMathData = await getRankMathHead(wpPermalink, locale);
+            }
+        } catch (error) {
+            console.error('[Product SEO] Error fetching Rank Math data for JSON-LD:', error);
+        }
+    }
+
     return (
         <div>
+            {rankMathData && <RankMathHead data={rankMathData} />}
             <SingleProduct data={data} variations={variations} />
         </div>
     );

@@ -1,37 +1,75 @@
 import BlogCard from "@/Shared/Card/BlogCard";
 import { getPosts } from "@/app/actions/getBlogs";
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import RankMathHead from "@/Shared/SEO/RankMathHead";
+import { getRankMathHead } from "@/lib/rankmath-head";
+import { mergeRankMathMetadata } from "@/lib/seo-utils";
+import { generateHreflangAlternates } from "@/lib/seo-utils";
 
-export const metadata = {
-    title: "Blog - Foiling Tips & Gear Reviews",
-    description:
-        "Discover foiling tips, industry information, tutorials, and expert gear reviews for riders of all experience levels.",
-    openGraph: {
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://afs-foiling.com';
+
+export async function generateMetadata() {
+    const locale = await getLocale();
+    const isEnglish = locale === 'en';
+    const blogPath = '/blog';
+    const currentUrl = isEnglish ? `${BASE_URL}${blogPath}` : `${BASE_URL}/fr${blogPath}`;
+
+    // Base metadata (fallback if Rank Math is unavailable)
+    const baseMetadata = {
         title: "Blog - Foiling Tips & Gear Reviews",
         description:
-            "Explore foiling tips, tutorials, and expert gear reviews for all riders.",
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/blog`,
-        siteName: "AFS Foiling",
-        images: [
-            {
-                url: "/images/blogs/paraglider.png",
-                width: 1200,
-                height: 630,
-                alt: "Foiling Tips & Blog Header",
-            },
-        ],
-        type: "website",
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Blog - Foiling Tips & Gear Reviews",
-        description:
-            "Discover foiling tips, tutorials, and expert gear reviews for riders of all levels.",
-        images: ["/images/blogs/paraglider.png"],
-    },
-};
+            "Discover foiling tips, industry information, tutorials, and expert gear reviews for riders of all experience levels.",
+        alternates: {
+            canonical: currentUrl,
+            languages: generateHreflangAlternates(blogPath),
+        },
+        openGraph: {
+            title: "Blog - Foiling Tips & Gear Reviews",
+            description:
+                "Explore foiling tips, tutorials, and expert gear reviews for all riders.",
+            url: currentUrl,
+            siteName: "AFS Foiling",
+            images: [
+                {
+                    url: "/images/blogs/paraglider.png",
+                    width: 1200,
+                    height: 630,
+                    alt: "Foiling Tips & Blog Header",
+                },
+            ],
+            type: "website",
+            locale: isEnglish ? 'en_US' : 'fr_FR',
+            alternateLocale: isEnglish ? 'fr_FR' : 'en_US',
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: "Blog - Foiling Tips & Gear Reviews",
+            description:
+                "Discover foiling tips, tutorials, and expert gear reviews for riders of all levels.",
+            images: ["/images/blogs/paraglider.png"],
+        },
+    };
+
+    // Fetch Rank Math metadata for blog archive page
+    let rankMathData = null;
+    try {
+        const wpBlogPath = locale === 'fr' ? '/fr/blog/' : '/blog/';
+        rankMathData = await getRankMathHead(wpBlogPath, locale);
+    } catch (error) {
+        console.error('[Blog SEO] Error fetching Rank Math data:', error);
+    }
+
+    // Merge Rank Math metadata with base metadata
+    if (rankMathData) {
+        return mergeRankMathMetadata(baseMetadata, rankMathData, {
+            languages: generateHreflangAlternates(blogPath),
+        });
+    }
+
+    return baseMetadata;
+}
 
 
 
@@ -66,8 +104,18 @@ export default async function BlogPage({ locale }) {
     }
     const t = await getTranslations("blog", locale);
 
+    // Fetch Rank Math data for JSON-LD injection
+    let rankMathData = null;
+    try {
+        const wpBlogPath = locale === 'fr' ? '/fr/blog/' : '/blog/';
+        rankMathData = await getRankMathHead(wpBlogPath, locale);
+    } catch (error) {
+        console.error('[Blog SEO] Error fetching Rank Math data for JSON-LD:', error);
+    }
+
     return (
         <div className="min-h-screen">
+            {rankMathData && <RankMathHead data={rankMathData} />}
             <div className="w-full mb-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)] relative max-h-[646px] h-[calc(100vh-139px)]">
                 <Image
                     src="/images/blogs/paraglider.png"

@@ -110,20 +110,27 @@ const BillingDetails = ({
                         value={watchFields.billing_postcode}
                         checkout={true}
                     />
-                    <Input
-                        label={t("email")}
-                        type="email"
-                        id="billing_email"
-                        register={register("billing_email", {
+                    <Controller
+                        name="billing_email"
+                        control={control}
+                        rules={{
                             required: t("required"),
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                 message: t("invalidEmail")
                             }
-                        })}
-                        error={getFieldError("billing_email")}
-                        value={watchFields.billing_email}
-                        checkout={true}
+                        }}
+                        render={({ field }) => (
+                            <Input
+                                label={t("email")}
+                                type="email"
+                                id="billing_email"
+                                register={field}
+                                error={getFieldError("billing_email")}
+                                value={field.value || ''}
+                                checkout={true}
+                            />
+                        )}
                     />
                     <Input
                         label={t("phone")}
