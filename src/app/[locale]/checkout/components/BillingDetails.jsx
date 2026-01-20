@@ -143,7 +143,14 @@ const BillingDetails = ({
                                 checkout={true}
                                 label={t("survey")}
                                 id='survey'
-                                register={field}
+                                register={{
+                                    ...field,
+                                    onChange: (e) => {
+                                        // Handle both event object and direct value
+                                        const value = e?.target?.value !== undefined ? e.target.value : e;
+                                        field.onChange(value);
+                                    }
+                                }}
                                 error={getFieldError("survey")}
                                 value={field.value}
                                 options={[

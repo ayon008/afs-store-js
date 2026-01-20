@@ -1,5 +1,5 @@
 import { Check, AlertCircle } from 'lucide-react';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const Input = ({
     label,
@@ -14,8 +14,31 @@ const Input = ({
     checkout = false,
     showValidation = false // New prop for showing validation icons
 }) => {
-    // value: the current value of the input, passed from parent via react-hook-form's watch
-    const showSuccess = value && value.length >= 2 && !error;
+    // Track the actual input value internally for reliable validation feedback
+    // This fixes the production build issue where watchFields doesn't update properly
+    const [internalValue, setInternalValue] = useState(value || '');
+
+    // Sync with external value prop when it changes (e.g., from form reset or initial load)
+    useEffect(() => {
+        if (value !== undefined && value !== null) {
+            setInternalValue(value);
+        }
+    }, [value]);
+
+    // Use internal value for validation display
+    const showSuccess = internalValue && internalValue.length >= 2 && !error;
+
+    // Wrap the register's onChange to also update internal state
+    const wrappedRegister = register ? {
+        ...register,
+        onChange: (e) => {
+            setInternalValue(e.target.value);
+            // Call original onChange if it exists
+            if (register.onChange) {
+                register.onChange(e);
+            }
+        }
+    } : {};
 
     return (
         <div>
@@ -35,7 +58,7 @@ const Input = ({
                 </label>
 
                 <input
-                    {...register}
+                    {...wrappedRegister}
                     type={type}
                     id={id}
                     placeholder={placeholder}
@@ -75,3 +98,4 @@ const Input = ({
 };
 
 export default Input;
+
