@@ -6,6 +6,8 @@ import Cookies from 'js-cookie';
 import { useTranslations } from 'next-intl';
 import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
 import { getStockStatusForLocation } from './utils/stockUtils';
+import { ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 
 // Import new sub-components
 import ProductHeader from './components/ProductHeader';
