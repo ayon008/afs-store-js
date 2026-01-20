@@ -7,19 +7,14 @@ import { useTranslations } from 'next-intl';
 import { recalculatePriceForCountry, WAREHOUSES, calculatePriceWithVat } from '@/lib/countries-config';
 import { getStockStatusForLocation } from './utils/stockUtils';
 import { ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
 
 // Import new sub-components
 import ProductHeader from './components/ProductHeader';
 import ProductForm from './components/ProductForm';
 import ProductPurchaseSection from './components/ProductPurchaseSection';
-import ProductInfo from './components/ProductInfo';
-import ExpertAdvice from './components/ExpertAdvice';
 import CompatibilityModal from './components/CompatibilityModal';
 import GradeModal from './components/GradeModal';
 import CalendlyModal from './components/CalendlyModal';
-import { getWordPressBaseUrl } from '@/lib/url-utils';
-import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 
 
