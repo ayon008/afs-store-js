@@ -96,6 +96,17 @@ const SideCart = ({ isOpen, onClose }) => {
         }
     }, { dependencies: [isOpen] });
 
+    const handleContinueToBasket = () => {
+        if (typeof window !== 'undefined') {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth',
+            });
+        }
+        onClose();
+    };
+
 
     return (
         isOpen &&
@@ -163,7 +174,7 @@ const SideCart = ({ isOpen, onClose }) => {
                             <span className='text-sm text-gray-500'>{t("taxCalculatedAtCheckout") || "Tax calculated at checkout"}</span>
                         )}
                     </div>
-                    <Link onClick={() => onClose()} href={'/cart'} className='cursor-pointer w-full'>
+                    <Link onClick={handleContinueToBasket} href={'/cart'} className='cursor-pointer w-full'>
                         <button disabled={cartItems?.length === 0} className={`w-full py-3 px-6 text-sm flex font-semibold uppercase leading-[100%] justify-center items-center gap-1 bg-[#1D98FF] rounded-lg text-white shadow-lg hover:bg-[#1585e0] transition-all ${cartItems?.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {t("continueToBasket")}
                             <ArrowUpRight className='w-4 h-4' />
