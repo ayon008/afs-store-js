@@ -1198,146 +1198,49 @@ const CheckoutPageContent = () => {
                 console.log('[Checkout] PayPal: Terms not accepted', {
                     termsValue,
                     watchFieldsTerms: watchFields.terms,
-                    currentTerms,
-                    type: typeof currentTerms,
-                    isTrue: currentTerms === true,
-                    isFalse: currentTerms === false
+                    currentTerms
                 });
             }
             return true;
         }
 
-        // Check required billing fields
-        // Use surveyValue directly to ensure Controller updates are detected
-        // Use direct watch values to ensure they're detected even if watchFields is stale
-        // Use || operator to fallback to watchFields (handles both undefined and empty string)
-        const currentSurvey = surveyValue || watchFields.survey;
-        const requiredFields = {
-            billing_first_name: billingFirstName || watchFields.billing_first_name,
-            billing_last_name: billingLastName || watchFields.billing_last_name,
-            billing_country: billingCountry || watchFields.billing_country,
-            billing_address_1: billingAddress || watchFields.billing_address_1,
-            billing_city: billingCity || watchFields.billing_city,
-            billing_postcode: billingPostcode || watchFields.billing_postcode,
-            billing_email: billingEmail || watchFields.billing_email,
-            survey: currentSurvey
-        };
-
-        for (const [fieldName, fieldValue] of Object.entries(requiredFields)) {
-            if (isEmpty(fieldValue)) {
-                // Debug: log which field is missing
-                if (process.env.NODE_ENV === 'development') {
-                    console.log(`[Checkout] PayPal: Field missing: ${fieldName}`, {
-                        value: fieldValue,
-                        type: typeof fieldValue,
-                        isNull: fieldValue === null,
-                        isUndefined: fieldValue === undefined,
-                        isEmptyString: fieldValue === '',
-                        directWatch: fieldName === 'billing_first_name' ? billingFirstName :
-                            fieldName === 'billing_last_name' ? billingLastName :
-                                fieldName === 'billing_email' ? billingEmail :
-                                    fieldName === 'billing_country' ? billingCountry :
-                                        fieldName === 'billing_address_1' ? billingAddress :
-                                            fieldName === 'billing_city' ? billingCity :
-                                                fieldName === 'billing_postcode' ? billingPostcode : null,
-                        watchFieldsSnapshot: {
-                            billing_first_name: watchFields.billing_first_name,
-                            billing_last_name: watchFields.billing_last_name,
-                            billing_email: watchFields.billing_email
-                        }
-                    });
-                }
-                return true;
+        // Only check email - other fields are not required for PayPal
+        const emailToValidate = billingEmail || watchFields.billing_email;
+        
+        // Check if email is empty
+        if (isEmpty(emailToValidate)) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('[Checkout] PayPal: Email is empty', {
+                    billingEmail,
+                    watchFieldsEmail: watchFields.billing_email
+                });
             }
+            return true;
         }
 
         // Validate email format
-        // Use the same email value that was checked in requiredFields
-        const emailToValidate = billingEmail || watchFields.billing_email;
-        if (emailToValidate) {
-            const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-            if (!emailRegex.test(String(emailToValidate).trim())) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('[Checkout] PayPal: Invalid email format', { emailToValidate });
-                }
-                return true;
+        const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+        if (!emailRegex.test(String(emailToValidate).trim())) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('[Checkout] PayPal: Invalid email format', { emailToValidate });
             }
-        }
-
-        // Check if "Autre" is selected but survey_other is empty
-        const currentSurveyValue = surveyValue || watchFields.survey;
-        if (currentSurveyValue === "other") {
-            if (isEmpty(watchFields.survey_other)) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('[Checkout] PayPal: Survey "other" selected but survey_other is empty');
-                }
-                return true;
-            }
-        }
-
-        // Check shipping address fields if shipping address is different
-        if (shippingAddress) {
-            const shippingFields = {
-                shipping_first_name: watchFields.shipping_first_name,
-                shipping_last_name: watchFields.shipping_last_name,
-                shipping_country: watchFields.shipping_country,
-                shipping_address_1: watchFields.shipping_address_1,
-                shipping_city: watchFields.shipping_city,
-                shipping_postcode: watchFields.shipping_postcode
-            };
-
-            for (const [fieldName, fieldValue] of Object.entries(shippingFields)) {
-                if (isEmpty(fieldValue)) {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log(`[Checkout] PayPal: Shipping field missing: ${fieldName}`, {
-                            value: fieldValue,
-                            shippingAddress
-                        });
-                    }
-                    return true;
-                }
-            }
-        }
-
-        // Check if shipping method is selected (only if shipping rates are available)
-        if (allShippingRates && Array.isArray(allShippingRates) && allShippingRates.length > 0) {
-            if (!selectedRateId) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('[Checkout] PayPal: Shipping method not selected', {
-                        allShippingRatesLength: allShippingRates.length,
-                        selectedRateId
-                    });
-                }
-                return true;
-            }
+            return true;
         }
 
         // All validations passed - PayPal should be enabled
         if (process.env.NODE_ENV === 'development') {
             console.log('[Checkout] PayPal: All validations passed, button should be ENABLED', {
                 terms: currentTerms,
-                billingEmail: emailToValidate,
-                survey: currentSurveyValue,
-                selectedRateId,
-                shippingAddress
+                billingEmail: emailToValidate
             });
         }
 
         return false;
     }, [
         termsValue,
-        billingFirstName,
-        billingLastName,
-        billingCountry,
-        billingAddress,
-        billingCity,
-        billingPostcode,
         billingEmail,
-        surveyValue,
-        watchFields, // Use entire watchFields object to ensure all changes are detected
-        shippingAddress,
-        allShippingRates,
-        selectedRateId
+        watchFields.terms,
+        watchFields.billing_email
     ]);
 
     // Debug: Log PayPal disabled state changes
@@ -1345,17 +1248,10 @@ const CheckoutPageContent = () => {
         console.log('[Checkout] PayPal disabled state:', isPayPalDisabled, {
             termsValue,
             billingEmail,
-            billingFirstName,
-            billingLastName,
-            billingCountry,
-            billingAddress,
-            billingCity,
-            billingPostcode,
-            surveyValue,
-            selectedRateId,
-            allShippingRatesLength: allShippingRates?.length || 0
+            watchFieldsTerms: watchFields.terms,
+            watchFieldsEmail: watchFields.billing_email
         });
-    }, [isPayPalDisabled, termsValue, billingEmail, billingFirstName, billingLastName, billingCountry, billingAddress, billingCity, billingPostcode, surveyValue, selectedRateId, allShippingRates]);
+    }, [isPayPalDisabled, termsValue, billingEmail, watchFields.terms, watchFields.billing_email]);
 
     // Check if Place Order button should be disabled (same validation as PayPal)
     const isPlaceOrderDisabled = useMemo(() => {

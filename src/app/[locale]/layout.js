@@ -71,7 +71,7 @@ export async function generateMetadata({ params }) {
   const isEnglish = locale === 'en';
   const title = isEnglish
     ? "The foiling spirit since 2009 - AFS"
-    : "L'esprit du foil depuis 2009 - AFS";
+    : "The Foiling Spirit Since 2009 - AFS";
   const description = isEnglish
     ? "Discover AFS products for all foiling disciplines: wing foil, surf foil, sup foil, windfoil. Made In France. Full Carbon"
     : "Découvrez les produits AFS pour toutes les disciplines du foil : wing foil, surf foil, sup foil, windfoil. Made In France. Full Carbon";
