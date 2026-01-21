@@ -132,6 +132,7 @@
       "paySecurely": "Payer en toute sécurité",
       "sslEncryption": "Chiffrement SSL 256 bits",
       "pciCompliant": "Conforme PCI",
+      "formDisabledMessage": "Veuillez accepter les conditions générales de vente pour activer le formulaire de paiement.",
       "validationErrors": {
         "invalidCardNumber": "Veuillez saisir un numéro de carte valide",
         "invalidMonth": "Mois invalide",
@@ -140,7 +141,12 @@
         "invalidCvv": "Veuillez saisir un CVV à {count} chiffres",
         "invalidCardName": "Veuillez saisir le nom du titulaire",
         "configNotLoaded": "Configuration de paiement non chargée. Veuillez actualiser la page.",
-        "systemNotLoaded": "Système de paiement non chargé. Veuillez patienter ou actualiser la page."
+        "systemNotLoaded": "Système de paiement non chargé. Veuillez patienter ou actualiser la page.",
+        "emailRequired": "L'adresse email est requise",
+        "cardFieldsRequired": "Veuillez remplir tous les champs de carte requis correctement.",
+        "formNotReady": "Formulaire de paiement non prêt. Veuillez actualiser la page.",
+        "paymentFailed": "Le paiement a échoué. Veuillez réessayer.",
+        "unknownError": "Une erreur est survenue lors du paiement"
       },
       "savedMethods": {
         "title": "Moyens de paiement enregistrés",

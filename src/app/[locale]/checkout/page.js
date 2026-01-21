@@ -539,30 +539,32 @@ const CheckoutPageContent = () => {
 
 
 
-    useEffect(() => {
-        const fetchPaymentMethods = async () => {
-            try {
-                const data = await getPaymentMethods();
-                if (Array.isArray(data)) {
-                    setPaymentMethods(data);
-                } else if (data && typeof data === 'object') {
-                    // If it's an object, try to convert to array
-                    const methodsArray = Object.values(data);
-                    if (Array.isArray(methodsArray)) {
-                        setPaymentMethods(methodsArray);
-                    } else {
-                        setPaymentMethods([]);
-                    }
+    // Function to reload payment methods (useful after payment errors)
+    const reloadPaymentMethods = useCallback(async () => {
+        try {
+            const data = await getPaymentMethods();
+            if (Array.isArray(data)) {
+                setPaymentMethods(data);
+            } else if (data && typeof data === 'object') {
+                // If it's an object, try to convert to array
+                const methodsArray = Object.values(data);
+                if (Array.isArray(methodsArray)) {
+                    setPaymentMethods(methodsArray);
                 } else {
                     setPaymentMethods([]);
                 }
-            } catch (error) {
-                console.error('Error fetching payment methods:', error);
+            } else {
                 setPaymentMethods([]);
             }
-        };
-        fetchPaymentMethods();
+        } catch (error) {
+            console.error('Error fetching payment methods:', error);
+            setPaymentMethods([]);
+        }
     }, []);
+
+    useEffect(() => {
+        reloadPaymentMethods();
+    }, [reloadPaymentMethods]);
 
     // State for shipping country details
     const [shippingCountryDetails, setShippingCountryDetails] = useState(null);
@@ -2105,6 +2107,8 @@ const CheckoutPageContent = () => {
                                 PAYMENT_INSTRUCTIONS={PAYMENT_INSTRUCTIONS}
                                 setOrderProcessing={setOrderProcessing}
                                 syncCartToAPI={syncCartToAPI}
+                                reloadPaymentMethods={reloadPaymentMethods}
+                                loadCart={loadCart}
                             />
                         </form>
                     </div>

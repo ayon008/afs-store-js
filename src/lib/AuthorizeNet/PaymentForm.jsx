@@ -162,6 +162,7 @@ const PaymentForm = forwardRef(function PaymentForm({
 
   // Validation state
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({}); // Track which fields have been touched
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Load Accept.js configuration
@@ -212,27 +213,34 @@ const PaymentForm = forwardRef(function PaymentForm({
     }
   };
 
-  // Validate form
-  const validateForm = useCallback(() => {
+  // Validate form - only show errors for touched fields
+  const validateForm = useCallback((showAllErrors = false) => {
     const newErrors = {};
     const cleanCardNumber = cardNumber.replace(/\s/g, '');
 
-    if (!cleanCardNumber || cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
-      newErrors.cardNumber = t("validationErrors.invalidCardNumber");
+    // Only validate and show errors for touched fields (or all if showAllErrors is true)
+    if (showAllErrors || touched.cardNumber) {
+      if (!cleanCardNumber || cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+        newErrors.cardNumber = t("validationErrors.invalidCardNumber");
+      }
     }
 
-    if (!expMonth || parseInt(expMonth) < 1 || parseInt(expMonth) > 12) {
-      newErrors.expMonth = t("validationErrors.invalidMonth");
+    if (showAllErrors || touched.expMonth) {
+      if (!expMonth || parseInt(expMonth) < 1 || parseInt(expMonth) > 12) {
+        newErrors.expMonth = t("validationErrors.invalidMonth");
+      }
     }
 
     const currentYear = new Date().getFullYear();
     const yearValue = parseInt(expYear);
-    if (!expYear || yearValue < currentYear || yearValue > currentYear + 20) {
-      newErrors.expYear = t("validationErrors.invalidYear");
+    if (showAllErrors || touched.expYear) {
+      if (!expYear || yearValue < currentYear || yearValue > currentYear + 20) {
+        newErrors.expYear = t("validationErrors.invalidYear");
+      }
     }
 
     // Check if card is expired
-    if (expMonth && expYear) {
+    if (expMonth && expYear && (showAllErrors || touched.expMonth || touched.expYear)) {
       const currentMonth = new Date().getMonth() + 1;
       if (yearValue === currentYear && parseInt(expMonth) < currentMonth) {
         newErrors.expMonth = t("validationErrors.cardExpired");
@@ -241,21 +249,26 @@ const PaymentForm = forwardRef(function PaymentForm({
 
     // CVV length depends on card type (AMEX = 4, others = 3)
     const cvvLength = cardType?.type === 'amex' ? 4 : 3;
-    if (!cvv || cvv.length < cvvLength) {
-      newErrors.cvv = t("validationErrors.invalidCvv", { count: cvvLength });
+    if (showAllErrors || touched.cvv) {
+      if (!cvv || cvv.length < cvvLength) {
+        newErrors.cvv = t("validationErrors.invalidCvv", { count: cvvLength });
+      }
     }
 
-    if (!cardName || cardName.trim().length < 2) {
-      newErrors.cardName = t("validationErrors.invalidCardName");
+    if (showAllErrors || touched.cardName) {
+      if (!cardName || cardName.trim().length < 2) {
+        newErrors.cardName = t("validationErrors.invalidCardName");
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [cardNumber, expMonth, expYear, cvv, cardName, cardType]);
+  }, [cardNumber, expMonth, expYear, cvv, cardName, cardType, touched, t]);
 
   // Handle tokenization with Accept.js
   const tokenizeCard = useCallback(() => {
-    if (!validateForm()) {
+    // Validate with all errors shown when submitting
+    if (!validateForm(true)) {
       return;
     }
 
@@ -349,6 +362,18 @@ const PaymentForm = forwardRef(function PaymentForm({
       )}
 
       <div className="space-y-4">
+        {/* Form disabled message */}
+        {isFormDisabled && !configLoading && !isProcessing && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span>{t("formDisabledMessage") || "Please accept the terms and conditions to enable the payment form."}</span>
+            </div>
+          </div>
+        )}
+
         {/* Config loading indicator */}
         {configLoading && (
           <div className="text-sm text-gray-500 flex items-center">
@@ -384,7 +409,11 @@ const PaymentForm = forwardRef(function PaymentForm({
               type="text"
               id="cardNumber"
               value={cardNumber}
-              onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+              onChange={(e) => {
+                setCardNumber(formatCardNumber(e.target.value));
+                setTouched(prev => ({ ...prev, cardNumber: true }));
+              }}
+              onBlur={() => setTouched(prev => ({ ...prev, cardNumber: true }))}
               placeholder="1234 5678 9012 3456"
               maxLength={19}
               disabled={isFormDisabled}
@@ -414,7 +443,11 @@ const PaymentForm = forwardRef(function PaymentForm({
             type="text"
             id="cardName"
             value={cardName}
-            onChange={(e) => setCardName(e.target.value)}
+            onChange={(e) => {
+              setCardName(e.target.value);
+              setTouched(prev => ({ ...prev, cardName: true }));
+            }}
+            onBlur={() => setTouched(prev => ({ ...prev, cardName: true }))}
             placeholder="John Doe"
             disabled={isFormDisabled}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
@@ -436,7 +469,11 @@ const PaymentForm = forwardRef(function PaymentForm({
             <select
               id="expMonth"
               value={expMonth}
-              onChange={(e) => setExpMonth(e.target.value)}
+              onChange={(e) => {
+                setExpMonth(e.target.value);
+                setTouched(prev => ({ ...prev, expMonth: true }));
+              }}
+              onBlur={() => setTouched(prev => ({ ...prev, expMonth: true }))}
               disabled={isFormDisabled}
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.expMonth ? 'border-red-500' : 'border-gray-300'
@@ -462,7 +499,11 @@ const PaymentForm = forwardRef(function PaymentForm({
             <select
               id="expYear"
               value={expYear}
-              onChange={(e) => setExpYear(e.target.value)}
+              onChange={(e) => {
+                setExpYear(e.target.value);
+                setTouched(prev => ({ ...prev, expYear: true }));
+              }}
+              onBlur={() => setTouched(prev => ({ ...prev, expYear: true }))}
               disabled={isFormDisabled}
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.expYear ? 'border-red-500' : 'border-gray-300'
@@ -489,7 +530,11 @@ const PaymentForm = forwardRef(function PaymentForm({
               type="text"
               id="cvv"
               value={cvv}
-              onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              onChange={(e) => {
+                setCvv(e.target.value.replace(/\D/g, '').slice(0, 4));
+                setTouched(prev => ({ ...prev, cvv: true }));
+              }}
+              onBlur={() => setTouched(prev => ({ ...prev, cvv: true }))}
               placeholder={cardType?.type === 'amex' ? '1234' : '123'}
               maxLength={4}
               disabled={isFormDisabled}

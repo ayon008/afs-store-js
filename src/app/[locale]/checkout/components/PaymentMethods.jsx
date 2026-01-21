@@ -26,7 +26,9 @@ const PaymentMethods = ({
     t,
     PAYMENT_INSTRUCTIONS,
     setOrderProcessing,
-    syncCartToAPI
+    syncCartToAPI,
+    reloadPaymentMethods,
+    loadCart
 }) => {
     // Helper function to get form values directly from DOM (bypasses React Compiler issues with getValues)
     // This is a workaround for React Compiler compatibility issues with React Hook Form
@@ -265,6 +267,16 @@ const PaymentMethods = ({
                                             clearCart();
                                             router.replace(`/order-success?order_id=${details.orderId}`);
                                         }}
+                                        onError={async (error) => {
+                                            // Reload cart and payment methods after error to update currency/location
+                                            console.log('[Authorize] Payment error, reloading cart and payment methods...');
+                                            if (loadCart) {
+                                                await loadCart();
+                                            }
+                                            if (reloadPaymentMethods) {
+                                                await reloadPaymentMethods();
+                                            }
+                                        }}
                                     />
                                 </div>
                             )}
@@ -323,6 +335,7 @@ const PaymentMethods = ({
                                             
                                             return {
                                                 ...values,
+                                                billing_email: domValues.billing_email || values.billing_email || '', // Add at root level for Authorize.Net
                                                 billing: {
                                                     first_name: domValues.billing_first_name || values.billing_first_name || '',
                                                     last_name: domValues.billing_last_name || values.billing_last_name || '',

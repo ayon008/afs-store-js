@@ -21,7 +21,9 @@ const PaymentErrorPage = () => {
             // Detect payment method from URL params or referrer
             const paymentMethod = searchParams.get('payment_method') || 
                                  (typeof window !== 'undefined' && window.location.search.includes('monetico') ? 'monetico' : null) ||
-                                 'monetico'; // Default to monetico since this is Monetico error page
+                                 (typeof window !== 'undefined' && window.location.search.includes('authnet') ? 'authnet' : null) ||
+                                 (typeof window !== 'undefined' && window.location.search.includes('authorize') ? 'authnet' : null) ||
+                                 null; // No default - let it be null if not specified
             
             // Update order status to failed when page loads
             // This ensures the order is marked as failed even if the webhook didn't fire

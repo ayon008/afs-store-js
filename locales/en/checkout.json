@@ -132,6 +132,7 @@
       "paySecurely": "Pay Securely",
       "sslEncryption": "256-bit SSL Encryption",
       "pciCompliant": "PCI Compliant",
+      "formDisabledMessage": "Please accept the terms and conditions to enable the payment form.",
       "validationErrors": {
         "invalidCardNumber": "Please enter a valid card number",
         "invalidMonth": "Invalid month",
@@ -140,7 +141,12 @@
         "invalidCvv": "Please enter {count}-digit CVV",
         "invalidCardName": "Please enter cardholder name",
         "configNotLoaded": "Payment configuration not loaded. Please refresh the page.",
-        "systemNotLoaded": "Payment system not loaded. Please wait or refresh the page."
+        "systemNotLoaded": "Payment system not loaded. Please wait or refresh the page.",
+        "emailRequired": "Email address is required",
+        "cardFieldsRequired": "Please fill in all required card fields correctly.",
+        "formNotReady": "Payment form not ready. Please refresh the page.",
+        "paymentFailed": "Payment failed. Please try again.",
+        "unknownError": "An error occurred during payment"
       },
       "savedMethods": {
         "title": "Saved Payment Methods",

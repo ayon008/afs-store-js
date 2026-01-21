@@ -76,7 +76,7 @@ export default function CheckoutAuthorize({
         billing_state: customerData.billing_state || customerData.billing?.state || '',
         billing_postcode: customerData.billing_postcode || customerData.billing?.postcode || '',
         billing_phone: customerData.billing_phone || customerData.billing?.phone || '',
-        billing_email: customerData.billing_email || customerData.billing?.email || customerData.email,
+        billing_email: customerData.billing?.email || customerData.billing_email || customerData.email || '',
         shipping_first_name: customerData.shipping_first_name || customerData.shipping?.first_name || customerData.billing_first_name || customerData.billing?.first_name || '',
         shipping_last_name: customerData.shipping_last_name || customerData.shipping?.last_name || customerData.billing_last_name || customerData.billing?.last_name || '',
         shipping_company: customerData.shipping_company || customerData.shipping?.company || customerData.billing_company || customerData.billing?.company || '',
@@ -92,7 +92,7 @@ export default function CheckoutAuthorize({
 
       // Validate required fields
       if (!orderData.billing_email) {
-        throw new Error('Email address is required')
+        throw new Error(t("validationErrors.emailRequired") || 'Email address is required')
       }
 
       if (!orderData.line_items || orderData.line_items.length === 0) {
@@ -124,7 +124,19 @@ export default function CheckoutAuthorize({
       const result = await response.json()
 
       if (!result.success) {
-        throw new Error(result.error || 'Payment failed')
+        // If order was created, redirect to payment error page
+        if (result.orderId) {
+          const localeValue = window.location.pathname.split('/')[1] || 'en'
+          const errorUrl = `/${localeValue}/checkout/payment-error?order_id=${result.orderId}&payment_method=authnet`
+          window.location.href = errorUrl
+          return
+        }
+        // Create error with orderId if available
+        const error = new Error(result.error || 'Payment failed')
+        if (result.orderId) {
+          error.orderId = result.orderId
+        }
+        throw error
       }
 
       // Payment successful
@@ -151,21 +163,52 @@ export default function CheckoutAuthorize({
 
     } catch (err) {
       console.error('Payment error:', err)
-      setError(err.message || 'An error occurred during payment')
+      
+      // Try to extract orderId from error response if available
+      let orderId = null
+      try {
+        // Check if error has orderId property (from API response)
+        if (err.orderId) {
+          orderId = err.orderId
+        }
+        // Try to parse error message if it contains order info
+        const errorStr = err.message || err.toString()
+        const orderIdMatch = errorStr.match(/order[_\s]?id[:\s]+(\d+)/i)
+        if (orderIdMatch) {
+          orderId = orderIdMatch[1]
+        }
+      } catch (parseErr) {
+        // Ignore parsing errors
+      }
+
+      // If order was created, redirect to payment error page
+      if (orderId) {
+        const localeValue = window.location.pathname.split('/')[1] || 'en'
+        const errorUrl = `/${localeValue}/checkout/payment-error?order_id=${orderId}&payment_method=authnet`
+        window.location.href = errorUrl
+        return
+      }
+
+      // Otherwise, display error in component
+      // Use translated error message
+      const errorMessage = err.message || t("validationErrors.unknownError") || 'An error occurred during payment'
+      setError(errorMessage)
       if (onError) onError(err)
       if (setOrderProcessing) setOrderProcessing(false)
       setLoading(false)
     }
-  }, [getCustomerData, cartData, syncCartToAPI, setOrderProcessing, onSuccess, onError])
+  }, [getCustomerData, cartData, syncCartToAPI, setOrderProcessing, onSuccess, onError, t])
 
   /**
    * Handle card tokenization error
    */
   const handleTokenizeError = useCallback((err) => {
-    setError(err.message || 'Failed to process card information')
+    // Use translated error message
+    const errorMessage = err.message || t("validationErrors.paymentFailed") || 'Failed to process card information'
+    setError(errorMessage)
     setLoading(false)
     if (setOrderProcessing) setOrderProcessing(false)
-  }, [setOrderProcessing])
+  }, [setOrderProcessing, t])
 
   /**
    * Handle payment button click - trigger tokenization
@@ -175,7 +218,7 @@ export default function CheckoutAuthorize({
 
     // Check if form is valid
     if (paymentFormRef.current && !paymentFormRef.current.isValid()) {
-      setError('Please fill in all required card fields correctly.')
+      setError(t("validationErrors.cardFieldsRequired") || 'Please fill in all required card fields correctly.')
       return
     }
 
@@ -187,7 +230,7 @@ export default function CheckoutAuthorize({
     if (paymentFormRef.current) {
       paymentFormRef.current.tokenize()
     } else {
-      setError('Payment form not ready. Please refresh the page.')
+      setError(t("validationErrors.formNotReady") || 'Payment form not ready. Please refresh the page.')
       setLoading(false)
     }
   }, [disabled, loading])
