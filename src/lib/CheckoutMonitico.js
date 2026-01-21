@@ -13,6 +13,7 @@ export default function CheckoutMonetico({
 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentOrderId, setCurrentOrderId] = useState(null)
 
   const initiatePayment = async () => {
     if (disabled) return
@@ -94,6 +95,9 @@ export default function CheckoutMonetico({
 
       const orderData = await orderResponse.json()
       const orderId = orderData.orderId
+      
+      // Store orderId for error handling
+      setCurrentOrderId(orderId)
 
       // Initialize Monetico payment
       // Ensure email is included in customerData for Monetico
@@ -122,6 +126,24 @@ export default function CheckoutMonetico({
 
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json()
+        
+        // Update order status to failed if payment initiation fails
+        if (orderId) {
+          try {
+            await fetch(`/api/orders/${orderId}/update-status`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                status: 'failed',
+                note: `Échec de l'initiation Monetico: ${errorData.error || 'Erreur inconnue'}`,
+                paymentMethod: paymentMethod
+              })
+            });
+          } catch (updateErr) {
+            console.error('Failed to update order status on Monetico initiation error:', updateErr);
+          }
+        }
+        
         throw new Error(errorData.error || 'Failed to initiate payment')
       }
 
@@ -139,6 +161,24 @@ export default function CheckoutMonetico({
     } catch (err) {
       console.error('Monetico payment error:', err)
       setError(err.message)
+      
+      // Update order status to failed if order was created
+      if (currentOrderId) {
+        try {
+          await fetch(`/api/orders/${currentOrderId}/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              status: 'failed',
+              note: `Erreur Monetico: ${err.message || 'Erreur inconnue'}`,
+              paymentMethod: customerData.payment_method || 'monetico'
+            })
+          });
+        } catch (updateErr) {
+          console.error('Failed to update order status on Monetico error:', updateErr);
+        }
+      }
+      
       if (onError) onError(err)
       if (setOrderProcessing) setOrderProcessing(false)
     } finally {

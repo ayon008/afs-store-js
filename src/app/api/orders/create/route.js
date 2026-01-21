@@ -200,14 +200,47 @@ export async function POST(req) {
     const wcOrderData = await wcResponse.json();
     const wooOrderId = wcOrderData.id;
 
-    // Create PayPal order
-    const paypalOrder = await createPayPalOrder(totalAmount, 'EUR');
+    try {
+      // Create PayPal order
+      const paypalOrder = await createPayPalOrder(totalAmount, 'EUR');
 
-    return NextResponse.json({
-      success: true,
-      wooOrderId: wooOrderId,
-      paypalOrderId: paypalOrder.id,
-    });
+      return NextResponse.json({
+        success: true,
+        wooOrderId: wooOrderId,
+        paypalOrderId: paypalOrder.id,
+      });
+    } catch (paypalError) {
+      // If WooCommerce order was created but PayPal order creation failed,
+      // update the WooCommerce order status to failed
+      console.error('PayPal order creation failed after WooCommerce order was created:', paypalError);
+      
+      if (wooOrderId) {
+        try {
+          const baseUrl = WP_BASE_URL.replace(/\/$/, '');
+          const apiUrl = `${baseUrl}/${localeValue}/wp-json/wc/v3/orders/${wooOrderId}`;
+          const url = new URL(apiUrl);
+          url.searchParams.set('consumer_key', WC_CONSUMER_KEY);
+          url.searchParams.set('consumer_secret', WC_CONSUMER_SECRET);
+
+          await fetch(url.toString(), {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeader(),
+            },
+            body: JSON.stringify({
+              status: 'failed',
+              customer_note: `Échec de la création de la commande PayPal: ${paypalError.message || 'Erreur inconnue'}`
+            }),
+            cache: 'no-store',
+          });
+        } catch (updateError) {
+          console.error('Failed to update order status after PayPal error:', updateError);
+        }
+      }
+
+      throw paypalError;
+    }
 
   } catch (error) {
     console.error('PayPal order creation error:', error);

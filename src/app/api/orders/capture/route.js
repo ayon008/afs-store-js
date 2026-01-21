@@ -88,6 +88,7 @@ async function updateWooCommerceOrder(orderId, updateData, localeValue) {
 
 export async function POST(req) {
   const localeValue = await getLocaleValue();
+  let requestData = null;
   
   try {
     // Validate environment variables
@@ -105,7 +106,8 @@ export async function POST(req) {
       }, { status: 500 });
     }
 
-    const { paypalOrderId, wooOrderId } = await req.json();
+    requestData = await req.json();
+    const { paypalOrderId, wooOrderId } = requestData;
 
     if (!paypalOrderId) {
       return NextResponse.json({
@@ -130,7 +132,10 @@ export async function POST(req) {
 
     if (!isSuccess) {
       // Update WooCommerce order to failed
-      await updateWooCommerceOrder(wooOrderId, { status: 'failed' }, localeValue);
+      await updateWooCommerceOrder(wooOrderId, { 
+        status: 'failed',
+        customer_note: `Paiement PayPal non complété. Statut: ${captureStatus}`
+      }, localeValue);
       
       return NextResponse.json({
         success: false,
@@ -177,6 +182,20 @@ export async function POST(req) {
 
   } catch (error) {
     console.error('PayPal capture error:', error);
+    
+    // If we have a wooOrderId from the request, try to update order status to failed
+    // Note: requestData is available in the outer scope
+    if (requestData?.wooOrderId) {
+      try {
+        await updateWooCommerceOrder(requestData.wooOrderId, { 
+          status: 'failed',
+          customer_note: `Erreur lors de la capture PayPal: ${error.message || 'Erreur inconnue'}`
+        }, localeValue);
+      } catch (updateError) {
+        console.error('Failed to update order status after PayPal capture error:', updateError);
+      }
+    }
+    
     return NextResponse.json({
       success: false,
       error: error.message || 'Erreur lors de la capture du paiement PayPal'

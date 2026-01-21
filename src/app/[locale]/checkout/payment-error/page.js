@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -11,13 +11,59 @@ const PaymentErrorPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const orderId = searchParams.get('order_id');
+    const [statusUpdated, setStatusUpdated] = useState(false);
 
     useEffect(() => {
         // Log error for debugging
         if (orderId) {
             console.log('Payment error for order:', orderId);
+            
+            // Detect payment method from URL params or referrer
+            const paymentMethod = searchParams.get('payment_method') || 
+                                 (typeof window !== 'undefined' && window.location.search.includes('monetico') ? 'monetico' : null) ||
+                                 'monetico'; // Default to monetico since this is Monetico error page
+            
+            // Update order status to failed when page loads
+            // This ensures the order is marked as failed even if the webhook didn't fire
+            const updateOrderStatus = async () => {
+                try {
+                    console.log(`[Payment Error] Updating order ${orderId} status to failed (payment method: ${paymentMethod})`);
+                    
+                    const response = await fetch(`/api/orders/${orderId}/update-status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: 'failed',
+                            note: 'Paiement échoué - redirection vers la page d\'erreur',
+                            paymentMethod: paymentMethod
+                        })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('[Payment Error] Order status updated to failed:', result);
+                        setStatusUpdated(true);
+                    } else {
+                        const errorText = await response.text();
+                        let errorData;
+                        try {
+                            errorData = JSON.parse(errorText);
+                        } catch {
+                            errorData = { error: errorText };
+                        }
+                        console.error('[Payment Error] Failed to update order status:', errorData);
+                    }
+                } catch (error) {
+                    console.error('[Payment Error] Error updating order status:', error);
+                }
+            };
+
+            // Only update if not already updated
+            if (!statusUpdated) {
+                updateOrderStatus();
+            }
         }
-    }, [orderId]);
+    }, [orderId, statusUpdated, searchParams]);
 
     return (
         <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white'>
