@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 export default function CheckoutMonetico({
   cartData,
-  customerData,
+  getCustomerData,
   onSuccess,
   onError,
   disabled = false,
@@ -13,9 +13,18 @@ export default function CheckoutMonetico({
 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentOrderId, setCurrentOrderId] = useState(null)
 
   const initiatePayment = async () => {
     if (disabled) return
+
+    // Get current form values at payment time
+    const customerData = getCustomerData ? getCustomerData() : {};
+
+    // Debug: Log customerData to trace form values
+    console.log('[Monetico] getCustomerData returned:', customerData);
+    console.log('[Monetico] billing_email:', customerData.billing_email);
+    console.log('[Monetico] billing?.email:', customerData.billing?.email);
 
     // Check if terms are accepted
     if (!customerData.terms) {
@@ -86,6 +95,9 @@ export default function CheckoutMonetico({
 
       const orderData = await orderResponse.json()
       const orderId = orderData.orderId
+      
+      // Store orderId for error handling
+      setCurrentOrderId(orderId)
 
       // Initialize Monetico payment
       // Ensure email is included in customerData for Monetico
@@ -98,18 +110,40 @@ export default function CheckoutMonetico({
         }
       };
 
+      // Get payment method from customerData to determine payment type
+      const paymentMethod = customerData.payment_method || 'monetico';
+
       const paymentResponse = await fetch('/api/payments/monetico/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId,
           customerData: moneticoCustomerData,
-          cartData
+          cartData,
+          paymentMethod // Pass payment method to detect split vs immediate
         })
       })
 
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json()
+        
+        // Update order status to failed if payment initiation fails
+        if (orderId) {
+          try {
+            await fetch(`/api/orders/${orderId}/update-status`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                status: 'failed',
+                note: `Échec de l'initiation Monetico: ${errorData.error || 'Erreur inconnue'}`,
+                paymentMethod: paymentMethod
+              })
+            });
+          } catch (updateErr) {
+            console.error('Failed to update order status on Monetico initiation error:', updateErr);
+          }
+        }
+        
         throw new Error(errorData.error || 'Failed to initiate payment')
       }
 
@@ -127,6 +161,24 @@ export default function CheckoutMonetico({
     } catch (err) {
       console.error('Monetico payment error:', err)
       setError(err.message)
+      
+      // Update order status to failed if order was created
+      if (currentOrderId) {
+        try {
+          await fetch(`/api/orders/${currentOrderId}/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              status: 'failed',
+              note: `Erreur Monetico: ${err.message || 'Erreur inconnue'}`,
+              paymentMethod: customerData.payment_method || 'monetico'
+            })
+          });
+        } catch (updateErr) {
+          console.error('Failed to update order status on Monetico error:', updateErr);
+        }
+      }
+      
       if (onError) onError(err)
       if (setOrderProcessing) setOrderProcessing(false)
     } finally {
@@ -180,15 +232,14 @@ export default function CheckoutMonetico({
           <p className="text-sm">{error}</p>
         </div>
       )}
-      
+
       <button
         onClick={initiatePayment}
         disabled={disabled || loading}
-        className={`w-full py-3 px-4 rounded font-medium transition-colors ${
-          disabled || loading
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 text-white'
-        }`}
+        className={`w-full py-3 px-4 rounded font-medium transition-colors ${disabled || loading
+          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
       >
         {loading ? (
           <div className="flex items-center justify-center">

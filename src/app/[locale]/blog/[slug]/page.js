@@ -8,6 +8,10 @@ import { getPosts } from '@/lib/wp';
 import { getTranslations } from 'next-intl/server';
 import NotFound from '@/Shared/NotFound/404';
 import { normalizeWordPressUrl } from '@/lib/url-utils';
+import RankMathHead from '@/Shared/SEO/RankMathHead';
+import { getRankMathHead, getPostPermalink } from '@/lib/rankmath-head';
+import { mergeRankMathMetadata } from '@/lib/seo-utils';
+import { generateHreflangAlternates } from '@/lib/seo-utils';
 export const revalidate = 60;
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://afs-foiling.com';
@@ -67,7 +71,8 @@ export async function generateMetadata({ params }) {
         'x-default': enUrl,
     };
 
-    return {
+    // Base metadata (fallback if Rank Math is unavailable)
+    const baseMetadata = {
         title: `${title} - AFS`,
         description,
         alternates: {
@@ -93,6 +98,24 @@ export async function generateMetadata({ params }) {
             images: featuredImage ? [featuredImage] : [],
         },
     };
+
+    // Fetch Rank Math metadata for blog post
+    let rankMathData = null;
+    try {
+        const wpPermalink = await getPostPermalink(slug, locale);
+        if (wpPermalink) {
+            rankMathData = await getRankMathHead(wpPermalink, locale);
+        }
+    } catch (error) {
+        console.error('[Blog Post SEO] Error fetching Rank Math data:', error);
+    }
+
+    // Merge Rank Math metadata with base metadata
+    if (rankMathData) {
+        return mergeRankMathMetadata(baseMetadata, rankMathData, { languages });
+    }
+
+    return baseMetadata;
 }
 
 export async function generateStaticParams() {
@@ -210,8 +233,20 @@ const page = async ({ params }) => {
         )
     }
 
+    // Fetch Rank Math data for JSON-LD injection
+    let rankMathData = null;
+    try {
+        const wpPermalink = await getPostPermalink(slug, locale);
+        if (wpPermalink) {
+            rankMathData = await getRankMathHead(wpPermalink, locale);
+        }
+    } catch (error) {
+        console.error('[Blog Post SEO] Error fetching Rank Math data for JSON-LD:', error);
+    }
+
     return (
         <div className='w-full relative'>
+            {rankMathData && <RankMathHead data={rankMathData} />}
             {/* HERO SECTION */}
             <div
                 style={

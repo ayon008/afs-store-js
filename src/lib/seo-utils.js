@@ -1,17 +1,22 @@
 /**
  * SEO Utilities for hreflang and metadata generation
+ * 
+ * Integrates with Rank Math WordPress plugin for SEO metadata.
  *
  * Usage in page.js:
  * import { generateHreflangAlternates, createPageMetadata } from '@/lib/seo-utils';
+ * import { getRankMathHead, rankMathToNextMetadata } from '@/lib/rankmath-head';
  *
  * export async function generateMetadata({ params }) {
  *   const { locale } = await params;
- *   return createPageMetadata({
+ *   const rankMathData = await getRankMathHead(permalink, locale);
+ *   const baseMetadata = createPageMetadata({
  *     locale,
  *     pathname: '/products',
  *     title: { en: 'Products', fr: 'Produits' },
  *     description: { en: '...', fr: '...' },
  *   });
+ *   return rankMathToNextMetadata(rankMathData, baseMetadata);
  * }
  */
 
@@ -186,4 +191,84 @@ export function createCategoryMetadata({
     title: `${resolvedName} - AFS`,
     description: description || defaultDescription,
   });
+}
+
+/**
+ * Merge Rank Math metadata with base metadata
+ * Rank Math values take precedence when available
+ * 
+ * @param {Object} baseMetadata - Base Next.js metadata
+ * @param {Object} rankMathData - Rank Math parsed data
+ * @param {Object} [overrides={}] - Additional overrides (e.g., hreflang)
+ * @returns {Object} Merged Next.js metadata
+ */
+export function mergeRankMathMetadata(baseMetadata, rankMathData, overrides = {}) {
+  if (!rankMathData) {
+    return baseMetadata;
+  }
+
+  const merged = { ...baseMetadata };
+
+  // Title: Rank Math takes precedence
+  if (rankMathData.title) {
+    merged.title = rankMathData.title;
+  }
+
+  // Description: Rank Math takes precedence
+  if (rankMathData.description) {
+    merged.description = rankMathData.description;
+  }
+
+  // Robots: Rank Math takes precedence
+  if (rankMathData.robots) {
+    const robotsParts = rankMathData.robots.toLowerCase().split(',').map(s => s.trim());
+    merged.robots = {};
+    if (robotsParts.includes('noindex')) merged.robots.index = false;
+    else if (robotsParts.includes('index')) merged.robots.index = true;
+    if (robotsParts.includes('nofollow')) merged.robots.follow = false;
+    else if (robotsParts.includes('follow')) merged.robots.follow = true;
+  }
+
+  // Canonical: Rank Math takes precedence, but preserve hreflang
+  if (rankMathData.canonical) {
+    merged.alternates = {
+      ...merged.alternates,
+      canonical: rankMathData.canonical,
+    };
+  }
+
+  // Open Graph: Merge Rank Math values
+  if (rankMathData.openGraph && Object.keys(rankMathData.openGraph).length > 0) {
+    merged.openGraph = {
+      ...merged.openGraph,
+      ...(rankMathData.openGraph.title && { title: rankMathData.openGraph.title }),
+      ...(rankMathData.openGraph.description && { description: rankMathData.openGraph.description }),
+      ...(rankMathData.openGraph.url && { url: rankMathData.openGraph.url }),
+      ...(rankMathData.openGraph.type && { type: rankMathData.openGraph.type }),
+      ...(rankMathData.openGraph.siteName && { siteName: rankMathData.openGraph.siteName }),
+      ...(rankMathData.openGraph.images && { images: rankMathData.openGraph.images }),
+      ...(rankMathData.openGraph.locale && { locale: rankMathData.openGraph.locale }),
+    };
+  }
+
+  // Twitter: Merge Rank Math values
+  if (rankMathData.twitter && Object.keys(rankMathData.twitter).length > 0) {
+    merged.twitter = {
+      ...merged.twitter,
+      ...(rankMathData.twitter.card && { card: rankMathData.twitter.card }),
+      ...(rankMathData.twitter.title && { title: rankMathData.twitter.title }),
+      ...(rankMathData.twitter.description && { description: rankMathData.twitter.description }),
+      ...(rankMathData.twitter.images && { images: rankMathData.twitter.images }),
+    };
+  }
+
+  // Apply overrides (e.g., hreflang)
+  if (overrides.languages) {
+    merged.alternates = {
+      ...merged.alternates,
+      languages: overrides.languages,
+    };
+  }
+
+  return merged;
 }

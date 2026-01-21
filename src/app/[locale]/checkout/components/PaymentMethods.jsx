@@ -11,6 +11,8 @@ const PaymentMethods = ({
     register,
     watchFields,
     setValue,
+    getValues,
+    control,
     filteredPaymentMethods,
     getPaymentMethodTranslation,
     cart,
@@ -26,6 +28,36 @@ const PaymentMethods = ({
     setOrderProcessing,
     syncCartToAPI
 }) => {
+    // Helper function to get form values directly from DOM (bypasses React Compiler issues with getValues)
+    // This is a workaround for React Compiler compatibility issues with React Hook Form
+    const getFormValuesFromDOM = () => {
+        const form = document.querySelector('form');
+        if (!form) {
+            console.warn('[PaymentMethods] No form found in DOM');
+            return {};
+        }
+        
+        const values = {};
+        
+        // Get all input, select, and textarea values by name attribute
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            const name = input.name || input.id;
+            if (name) {
+                if (input.type === 'checkbox') {
+                    values[name] = input.checked;
+                } else if (input.type === 'radio') {
+                    if (input.checked) {
+                        values[name] = input.value;
+                    }
+                } else {
+                    values[name] = input.value || '';
+                }
+            }
+        });
+        
+        return values;
+    };
     return (
         <div className='bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden'>
             {/* Header */}
@@ -46,7 +78,7 @@ const PaymentMethods = ({
                         method.title?.toLowerCase().includes('carte bancaire');
                     const isPayPal = method.id === 'paypal' || method.id === 'ppcp-gateway';
                     const isAuthorize = method.id === 'authnet' || method.id?.toLowerCase().includes('authnet');
-                    
+
                     // Get translated title and description
                     const paymentTranslation = getPaymentMethodTranslation(method);
 
@@ -86,8 +118,8 @@ const PaymentMethods = ({
                                                 const packageId = selectedRateId.substring(0, colonIndex);
                                                 const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
-                                                    .filter(rate => 
-                                                        rate.rate_id === rateId && 
+                                                    .filter(rate =>
+                                                        rate.rate_id === rateId &&
                                                         String(rate.package_id || 0) === String(packageId)
                                                     )
                                                     .map(rate => ({
@@ -97,14 +129,42 @@ const PaymentMethods = ({
                                                     }));
                                             })()
                                         }}
-                                        customerData={{
-                                            ...watchFields,
-                                            billing: {
-                                                first_name: watchFields.billing_first_name,
-                                                last_name: watchFields.billing_last_name,
-                                                email: watchFields.billing_email,
-                                                phone: watchFields.billing_phone || ''
+                                        getCustomerData={() => {
+                                            // Read values directly from DOM to bypass React Compiler issues with getValues()
+                                            const domValues = getFormValuesFromDOM();
+                                            
+                                            // Also try getValues() and watchFields as fallbacks
+                                            let rhfValues = {};
+                                            if (getValues && typeof getValues === 'function') {
+                                                try {
+                                                    rhfValues = getValues();
+                                                } catch (e) {
+                                                    console.warn('[PayPal] getValues() failed, using DOM values');
+                                                }
                                             }
+                                            
+                                            // Merge: DOM values take precedence (most reliable), then RHF values, then watchFields
+                                            const values = {
+                                                ...watchFields,
+                                                ...rhfValues,
+                                                ...domValues // DOM values override everything (most current)
+                                            };
+                                            
+                                            return {
+                                                ...values,
+                                                billing: {
+                                                    first_name: domValues.billing_first_name || values.billing_first_name || '',
+                                                    last_name: domValues.billing_last_name || values.billing_last_name || '',
+                                                    email: domValues.billing_email || values.billing_email || '',
+                                                    phone: domValues.billing_phone || values.billing_phone || '',
+                                                    company: domValues.billing_company || values.billing_company || '',
+                                                    country: domValues.billing_country || values.billing_country || '',
+                                                    address_1: domValues.billing_address_1 || values.billing_address_1 || '',
+                                                    city: domValues.billing_city || values.billing_city || '',
+                                                    state: domValues.billing_state || values.billing_state || '',
+                                                    postcode: domValues.billing_postcode || values.billing_postcode || ''
+                                                }
+                                            };
                                         }}
                                         disabled={isPayPalDisabled}
                                         setOrderProcessing={setOrderProcessing}
@@ -138,8 +198,8 @@ const PaymentMethods = ({
                                                 const packageId = selectedRateId.substring(0, colonIndex);
                                                 const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
-                                                    .filter(rate => 
-                                                        rate.rate_id === rateId && 
+                                                    .filter(rate =>
+                                                        rate.rate_id === rateId &&
                                                         String(rate.package_id || 0) === String(packageId)
                                                     )
                                                     .map(rate => ({
@@ -149,14 +209,53 @@ const PaymentMethods = ({
                                                     }));
                                             })()
                                         }}
-                                        customerData={{
-                                            ...watchFields,
-                                            billing: {
-                                                ...watchFields,
-                                                first_name: watchFields.billing_first_name,
-                                                last_name: watchFields.billing_last_name,
-                                                email: watchFields.billing_email,
+                                        getCustomerData={() => {
+                                            // Read values directly from DOM to bypass React Compiler issues with getValues()
+                                            // This is a workaround for React Compiler compatibility issues with React Hook Form
+                                            const domValues = getFormValuesFromDOM();
+                                            
+                                            // Also try getValues() and watchFields as fallbacks
+                                            let rhfValues = {};
+                                            if (getValues && typeof getValues === 'function') {
+                                                try {
+                                                    rhfValues = getValues();
+                                                } catch (e) {
+                                                    console.warn('[Monetico] getValues() failed, using DOM values');
+                                                }
                                             }
+                                            
+                                            // Merge: DOM values take precedence (most reliable), then RHF values, then watchFields
+                                            const values = {
+                                                ...watchFields,
+                                                ...rhfValues,
+                                                ...domValues // DOM values override everything (most current)
+                                            };
+                                            
+                                            // Ensure we have billing_email from multiple sources
+                                            const billingEmail = domValues.billing_email || 
+                                                                values.billing_email || 
+                                                                rhfValues.billing_email ||
+                                                                watchFields?.billing_email ||
+                                                                '';
+                                            
+                                            const result = {
+                                                ...values,
+                                                billing_email: billingEmail, // Ensure it's at root level
+                                                billing: {
+                                                    first_name: domValues.billing_first_name || values.billing_first_name || '',
+                                                    last_name: domValues.billing_last_name || values.billing_last_name || '',
+                                                    email: billingEmail,
+                                                    phone: domValues.billing_phone || values.billing_phone || '',
+                                                    company: domValues.billing_company || values.billing_company || '',
+                                                    country: domValues.billing_country || values.billing_country || '',
+                                                    address_1: domValues.billing_address_1 || values.billing_address_1 || '',
+                                                    city: domValues.billing_city || values.billing_city || '',
+                                                    state: domValues.billing_state || values.billing_state || '',
+                                                    postcode: domValues.billing_postcode || values.billing_postcode || ''
+                                                }
+                                            };
+                                            
+                                            return result;
                                         }}
                                         disabled={!watchFields.terms}
                                         setOrderProcessing={setOrderProcessing}
@@ -190,8 +289,8 @@ const PaymentMethods = ({
                                                 const packageId = selectedRateId.substring(0, colonIndex);
                                                 const rateId = selectedRateId.substring(colonIndex + 1);
                                                 return allShippingRates
-                                                    .filter(rate => 
-                                                        rate.rate_id === rateId && 
+                                                    .filter(rate =>
+                                                        rate.rate_id === rateId &&
                                                         String(rate.package_id || 0) === String(packageId)
                                                     )
                                                     .map(rate => ({
@@ -201,14 +300,42 @@ const PaymentMethods = ({
                                                     }));
                                             })()
                                         }}
-                                        customerData={{
-                                            ...watchFields,
-                                            billing: {
-                                                ...watchFields,
-                                                first_name: watchFields.billing_first_name,
-                                                last_name: watchFields.billing_last_name,
-                                                email: watchFields.billing_email,
+                                        getCustomerData={() => {
+                                            // Read values directly from DOM to bypass React Compiler issues with getValues()
+                                            const domValues = getFormValuesFromDOM();
+                                            
+                                            // Also try getValues() and watchFields as fallbacks
+                                            let rhfValues = {};
+                                            if (getValues && typeof getValues === 'function') {
+                                                try {
+                                                    rhfValues = getValues();
+                                                } catch (e) {
+                                                    console.warn('[Authorize] getValues() failed, using DOM values');
+                                                }
                                             }
+                                            
+                                            // Merge: DOM values take precedence (most reliable), then RHF values, then watchFields
+                                            const values = {
+                                                ...watchFields,
+                                                ...rhfValues,
+                                                ...domValues // DOM values override everything (most current)
+                                            };
+                                            
+                                            return {
+                                                ...values,
+                                                billing: {
+                                                    first_name: domValues.billing_first_name || values.billing_first_name || '',
+                                                    last_name: domValues.billing_last_name || values.billing_last_name || '',
+                                                    email: domValues.billing_email || values.billing_email || '',
+                                                    phone: domValues.billing_phone || values.billing_phone || '',
+                                                    company: domValues.billing_company || values.billing_company || '',
+                                                    country: domValues.billing_country || values.billing_country || '',
+                                                    address_1: domValues.billing_address_1 || values.billing_address_1 || '',
+                                                    city: domValues.billing_city || values.billing_city || '',
+                                                    state: domValues.billing_state || values.billing_state || '',
+                                                    postcode: domValues.billing_postcode || values.billing_postcode || ''
+                                                }
+                                            };
                                         }}
                                         disabled={!watchFields.terms}
                                         setOrderProcessing={setOrderProcessing}

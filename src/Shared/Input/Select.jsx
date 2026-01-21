@@ -2,7 +2,11 @@ import { Check } from 'lucide-react';
 import React from 'react';
 
 const Select = ({ label, id, register, error, registerPage = false, value, show = true, checkout = false, options = [], placeholder = "Select..." }) => {
-    const showAyon = value && value.length >= 2;
+    // When using Controller, register contains {onChange, onBlur, value, ref, name}
+    // We need to use the value from Controller if available to avoid conflicts in production
+    const isControllerField = register && typeof register.onChange === 'function' && Object.prototype.hasOwnProperty.call(register, 'value');
+    const actualValue = isControllerField ? register.value : value;
+    const showAyon = actualValue && actualValue.length >= 2;
 
     return (
         <div>
@@ -24,7 +28,7 @@ const Select = ({ label, id, register, error, registerPage = false, value, show 
                 <select
                     {...(register || {})}
                     id={id}
-                    value={value !== undefined && value !== null ? value : ''}
+                    value={actualValue !== undefined && actualValue !== null ? actualValue : ''}
                     className={`border border-[#BFBFBF] rounded-[4px] w-full py-3 px-3 focus:outline-none text-lg leading-[23px] text-black font-semibold bg-white appearance-none cursor-pointer
                     ${error ? "border-red-500" : ""}`}
                     disabled={!show}

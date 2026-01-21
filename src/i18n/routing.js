@@ -46,6 +46,14 @@ export const routing = defineRouting({
             en: "/legal-notice",
             fr: "/mentions-legales"
         },
+        '/legal-notices': {
+            en: "/legal-notices",
+            fr: "/mentions-legales"
+        },
+        '/terms-and-conditions': {
+            en: "/terms-and-conditions",
+            fr: "/conditions-generales-de-vente"
+        },
         '/need-advice': {
             en: "/need-advice",
             fr: "/tickets"

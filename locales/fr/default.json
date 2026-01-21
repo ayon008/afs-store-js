@@ -236,16 +236,22 @@
     "5th": "Garantie de 2 à 3 ans",
     "6th": "Livraison dans le monde entier",
     "7th": "Remboursement d'impôt disponible",
-    "about": "À propos de nous",
+    "about": "A PROPOS",
     "accept": "J'accepte la politique de confidentialité et les conditions d'utilisation",
     "client": "Client du service",
-    "copy": "Tous droits réservés. ©2025",
+    "copy": "Foil and Co., All rights reserved. ©2026",
     "email": "Saisissez votre adresse électronique pour vous abonner à nos bulletins d'information",
+    "newsletterTitle": "Abonnez-vous à notre newsletter",
+    "newsletterDescription": "Nous ne vous enverrons pas de spams, nous vous informerons uniquement d'un nouveau produit ou d'un événement.",
     "li-1": "<item1><link1>Configurateur de feuilles</link1></item1><item><link2>Meilleure correspondance stab</link2></item><item><link3>Comparateur 3 stabs / aile avant</link3></item><item><link4>Comparaison des mâts</link4></item><item><link5>Construction de la planche</link5></item><item><link6>Equipement</link6></item><item><link7>Récupération</link7></item><item><link8>Caractéristiques du film</link8></item><item><link9>Taille de la vis</link9></item>",
-    "li-2": "<item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>\n      <item><link7>Conditions générales de vente</link7></item>\n      <item><link8>Politique de confidentialité</link8></item>",
+    "li-2": "<item1><link1>Mentions légales</link1></item1>\n      <item><link2>Conditions générales de vente</link2></item>\n      <item><link3>Politique de confidentialité</link3></item>",
     "li-3": " <item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>",
     "tools": "Outils d'achat",
-    "Universe": "Univers"
+    "Universe": "Univers",
+    "social": "AFS",
+    "li-social": "<item1><link1>Instagram</link1></item1>\n      <item><link2>Facebook</link2></item>\n      <item><link3>YouTube</link3></item>\n      <item><link4>WhatsApp</link4></item>",
+    "mostSearched": "LE PLUS RECHERCHE",
+    "li-most-searched": "<item1><link1>MATERIEL WINGFOIL</link1></item1>\n      <item><link2>MATERIEL DOWNWIND</link2></item>\n      <item><link3>PACK WINGFOIL</link3></item>"
   },
   "Form": {
     "title": "Formulaire"

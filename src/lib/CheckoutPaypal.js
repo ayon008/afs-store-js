@@ -4,8 +4,8 @@ import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Props: cartData, customerData (from checkout form state), disabled, setOrderProcessing, syncCartToAPI
-export default function CheckoutPayPal({ cartData, customerData, onSuccess, disabled = false, setOrderProcessing, syncCartToAPI }) {
+// Props: cartData, getCustomerData (callback to get checkout form state), disabled, setOrderProcessing, syncCartToAPI
+export default function CheckoutPayPal({ cartData, getCustomerData, onSuccess, disabled = false, setOrderProcessing, syncCartToAPI }) {
     const router = useRouter();
     const [wooOrderId, setWooOrderId] = useState(null);
     const [error, setError] = useState(null);
@@ -25,6 +25,9 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
         // Show full-screen overlay
         if (setOrderProcessing) setOrderProcessing(true);
 
+        // Get current form values at payment time
+        const customerData = getCustomerData ? getCustomerData() : {};
+
         try {
             // Sync localStorage cart to WooCommerce API first
             if (syncCartToAPI) {
@@ -40,10 +43,18 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
                 body: JSON.stringify({ cartData, customerData }),
             });
 
+            // Check content type before parsing JSON
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error('Non-JSON response from /api/orders/create:', text);
+                throw new Error(`Server error: ${res.status} ${res.statusText}`);
+            }
+
             const responseData = await res.json();
 
             if (!res.ok) {
-                throw new Error(responseData.message || 'Failed to create order');
+                throw new Error(responseData.error || responseData.message || 'Failed to create order');
             }
 
             setWooOrderId(responseData.wooOrderId);
@@ -55,6 +66,10 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
             setError(err.message || 'Failed to create order');
             setLoading(false);
             if (setOrderProcessing) setOrderProcessing(false);
+            
+            // If order was created but PayPal order creation failed, update order status
+            // Note: wooOrderId might not be set yet if the error occurred before order creation
+            // This is handled by the API route itself
             throw err;
         }
     };
@@ -74,10 +89,18 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
                 }),
             });
 
+            // Check content type before parsing JSON
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await res.text();
+                console.error('Non-JSON response from /api/orders/capture:', text);
+                throw new Error(`Server error: ${res.status} ${res.statusText}`);
+            }
+
             const details = await res.json();
 
             if (!res.ok) {
-                throw new Error(details.message || 'Failed to capture payment');
+                throw new Error(details.error || details.message || 'Failed to capture payment');
             }
 
             setLoading(false);
@@ -102,24 +125,75 @@ export default function CheckoutPayPal({ cartData, customerData, onSuccess, disa
             setError(err.message || 'Failed to complete payment');
             setLoading(false);
             if (setOrderProcessing) setOrderProcessing(false);
+            
+            // Update order status to failed if capture failed
+            if (wooOrderId) {
+                try {
+                    await fetch(`/api/orders/${wooOrderId}/update-status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: 'failed',
+                            note: `Échec de la capture PayPal: ${err.message || 'Erreur inconnue'}`,
+                            paymentMethod: 'paypal'
+                        })
+                    });
+                } catch (updateErr) {
+                    console.error('Failed to update order status on capture error:', updateErr);
+                }
+            }
             throw err;
         }
     };
 
     // Called when user cancels the payment
-    const onCancel = (data) => {
+    const onCancel = async (data) => {
         console.log('PayPal payment cancelled:', data);
         setError('Payment was cancelled. Please try again.');
         setLoading(false);
         if (setOrderProcessing) setOrderProcessing(false);
+        
+        // Update order status to failed if order was created
+        if (wooOrderId) {
+            try {
+                await fetch(`/api/orders/${wooOrderId}/update-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'failed',
+                        note: 'Paiement PayPal annulé par l\'utilisateur.',
+                        paymentMethod: 'paypal'
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to update order status on cancel:', err);
+            }
+        }
     };
 
     // Called when there's an error with PayPal
-    const onError = (err) => {
+    const onError = async (err) => {
         console.error('PayPal error:', err);
         setError('An error occurred with the PayPal transaction. Please try again.');
         setLoading(false);
         if (setOrderProcessing) setOrderProcessing(false);
+        
+        // Update order status to failed if order was created
+        if (wooOrderId) {
+            try {
+                await fetch(`/api/orders/${wooOrderId}/update-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: 'failed',
+                        note: `Erreur PayPal: ${err.message || 'Erreur inconnue'}`,
+                        paymentMethod: 'paypal'
+                    })
+                });
+            } catch (updateErr) {
+                console.error('Failed to update order status on error:', updateErr);
+            }
+        }
     };
 
     return (

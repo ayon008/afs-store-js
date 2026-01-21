@@ -110,20 +110,27 @@ const BillingDetails = ({
                         value={watchFields.billing_postcode}
                         checkout={true}
                     />
-                    <Input
-                        label={t("email")}
-                        type="email"
-                        id="billing_email"
-                        register={register("billing_email", {
+                    <Controller
+                        name="billing_email"
+                        control={control}
+                        rules={{
                             required: t("required"),
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                 message: t("invalidEmail")
                             }
-                        })}
-                        error={getFieldError("billing_email")}
-                        value={watchFields.billing_email}
-                        checkout={true}
+                        }}
+                        render={({ field }) => (
+                            <Input
+                                label={t("email")}
+                                type="email"
+                                id="billing_email"
+                                register={field}
+                                error={getFieldError("billing_email")}
+                                value={field.value || ''}
+                                checkout={true}
+                            />
+                        )}
                     />
                     <Input
                         label={t("phone")}
@@ -143,7 +150,14 @@ const BillingDetails = ({
                                 checkout={true}
                                 label={t("survey")}
                                 id='survey'
-                                register={field}
+                                register={{
+                                    ...field,
+                                    onChange: (e) => {
+                                        // Handle both event object and direct value
+                                        const value = e?.target?.value !== undefined ? e.target.value : e;
+                                        field.onChange(value);
+                                    }
+                                }}
                                 error={getFieldError("survey")}
                                 value={field.value}
                                 options={[
