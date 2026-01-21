@@ -4,7 +4,8 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from "gsap"
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import Cookies from 'js-cookie';
 
 const Footer = () => {
     const [first, setFirst] = useState(false);
@@ -137,6 +138,60 @@ const Footer = () => {
     }, { dependencies: [third] });
 
     const t = useTranslations("footer");
+    const locale = useLocale();
+
+    // États pour le formulaire newsletter
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: null, text: '' });
+
+    // Handler pour la soumission du formulaire newsletter
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        
+        // Validation de l'email
+        if (!email || !email.trim()) {
+            setMessage({ type: 'error', text: t('emailRequired') || 'Email is required' });
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            setMessage({ type: 'error', text: t('invalidEmail') || 'Invalid email format' });
+            return;
+        }
+
+        setIsLoading(true);
+        setMessage({ type: null, text: '' });
+
+        try {
+            const response = await fetch('/api/newsletter/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email.trim() }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessage({ type: 'success', text: t('newsletterSuccess') || 'Successfully subscribed to newsletter!' });
+                setEmail(''); // Réinitialiser le formulaire
+                // Effacer le message après 5 secondes
+                setTimeout(() => {
+                    setMessage({ type: null, text: '' });
+                }, 5000);
+            } else {
+                setMessage({ type: 'error', text: data.error || t('newsletterError') || 'An error occurred. Please try again.' });
+            }
+        } catch (error) {
+            console.error('Newsletter subscription error:', error);
+            setMessage({ type: 'error', text: t('newsletterError') || 'An error occurred. Please try again.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <footer className='bg-[#f0f0f0]'>
@@ -273,37 +328,56 @@ const Footer = () => {
                                 {t("newsletterDescription")}
                             </p>
 
-                            <form className="flex flex-col gap-3 text-black">
+                            <form className="flex flex-col gap-3 text-black" onSubmit={handleNewsletterSubmit}>
                                 <div className="flex border border-[#111] rounded-[4px] relative">
                                     <label className="absolute text-[14px] bg-[#f0f0f0] text-[#999999] top-[-8.4px] left-[16px] font-semibold">
                                         EMAIL
                                     </label>
                                     <input
                                         type="email"
+                                        name="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                         placeholder="person@email.com"
                                         className="w-full px-4 py-3 placeholder-[#999999] font-semibold outline-none rounded-[4px]"
                                         required
+                                        disabled={isLoading}
                                     />
                                     <button
                                         type="submit"
-                                        className="w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center cursor-pointer"
+                                        disabled={isLoading}
+                                        className={`w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="23"
-                                            height="20"
-                                            viewBox="0 0 23 20"
-                                            fill="none"
-                                        >
-                                            <path
-                                                d="M21.3286 9.9999L1.27141 9.9999M21.3286 9.9999L12.7326 18.5713M21.3286 9.9999L12.7326 1.42847"
-                                                stroke="#808080"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="square"
-                                            ></path>
-                                        </svg>
+                                        {isLoading ? (
+                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="23"
+                                                height="20"
+                                                viewBox="0 0 23 20"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M21.3286 9.9999L1.27141 9.9999M21.3286 9.9999L12.7326 18.5713M21.3286 9.9999L12.7326 1.42847"
+                                                    stroke="#808080"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="square"
+                                                ></path>
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
+                                {message.text && (
+                                    <div className={`text-sm font-semibold ${
+                                        message.type === 'success' ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                        {message.text}
+                                    </div>
+                                )}
                                 <span className='flex items-start gap-1 text-[#999] text-lg font-lg leading-[100%]'>
                                     <input type='checkbox' className='' />
                                     <label htmlFor="">{t("accept")}</label>
