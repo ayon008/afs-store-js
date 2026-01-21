@@ -128,9 +128,9 @@ const Page = () => {
                                     <div className="mt-16 space-y-16">
                                         <Table title="Aile monoblock Silk"
                                             tableRow={[
-                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "Uhm Carbone / Ame Corecell", "0.9", "NA"] },
-                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
-                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
+                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "UHM Carbone / Ame Corecell", "0.9", "NA"] },
+                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "UHM Carbone / Ame Corecell", "0.96", "NA"] },
+                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "UHM Carbone / Ame Corecell", "1.0", "NA"] },
                                             ]}
                                             tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
                                         {/* 2nd table */}
@@ -182,7 +182,7 @@ const Page = () => {
 
                                         <Table title="Aile monobloc Pure Fuselink"
                                             tableRow={[
-                                                { name: "Pure 560", value: ["560 aile avant / stabilisateur", "750", "10", "-", "-", "667mm", "Uhm Carbone / HM Carbone", "1.2", "NA"] },
+                                                { name: "Pure 560", value: ["560 aile avant / stabilisateur", "750", "10", "-", "-", "667mm", "UHM Carbone / HM Carbone", "1.2", "NA"] },
                                                 { name: "Pure HA 800", value: ["800", "1000", "13", "100", "11.6", "572mm", "HM Carbone", "1.4", "NA"] },
                                                 { name: "Pure HA 1100", value: ["1100", "1100", "11", "125", "14.5", "553mm", "HM Carbone", "1.5", "NA"] },
                                                 { name: "Pure 600", value: ["600", "708", "8.4", "108", "11.4", "522mm", "HM Carbone / HR Carbone / Monolithique", "1.1", "NA"] },
@@ -284,16 +284,16 @@ const Page = () => {
                                             title="Caractéristiques planche AFS Advanced"
                                             tableRow={[
                                                 {
-                                                    name: "",
-                                                    value: ["5.6", "20.5", "75L", "Carbone / Glass"]
+                                                    name: "Blackbird ML 5’6",
+                                                    value: ["5.6", "20.5", "75L", "Sandwich Glass"]
                                                 },
                                                 {
-                                                    name: "",
-                                                    value: ["6’0", "22", "90L", "Carbone Or Glass"],
+                                                    name: "Blackbird ML 6’0",
+                                                    value: ["6’0", "22", "90L", "Sandwich Glass"],
                                                 },
                                                 {
-                                                    name: "",
-                                                    value: ["6.3 ", "22.5", "100L", "Carbone Or Glass"],
+                                                    name: "Blackbird ML 6’3",
+                                                    value: ["6.3 ", "22.5", "100L", "Sandwich Carbone"],
                                                 }
                                             ]}
                                             tableHead={["Longueur (in/cm)", "Largeur (cm)", "Volume (litre)", "Construction"]}
@@ -406,9 +406,9 @@ const Page = () => {
                                     <div className="mt-16 space-y-16">
                                         <Table title="Aile monoblock Silk"
                                             tableRow={[
-                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "Uhm Carbone / Ame Corecell", "0.9", "NA"] },
-                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "Uhm Carbone / Ame Corecell", "0.96", "NA"] },
-                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "Uhm Carbone / Ame Corecell", "1.0", "NA"] },
+                                                { name: "avion silk 650", value: ["650", "720", "8", "115", "13.7", "572", "UHM Carbone / Ame Corecell", "0.9", "NA"] },
+                                                { name: "avion silk 850", value: ["850", "824", "8", "134", "16", "555", "UHM Carbone / Ame Corecell", "0.96", "NA"] },
+                                                { name: "avion silk 1050", value: ["1050", "916", "8", "150", "17.9", "538", "UHM Carbone / Ame Corecell", "1.0", "NA"] },
                                             ]}
                                             tableHead={["SURFACE (CM<sup>2</sup>)", "Envergure (mm)", "ASPECT RATIO", "Corde maximum (mm)", "Epaisseur maximum (mm)", "Longueur (mm) <small>(Bord de fuite Aile / Extrémité fuselage)</small>", "Construction", "Poids (kg)", "Visserie"]} />
                                         {/* 2nd table */}
@@ -459,7 +459,7 @@ const Page = () => {
 
                                         <Table title="Aile monobloc Pure Fuselink"
                                             tableRow={[
-                                                { name: "Pure 560", value: ["560 aile avant / stabilisateur", "750", "10", "-", "-", "667mm", "Uhm Carbone / HM Carbone", "1.2", "NA"] },
+                                                { name: "Pure 560", value: ["560 aile avant / stabilisateur", "750", "10", "-", "-", "667mm", "UHM Carbone / HM Carbone", "1.2", "NA"] },
                                                 { name: "Pure HA 800", value: ["800", "1000", "13", "100", "11.6", "572mm", "HM Carbone", "1.4", "NA"] },
                                                 { name: "Pure HA 1100", value: ["1100", "1100", "11", "125", "14.5", "553mm", "HM Carbone", "1.5", "NA"] },
                                                 { name: "Pure 600", value: ["600", "708", "8.4", "108", "11.4", "522mm", "HM Carbone / HR Carbone / Monolithique", "1.1", "NA"] },
@@ -577,16 +577,16 @@ const Page = () => {
                                                 title="Caractéristiques planche AFS Advanced"
                                                 tableRow={[
                                                     {
-                                                        name: "",
-                                                        value: ["5.6", "20.5", "75L", "Carbone / Glass"]
+                                                        name: "Blackbird ML 5’6",
+                                                        value: ["5.6", "20.5", "75L", "Sandwich Glass"]
                                                     },
                                                     {
-                                                        name: "",
-                                                        value: ["6’0", "22", "90L", "Carbone Or Glass"],
+                                                        name: "Blackbird ML 6’0",
+                                                        value: ["6’0", "22", "90L", "Sandwich Glass"],
                                                     },
                                                     {
-                                                        name: "",
-                                                        value: ["6.3 ", "22.5", "100L", "Carbone Or Glass"],
+                                                        name: "Blackbird ML 6’3",
+                                                        value: ["6.3 ", "22.5", "100L", "Sandwich Carbone"],
                                                     }
                                                 ]}
                                                 tableHead={["Longueur (in/cm)", "Largeur (cm)", "Volume (litre)", "Construction"]}
