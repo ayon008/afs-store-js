@@ -38,6 +38,30 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      // Rediriger /en/wc-api/wc_gateway_monetico vers /fr/wc-api/wc_gateway_monetico
+      {
+        source: '/en/wc-api/wc_gateway_monetico',
+        destination: '/fr/wc-api/wc_gateway_monetico',
+      },
+      // Rediriger /wc-api/wc_gateway_monetico (sans préfixe) vers /fr/wc-api/wc_gateway_monetico
+      {
+        source: '/wc-api/wc_gateway_monetico',
+        destination: '/fr/wc-api/wc_gateway_monetico',
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      // Rediriger /fr/product-category/* vers /fr/categorie-produit/*
+      {
+        source: '/fr/product-category/:path*',
+        destination: '/fr/categorie-produit/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 

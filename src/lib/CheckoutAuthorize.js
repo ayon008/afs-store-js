@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import PaymentForm from './AuthorizeNet/PaymentForm'
-import SavedPaymentMethods from './AuthorizeNet/SavedPaymentMethods'
 
 /**
  * CheckoutAuthorize Component
@@ -31,83 +30,29 @@ export default function CheckoutAuthorize({
   const tCheckout = useTranslations("checkout")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [saveCard, setSaveCard] = useState(false)
-  const [useNewCard, setUseNewCard] = useState(true)
-  const [selectedPaymentProfile, setSelectedPaymentProfile] = useState(null)
+  const [isFormValid, setIsFormValid] = useState(false)
 
   // Ref to PaymentForm for triggering tokenization
   const paymentFormRef = useRef(null)
-  const [opaqueData, setOpaqueData] = useState(null)
-
-  // Get customer email for saved cards (get current value)
-  const currentCustomerData = getCustomerData ? getCustomerData() : {};
-  const customerEmail = currentCustomerData.billing_email ||
-    currentCustomerData.billing?.email ||
-    currentCustomerData.email
 
   /**
-   * Handle payment method selection from saved cards
+   * Handle card tokenization success - process payment immediately
    */
-  const handlePaymentMethodSelect = useCallback((method) => {
-    if (method) {
-      setSelectedPaymentProfile(method)
-      setUseNewCard(false)
-      setOpaqueData(null)
-    } else {
-      setSelectedPaymentProfile(null)
-      setUseNewCard(true)
-    }
-  }, [])
-
-  /**
-   * Handle card tokenization success
-   */
-  const handleTokenized = useCallback((data) => {
-    console.log('Card tokenized:', {
-      cardType: data.cardType,
-      cardTypeName: data.cardTypeName,
-      lastFour: data.lastFour,
-    })
-    setOpaqueData(data)
+  const handleTokenized = useCallback(async (opaqueData) => {
     setError(null)
-  }, [])
-
-  /**
-   * Handle card tokenization error
-   */
-  const handleTokenizeError = useCallback((err) => {
-    setError(err.message || 'Failed to process card information')
-    setOpaqueData(null)
-  }, [])
-
-  /**
-   * Process the payment
-   */
-  const processPayment = async () => {
-    if (disabled) return
-
+    
     // Get current form values at payment time
     const customerData = getCustomerData ? getCustomerData() : {};
 
     // Validate terms acceptance
     if (!customerData.terms) {
       setError('You must accept the terms and conditions to continue.')
-      return
-    }
-
-    // Validate payment method
-    if (useNewCard && !opaqueData) {
-      setError('Please enter your card information.')
-      return
-    }
-
-    if (!useNewCard && !selectedPaymentProfile) {
-      setError('Please select a payment method.')
+      setLoading(false)
+      if (setOrderProcessing) setOrderProcessing(false)
       return
     }
 
     setLoading(true)
-    setError(null)
     // Show full-screen overlay
     if (setOrderProcessing) setOrderProcessing(true)
 
@@ -157,25 +102,15 @@ export default function CheckoutAuthorize({
       // Build payment request
       const paymentRequest = {
         orderData,
-        saveCard: useNewCard ? saveCard : false,
-      }
-
-      if (useNewCard) {
-        paymentRequest.opaqueData = {
+        saveCard: false, // Never save card
+        opaqueData: {
           dataDescriptor: opaqueData.dataDescriptor,
           dataValue: opaqueData.dataValue,
-        }
-        paymentRequest.cardInfo = {
+        },
+        cardInfo: {
           cardType: opaqueData.cardType,
           cardTypeName: opaqueData.cardTypeName,
           lastFour: opaqueData.lastFour,
-        }
-      } else {
-        paymentRequest.customerProfileId = selectedPaymentProfile.customerProfileId
-        paymentRequest.paymentProfileId = selectedPaymentProfile.paymentProfileId
-        paymentRequest.cardInfo = {
-          cardType: selectedPaymentProfile.cardType,
-          lastFour: selectedPaymentProfile.cardNumber?.slice(-4),
         }
       }
 
@@ -219,10 +154,65 @@ export default function CheckoutAuthorize({
       setError(err.message || 'An error occurred during payment')
       if (onError) onError(err)
       if (setOrderProcessing) setOrderProcessing(false)
-    } finally {
       setLoading(false)
     }
-  }
+  }, [getCustomerData, cartData, syncCartToAPI, setOrderProcessing, onSuccess, onError])
+
+  /**
+   * Handle card tokenization error
+   */
+  const handleTokenizeError = useCallback((err) => {
+    setError(err.message || 'Failed to process card information')
+    setLoading(false)
+    if (setOrderProcessing) setOrderProcessing(false)
+  }, [setOrderProcessing])
+
+  /**
+   * Handle payment button click - trigger tokenization
+   */
+  const handlePayClick = useCallback(() => {
+    if (disabled || loading) return
+
+    // Check if form is valid
+    if (paymentFormRef.current && !paymentFormRef.current.isValid()) {
+      setError('Please fill in all required card fields correctly.')
+      return
+    }
+
+    // Start loading
+    setLoading(true)
+    setError(null)
+
+    // Trigger tokenization - handleTokenized will process payment
+    if (paymentFormRef.current) {
+      paymentFormRef.current.tokenize()
+    } else {
+      setError('Payment form not ready. Please refresh the page.')
+      setLoading(false)
+    }
+  }, [disabled, loading])
+
+  /**
+   * Check form validity periodically
+   */
+  useEffect(() => {
+    const checkValidity = () => {
+      if (paymentFormRef.current) {
+        const valid = paymentFormRef.current.isValid()
+        setIsFormValid(valid)
+      } else {
+        setIsFormValid(false)
+      }
+    }
+
+    // Check immediately
+    checkValidity()
+
+    // Check periodically (every 500ms) to update button state
+    const interval = setInterval(checkValidity, 500)
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -251,69 +241,26 @@ export default function CheckoutAuthorize({
         </div>
       )}
 
-      {/* Saved payment methods */}
-      {customerEmail && (
-        <SavedPaymentMethods
-          customerEmail={customerEmail}
-          onSelect={handlePaymentMethodSelect}
-          showAddNew={true}
-          onAddNew={() => setUseNewCard(true)}
+      {/* Card form */}
+      <div className="border border-gray-200 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-4">
+          {t("cardDetails")}
+        </h4>
+
+        <PaymentForm
+          ref={paymentFormRef}
+          onTokenized={handleTokenized}
+          onError={handleTokenizeError}
+          disabled={loading || disabled}
+          loading={loading}
         />
-      )}
-
-      {/* New card form */}
-      {useNewCard && (
-        <div className="border border-gray-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-4">
-            {customerEmail ? t("enterNewCardDetails") : t("cardDetails")}
-          </h4>
-
-          <PaymentForm
-            ref={paymentFormRef}
-            onTokenized={handleTokenized}
-            onError={handleTokenizeError}
-            disabled={loading || disabled}
-            loading={loading}
-          />
-
-          {/* Save card checkbox */}
-          {customerEmail && (
-            <div className="mt-4 flex items-center">
-              <input
-                type="checkbox"
-                id="saveCard"
-                checked={saveCard}
-                onChange={(e) => setSaveCard(e.target.checked)}
-                disabled={loading || disabled}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="saveCard" className="ml-2 text-sm text-gray-600">
-                {t("saveCard")}
-              </label>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Selected saved card info */}
-      {!useNewCard && selectedPaymentProfile && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-sm text-gray-700">
-              {t("usingSavedCard")} <strong>{selectedPaymentProfile.cardNumber?.slice(-4) || '****'}</strong>
-            </span>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Pay button */}
       <button
         type="button"
-        onClick={processPayment}
-        disabled={loading || disabled || (useNewCard && !opaqueData)}
+        onClick={handlePayClick}
+        disabled={loading || disabled || !isFormValid}
         className="w-full bg-[#1D98FF] text-white font-semibold py-3 px-6 rounded-xl hover:bg-[#1585e0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
       >
         {loading ? (
