@@ -245,6 +245,7 @@
     "newsletterDescription": "Nous ne vous enverrons pas de spams, nous vous informerons uniquement d'un nouveau produit ou d'un événement.",
     "emailRequired": "L'adresse email est requise",
     "invalidEmail": "Format d'email invalide",
+    "acceptRequired": "Vous devez accepter la politique de confidentialité et les conditions d'utilisation",
     "newsletterSuccess": "Abonnement à la newsletter réussi !",
     "newsletterError": "Une erreur s'est produite. Veuillez réessayer.",
     "li-1": "<item1><link1>Configurateur de feuilles</link1></item1><item><link2>Meilleure correspondance stab</link2></item><item><link3>Comparateur 3 stabs / aile avant</link3></item><item><link4>Comparaison des mâts</link4></item><item><link5>Construction de la planche</link5></item><item><link6>Equipement</link6></item><item><link7>Récupération</link7></item><item><link8>Caractéristiques du film</link8></item><item><link9>Taille de la vis</link9></item>",

@@ -142,12 +142,19 @@ const Footer = () => {
 
     // États pour le formulaire newsletter
     const [email, setEmail] = useState('');
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState({ type: null, text: '' });
 
     // Handler pour la soumission du formulaire newsletter
     const handleNewsletterSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validation de l'acceptation des conditions
+        if (!acceptedTerms) {
+            setMessage({ type: 'error', text: t('acceptRequired') || 'You must accept the privacy policy and terms of use' });
+            return;
+        }
         
         // Validation de l'email
         if (!email || !email.trim()) {
@@ -178,6 +185,7 @@ const Footer = () => {
             if (data.success) {
                 setMessage({ type: 'success', text: t('newsletterSuccess') || 'Successfully subscribed to newsletter!' });
                 setEmail(''); // Réinitialiser le formulaire
+                setAcceptedTerms(false); // Réinitialiser la checkbox
                 // Effacer le message après 5 secondes
                 setTimeout(() => {
                     setMessage({ type: null, text: '' });
@@ -345,8 +353,8 @@ const Footer = () => {
                                     />
                                     <button
                                         type="submit"
-                                        disabled={isLoading}
-                                        className={`w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                        disabled={isLoading || !acceptedTerms}
+                                        className={`w-full text-black font-semibold rounded-md flex-[50px_0_0] flex items-center justify-center ${isLoading || !acceptedTerms ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                     >
                                         {isLoading ? (
                                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -379,7 +387,18 @@ const Footer = () => {
                                     </div>
                                 )}
                                 <span className='flex items-start gap-1 text-[#999] text-lg font-lg leading-[100%]'>
-                                    <input type='checkbox' className='' />
+                                    <input 
+                                        type='checkbox' 
+                                        checked={acceptedTerms}
+                                        onChange={(e) => {
+                                            setAcceptedTerms(e.target.checked);
+                                            // Effacer le message d'erreur si l'utilisateur coche la case
+                                            if (e.target.checked && message.type === 'error' && message.text === (t('acceptRequired') || 'You must accept the privacy policy and terms of use')) {
+                                                setMessage({ type: null, text: '' });
+                                            }
+                                        }}
+                                        className='' 
+                                    />
                                     <label htmlFor="">{t("accept")}</label>
                                 </span>
                             </form>

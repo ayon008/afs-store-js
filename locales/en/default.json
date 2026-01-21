@@ -245,6 +245,7 @@
     "newsletterDescription": "We will not send you spam, we will only inform you of a new product or event.",
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email format",
+    "acceptRequired": "You must accept the privacy policy and terms of use",
     "newsletterSuccess": "Successfully subscribed to newsletter!",
     "newsletterError": "An error occurred. Please try again.",
     "li-1": "<item1><link1>Foil Configurator</link1></item1><item><link2>Best match stab</link2></item><item><link3>Comparator 3 stabs / front wing</link3></item><item><link4>Mast comparison</link4></item><item><link5>Board Construction</link5></item><item><link6>Equipment</link6></item><item><link7>Recovery</link7></item><item><link8>Foil Characteristics</link8></item><item><link9>Screw Size</link9></item>",
