@@ -218,33 +218,6 @@ const Ucarve = () => {
         ],
     };
 
-    /* ----------------------------------------
-     PERFORMANCE content
-  ---------------------------------------- */
-    // const performanceContent = {
-    //     title:
-    //         "The U Carve is a fusion of performance, glide, and feel — a natural, precise, intuitive behavior that offers as much freedom as stability.",
-    //     description:
-    //         "A design dedicated to pure surf carving, designed to feel the wave, not fight it.",
-    //     images: [
-    //         {
-    //             src: "https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave130_0002.png",
-    //             alt: "AFS U Carve Stabilizer",
-    //             rotate: "rotate(-45deg)",
-    //         },
-    //         {
-    //             src: "https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave130_0002.png",
-    //             alt: "AFS U Carve Stabilizer",
-    //             rotate: "rotate(-45deg)",
-    //         },
-    //         {
-    //             src: "https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave130_0002.png",
-    //             alt: "AFS U Carve Stabilizer",
-    //             rotate: "rotate(-45deg)",
-    //         },
-    //     ],
-    // };
-
     useGSAP(() => {
         if (!contentRef.current) return;
         const mm = gsap.matchMedia();
