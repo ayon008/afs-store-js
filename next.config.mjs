@@ -18,6 +18,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'api.afs-foiling.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'afs-foiling.com',
       },
       {

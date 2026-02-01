@@ -1,8 +1,9 @@
-import StreamLanding from "@/app/components/Landings/StreamLanding";
+import Ucarve from "@/app/components/Landings/Ucarve";
+
 
 export function getProductLanding(key) {
     const map = {
-        stream: StreamLanding,
+        u_carve: Ucarve,
     };
 
     return map[key]

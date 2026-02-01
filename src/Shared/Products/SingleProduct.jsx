@@ -16,7 +16,9 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { getProductLanding } from '@/lib/getProductLanding';
 import SingleNavBar from '@/app/components/SingleNavBar';
-
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import gsap from 'gsap';
+gsap.registerPlugin(ScrollTrigger);
 // For youtube link in review and pop up section
 function extractYouTubeID(url) {
     const regExp =
@@ -38,7 +40,7 @@ const SingleProduct = ({ data, variations }) => {
 
     const LandingPage = getProductLanding(data?.acf?.landing_key);
     const [isLanding, setIsLanding] = useState(!!LandingPage);
-
+    const containerRef = useRef(null);
     useEffect(() => {
         if (!data) return; // wait for data to load
 
@@ -144,12 +146,27 @@ const SingleProduct = ({ data, variations }) => {
         )
     }
 
+    useEffect(() => {
+        let prevHeight = containerRef.current?.offsetHeight;
+
+        const interval = setInterval(() => {
+            const newHeight = containerRef.current?.offsetHeight;
+            if (newHeight !== prevHeight) {
+                prevHeight = newHeight;
+                ScrollTrigger.refresh();
+            }
+        }, 300);
+
+        return () => clearInterval(interval);
+    }, []);
+
+
     return (
         <div>
             {
                 !!LandingPage && <SingleNavBar setIsLanding={setIsLanding} data={data} isLanding={isLanding} />
             }
-            <div className={`global-padding md:pt-4 pt-0 max-w-[1920px] mx-auto w-full relative ${isLanding ? 'hidden' : 'block'}`}>
+            <div ref={containerRef} id="product-content" className={`global-padding md:pt-4 pt-0 max-w-[1920px] mx-auto w-full relative ${isLanding ? 'hidden' : 'block'}`}>
                 <BreadCums />
                 <div className='flex items-start md:flex-row flex-col justify-between gap-10'>
                     <div className='md:w-[60%] w-full'>
@@ -346,7 +363,7 @@ const SingleProduct = ({ data, variations }) => {
                 </PopUp>
             </div>
             {
-                !!LandingPage && <div id="stream-landing"><LandingPage data={data} setIsLanding={setIsLanding} /></div>
+                !!LandingPage && <div id="product-landing-section"><LandingPage data={data} setIsLanding={setIsLanding} /></div>
             }
         </div>
     );

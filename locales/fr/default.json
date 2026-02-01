@@ -101,6 +101,10 @@
     "home-spot": "point d'attache",
     "team": "équipe"
   },
+  "blackBird": {
+    "about_h": "Avec de nouveaux hybrides et un design sans compromis, chaque session devient une expérience unique où la performance, la glisse et le plaisir s'unissent pour redéfinir le foiling.",
+    "Hero_t": "Hybrid / Mid-length experience - By AFS Advanced"
+  },
   "blog": {
     "blog": "Blog",
     "heading": "Découvrez des conseils sur le foiling, des informations sur l'industrie et des revues d'équipement pour les riders de tous niveaux.",
@@ -236,27 +240,16 @@
     "5th": "Garantie de 2 à 3 ans",
     "6th": "Livraison dans le monde entier",
     "7th": "Remboursement d'impôt disponible",
-    "about": "A PROPOS",
+    "about": "À propos de nous",
     "accept": "J'accepte la politique de confidentialité et les conditions d'utilisation",
     "client": "Client du service",
-    "copy": "Foil and Co., All rights reserved. ©2026",
+    "copy": "Tous droits réservés. ©2025",
     "email": "Saisissez votre adresse électronique pour vous abonner à nos bulletins d'information",
-    "newsletterTitle": "Abonnez-vous à notre newsletter",
-    "newsletterDescription": "Nous ne vous enverrons pas de spams, nous vous informerons uniquement d'un nouveau produit ou d'un événement.",
-    "emailRequired": "L'adresse email est requise",
-    "invalidEmail": "Format d'email invalide",
-    "acceptRequired": "Vous devez accepter la politique de confidentialité et les conditions d'utilisation",
-    "newsletterSuccess": "Abonnement à la newsletter réussi !",
-    "newsletterError": "Une erreur s'est produite. Veuillez réessayer.",
     "li-1": "<item1><link1>Configurateur de feuilles</link1></item1><item><link2>Meilleure correspondance stab</link2></item><item><link3>Comparateur 3 stabs / aile avant</link3></item><item><link4>Comparaison des mâts</link4></item><item><link5>Construction de la planche</link5></item><item><link6>Equipement</link6></item><item><link7>Récupération</link7></item><item><link8>Caractéristiques du film</link8></item><item><link9>Taille de la vis</link9></item>",
-    "li-2": "<item1><link1>Mentions légales</link1></item1>\n      <item><link2>Conditions générales de vente</link2></item>\n      <item><link3>Politique de confidentialité</link3></item>",
+    "li-2": "<item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>\n      <item><link7>Conditions générales de vente</link7></item>\n      <item><link8>Politique de confidentialité</link8></item>",
     "li-3": " <item1><link1>Afs advance</link1></item1>\n      <item><link2>Fabriqué en France</link2></item>\n      <item><link3>Avis</link3></item>\n      <item><link4>L'équipe</link4></item>\n      <item><link5>Nous rejoindre</link5></item>\n      <item><link6>Mentions légales</link6></item>",
     "tools": "Outils d'achat",
-    "Universe": "Univers",
-    "social": "AFS",
-    "li-social": "<item1><link1>Instagram</link1></item1>\n      <item><link2>Facebook</link2></item>\n      <item><link3>YouTube</link3></item>\n      <item><link4>WhatsApp</link4></item>",
-    "mostSearched": "LE PLUS RECHERCHE",
-    "li-most-searched": "<item1><link1>MATERIEL WINGFOIL</link1></item1>\n      <item><link2>MATERIEL DOWNWIND</link2></item>\n      <item><link3>PACK WINGFOIL</link3></item>"
+    "Universe": "Univers"
   },
   "Form": {
     "title": "Formulaire"
@@ -696,10 +689,25 @@
     "The sales staff": "Les vendeurs sont des marins passionnés qui n'hésitent pas à se mettre à l'eau pour tester tous les produits afin de vous conseiller au mieux !",
     "The Surfone store was": "Le magasin Surfone a été créé en 1978 dans la station balnéaire de Port Leucate sur les Terres Catalanes, haut lieu des sports de glisse réputé pour sa tramontane. L'équipe vous accueille dans un espace de 400m2, proposant une large gamme de produits pour tous les niveaux et tous les types de pratique."
   },
+  "ucarve": {
+    "about_h": "Pour les cavaliers qui sculptent, connectent et tracent des lignes",
+    "about_p": "La gamme s'adresse à la fois aux wingers engagés dans le carving et aux surf foilers exigeants à la recherche d'un mélange parfait de connexion, d'efficacité de pompage et d'expressivité dans la vague, ainsi qu'aux downwinders qui aiment dessiner des lignes nettes. Elle vous permet de façonner vos virages de manière fluide, instinctive et totalement intuitive, pour une glisse vivante, efficace et inspirante.",
+    "flow_h_I": "Vous bénéficiez d'une conduite cohérente, d'une véritable connexion à la vague et d'un contrôle solide comme le roc à Vmax, encore amélioré par les pointes retournées qui agissent comme de véritables winglets, réduisant les pertes d'énergie et les mouvements indésirables à grande vitesse.",
+    "flow_h_II": "A basse vitesse, elle tient toujours ses promesses : vous conservez la portance, le soutien et une sensation d'équilibre et de prévisibilité, sans jamais \"passer à travers\" le foil.",
+    "hero_bottom_p": "La gamme U Carve est construite autour d'un concept de base complète, avec une empreinte de montage généreuse qui offre de la rigidité et une sensation précise et fiable sous le pied.",
+    "hero_h": "La gamme U-Carve",
+    "hero_p": "conçu pour sentir la vague.",
+    "hero_p_II": "Cette gamme est conçue pour améliorer trois sensations essentielles sur l'eau : la glisse, la précision et la sensation de carving pure.",
+    "hero_row_p_I": "Son envergure réduite et ses extrémités affinées concentrent la portance, libérant complètement le roulis pour un comportement plus surf, plus ludique et un carving ultra-naturel.",
+    "hero_row_p_II": "Son envergure réduite et ses extrémités affinées concentrent la portance, libérant complètement le roulis pour un comportement plus surf, plus ludique et un carving ultra-naturel.",
+    "hero_row_p_III": "Malgré ce format compact, chaque détail du profil - épaisseur, cambrure, transitions - a été affiné pour minimiser la traînée et maximiser la glisse et l'efficacité.",
+    "whole_h": "C'était là tout le défi",
+    "whole_p": "Il s'agit d'un foil qui se libère complètement en roulis, qui est très surf, mais qui reste efficace et fiable dans les sections les plus lentes."
+  },
   "visit": {
     "play": " LIRE LA VIDÉO",
     "precission": "La précision jusque dans les moindres détails.",
-    "the-production": "La production de feuilles et de planches est un véritable défi. Elle exige précision et expertise à chaque étape, de la conception à l'assemblage final. Notre usine est équipée des technologies les plus récentes pour garantir une qualité et des performances optimales."
+    "the-production": "La production de foils et de planches est un véritable défi. Elle exige précision et expertise à chaque étape, de la conception à l'assemblage final. Notre usine est équipée des technologies les plus récentes pour garantir une qualité et des performances optimales."
   },
   "whatsnew": {
     "aside": "<p>03 SEPTEMBRE 2025</p><h2>NEW WING - THE STREAM</h2>",

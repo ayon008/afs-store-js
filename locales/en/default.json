@@ -101,6 +101,10 @@
     "home-spot": "home spot",
     "team": "team"
   },
+  "blackBird": {
+    "about_h": "With new hybrid and uncompromising design, every session becomes a unique experience where performance, glide, and enjoyment come together to redefine foiling.",
+    "Hero_t": "Hybrid / Mid-length experience - By AFS Advanced"
+  },
   "blog": {
     "blog": "Blog",
     "heading": "Discover foiling tips, industry information, and equipment reviews for riders of all levels.",
@@ -236,27 +240,16 @@
     "5th": "2 to 3 years warranty",
     "6th": "Worldwide delivery",
     "7th": "Tax refund available",
-    "about": "ABOUT US",
+    "about": "About Us",
     "accept": "I accept the privacy policy and terms of use",
     "client": "Service Client",
     "copy": "Foil and Co., All rights are reserved. ©2025",
     "email": "Enter your email address to subscribe to our newsletters",
-    "newsletterTitle": "Subscribe to our newsletter",
-    "newsletterDescription": "We will not send you spam, we will only inform you of a new product or event.",
-    "emailRequired": "Email is required",
-    "invalidEmail": "Invalid email format",
-    "acceptRequired": "You must accept the privacy policy and terms of use",
-    "newsletterSuccess": "Successfully subscribed to newsletter!",
-    "newsletterError": "An error occurred. Please try again.",
     "li-1": "<item1><link1>Foil Configurator</link1></item1><item><link2>Best match stab</link2></item><item><link3>Comparator 3 stabs / front wing</link3></item><item><link4>Mast comparison</link4></item><item><link5>Board Construction</link5></item><item><link6>Equipment</link6></item><item><link7>Recovery</link7></item><item><link8>Foil Characteristics</link8></item><item><link9>Screw Size</link9></item>",
-    "li-2": "<item1><link1>Legal Notices</link1></item1>\n      <item><link2>General terms and conditions of sale</link2></item>\n      <item><link3>Privacy Policy</link3></item>",
+    "li-2": "<item1><link1>Afs advance</link1></item1>\n      <item><link2>Made in france</link2></item>\n      <item><link3>Notice</link3></item>\n      <item><link4>Team</link4></item>\n      <item><link5>Join Us</link5></item>\n      <item><link6>Legal Notices</link6></item>\n      <item><link7>General terms and conditions of sale</link7></item>\n      <item><link8>Privacy Policy</link8></item>",
     "li-3": " <item1><link1>Afs advance</link1></item1>\n      <item><link2>Made in france</link2></item>\n      <item><link3>Notice</link3></item>\n      <item><link4>Team</link4></item>\n      <item><link5>Join Us</link5></item>\n      <item><link6>Legal Notices</link6></item>",
     "tools": "Purchasing tools",
-    "Universe": "Universe",
-    "social": "AFS",
-    "li-social": "<item1><link1>Instagram</link1></item1>\n      <item><link2>Facebook</link2></item>\n      <item><link3>YouTube</link3></item>\n      <item><link4>WhatsApp</link4></item>",
-    "mostSearched": "MOST SEARCHED",
-    "li-most-searched": "<item1><link1>WINGFOIL EQUIPMENT</link1></item1>\n      <item><link2>DOWNWIND EQUIPMENT</link2></item>\n      <item><link3>WINGFOIL PACK</link3></item>"
+    "Universe": "Universe"
   },
   "Form": {
     "title": "Form"
@@ -695,6 +688,21 @@
     "sub_h": "Surfone offers a wide range of products for all levels and types of practice, including AFS equipment",
     "The sales staff": "The sales staff are keen sailors who don't hesitate to get in the water to test all the products so they can give you the best advice!",
     "The Surfone store was": "The Surfone store was set up in 1978 in the seaside resort of Port Leucate on the Terres Catalanes, a mecca for board sports renowned for its Tramontane wind. The team welcomes you in a 400m2 space, offering a wide range of products for all levels and types of practice."
+  },
+  "ucarve": {
+    "about_h": "For riders who carve, connect, and draw lines",
+    "about_p": "The range is aimed at both committed carving-focused wingers and\n              demanding surf foilers seeking the perfect blend of connection,\n              pumping efficiency, and expressive riding in the wave, plus\n              downwinders who love drawing clean lines. It allows you to shape\n              your turns in a fluid, instinctive and fully intuitive way, for a\n              lively, efficient, and inspiring glide.",
+    "flow_h_I": "You get consistent drive, true connection to the wave, and rock-solid control at Vmax, further enhanced by the upturned tips acting as genuine winglets, reducing energy losses and unwanted movements at high speed.",
+    "flow_h_II": "At low speed, it still delivers: you keep lift, support, and a balanced, predictable feel, without ever “falling through” the foil.",
+    "hero_bottom_p": "The U Carve range is built around a full-base concept, with a\n              generous mounting footprint that delivers stiffness and a precise,\n              dependable feel underfoot.",
+    "hero_h": "The U-Carve range",
+    "hero_p": "designed to feel the wave.",
+    "hero_p_II": "This range is designed to elevate three essential on-water\n              sensations: glide, precision, and pure carving feel.",
+    "hero_row_p_I": "Its reduced span and refined tips concentrate the lift, freeing\n                the roll completely for a more surfy, playful behavior and\n                ultra-natural carving.",
+    "hero_row_p_II": "Its reduced span and refined tips concentrate the lift, freeing\n                the roll completely for a more surfy, playful behavior and\n                ultra-natural carving.",
+    "hero_row_p_III": "Despite this compact format, every detail of the profile -\n                thickness, camber, transitions - has been refined to minimize\n                drag and maximize glide and efficiency.",
+    "whole_h": "That was the whole challenge",
+    "whole_p": "Achieving a foil that’s fully freed in roll, highly surfy, yet still efficient and reliable in the slowest sections."
   },
   "visit": {
     "play": " PLAY VIDEO",
