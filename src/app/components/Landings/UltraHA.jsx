@@ -1,913 +1,1016 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, useEffect } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import SplitText from "gsap/SplitText";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Thumbs } from "swiper/modules";
+import { useTranslations } from "next-intl";
+import { ReactLenis } from "lenis/react";
 
 import "swiper/css";
 import "swiper/css/thumbs";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ----------------------------------------
+const UltraHA = () => {
+  //define i18n
+  const t = useTranslations("UltraHA");
+  const g = useTranslations("productDimension");
+  const container = useRef(null);
+  const lenisRef = useRef();
+
+  const tabs = ["Ha Ultra 600", "Ha Ultra 750", "Ha Ultra 900"];
+
+  const [activeTab, setActiveTab] = useState(0);
+  const [showPaddles, setShowPaddles] = useState(false);
+
+  const navRef = useRef(null);
+  const trackRef = useRef(null);
+  const bgRef = useRef(null);
+  const btnRefs = useRef([]);
+  const xRef = useRef(0);
+
+  /* ----------------------------------------
    TABLE DATA (ONLY CONTENT CHANGE)
 ---------------------------------------- */
 
-const uCarve130Specs = [
-    { label: "Surface", value: "130 cm2" },
-    { label: "Envergure", value: "360 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: "Corde maximum", value: "68" },
-    { label: "Epaisseur maximum", value: "5" },
+  const haUltra600 = [
+    { label: "Surface", value: "600 cm2" },
+    { label: g("Envergure"), value: "980 mm" },
+    { label: "Aspect ratio", value: "16" },
+    { label: g("Corde maximum"), value: "84 mm" },
+    { label: g("Epaisseur maximum"), value: "10.8 mm" },
     {
-        label: "Construction",
-        value: "HR Carbone + HM Carbone / Monolithique",
+      label: "Construction",
+      value: `UHM ${g("et")} HM ${g("Carbone")}`,
     },
-    { label: "Taille des vis", value: "12mm Torx 30" },
-];
+  ];
 
-const uCarve140Specs = [
-    { label: "Surface", value: "140 cm2" },
-    { label: "Envergure", value: "375 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: "Corde maximum", value: "72" },
-    { label: "Epaisseur maximum", value: "5" },
+  const haUltra750 = [
+    { label: "Surface", value: "750 cm2" },
+    { label: g("Envergure"), value: "1060 mm" },
+    { label: "Aspect ratio", value: "15" },
+    { label: g("Corde maximum"), value: "95 mm" },
+    { label: g("Epaisseur maximum"), value: "12.3 mm" },
     {
-        label: "Construction",
-        value: "HR Carbone + HM Carbone / Monolithique",
+      label: "Construction",
+      value: `UHM ${g("et")} HM ${g("Carbone")}`,
     },
-    { label: "Taille des vis", value: "12mm Torx 30" },
-];
+  ];
 
-const uCarve150Specs = [
-    { label: "Surface", value: "150 cm2" },
-    { label: "Envergure", value: "390 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: "Corde maximum", value: "76" },
-    { label: "Epaisseur maximum", value: "5" },
+  const haUltra900 = [
+    { label: "Surface", value: "900 cm2" },
+    { label: g("Envergure"), value: "1120 mm" },
+    { label: "Aspect ratio", value: "14" },
+    { label: g("Corde maximum"), value: "106 mm" },
+    { label: g("Epaisseur maximum"), value: "13.9 mm" },
     {
-        label: "Construction",
-        value: "HR Carbone + HM Carbone / Monolithique",
+      label: "Construction",
+      value: `UHM ${g("et")} HM ${g("Carbone")}`,
     },
-    { label: "Taille des vis", value: "12mm Torx 30" },
-];
+  ];
 
-const uCarve160Specs = [
-    { label: "Surface", value: "160 cm2" },
-    { label: "Envergure", value: "400 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: "Corde maximum", value: "80" },
-    { label: "Epaisseur maximum", value: "5" },
-    {
-        label: "Construction",
-        value: "HR Carbone + HM Carbone / Monolithique",
-    },
-    { label: "Taille des vis", value: "12mm Torx 30" },
-];
-
-/* ----------------------------------------
+  /* ----------------------------------------
    REUSABLE TABLE (SAME MARKUP)
 ---------------------------------------- */
-function SpecsTable({ data }) {
+  function SpecsTable({ data }) {
     return (
-        <table>
-            <tbody className="text-4 lg:text-[18px] font-bold leading-[110%] flex flex-col gap-2">
-                {data.map((row, index) => (
-                    <tr
-                        key={index}
-                        className="py-[2px] border-b border-b-[1px] border-b-[#FFFFFF26] flex justify-between gap-[40px]"
-                    >
-                        <th
-                            style={{ padding: 0, backgroundColor: "transparent" }}
-                            className="text-left text-[#FFFFFFCC] !whitespace-break-spaces"
-                        >
-                            {row.label}
-                        </th>
+      <table>
+        <tbody className="text-4 lg:text-[18px] font-bold leading-[110%] flex flex-col gap-2">
+          {data.map((row, index) => (
+            <tr
+              key={index}
+              className="py-[2px] border-b border-b-[1px] border-b-[#FFFFFF26] flex justify-between gap-[40px]"
+            >
+              <th
+                style={{ padding: 0, backgroundColor: "transparent" }}
+                className="text-left text-[#FFFFFFCC] !whitespace-break-spaces"
+              >
+                {row.label}
+              </th>
 
-                        <td
-                            style={{ textAlign: "right" }}
-                            className="font-semibold !whitespace-break-spaces"
-                        >
-                            {row.value}
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+              <td
+                style={{ textAlign: "right" }}
+                className="font-semibold !whitespace-break-spaces"
+              >
+                {row.value}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
-}
+  }
 
-const UltraHA = () => {
-    const container = useRef(null);
+  /* ----------------------------------------
+     Indicator animation
+  ---------------------------------------- */
+  const moveIndicator = () => {
+    const nav = navRef.current;
+    const activeBtn = btnRefs.current[activeTab];
+    const bg = bgRef.current;
 
-    const tabs = ["U carve 130", "U carve 140", "U carve 150", "U carve 160"];
+    if (!nav || !activeBtn || !bg) return;
 
-    const [activeTab, setActiveTab] = useState(0);
-    const [showPaddles, setShowPaddles] = useState(false);
+    const navRect = nav.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
 
-    const navRef = useRef(null);
-    const trackRef = useRef(null);
-    const bgRef = useRef(null);
-    const btnRefs = useRef([]);
-    const xRef = useRef(0);
+    gsap.to(bg, {
+      x: btnRect.left - navRect.left,
+      width: btnRect.width,
+      height: btnRect.height,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
 
-    /* ----------------------------------------
-       Indicator animation
-    ---------------------------------------- */
-    const moveIndicator = () => {
-        const nav = navRef.current;
-        const activeBtn = btnRefs.current[activeTab];
-        const bg = bgRef.current;
+  /* ----------------------------------------
+     Center active tab
+  ---------------------------------------- */
+  const centerActiveTab = () => {
+    const nav = navRef.current;
+    const track = trackRef.current;
+    const btn = btnRefs.current[activeTab];
 
-        if (!nav || !activeBtn || !bg) return;
+    if (!nav || !track || !btn) return;
 
-        const navRect = nav.getBoundingClientRect();
-        const btnRect = activeBtn.getBoundingClientRect();
+    const navWidth = nav.offsetWidth;
+    const trackWidth = track.scrollWidth;
 
-        gsap.to(bg, {
-            x: btnRect.left - navRect.left,
-            width: btnRect.width,
-            height: btnRect.height,
-            duration: 0.3,
-            ease: "power2.out",
-        });
-    };
+    const btnOffset = btn.offsetLeft + btn.offsetWidth / 2;
 
-    /* ----------------------------------------
-       Center active tab
-    ---------------------------------------- */
-    const centerActiveTab = () => {
-        const nav = navRef.current;
-        const track = trackRef.current;
-        const btn = btnRefs.current[activeTab];
+    let targetX = navWidth / 2 - btnOffset;
 
-        if (!nav || !track || !btn) return;
+    const minX = Math.min(0, navWidth - trackWidth);
+    targetX = gsap.utils.clamp(minX, 0, targetX);
 
-        const navWidth = nav.offsetWidth;
-        const trackWidth = track.scrollWidth;
+    xRef.current = targetX;
 
-        const btnOffset = btn.offsetLeft + btn.offsetWidth / 2;
+    gsap.to(track, {
+      x: targetX,
+      duration: 0.4,
+      ease: "power2.out",
+      onUpdate: moveIndicator,
+    });
+  };
 
-        let targetX = navWidth / 2 - btnOffset;
+  useLayoutEffect(() => {
+    moveIndicator();
+    centerActiveTab();
+  }, [activeTab]);
 
-        const minX = Math.min(0, navWidth - trackWidth);
-        targetX = gsap.utils.clamp(minX, 0, targetX);
+  /* ----------------------------------------
+     Detect overflow
+  ---------------------------------------- */
+  const checkOverflow = () => {
+    const nav = navRef.current;
+    const track = trackRef.current;
+    if (!nav || !track) return;
 
-        xRef.current = targetX;
+    setShowPaddles(track.scrollWidth > nav.offsetWidth);
+  };
 
-        gsap.to(track, {
-            x: targetX,
-            duration: 0.4,
-            ease: "power2.out",
-            onUpdate: moveIndicator,
-        });
-    };
+  /* ----------------------------------------
+     Arrow handlers
+  ---------------------------------------- */
+  const goPrev = () => setActiveTab((i) => Math.max(0, i - 1));
+  const goNext = () => setActiveTab((i) => Math.min(tabs.length - 1, i + 1));
 
-    useLayoutEffect(() => {
-        moveIndicator();
-        centerActiveTab();
-    }, [activeTab]);
+  const swiperRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-    /* ----------------------------------------
-       Detect overflow
-    ---------------------------------------- */
-    const checkOverflow = () => {
-        const nav = navRef.current;
-        const track = trackRef.current;
-        if (!nav || !track) return;
+  const sliderImages = {
+    0: [
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_01-2.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_02-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_03-1-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_04-1-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_05-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_06-2.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_04-2.png`,
+    ],
+    1: [
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_01-1-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_02-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_03-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_04-1-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_05-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_06-2.png`,
+    ],
+    2: [
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_01-1-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_02-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_03-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_04-2.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_05-1.png`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_07-2-1.png`,
+    ],
+  };
 
-        setShowPaddles(track.scrollWidth > nav.offsetWidth);
-    };
+  const images = sliderImages[activeTab];
 
-    /* ----------------------------------------
-       Arrow handlers
-    ---------------------------------------- */
-    const goPrev = () => setActiveTab((i) => Math.max(0, i - 1));
-    const goNext = () => setActiveTab((i) => Math.min(tabs.length - 1, i + 1));
+  const specsData =
+    activeTab === 0 ? haUltra600 : activeTab === 1 ? haUltra750 : haUltra900;
 
-    /* ----------------------------------------
+  const title =
+    activeTab === 0
+      ? "Ha Ultra 600"
+      : activeTab === 1
+      ? "Ha Ultra 750"
+      : "Ha Ultra 900";
+
+  useLayoutEffect(() => {
+    setActiveIndex(0);
+    swiperRef.current?.slideTo(0, 0);
+  }, [activeTab]);
+
+  /* ----------------------------------------
        GSAP animations
     ---------------------------------------- */
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            // Kill any existing ScrollTriggers
-            ScrollTrigger.getAll().forEach((t) => t.kill());
 
-            const mm = gsap.matchMedia();
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
 
-            mm.add(
-                {
-                    desktop: "(min-width: 1024px)",
-                    tablet: "(min-width: 768px) and (max-width: 1023px)",
-                    mobile: "(max-width: 767px)",
-                },
-                (context) => {
-                    const { desktop, tablet, mobile } = context.conditions;
+      mm.add(
+        {
+          desktop: "(min-width: 1024px)",
+          tablet: "(min-width: 768px) and (max-width: 1023px)",
+          mobile: "(max-width: 767px)",
+        },
+        (context) => {
+          const { desktop, tablet, mobile } = context.conditions;
 
-                    // 🔹 Responsive helper
-                    const r = (d, t, m) => (desktop ? d : tablet ? t : m);
+          // 🔹 Responsive helper
+          const r = (d, t, m) => (desktop ? d : tablet ? t : m);
 
-                    /* ------------------------------
-                       🔹 RESPONSIVE ENTRANCE ANIM
-                    ------------------------------ */
-                    const tl = gsap.timeline();
+          /* ------------------------------
+                 HERO INTRO TIMELINE
+              ------------------------------ */
+          const tl = gsap.timeline();
 
-                    tl.from(
-                        ".hero_svg",
-                        {
-                            y: 200,
-                            duration: 1,
-                            ease: "power3.out",
-                        },
-                        "<"
-                    )
-                        .from(
-                            ".hero_img",
-                            {
-                                rotate: 0,
-                                opacity: 0.3,
-                                duration: 1,
-                                ease: "power3.out",
-                            },
-                            "<"
-                        )
-                        .from(
-                            ".text_b",
-                            {
-                                x: "-100%",
-                                duration: 1,
-                                ease: "power3.out",
-                            },
-                            "<"
-                        )
-                        .to(
-                            ".hero",
-                            {
-                                "--after-opacity": 0.6,
-                                "--before-opacity": 0.6,
-                                duration: 2,
-                                ease: "power3.out",
-                            },
-                            "<"
-                        );
-
-                    /* ------------------------------
-                        HERO → ABOUT SCROLL
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about",
-                                start: "top bottom",
-                                end: "center center",
-                                scrub: true,
-                                markers: false,
-                            },
-                        })
-                        .fromTo(".about_h2", { y: "100%" }, { y: 0 }, "<")
-                        .fromTo(".about_img_one", { y: 160 }, { y: 0 }, "<")
-                        .fromTo(".about_img_three", { y: -160 }, { y: 0 }, "<");
-
-                    /* ------------------------------
-                        HERO → ABOUT SCROLL
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about_II",
-                                start: "top bottom",
-                                end: "top top",
-                                scrub: true,
-                                pin: ".about_h2",
-                                markers: false,
-                                pinSpacing: false,
-                            },
-                        })
-                        .fromTo(".about_h2", { y: "0" }, { y: 0 }, "<")
-                        .fromTo(".about_img_two", { y: 0 }, { y: 80 }, "<")
-                        .fromTo(".about_img_three", { y: 0 }, { y: 160 }, "<")
-                        .fromTo(".about_II_p_I", { y: "100%" }, { y: 0 }, "<")
-                        .fromTo(".about_II_line", { x: 60 }, { x: 0 }, "<");
-
-                    /* ------------------------------
-                        ABOUT II exit
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about_II",
-                                start: "top top",
-                                end: "bottom top",
-                                scrub: true,
-                                markers: false,
-                            },
-                        })
-                        .fromTo(".about_II_p_I", { y: 0 }, { y: 80 }, "<");
-
-                    /* ------------------------------
-                        ABOUT III entry
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about_III",
-                                endTrigger: ".about_IIII",
-                                start: "top bottom",
-                                end: "top bottom",
-                                scrub: true,
-                                markers: false,
-                            },
-                        })
-                        .fromTo(".about_III_img_one", { y: 80 }, { y: 0 }, "<")
-                        .fromTo(".about_III_img_three", { y: -80 }, { y: 0 }, "<")
-                        .fromTo(".about_III_p", { y: 80 }, { y: 0 }, "<");
-
-                    /* ------------------------------
-                        ABOUT IIII entry
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about_IIII",
-                                start: "top bottom",
-                                end: "top top",
-                                scrub: true,
-                                markers: false,
-                            },
-                        })
-                        .fromTo(
-                            ".about_III_img_div",
-                            { y: 0 },
-                            { y: r(-120, -80, -40) },
-                            "<"
-                        )
-                        .fromTo(".about_IIII_img", { scale: 1 }, { scale: 1.1 }, "<")
-                        .fromTo(".about_IIII_p", { y: 80 }, { y: 0, stagger: 0.15 }, "<")
-                        .fromTo(
-                            ".about_IIII_p_II",
-                            { x: 20 },
-                            { x: 0, stagger: 0.15 },
-                            "<"
-                        );
-
-                    /* ------------------------------
-                        ABOUT IIII inner entry
-                    ------------------------------ */
-                    gsap
-                        .timeline({
-                            scrollTrigger: {
-                                trigger: ".about_IIII_div_inner",
-                                start: "top bottom",
-                                end: "bottom bottom",
-                                scrub: true,
-                                markers: false,
-                            },
-                        })
-                        .fromTo(".about_IIII_img_I", { x: -200 }, { x: 0 }, "<")
-                        .fromTo(".about_IIII_img_II", { x: 200 }, { x: 0 }, "<")
-                        .fromTo(
-                            ".about_IIII_p_III",
-                            { y: 80 },
-                            { y: 0, stagger: 0.15 },
-                            "<"
-                        )
-                        .fromTo(".tracker", { rotate: 0 }, { rotate: -2 }, "<");
-
-                    const el = container.current.querySelector(".ticker-content");
-                    const width = el.offsetWidth / 2;
-
-                    gsap.to(el, {
-                        x: -width, // move left
-                        ease: "linear",
-                        repeat: -1, // infinite
-                        duration: 10, // adjust speed
-                    });
-                }
+          tl.from(
+            ".hero_svg",
+            {
+              y: 200,
+              duration: 1,
+              ease: "power3.out",
+            },
+            "<"
+          )
+            .from(
+              ".hero_img",
+              {
+                rotate: 0,
+                opacity: 0.3,
+                duration: 1,
+                ease: "power3.out",
+              },
+              "<"
+            )
+            .from(
+              ".text_b",
+              {
+                x: "-100%",
+                duration: 1,
+                ease: "power3.out",
+              },
+              "<"
+            )
+            .to(
+              ".hero",
+              {
+                "--after-opacity": 0.6,
+                "--before-opacity": 0.6,
+                duration: 2,
+                ease: "power3.out",
+              },
+              "<"
             );
 
-            ScrollTrigger.refresh();
-        }, container);
+          /* ------------------------------
+                          HERO → ABOUT SCROLL
+                      ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about",
+                start: "top bottom",
+                end: "center center",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(".about_h2", { y: "100%" }, { y: 0 }, "<")
+            .fromTo(".about_img_one", { y: 160 }, { y: 0 }, "<")
+            .fromTo(".about_img_three", { y: -160 }, { y: 0 }, "<");
 
-        return () => ctx.revert(); // cleanup
-    }, []);
+          /* ------------------------------
+                        HERO → ABOUT SCROLL
+                    ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about_II",
+                start: "top bottom",
+                end: "top top",
+                scrub: true,
+                pin: ".about_h2",
+                markers: false,
+                pinSpacing: false,
+              },
+            })
+            .fromTo(".about_h2", { y: "0" }, { y: 0, ease: "Power1.out" }, "<")
+            .fromTo(
+              ".about_img_two",
+              { y: 0, ease: "Power1.out" },
+              { y: 80 },
+              "<"
+            )
+            .fromTo(
+              ".about_img_three",
+              { y: 0, ease: "Power1.out" },
+              { y: 160 },
+              "<"
+            )
+            .fromTo(
+              ".about_II_p_I",
+              { y: "100%", ease: "Power1.out" },
+              { y: 0 },
+              "<"
+            )
+            .fromTo(
+              ".about_II_line",
+              { x: 60 },
+              { x: 0, ease: "Power1.out" },
+              "<"
+            );
 
-    // 🔥 Image load handler (important)
-    const handleImageLoad = () => {
-        ScrollTrigger.refresh();
-    };
+          /* ------------------------------
+                          ABOUT II exit
+                      ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about_II",
+                start: "top top",
+                end: "bottom top",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".about_II_p_I",
+              { y: 0 },
+              { y: 80, ease: "Power1.out" },
+              "<"
+            );
 
-    return (
-        <div ref={container} className="overflow-hidden bg-[#000]">
-            {/*HERO*/}
-            <section
-                className="hero z-0 relative min-h-[760px] min-h-[calc(100vh-80px)] pt-[140px] overflow-hidden
-        after:content-[''] after:absolute after:top-[10%] after:right-[-30%] after:w-[1200px] after:h-[600px] after:bg-[#0059B8] after:blur-[553px] after:-z-10 after:rounded-[50%] after:rotate-[200deg] after:opacity-[var(--after-opacity,0)]
+          /* ------------------------------
+                        ABOUT III entry
+                    ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about_III",
+                endTrigger: ".about_IIII",
+                start: "top bottom",
+                end: "top bottom",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".about_III_img_one",
+              { y: 80 },
+              { y: 0, ease: "Power1.out" },
+              "<"
+            )
+            .fromTo(
+              ".about_III_img_three",
+              { y: -80 },
+              { y: 0, ease: "Power1.out" },
+              "<"
+            )
+            .fromTo(
+              ".about_III_p",
+              { y: 80 },
+              { y: 0, ease: "Power1.out" },
+              "<"
+            );
+
+          /* ------------------------------
+                          ABOUT IIII entry
+                      ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about_IIII",
+                start: "top bottom",
+                end: "top top",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".about_III_img_div",
+              { y: 0 },
+              { y: r(-120, -80, -40), ease: "Power1.out" },
+              "<"
+            )
+            .fromTo(
+              ".about_IIII_img",
+              { scale: 1 },
+              { scale: 1.1, ease: "Power1.out" },
+              "<"
+            )
+            .fromTo(
+              ".about_IIII_p",
+              { y: 80 },
+              { y: 0, stagger: 0.14, ease: "Power4.inOut" },
+              "<"
+            )
+            .fromTo(
+              ".about_IIII_p_II",
+              { x: -20 },
+              { x: 0, stagger: 0.15, ease: "Power1.out" },
+              "<"
+            );
+
+          /* ------------------------------
+                          ABOUT IIII inner entry
+                      ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about_IIII_div_inner",
+                start: "top bottom",
+                end: "center center",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".about_IIII_img_I",
+              { x: -200 },
+              { x: 0, ease: "Power1.inOut" },
+              "<"
+            )
+            .fromTo(
+              ".about_IIII_img_II",
+              { x: 200 },
+              { x: 0, ease: "Power1.inOut" },
+              "<"
+            )
+            .fromTo(
+              ".about_IIII_p_III",
+              { y: 80 },
+              { y: 0, stagger: 0.15, ease: "Power1.out" },
+              "<"
+            )
+            .fromTo(
+              ".tracker",
+              { rotate: 0 },
+              { rotate: -2, ease: "Power1.out" },
+              "<"
+            );
+
+          const el = container.current.querySelector(".ticker-content");
+          const width = el.offsetWidth / 2;
+          gsap.to(el, {
+            x: -width,
+            ease: "linear",
+            repeat: -1,
+            duration: 20,
+          });
+        }
+      );
+
+      return () => mm.revert();
+    },
+    { scope: container }
+  );
+
+  /* --------------------------------------------------
+     🔥 IMAGE LOAD FIX (CRITICAL FOR SCROLLTRIGGER)
+     --------------------------------------------------
+     Next <Image /> loads with intrinsic size first
+     → layout shifts after decode
+     → ScrollTrigger needs refresh AFTER decode
+  -------------------------------------------------- */
+
+  const handleImageLoad = (img) => {
+    // Wait for browser layout + decode
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+  };
+
+  return (
+    <ReactLenis root options={{ autoRef: false }} ref={lenisRef}>
+      <div
+        ref={container}
+        className="relative overflow-hidden bg-[#000] mx-auto"
+      >
+        {/*HERO*/}
+        <section
+          className="bg-[#000] z-1 hero relative min-h-[760px] min-h-[calc(100vh-80px)] pt-[140px] overflow-hidden
+        after:content-[''] after:absolute after:top-[-30%] after:right-[-30%] after:w-[1200px] after:h-[600px] after:bg-[#0059B8] after:blur-[553px] after:-z-10 after:rounded-[50%] after:rotate-[200deg] after:opacity-[var(--after-opacity,0)]
         before:content-[''] before:absolute before:top-[-30%] before:left-[-30%] before:w-[1200px] before:h-[600px] before:bg-[#0059B8] before:blur-[553px] before:-z-10 before:rounded-[50%] before:rotate-[200deg] before:opacity-[var(--before-opacity,0)]
         flex flex-col items-center justify-between global-padding pb-[15vh]"
+        >
+          {/* the HA svg */}
+          <div className="relative z-1 overflow-hidden">
+            <svg
+              className="hero_svg smooth md:max-w-[55.2vw] max-w-[75vw] min-w-[55.2vw] mx-auto"
+              xmlns="http://www.w3.org/2000/svg"
+              width={1060}
+              height={279}
+              viewBox="0 0 1060 279"
+              fill="none"
             >
-                {/* the HA svg */}
-                <div className="relative z-1 overflow-hidden">
-                    <svg
-                        className="hero_svg smooth md:max-w-[55.2vw] max-w-[75vw] min-w-[55.2vw] mx-auto"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={1060}
-                        height={279}
-                        viewBox="0 0 1060 279"
-                        fill="none"
-                    >
-                        <g filter="url(#filter0_d_19643_241)">
-                            <path
-                                className="text_b"
-                                d="M12.1582 222.571H15.7209L24.098 243.032H24.3868L32.7639 222.571H36.3265V247.221H33.5342V228.493H33.2935L25.5904 247.221H22.8944L15.1913 228.493H14.9506L14.9506 247.221H12.1582V222.571ZM66.4988 234.897C66.4988 237.496 66.0296 239.743 65.0908 241.637C64.152 243.53 62.8642 244.99 61.2272 246.018C59.5904 247.044 57.7208 247.558 55.6185 247.558C53.5162 247.558 51.6466 247.044 50.0097 246.018C48.3728 244.99 47.085 243.53 46.1461 241.637C45.2073 239.743 44.738 237.496 44.738 234.897C44.738 232.297 45.2073 230.05 46.1461 228.156C47.085 226.262 48.3728 224.802 50.0097 223.775C51.6466 222.748 53.5162 222.234 55.6185 222.234C57.7208 222.234 59.5904 222.748 61.2272 223.775C62.8642 224.802 64.152 226.262 65.0908 228.156C66.0296 230.05 66.4988 232.297 66.4988 234.897ZM63.6104 234.897C63.6104 232.762 63.2533 230.96 62.5392 229.492C61.8331 228.023 60.8742 226.912 59.6626 226.158C58.459 225.404 57.1109 225.027 55.6185 225.027C54.126 225.027 52.774 225.404 51.5624 226.158C50.3587 226.912 49.3999 228.023 48.6857 229.492C47.9796 230.96 47.6265 232.762 47.6265 234.897C47.6265 237.03 47.9796 238.832 48.6857 240.3C49.3999 241.769 50.3587 242.88 51.5624 243.634C52.774 244.389 54.126 244.766 55.6185 244.766C57.1109 244.766 58.459 244.389 59.6626 243.634C60.8742 242.88 61.8331 241.769 62.5392 240.3C63.2533 238.832 63.6104 237.03 63.6104 234.897ZM74.9077 247.221V222.571H83.2362C85.1621 222.571 86.7431 222.9 87.9786 223.558C89.214 224.208 90.1292 225.103 90.7226 226.242C91.3168 227.382 91.6132 228.677 91.6132 230.13C91.6132 231.582 91.3168 232.87 90.7226 233.993C90.1292 235.117 89.218 236 87.9905 236.642C86.7631 237.275 85.194 237.592 83.2847 237.592H76.5445V234.897H83.1883C84.5042 234.897 85.5635 234.704 86.3657 234.318C87.1764 233.934 87.7619 233.388 88.1228 232.682C88.4923 231.968 88.6764 231.117 88.6764 230.13C88.6764 229.143 88.4923 228.281 88.1228 227.542C87.754 226.804 87.1638 226.234 86.3537 225.833C85.5429 225.424 84.4723 225.219 83.1398 225.219H77.8923V247.221H74.9077ZM86.5099 236.148L92.5761 247.221H89.1097L83.1398 236.148H86.5099ZM99.9769 247.221V222.571H108.305C110.239 222.571 111.82 222.92 113.048 223.619C114.283 224.309 115.198 225.244 115.792 226.423C116.386 227.602 116.682 228.919 116.682 230.371C116.682 231.823 116.386 233.143 115.792 234.33C115.206 235.518 114.299 236.465 113.072 237.171C111.844 237.869 110.271 238.218 108.354 238.218H102.384V235.57H108.257C109.581 235.57 110.645 235.342 111.447 234.884C112.25 234.427 112.831 233.809 113.192 233.03C113.561 232.244 113.746 231.358 113.746 230.371C113.746 229.384 113.561 228.501 113.192 227.723C112.831 226.944 112.246 226.335 111.435 225.894C110.625 225.444 109.549 225.219 108.209 225.219H102.961V247.221H99.9769ZM124.881 247.221V222.571H127.865V233.548H141.008V222.571H143.994V247.221H141.008V236.196H127.865V247.221H124.881ZM170.758 247.221L164.018 222.571H167.051L172.202 242.648H172.443L177.69 222.571H181.061L186.309 242.648H186.549L191.7 222.571H194.734L187.993 247.221H184.912L179.472 227.578H179.279L173.839 247.221H170.758ZM204.827 222.571V247.221H201.843V222.571H204.827ZM212.853 225.219V222.571H231.34V225.219H223.589V247.221H220.605V225.219H212.853ZM239.337 247.221V222.571H242.322V233.548H255.465V222.571H258.45V247.221H255.465V236.196H242.322V247.221H239.337ZM279.389 225.219V222.571H297.877V225.219H290.125V247.221H287.14V225.219H279.389ZM305.873 247.221V222.571H308.857V233.548H322.001V222.571H324.986V247.221H322.001V236.196H308.857V247.221H305.873ZM334.351 247.221V222.571H349.228V225.219H337.336V233.548H348.457V236.196H337.336V244.573H349.42V247.221H334.351ZM370.919 247.221V222.571H385.795V225.219H373.903V233.548H385.025V236.196H373.903V244.573H385.988V247.221H370.919ZM394.564 247.221V222.571H397.55V244.573H409.008V247.221H394.564ZM417.019 247.221V222.571H431.896V225.219H420.004V233.548H431.126V236.196H420.004V244.573H432.089V247.221H417.019ZM440.665 222.571H444.228L452.605 243.032H452.894L461.271 222.571H464.834V247.221H462.041V228.493H461.8L454.097 247.221H451.401L443.698 228.493H443.457V247.221H440.665V222.571ZM474.207 247.221V222.571H489.084V225.219H477.193V233.548H488.314V236.196H477.193V244.573H489.277V247.221H474.207ZM517.4 222.571V247.221H514.511L501.08 227.867H500.838V247.221H497.854V222.571H500.742L514.223 241.974H514.463V222.571H517.4ZM525.414 225.219V222.571H543.902V225.219H536.151V247.221H533.165V225.219H525.414ZM565.378 228.734C565.234 227.514 564.648 226.567 563.621 225.894C562.593 225.219 561.334 224.882 559.841 224.882C558.75 224.882 557.795 225.059 556.977 225.412C556.166 225.765 555.532 226.25 555.075 226.868C554.626 227.486 554.401 228.188 554.401 228.975C554.401 229.632 554.557 230.198 554.87 230.672C555.191 231.137 555.601 231.526 556.099 231.839C556.596 232.144 557.117 232.397 557.663 232.597C558.209 232.79 558.71 232.947 559.168 233.067L561.671 233.741C562.313 233.909 563.027 234.142 563.814 234.439C564.608 234.736 565.366 235.141 566.089 235.655C566.818 236.16 567.42 236.81 567.893 237.604C568.367 238.399 568.604 239.374 568.604 240.529C568.604 241.861 568.255 243.065 567.557 244.14C566.867 245.215 565.855 246.069 564.523 246.703C563.2 247.337 561.591 247.654 559.697 247.654C557.931 247.654 556.403 247.369 555.112 246.8C553.828 246.23 552.816 245.436 552.079 244.417C551.348 243.398 550.935 242.214 550.838 240.866H553.92C554 241.797 554.313 242.567 554.858 243.177C555.412 243.779 556.111 244.228 556.953 244.525C557.803 244.814 558.718 244.958 559.697 244.958C560.836 244.958 561.86 244.773 562.766 244.405C563.673 244.028 564.391 243.506 564.921 242.84C565.45 242.166 565.715 241.379 565.715 240.481C565.715 239.662 565.486 238.996 565.029 238.483C564.572 237.97 563.97 237.552 563.224 237.231C562.477 236.91 561.671 236.629 560.804 236.389L557.771 235.522C555.845 234.968 554.321 234.178 553.198 233.151C552.075 232.124 551.512 230.78 551.512 229.119C551.512 227.739 551.886 226.536 552.632 225.508C553.386 224.473 554.397 223.671 555.665 223.101C556.941 222.523 558.365 222.234 559.938 222.234C561.527 222.234 562.939 222.519 564.174 223.089C565.41 223.651 566.389 224.421 567.111 225.4C567.842 226.379 568.226 227.49 568.267 228.734H565.378ZM580.752 243.851L580.56 245.151C580.423 246.065 580.215 247.044 579.934 248.088C579.661 249.131 579.376 250.114 579.079 251.036C578.783 251.96 578.537 252.693 578.345 253.239H576.179C576.283 252.726 576.419 252.047 576.587 251.205C576.756 250.363 576.925 249.42 577.093 248.377C577.27 247.341 577.414 246.282 577.526 245.199L577.671 243.851H580.752ZM601.364 225.219V222.571H619.851V225.219H612.1V247.221H609.115V225.219H601.364ZM627.847 247.221V222.571H636.175C638.101 222.571 639.682 222.9 640.918 223.558C642.153 224.208 643.068 225.103 643.662 226.242C644.256 227.382 644.553 228.677 644.553 230.13C644.553 231.582 644.256 232.87 643.662 233.993C643.068 235.117 642.157 236 640.93 236.642C639.702 237.275 638.133 237.592 636.224 237.592H629.484V234.897H636.128C637.443 234.897 638.503 234.704 639.305 234.318C640.116 233.934 640.701 233.388 641.062 232.682C641.432 231.968 641.616 231.117 641.616 230.13C641.616 229.143 641.432 228.281 641.062 227.542C640.693 226.804 640.104 226.234 639.293 225.833C638.483 225.424 637.412 225.219 636.08 225.219H630.832V247.221H627.847ZM639.45 236.148L645.515 247.221H642.049L636.08 236.148H639.45ZM653.927 247.221H650.797L659.849 222.571H662.93L671.981 247.221H668.851L661.486 226.471H661.293L653.927 247.221ZM655.083 237.592H667.694V240.24H655.083V237.592ZM698.757 222.571V247.221H695.866L682.435 227.867H682.195V247.221H679.211V222.571H682.096L695.58 241.974H695.819V222.571H698.757ZM721.598 228.734C721.452 227.514 720.867 226.567 719.844 225.894C718.814 225.219 717.557 224.882 716.062 224.882C714.972 224.882 714.015 225.059 713.198 225.412C712.387 225.765 711.756 226.25 711.297 226.868C710.845 227.486 710.619 228.188 710.619 228.975C710.619 229.632 710.779 230.198 711.091 230.672C711.41 231.137 711.822 231.526 712.321 231.839C712.819 232.144 713.337 232.397 713.882 232.597C714.427 232.79 714.932 232.947 715.391 233.067L717.89 233.741C718.534 233.909 719.245 234.142 720.036 234.439C720.827 234.736 721.585 235.141 722.309 235.655C723.04 236.16 723.638 236.81 724.117 237.604C724.589 238.399 724.821 239.374 724.821 240.529C724.821 241.861 724.476 243.065 723.778 244.14C723.087 245.215 722.077 246.069 720.747 246.703C719.418 247.337 717.81 247.654 715.916 247.654C714.155 247.654 712.626 247.369 711.33 246.8C710.048 246.23 709.038 245.436 708.3 244.417C707.569 243.398 707.157 242.214 707.057 240.866H710.141C710.221 241.797 710.533 242.567 711.078 243.177C711.636 243.779 712.334 244.228 713.171 244.525C714.022 244.814 714.939 244.958 715.916 244.958C717.059 244.958 718.083 244.773 718.986 244.405C719.897 244.028 720.615 243.506 721.14 242.84C721.671 242.166 721.937 241.379 721.937 240.481C721.937 239.662 721.704 238.996 721.253 238.483C720.794 237.97 720.189 237.552 719.445 237.231C718.701 236.91 717.89 236.629 717.026 236.389L713.995 235.522C712.068 234.968 710.54 234.178 709.416 233.151C708.293 232.124 707.735 230.78 707.735 229.119C707.735 227.739 708.107 226.536 708.852 225.508C709.609 224.473 710.619 223.671 711.889 223.101C713.165 222.523 714.587 222.234 716.162 222.234C717.75 222.234 719.159 222.519 720.395 223.089C721.631 223.651 722.608 224.421 723.333 225.4C724.064 226.379 724.449 227.49 724.489 228.734H721.598ZM752.96 230.274H749.969C749.796 229.416 749.484 228.661 749.045 228.012C748.613 227.362 748.081 226.816 747.457 226.375C746.839 225.925 746.154 225.588 745.397 225.364C744.646 225.139 743.855 225.027 743.037 225.027C741.549 225.027 740.193 225.404 738.983 226.158C737.781 226.912 736.824 228.023 736.106 229.492C735.401 230.96 735.049 232.762 735.049 234.897C735.049 237.03 735.401 238.832 736.106 240.3C736.824 241.769 737.781 242.88 738.983 243.634C740.193 244.389 741.549 244.766 743.037 244.766C743.855 244.766 744.646 244.653 745.397 244.429C746.154 244.204 746.839 243.871 747.457 243.43C748.081 242.98 748.613 242.431 749.045 241.781C749.484 241.123 749.796 240.369 749.969 239.518H752.96C752.734 240.778 752.322 241.905 751.73 242.9C751.139 243.895 750.394 244.742 749.517 245.44C748.633 246.13 747.643 246.656 746.54 247.016C745.45 247.377 744.28 247.558 743.037 247.558C740.937 247.558 739.07 247.044 737.428 246.018C735.794 244.99 734.504 243.53 733.567 241.637C732.63 239.743 732.158 237.496 732.158 234.897C732.158 232.297 732.63 230.05 733.567 228.156C734.504 226.262 735.794 224.802 737.428 223.775C739.07 222.748 740.937 222.234 743.037 222.234C744.28 222.234 745.45 222.415 746.54 222.776C747.643 223.137 748.633 223.667 749.517 224.365C750.394 225.055 751.139 225.898 751.73 226.892C752.322 227.879 752.734 229.006 752.96 230.274ZM761.167 247.221V222.571H776.047V225.219H764.158V233.548H775.276V236.196H764.158V244.573H776.24V247.221H761.167ZM804.365 222.571V247.221H801.474L788.043 227.867H787.803V247.221H784.813V222.571H787.704L801.188 241.974H801.427V222.571H804.365ZM821.331 247.221H813.722V222.571H821.67C824.063 222.571 826.103 223.065 827.804 224.052C829.505 225.031 830.815 226.439 831.719 228.277C832.622 230.106 833.081 232.297 833.081 234.848C833.081 237.416 832.622 239.626 831.705 241.48C830.795 243.325 829.459 244.746 827.711 245.74C825.963 246.727 823.837 247.221 821.331 247.221ZM816.712 244.573H821.138C823.179 244.573 824.867 244.18 826.203 243.394C827.545 242.608 828.542 241.488 829.2 240.036C829.858 238.583 830.19 236.854 830.19 234.848C830.19 232.858 829.864 231.145 829.213 229.709C828.562 228.264 827.591 227.157 826.302 226.387C825.013 225.608 823.405 225.219 821.477 225.219H816.712V244.573ZM852.281 222.571H855.696L862.535 234.078H862.821L869.659 222.571H873.075L864.17 237.062V247.221H861.186V237.062L852.281 222.571ZM899.964 234.897C899.964 237.496 899.499 239.743 898.555 241.637C897.618 243.53 896.329 244.99 894.694 246.018C893.059 247.044 891.185 247.558 889.085 247.558C886.985 247.558 885.111 247.044 883.476 246.018C881.841 244.99 880.552 243.53 879.615 241.637C878.677 239.743 878.206 237.496 878.206 234.897C878.206 232.297 878.677 230.05 879.615 228.156C880.552 226.262 881.841 224.802 883.476 223.775C885.111 222.748 886.985 222.234 889.085 222.234C891.185 222.234 893.059 222.748 894.694 223.775C896.329 224.802 897.618 226.262 898.555 228.156C899.499 230.05 899.964 232.297 899.964 234.897ZM897.08 234.897C897.08 232.762 896.721 230.96 896.003 229.492C895.299 228.023 894.342 226.912 893.132 226.158C891.929 225.404 890.58 225.027 889.085 225.027C887.596 225.027 886.24 225.404 885.031 226.158C883.828 226.912 882.864 228.023 882.153 229.492C881.449 230.96 881.097 232.762 881.097 234.897C881.097 237.03 881.449 238.832 882.153 240.3C882.864 241.769 883.828 242.88 885.031 243.634C886.24 244.389 887.596 244.766 889.085 244.766C890.58 244.766 891.929 244.389 893.132 243.634C894.342 242.88 895.299 241.769 896.003 240.3C896.721 238.832 897.08 237.03 897.08 234.897ZM924.553 222.571H927.537V238.892C927.537 240.577 927.138 242.082 926.341 243.406C925.557 244.722 924.447 245.761 923.011 246.523C921.576 247.277 919.888 247.654 917.954 247.654C916.02 247.654 914.339 247.277 912.903 246.523C911.461 245.761 910.351 244.722 909.554 243.406C908.77 242.082 908.377 240.577 908.377 238.892V222.571H911.361V238.651C911.361 239.855 911.627 240.926 912.152 241.865C912.684 242.796 913.435 243.53 914.418 244.068C915.402 244.597 916.585 244.862 917.954 244.862C919.33 244.862 920.506 244.597 921.496 244.068C922.48 243.53 923.237 242.796 923.756 241.865C924.287 240.926 924.553 239.855 924.553 238.651V222.571ZM936.888 247.221V222.571H945.215C947.142 222.571 948.724 222.9 949.96 223.558C951.19 224.208 952.107 225.103 952.698 226.242C953.296 227.382 953.595 228.677 953.595 230.13C953.595 231.582 953.296 232.87 952.698 233.993C952.107 235.117 951.196 236 949.967 236.642C948.744 237.275 947.175 237.592 945.261 237.592H938.523V234.897H945.168C946.484 234.897 947.541 234.704 948.345 234.318C949.156 233.934 949.741 233.388 950.1 232.682C950.472 231.968 950.658 231.117 950.658 230.13C950.658 229.143 950.472 228.281 950.1 227.542C949.734 226.804 949.143 226.234 948.332 225.833C947.521 225.424 946.451 225.219 945.115 225.219H939.872V247.221H936.888ZM948.491 236.148L954.552 247.221H951.09L945.115 236.148H948.491ZM975.433 228.734C975.294 227.514 974.702 226.567 973.679 225.894C972.649 225.219 971.393 224.882 969.897 224.882C968.807 224.882 967.85 225.059 967.033 225.412C966.222 225.765 965.591 226.25 965.132 226.868C964.68 227.486 964.461 228.188 964.461 228.975C964.461 229.632 964.614 230.198 964.926 230.672C965.252 231.137 965.657 231.526 966.156 231.839C966.654 232.144 967.173 232.397 967.718 232.597C968.269 232.79 968.768 232.947 969.226 233.067L971.732 233.741C972.37 233.909 973.087 234.142 973.872 234.439C974.662 234.736 975.427 235.141 976.144 235.655C976.875 236.16 977.48 236.81 977.952 237.604C978.424 238.399 978.663 239.374 978.663 240.529C978.663 241.861 978.311 243.065 977.613 244.14C976.922 245.215 975.912 246.069 974.583 246.703C973.26 247.337 971.645 247.654 969.758 247.654C967.99 247.654 966.462 247.369 965.166 246.8C963.883 246.23 962.873 245.436 962.135 244.417C961.404 243.398 960.992 242.214 960.899 240.866H963.976C964.056 241.797 964.368 242.567 964.913 243.177C965.471 243.779 966.169 244.228 967.013 244.525C967.864 244.814 968.774 244.958 969.758 244.958C970.894 244.958 971.918 244.773 972.821 244.405C973.732 244.028 974.45 243.506 974.981 242.84C975.506 242.166 975.772 241.379 975.772 240.481C975.772 239.662 975.546 238.996 975.088 238.483C974.629 237.97 974.024 237.552 973.28 237.231C972.536 236.91 971.732 236.629 970.861 236.389L967.831 235.522C965.903 234.968 964.381 234.178 963.258 233.151C962.128 232.124 961.57 230.78 961.57 229.119C961.57 227.739 961.942 226.536 962.687 225.508C963.444 224.473 964.454 223.671 965.724 223.101C967 222.523 968.422 222.234 969.997 222.234C971.585 222.234 972.994 222.519 974.23 223.089C975.466 223.651 976.443 224.421 977.168 225.4C977.899 226.379 978.284 227.49 978.324 228.734H975.433ZM986.957 247.221V222.571H1001.84V225.219H989.941V233.548H1001.07V236.196H989.941V244.573H1002.03V247.221H986.957ZM1010.6 247.221V222.571H1013.59V244.573H1025.05V247.221H1010.6ZM1033.06 247.221V222.571H1047.84V225.219H1036.04V233.548H1046.73V236.196H1036.04V247.221H1033.06Z"
-                                fill="white"
-                            />
-                            <path
-                                d="M411.327 2.47663H448.32V116.101C448.32 128.859 445.273 140.023 439.178 149.59C433.141 159.159 424.683 166.62 413.805 171.974C402.926 177.271 390.254 179.919 375.788 179.919C361.264 179.919 348.563 177.271 337.685 171.974C326.806 166.62 318.348 159.159 312.311 149.59C306.274 140.023 303.256 128.859 303.256 116.101V2.47663H340.248V112.94C340.248 119.604 341.7 125.527 344.605 130.711C347.567 135.893 351.724 139.965 357.078 142.927C362.432 145.889 368.668 147.369 375.788 147.369C382.964 147.369 389.2 145.889 394.497 142.927C399.851 139.965 403.98 135.893 406.885 130.711C409.847 125.527 411.327 119.604 411.327 112.94V2.47663ZM469.132 177.442V2.47663H506.124V146.942H581.133V177.442H469.132ZM567.495 32.9759V2.47663L711.194 2.47656V32.9759H657.626V177.442H621.06V32.9759H567.495ZM725.23 177.442V2.47656H794.26C807.478 2.47656 818.75 4.8402 828.094 9.56746C837.491 14.2378 844.641 20.873 849.539 29.4731C854.49 38.0163 856.969 48.0689 856.969 59.6307C856.969 71.2495 854.464 81.2447 849.453 89.6171C844.442 97.9329 837.178 104.312 827.668 108.754C818.211 113.197 806.761 115.418 793.323 115.418H747.102V85.6874H787.342C794.406 85.6874 800.268 84.7191 804.94 82.7826C809.612 80.846 813.087 77.9418 815.367 74.0686C817.699 70.1955 818.869 65.3833 818.869 59.6307C818.869 53.821 817.699 48.9232 815.367 44.9364C813.087 40.9495 809.585 37.9309 804.853 35.8805C800.188 33.7732 794.293 32.7196 787.169 32.7196H762.227V177.442H725.23ZM819.72 97.8186L863.203 177.442H822.371L779.825 97.8186H819.72ZM903.649 177.442H864.007L924.404 2.47656H972.074L1032.39 177.442H992.749L948.927 42.4588H947.558L903.649 177.442ZM901.17 108.668H994.803V137.545H901.17V108.668Z"
-                                fill="#EEEEEE"
-                            />
-                            <mask
-                                id="mask0_19643_241"
-                                style={{
-                                    maskType: "luminance",
-                                }}
-                                maskUnits="userSpaceOnUse"
-                                x={300}
-                                y={0}
-                                width={736}
-                                height={183}
-                            >
-                                <path d="M1035.64 0H300.621V182.094H1035.64V0Z" fill="white" />
-                                <path
-                                    d="M411.329 2.47663H448.322V116.101C448.322 128.859 445.275 140.023 439.18 149.59C433.143 159.159 424.685 166.62 413.807 171.974C402.928 177.271 390.256 179.919 375.79 179.919C361.266 179.919 348.565 177.271 337.687 171.974C326.808 166.62 318.35 159.159 312.313 149.59C306.276 140.023 303.258 128.859 303.258 116.101V2.47663H340.25V112.94C340.25 119.604 341.702 125.527 344.606 130.711C347.568 135.893 351.726 139.965 357.08 142.927C362.434 145.889 368.67 147.369 375.79 147.369C382.966 147.369 389.202 145.889 394.499 142.927C399.853 139.965 403.982 135.893 406.887 130.711C409.849 125.527 411.329 119.604 411.329 112.94V2.47663ZM469.134 177.442V2.47663H506.126V146.942H581.135V177.442H469.134ZM567.497 32.9759V2.47663L711.196 2.47656V32.9759H657.627V177.442H621.062V32.9759H567.497ZM725.232 177.442V2.47656H794.262C807.48 2.47656 818.751 4.8402 828.095 9.56746C837.493 14.2378 844.643 20.873 849.541 29.4731C854.492 38.0163 856.971 48.0689 856.971 59.6307C856.971 71.2495 854.466 81.2447 849.455 89.6171C844.444 97.9329 837.18 104.312 827.67 108.754C818.213 113.197 806.762 115.418 793.325 115.418H747.103V85.6874H787.344C794.408 85.6874 800.27 84.7191 804.942 82.7826C809.613 80.846 813.089 77.9418 815.369 74.0686C817.701 70.1955 818.871 65.3833 818.871 59.6307C818.871 53.821 817.701 48.9232 815.369 44.9364C813.089 40.9495 809.587 37.9309 804.855 35.8805C800.19 33.7732 794.295 32.7196 787.171 32.7196H762.229V177.442H725.232ZM819.722 97.8186L863.205 177.442H822.373L779.827 97.8186H819.722ZM903.651 177.442H864.009L924.406 2.47656H972.076L1032.39 177.442H992.751L948.929 42.4588H947.56L903.651 177.442ZM901.172 108.668H994.805V137.545H901.172V108.668Z"
-                                    fill="black"
-                                />
-                            </mask>
-                            <g mask="url(#mask0_19643_241)">
-                                <path
-                                    d="M411.331 2.47622V0.482489H409.337V2.47622H411.331ZM448.323 2.47622H450.317V0.482489H448.323V2.47622ZM439.182 149.59L437.5 148.519L437.495 148.526L439.182 149.59ZM413.808 171.974L414.681 173.766L414.689 173.762L413.808 171.974ZM337.688 171.974L336.808 173.762L336.815 173.766L337.688 171.974ZM303.259 2.47622V0.482489H301.266V2.47622H303.259ZM340.251 2.47622H342.245V0.482489H340.251V2.47622ZM344.608 130.71L342.869 131.684L342.873 131.692L342.877 131.699L344.608 130.71ZM394.5 142.926L393.535 141.182L393.527 141.186L394.5 142.926ZM406.888 130.71L405.158 129.721L405.153 129.728L405.149 129.735L406.888 130.71ZM411.331 2.47622V4.46995H448.323V2.47622V0.482489H411.331V2.47622ZM448.323 2.47622H446.329V116.101H448.323H450.317V2.47622H448.323ZM448.323 116.101H446.329C446.329 128.528 443.365 139.31 437.5 148.519L439.182 149.59L440.863 150.661C447.186 140.734 450.317 129.19 450.317 116.101H448.323ZM439.182 149.59L437.495 148.526C431.669 157.761 423.501 164.982 412.928 170.185L413.808 171.974L414.689 173.762C425.872 168.258 434.62 160.556 440.868 150.654L439.182 149.59ZM413.808 171.974L412.936 170.181C402.377 175.322 390.014 177.925 375.791 177.925V179.919V181.912C390.502 181.912 403.483 179.219 414.681 173.766L413.808 171.974ZM375.791 179.919V177.925C361.51 177.925 349.118 175.321 338.561 170.181L337.688 171.974L336.815 173.766C348.015 179.219 361.025 181.912 375.791 181.912V179.919ZM337.688 171.974L338.569 170.185C327.996 164.982 319.828 157.761 314.001 148.526L312.315 149.59L310.629 150.654C316.877 160.556 325.624 168.258 336.808 173.762L337.688 171.974ZM312.315 149.59L314.001 148.526C308.19 139.316 305.253 128.532 305.253 116.101H303.259H301.266C301.266 129.186 304.366 140.728 310.629 150.654L312.315 149.59ZM303.259 116.101H305.253V2.47622H303.259H301.266V116.101H303.259ZM303.259 2.47622V4.46995H340.251V2.47622V0.482489H303.259V2.47622ZM340.251 2.47622H338.257V112.94H340.251H342.245V2.47622H340.251ZM340.251 112.94H338.257C338.257 119.903 339.778 126.169 342.869 131.684L344.608 130.71L346.347 129.735C343.629 124.885 342.245 119.305 342.245 112.94H340.251ZM344.608 130.71L342.877 131.699C346.025 137.207 350.451 141.537 356.116 144.671L357.081 142.926L358.046 141.182C353.004 138.393 349.115 134.578 346.339 129.721L344.608 130.71ZM357.081 142.926L356.116 144.671C361.811 147.821 368.39 149.363 375.791 149.363V147.369V145.375C368.953 145.375 363.06 143.955 358.046 141.182L357.081 142.926ZM375.791 147.369V149.363C383.246 149.363 389.829 147.823 395.473 144.667L394.5 142.926L393.527 141.186C388.578 143.954 382.689 145.375 375.791 145.375V147.369ZM394.5 142.926L395.466 144.671C401.134 141.535 405.536 137.201 408.627 131.684L406.888 130.71L405.149 129.735C402.431 134.585 398.575 138.395 393.535 141.182L394.5 142.926ZM406.888 130.71L408.619 131.699C411.773 126.181 413.325 119.909 413.325 112.94H411.331H409.337C409.337 119.298 407.928 124.873 405.158 129.721L406.888 130.71ZM411.331 112.94H413.325V2.47622H411.331H409.337V112.94H411.331ZM469.135 177.441H467.141V179.435H469.135V177.441ZM469.135 2.47622V0.482489H467.141V2.47622H469.135ZM506.127 2.47622H508.121V0.482489H506.127V2.47622ZM506.127 146.942H504.134V148.935H506.127V146.942ZM581.136 146.942H583.13V144.948H581.136V146.942ZM581.136 177.441V179.435H583.13V177.441H581.136ZM469.135 177.441H471.129V2.47622H469.135H467.141V177.441H469.135ZM469.135 2.47622V4.46995H506.127V2.47622V0.482489H469.135V2.47622ZM506.127 2.47622H504.134V146.942H506.127H508.121V2.47622H506.127ZM506.127 146.942V148.935H581.136V146.942V144.948H506.127V146.942ZM581.136 146.942H579.142V177.441H581.136H583.13V146.942H581.136ZM581.136 177.441V175.447H469.135V177.441V179.435H581.136V177.441ZM567.498 32.9754H565.505V34.9692H567.498V32.9754ZM567.498 2.47622V0.482489H565.505V2.47622H567.498ZM711.198 2.47615H713.192V0.482422H711.198V2.47615ZM711.198 32.9754V34.9692H713.192V32.9754H711.198ZM657.629 32.9754V30.9817H655.635V32.9754H657.629ZM657.629 177.441V179.435H659.623V177.441H657.629ZM621.064 177.441H619.07V179.435H621.064V177.441ZM621.064 32.9754H623.058V30.9817H621.064V32.9754ZM567.498 32.9754H569.492V2.47622H567.498H565.505V32.9754H567.498ZM567.498 2.47622V4.46995L711.198 4.46988V2.47615V0.482422L567.498 0.482489V2.47622ZM711.198 2.47615H709.204V32.9754H711.198H713.192V2.47615H711.198ZM711.198 32.9754V30.9817H657.629V32.9754V34.9692H711.198V32.9754ZM657.629 32.9754H655.635V177.441H657.629H659.623V32.9754H657.629ZM657.629 177.441V175.447H621.064V177.441V179.435H657.629V177.441ZM621.064 177.441H623.058V32.9754H621.064H619.07V177.441H621.064ZM621.064 32.9754V30.9817H567.498V32.9754V34.9692H621.064V32.9754ZM725.234 177.441H723.24V179.435H725.234V177.441ZM725.234 2.47615V0.482422H723.24V2.47615H725.234ZM828.097 9.56705L827.2 11.3459V11.3492L827.206 11.3524L828.097 9.56705ZM849.543 29.4727L847.808 30.4594L847.815 30.4663V30.473L849.543 29.4727ZM849.456 89.6167L851.164 90.6461V90.6408L849.456 89.6167ZM827.672 108.754L826.828 106.947L826.821 106.949L827.672 108.754ZM747.105 115.418H745.111V117.411H747.105V115.418ZM747.105 85.687V83.6933H745.111V85.687H747.105ZM815.37 74.0682L813.662 73.0388L813.656 73.0481L813.649 73.0574L815.37 74.0682ZM815.37 44.936L813.636 45.9251L813.642 45.9344L813.649 45.9436L815.37 44.936ZM804.857 35.8801L804.039 37.6975L804.053 37.7034L804.066 37.7092L804.857 35.8801ZM762.231 32.7192V30.7254H760.237V32.7192H762.231ZM762.231 177.441V179.435H764.224V177.441H762.231ZM819.723 97.8182L821.471 96.8625L820.906 95.8245H819.723V97.8182ZM863.207 177.441V179.435H866.569L864.961 176.485L863.207 177.441ZM822.375 177.441L820.614 178.381L821.179 179.435H822.375V177.441ZM779.829 97.8182V95.8245H776.499L778.068 98.7579L779.829 97.8182ZM725.234 177.441H727.227V2.47615H725.234H723.24V177.441H725.234ZM725.234 2.47615V4.46988H794.263V2.47615V0.482422H725.234V2.47615ZM794.263 2.47615V4.46988C807.249 4.46988 818.201 6.79205 827.2 11.3459L828.097 9.56705L828.994 7.78818C819.311 2.88752 807.714 0.482422 794.263 0.482422V2.47615ZM828.097 9.56705L827.206 11.3524C836.278 15.8576 843.116 22.2248 847.808 30.4594L849.543 29.4727L851.271 28.486C846.167 19.5204 838.717 12.6171 828.981 7.78167L828.097 9.56705ZM849.543 29.4727L847.815 30.473C852.567 38.664 854.979 48.3593 854.979 59.6303H856.973H858.967C858.967 47.7776 856.421 37.3679 851.264 28.4725L849.543 29.4727ZM856.973 59.6303H854.979C854.979 70.9573 852.54 80.5844 847.742 88.5925L849.456 89.6167L851.164 90.6408C856.395 81.9049 858.967 71.5402 858.967 59.6303H856.973ZM849.456 89.6167L847.748 88.5879C842.957 96.5362 836.012 102.658 826.828 106.947L827.672 108.754L828.516 110.56C838.351 105.965 845.928 99.3281 851.164 90.6461L849.456 89.6167ZM827.672 108.754L826.821 106.949C817.696 111.237 806.558 113.424 793.326 113.424V115.418V117.411C806.977 117.411 818.733 115.156 828.516 110.558L827.672 108.754ZM793.326 115.418V113.424H747.105V115.418V117.411H793.326V115.418ZM747.105 115.418H749.099V85.687H747.105H745.111V115.418H747.105ZM747.105 85.687V87.6807H787.345V85.687V83.6933H747.105V85.687ZM787.345 85.687V87.6807C794.576 87.6807 800.723 86.6925 805.707 84.6244L804.943 82.7821L804.179 80.9406C799.826 82.7456 794.243 83.6933 787.345 83.6933V85.687ZM804.943 82.7821L805.707 84.6244C810.725 82.5436 814.56 79.3715 817.085 75.079L815.37 74.0682L813.649 73.0574C811.615 76.5105 808.505 79.1482 804.179 80.9406L804.943 82.7821ZM815.37 74.0682L817.072 75.0976C819.643 70.8404 820.866 65.648 820.866 59.6303H818.873H816.879C816.879 65.117 815.762 69.5504 813.662 73.0388L815.37 74.0682ZM818.873 59.6303H820.866C820.866 53.5567 819.643 48.2901 817.085 43.9283L815.37 44.936L813.649 45.9436C815.762 49.5555 816.879 54.0851 816.879 59.6303H818.873ZM815.37 44.936L817.098 43.9468C814.579 39.5408 810.725 36.2508 805.654 34.0511L804.857 35.8801L804.066 37.7092C808.445 39.6102 811.596 42.3574 813.636 45.9251L815.37 44.936ZM804.857 35.8801L805.681 34.0628C800.67 31.8032 794.476 30.7254 787.172 30.7254V32.7192V34.7129C794.117 34.7129 799.706 35.7424 804.039 37.6975L804.857 35.8801ZM787.172 32.7192V30.7254H762.231V32.7192V34.7129H787.172V32.7192ZM762.231 32.7192H760.237V177.441H762.231H764.224V32.7192H762.231ZM762.231 177.441V175.447H725.234V177.441V179.435H762.231V177.441ZM819.723 97.8182L817.975 98.7739L861.459 178.397L863.207 177.441L864.961 176.485L821.471 96.8625L819.723 97.8182ZM863.207 177.441V175.447H822.375V177.441V179.435H863.207V177.441ZM822.375 177.441L824.129 176.501L781.583 96.8791L779.829 97.8182L778.068 98.7579L820.614 178.381L822.375 177.441ZM779.829 97.8182V99.8119H819.723V97.8182V95.8245H779.829V97.8182ZM903.653 177.441V179.435H905.095L905.547 178.058L903.653 177.441ZM864.011 177.441L862.123 176.791L861.213 179.435H864.011V177.441ZM924.407 2.47615V0.482422H922.992L922.527 1.8256L924.407 2.47615ZM972.078 2.47615L973.965 1.8264L973.5 0.482422H972.078V2.47615ZM1032.39 177.441V179.435H1035.19L1034.28 176.791L1032.39 177.441ZM992.753 177.441L990.858 178.057L991.304 179.435H992.753V177.441ZM948.93 42.4584L950.824 41.8427L950.379 40.4647H948.93V42.4584ZM947.561 42.4584V40.4647H946.112L945.667 41.8416L947.561 42.4584ZM901.174 108.668V106.674H899.18V108.668H901.174ZM994.806 108.668H996.8V106.674H994.806V108.668ZM994.806 137.545V139.538H996.8V137.545H994.806ZM901.174 137.545H899.18V139.538H901.174V137.545ZM903.653 177.441V175.447H864.011V177.441V179.435H903.653V177.441ZM864.011 177.441L865.891 178.092L926.295 3.12677L924.407 2.47615L922.527 1.8256L862.123 176.791L864.011 177.441ZM924.407 2.47615V4.46988H972.078V2.47615V0.482422H924.407V2.47615ZM972.078 2.47615L970.197 3.12598L1030.51 178.091L1032.39 177.441L1034.28 176.791L973.965 1.8264L972.078 2.47615ZM1032.39 177.441V175.447H992.753V177.441V179.435H1032.39V177.441ZM992.753 177.441L994.653 176.826L950.824 41.8427L948.93 42.4584L947.03 43.0741L990.858 178.057L992.753 177.441ZM948.93 42.4584V40.4647H947.561V42.4584V44.4522H948.93V42.4584ZM947.561 42.4584L945.667 41.8416L901.752 176.824L903.653 177.441L905.547 178.058L949.455 43.0752L947.561 42.4584ZM901.174 108.668V110.662H994.806V108.668V106.674H901.174V108.668ZM994.806 108.668H992.812V137.545H994.806H996.8V108.668H994.806ZM994.806 137.545V135.551H901.174V137.545V139.538H994.806V137.545ZM901.174 137.545H903.168V108.668H901.174H899.18V137.545H901.174Z"
-                                    fill="#EEEEEE"
-                                />
-                            </g>
-                            <path
-                                d="M68.5648 178.774H20.8359L109.432 1.99609H152.129L125.138 68.0969H191.166L225.17 1.99609H287.996V178.774H249.569V146.716H202.45L186.743 178.774H136.422L171.647 108.398H103.789L68.5648 178.774Z"
-                                stroke="white"
-                                strokeWidth={2.65831}
-                            />
-                            <path
-                                d="M216.5 108.551H248.5V39.5508H247L216.5 108.551Z"
-                                stroke="white"
-                                strokeWidth={2.66}
-                            />
-                        </g>
-                        <defs>
-                            <filter
-                                id="filter0_d_19643_241"
-                                x={-0.00355148}
-                                y={0.482422}
-                                width={1060.01}
-                                height={277.545}
-                                filterUnits="userSpaceOnUse"
-                                colorInterpolationFilters="sRGB"
-                            >
-                                <feFlood floodOpacity={0} result="BackgroundImageFix" />
-                                <feColorMatrix
-                                    in="SourceAlpha"
-                                    type="matrix"
-                                    values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                                    result="hardAlpha"
-                                />
-                                <feOffset dy={12.627} />
-                                <feGaussianBlur stdDeviation={6.08088} />
-                                <feComposite in2="hardAlpha" operator="out" />
-                                <feColorMatrix
-                                    type="matrix"
-                                    values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-                                />
-                                <feBlend
-                                    mode="normal"
-                                    in2="BackgroundImageFix"
-                                    result="effect1_dropShadow_19643_241"
-                                />
-                                <feBlend
-                                    mode="normal"
-                                    in="SourceGraphic"
-                                    in2="effect1_dropShadow_19643_241"
-                                    result="shape"
-                                />
-                            </filter>
-                        </defs>
-                    </svg>
-                </div>
-                {/* Main div images */}
-                <div className="relative flex max-w-[100vw]">
-                    {/* image box one */}
-                    <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA600_3D_04-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto" }}
-                            className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
-                        />
-                    </div>
-
-                    {/* image box two */}
-                    <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA750_3D_04-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto" }}
-                            className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
-                        />
-                    </div>
-
-                    {/* image box three */}
-                    <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA900_3D_04-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto" }}
-                            className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
-                        />
-                    </div>
-                </div>
-                {/* bottom black */}
-                <div className="absolute bottom-0 left-0 w-[100%] h-[200px] bg-[linear-gradient(0deg,#000000_10%,rgba(0,0,0,0)_100%)] z-10" />
-            </section>
-
-            {/*about sec*/}
-            <section className="about relative smooth relative bg-[#CCCCCC] min-h-[860px] overflow-hidden z-0">
-                {/*inner sec*/}
-                <div className="global-padding max-w-[1920px] mx-auto after:content-[''] after:absolute after:top-0 after:left-0 after:w-[60%] after:h-full after:bg-[linear-gradient(270deg,rgba(204,204,204,0)_0%,#CCCCCC_100%)]">
-                    <div className="relative overflow-hidden my-[60px]">
-                        <h2 className="about_h2 smooth relative z-1 text-[42px] text-white font-bold w-[920px] md:max-w-[60vw] max-w-[100%] leading-[1.3]">
-                            These wings were designed to deliver glide, precision,
-                            and efficiency while maintaining a high average speed — a key
-                            requirement of modern downwind riding.
-                        </h2>
-                    </div>
-                    {/* image div */}
-                    <div className="min-w-[80vw] md:absolute md:-right-[10%] md:-top-[10%] relative right-0 mb-[80px]">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA600_3D_01-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
-                            className="about_img_one smooth top-0 md:absolute relative lg:mb-0 -mb-[100px] scale-[1.2]"
-                        />
-
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA750_3D_01-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
-                            className="about_img_two smooth md:absolute relative md:top-[200px] top-unset lg:mb-0 -mb-[100px]  scale-[1.2]"
-                        />
-
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA900_3D_01-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
-                            className="about_img_three smooth md:absolute relative md:top-[400px] top-auto  scale-[1.2]"
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/*tube sec*/}
-            <section className="about_II relative lg:mb-0 mb-20 overflow-hidden z-[1] bg-[#000]">
-                <p className="about_II_p_I max-w-[520px] lg:right-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] right-auto lg:absolute relative lg:top-[10%] z-2 text-white leading-[1.3] font-semibold text-[22px] after:content-[''] after:absolute after:w-[100%] after:h-[120%] after:bg-[#0059B8] after:blur-[80px] after:-z-10 after:opacity-[0.6] after:rounded-[20%] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 mx-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] py-[60px]">
-                    We integrated <span className="text-[#D44841]">tubercles</span> along
-                    the leading edge to achieve a more progressive stall and improved
-                    ability to lock into bumps, even when the sea becomes irregular.
-                </p>
-
-                <div className="relative">
-                    <Image
-                        src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA600_3D_03-1.png"
-                        width={800}
-                        height={600}
-                        alt="BBML Graphic"
-                        style={{ width: "100%", height: "auto" }}
-                        className="smooth"
-                    />
-
-                    <Image
-                        src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/line.png"
-                        width={800}
-                        height={600}
-                        alt="BBML Graphic"
-                        style={{ width: "100%", height: "auto" }}
-                        className="about_II_line smooth absolute z-1 top-[7.5%]"
-                    />
-                </div>
-            </section>
-
-            {/*winglets sec*/}
-            <section className="about_III relative flex gap-[20px] min-w-[100vw] justify-end items-center lg:pr-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] pr-0 global-margin flex-col md:flex-row z-[2] bg-[#000]">
-                {/* Left column - images */}
-                <div className="about_III_img_div smooth relative flex-1 flex flex-col gap-16 items-start after:content-[''] after:absolute after:-top-[100%] after:left-[0%] lg:after:w-[50%] after:w-[100%] after:h-[300%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] order-2 md:order-0">
-                    <Image
-                        src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA600_3D_06-1-1.png"
-                        width={800}
-                        height={600}
-                        alt="BBML Graphic"
-                        style={{ width: "90%", height: "auto" }}
-                        className="about_III_img_one smooth relative z-1"
-                    />
-
-                    <Image
-                        src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA750_3D_06-1-1.png"
-                        width={800}
-                        height={600}
-                        alt="BBML Graphic"
-                        style={{ width: "95%", height: "auto" }}
-                        className="about_III_img_two smooth relative z-1"
-                    />
-
-                    <Image
-                        src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA900_3D_07-1-1.png"
-                        width={800}
-                        height={600}
-                        alt="BBML Graphic"
-                        style={{ width: "100%", height: "auto" }}
-                        className="about_III_img_three smooth relative z-1"
-                    />
-                </div>
-
-                {/* Right column - fixed width */}
-                <div className="lg:w-[520px] lg:max-w-[30vw] md:w-[40vw] order-0 md:px-[0px] md:pb-[0px] px-[20px] pb-[40px] z-1 relative">
-                    <div className="relative overflow-hidden">
-                        <p className="about_III_p text-white leading-[1.3] font-semibold text-[22px] right-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]">
-                            <span className="text-[#D44841]">
-                                The mini winglets at the wingtips
-                            </span>{" "}
-                            help stabilize airflow, reduce vortices, and increase directional
-                            stability.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/*profile sec*/}
-            <section className="about_IIII flex flex-col bg-[#111] relative z-1 global-margin relative z-[10]">
-                {/* div one */}
-                <div className="flex min-h-[620px] md:flex-row flex-col">
-                    {/* div one content left*/}
-                    <div className="relative overflow-hidden py-16 flex-1 flex after:content-[''] after:absolute after:w-[100%] after:h-[70%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] after:-bottom-[35%] after:left-1/2 after:-translate-x-1/2 md:order-1 order-2">
-                        <div className="flex global-padding flex-col justify-between gap-20 relative z-2">
-                            {/* div one content top*/}
-                            <div className="space-y-[25px] relative overflow-hidden">
-                                <h2 className="about_IIII_p global-h2 text-white">
-                                    A profile designed for ultra-efficient pumping
-                                </h2>
-                                <p className="about_IIII_p text-white font-medium leading-[1.3] text-[20px] max-w-[80%] max-w-[522px]">
-                                    A core element of the ULTRA range lies in its profile design,
-                                    optimized to reduce the energy required for pumping.
-                                </p>
-                            </div>
-                            {/* div one content bottom*/}
-                            <div className="flex gap-[40px] flex-col lg:flex-row oveflow-hidden">
-                                <p className="about_IIII_p_II text-[18px] leading-[1.3] text-[#FFFFFFCC] font-medium pl-[20px] border-l-2 border-[#D44841]">
-                                    The goal is not explosive pumping, but rather a smooth,
-                                    efficient pumping style that maintains average speed with
-                                    minimal effort.
-                                </p>
-
-                                <p className="about_IIII_p_II text-[18px] leading-[1.3] text-[#FFFFFFCC] font-medium pl-[20px] border-l-2 border-[#D44841]">
-                                    An effective, fluid, low-energy pumping motion that allows
-                                    riders to connect bump after bump while expending as little
-                                    energy as possible.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="relative flex-1 overflow-hidden md:max-w-1/2 max-w-[100%] md:order-2 order-0 flex">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/DSC01362-Recupere-4.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto" }}
-                            className="about_IIII_img smooth object-cover aspect-[96/62] lg:aspect-auto"
-                        />
-                    </div>
-                </div>
-
-                {/* div two */}
-                <div className="about_IIII_div_inner flex min-h-[620px] flex-col md:flex-row">
-                    {/* div one content left*/}
-                    <div className="relative flex-1 bg-[#CCCCCC] flex items-center overflow-hidden min-h-[320px]">
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ULTRA900_3D_04-1-1.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "100%", height: "auto" }}
-                            className="smooth filter drop-shadow-[0px_0px_0px_0px_#00000026] drop-shadow-[0px_18px_39px_0px_#00000026] drop-shadow-[0px_72px_72px_0px_#00000021] drop-shadow-[0px_162px_97px_0px_#00000014] drop-shadow-[0px_287px_115px_0px_#00000005] drop-shadow-[0px_449px_126px_0px_#00000000] scale-[2] about_IIII_img_I"
-                        />
-
-                        <Image
-                            src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/UGlide_0002-3.png"
-                            width={800}
-                            height={600}
-                            alt="BBML Graphic"
-                            style={{ width: "80%", height: "auto" }}
-                            className="smooth filter drop-shadow-[0px_0px_0px_0px_#00000026] drop-shadow-[0px_18px_39px_0px_#00000026] drop-shadow-[0px_72px_72px_0px_#00000021] drop-shadow-[0px_162px_97px_0px_#00000014] drop-shadow-[0px_287px_115px_0px_#00000005] drop-shadow-[0px_449px_126px_0px_#00000000] absolute -right-[10%] bottom-[25%] about_IIII_img_II"
-                        />
-                    </div>
-                    {/* div one content right*/}
-                    <div className="relative py-20 flex-1 flex text-center justofy-center items-center overflow-hidden after:content-[''] after:absolute lg:after:w-[50%] after:w-[100%] after:h-[120%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2">
-                        <div className="flex flex-col justify-between gap-20 relative z-2 mb-10">
-                            {/* div two content*/}
-                            <div className="relative overflow-hidden global-padding flex flex-col gap-[25px] justofy-center items-center">
-                                <h2 className="about_IIII_p_III global-h2 text-white">
-                                    HA ULTRA + U-GLIDE: the downwind signature
-                                </h2>
-                                <p className="about_IIII_p_III text-white font-medium leading-[1.3] text-[20px] max-w-[80%] max-w-[522px]">
-                                    A setup designed to glide far, sustain average speed, connect
-                                    efficiently, and follow the most direct line — with minimal
-                                    yet effective pumping.
-                                </p>
-                            </div>
-                            {/* tracker*/}
-                            <div className="tracker absolute ticker overflow-hidden bg-[#D44841] py-[8px] text-white font-bold uppercase -left-[40px] -bottom-[60px] -rotate-[2deg]">
-                                <div className="ticker-content flex gap-10 whitespace-nowrap">
-                                    {Array(3)
-                                        .fill(
-                                            <>
-                                                <span className="dot w-2 h-2 bg-[#FFFFFF99] rounded-full"></span>
-                                                <span>
-                                                    A platform built for modern downwind riding: fast,
-                                                    precise, and energy-efficient.
-                                                </span>
-                                            </>
-                                        )
-                                        .map((item, i) => (
-                                            <span key={i} className="flex items-center gap-2">
-                                                {item}
-                                            </span>
-                                        ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/*Technical information section*/}
-            <section className="relative global-padding max-w-[1440px] mx-auto mb-30">
-                <h2 className="global-h2 text-center text-white mb-20">
-                    Technical information
-                </h2>
-
-                {/* Content */}
-                <div className="text-white">
-                    {activeTab === 0 && (
-                        <div className="relative flex flex-col">
-                            <div className="bg-[#00000033] blur-20 p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                                <h3 className="text-[28px] leading-[100%] font-semibold">
-                                    U carve 130
-                                </h3>
-
-                                <SpecsTable data={uCarve130Specs} />
-                            </div>
-
-                            <div className="relative md:absolute lg:absolute right-0 top-20 pb-[40px] md:pb-0"></div>
-                        </div>
-                    )}
-
-                    {activeTab === 1 && (
-                        <div className="relative">
-                            <div className="bg-[#00000033] blur-20 p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                                <h3 className="text-[28px] leading-[100%] font-semibold">
-                                    U carve 140
-                                </h3>
-
-                                <SpecsTable data={uCarve140Specs} />
-                            </div>
-
-                            <div className="relative md:absolute lg:absolute right-0 top-20 pb-[40px] md:pb-0">
-                                <Image
-                                    src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave140_0001-1-1.png"
-                                    alt="AFS U Carve Stabilizer"
-                                    loading="lazy"
-                                    width={1000}
-                                    height={1000}
-                                    style={{ height: "auto", width: "100%" }}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 2 && (
-                        <div className="relative">
-                            <div className="bg-[#00000033] blur-20 p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                                <h3 className="text-[28px] leading-[100%] font-semibold">
-                                    U carve 150
-                                </h3>
-
-                                <SpecsTable data={uCarve150Specs} />
-                            </div>
-
-                            <div className="relative md:absolute lg:absolute right-0 top-20 pb-[40px] md:pb-0">
-                                <Image
-                                    src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave150_0001-4.png"
-                                    alt="AFS U Carve Stabilizer"
-                                    loading="lazy"
-                                    width={1000}
-                                    height={1000}
-                                    style={{ height: "auto", width: "100%" }}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 3 && (
-                        <div className="relative">
-                            <div className="bg-[#00000033] blur-20 p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                                <h3 className="text-[28px] leading-[100%] font-semibold">
-                                    U carve 160
-                                </h3>
-
-                                <SpecsTable data={uCarve160Specs} />
-                            </div>
-
-                            <div className="relative md:absolute lg:absolute right-0 top-20 pb-[40px] md:pb-0">
-                                <Image
-                                    src="https://staging.afs-foiling.com/wp-content/uploads/2026/01/ucrave160_0001-2-1.png"
-                                    alt="AFS U Carve Stabilizer"
-                                    loading="lazy"
-                                    width={1000}
-                                    height={1000}
-                                    style={{ height: "auto", width: "100%" }}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Tab Navigation */}
-                <div
-                    ref={navRef}
-                    className="relative overflow-hidden rounded-full bg-[#1F1F1F] max-w-fit mx-auto mt-20"
+              <g filter="url(#filter0_d_19643_241)">
+                <path
+                  className="text_b"
+                  d="M12.1582 222.571H15.7209L24.098 243.032H24.3868L32.7639 222.571H36.3265V247.221H33.5342V228.493H33.2935L25.5904 247.221H22.8944L15.1913 228.493H14.9506L14.9506 247.221H12.1582V222.571ZM66.4988 234.897C66.4988 237.496 66.0296 239.743 65.0908 241.637C64.152 243.53 62.8642 244.99 61.2272 246.018C59.5904 247.044 57.7208 247.558 55.6185 247.558C53.5162 247.558 51.6466 247.044 50.0097 246.018C48.3728 244.99 47.085 243.53 46.1461 241.637C45.2073 239.743 44.738 237.496 44.738 234.897C44.738 232.297 45.2073 230.05 46.1461 228.156C47.085 226.262 48.3728 224.802 50.0097 223.775C51.6466 222.748 53.5162 222.234 55.6185 222.234C57.7208 222.234 59.5904 222.748 61.2272 223.775C62.8642 224.802 64.152 226.262 65.0908 228.156C66.0296 230.05 66.4988 232.297 66.4988 234.897ZM63.6104 234.897C63.6104 232.762 63.2533 230.96 62.5392 229.492C61.8331 228.023 60.8742 226.912 59.6626 226.158C58.459 225.404 57.1109 225.027 55.6185 225.027C54.126 225.027 52.774 225.404 51.5624 226.158C50.3587 226.912 49.3999 228.023 48.6857 229.492C47.9796 230.96 47.6265 232.762 47.6265 234.897C47.6265 237.03 47.9796 238.832 48.6857 240.3C49.3999 241.769 50.3587 242.88 51.5624 243.634C52.774 244.389 54.126 244.766 55.6185 244.766C57.1109 244.766 58.459 244.389 59.6626 243.634C60.8742 242.88 61.8331 241.769 62.5392 240.3C63.2533 238.832 63.6104 237.03 63.6104 234.897ZM74.9077 247.221V222.571H83.2362C85.1621 222.571 86.7431 222.9 87.9786 223.558C89.214 224.208 90.1292 225.103 90.7226 226.242C91.3168 227.382 91.6132 228.677 91.6132 230.13C91.6132 231.582 91.3168 232.87 90.7226 233.993C90.1292 235.117 89.218 236 87.9905 236.642C86.7631 237.275 85.194 237.592 83.2847 237.592H76.5445V234.897H83.1883C84.5042 234.897 85.5635 234.704 86.3657 234.318C87.1764 233.934 87.7619 233.388 88.1228 232.682C88.4923 231.968 88.6764 231.117 88.6764 230.13C88.6764 229.143 88.4923 228.281 88.1228 227.542C87.754 226.804 87.1638 226.234 86.3537 225.833C85.5429 225.424 84.4723 225.219 83.1398 225.219H77.8923V247.221H74.9077ZM86.5099 236.148L92.5761 247.221H89.1097L83.1398 236.148H86.5099ZM99.9769 247.221V222.571H108.305C110.239 222.571 111.82 222.92 113.048 223.619C114.283 224.309 115.198 225.244 115.792 226.423C116.386 227.602 116.682 228.919 116.682 230.371C116.682 231.823 116.386 233.143 115.792 234.33C115.206 235.518 114.299 236.465 113.072 237.171C111.844 237.869 110.271 238.218 108.354 238.218H102.384V235.57H108.257C109.581 235.57 110.645 235.342 111.447 234.884C112.25 234.427 112.831 233.809 113.192 233.03C113.561 232.244 113.746 231.358 113.746 230.371C113.746 229.384 113.561 228.501 113.192 227.723C112.831 226.944 112.246 226.335 111.435 225.894C110.625 225.444 109.549 225.219 108.209 225.219H102.961V247.221H99.9769ZM124.881 247.221V222.571H127.865V233.548H141.008V222.571H143.994V247.221H141.008V236.196H127.865V247.221H124.881ZM170.758 247.221L164.018 222.571H167.051L172.202 242.648H172.443L177.69 222.571H181.061L186.309 242.648H186.549L191.7 222.571H194.734L187.993 247.221H184.912L179.472 227.578H179.279L173.839 247.221H170.758ZM204.827 222.571V247.221H201.843V222.571H204.827ZM212.853 225.219V222.571H231.34V225.219H223.589V247.221H220.605V225.219H212.853ZM239.337 247.221V222.571H242.322V233.548H255.465V222.571H258.45V247.221H255.465V236.196H242.322V247.221H239.337ZM279.389 225.219V222.571H297.877V225.219H290.125V247.221H287.14V225.219H279.389ZM305.873 247.221V222.571H308.857V233.548H322.001V222.571H324.986V247.221H322.001V236.196H308.857V247.221H305.873ZM334.351 247.221V222.571H349.228V225.219H337.336V233.548H348.457V236.196H337.336V244.573H349.42V247.221H334.351ZM370.919 247.221V222.571H385.795V225.219H373.903V233.548H385.025V236.196H373.903V244.573H385.988V247.221H370.919ZM394.564 247.221V222.571H397.55V244.573H409.008V247.221H394.564ZM417.019 247.221V222.571H431.896V225.219H420.004V233.548H431.126V236.196H420.004V244.573H432.089V247.221H417.019ZM440.665 222.571H444.228L452.605 243.032H452.894L461.271 222.571H464.834V247.221H462.041V228.493H461.8L454.097 247.221H451.401L443.698 228.493H443.457V247.221H440.665V222.571ZM474.207 247.221V222.571H489.084V225.219H477.193V233.548H488.314V236.196H477.193V244.573H489.277V247.221H474.207ZM517.4 222.571V247.221H514.511L501.08 227.867H500.838V247.221H497.854V222.571H500.742L514.223 241.974H514.463V222.571H517.4ZM525.414 225.219V222.571H543.902V225.219H536.151V247.221H533.165V225.219H525.414ZM565.378 228.734C565.234 227.514 564.648 226.567 563.621 225.894C562.593 225.219 561.334 224.882 559.841 224.882C558.75 224.882 557.795 225.059 556.977 225.412C556.166 225.765 555.532 226.25 555.075 226.868C554.626 227.486 554.401 228.188 554.401 228.975C554.401 229.632 554.557 230.198 554.87 230.672C555.191 231.137 555.601 231.526 556.099 231.839C556.596 232.144 557.117 232.397 557.663 232.597C558.209 232.79 558.71 232.947 559.168 233.067L561.671 233.741C562.313 233.909 563.027 234.142 563.814 234.439C564.608 234.736 565.366 235.141 566.089 235.655C566.818 236.16 567.42 236.81 567.893 237.604C568.367 238.399 568.604 239.374 568.604 240.529C568.604 241.861 568.255 243.065 567.557 244.14C566.867 245.215 565.855 246.069 564.523 246.703C563.2 247.337 561.591 247.654 559.697 247.654C557.931 247.654 556.403 247.369 555.112 246.8C553.828 246.23 552.816 245.436 552.079 244.417C551.348 243.398 550.935 242.214 550.838 240.866H553.92C554 241.797 554.313 242.567 554.858 243.177C555.412 243.779 556.111 244.228 556.953 244.525C557.803 244.814 558.718 244.958 559.697 244.958C560.836 244.958 561.86 244.773 562.766 244.405C563.673 244.028 564.391 243.506 564.921 242.84C565.45 242.166 565.715 241.379 565.715 240.481C565.715 239.662 565.486 238.996 565.029 238.483C564.572 237.97 563.97 237.552 563.224 237.231C562.477 236.91 561.671 236.629 560.804 236.389L557.771 235.522C555.845 234.968 554.321 234.178 553.198 233.151C552.075 232.124 551.512 230.78 551.512 229.119C551.512 227.739 551.886 226.536 552.632 225.508C553.386 224.473 554.397 223.671 555.665 223.101C556.941 222.523 558.365 222.234 559.938 222.234C561.527 222.234 562.939 222.519 564.174 223.089C565.41 223.651 566.389 224.421 567.111 225.4C567.842 226.379 568.226 227.49 568.267 228.734H565.378ZM580.752 243.851L580.56 245.151C580.423 246.065 580.215 247.044 579.934 248.088C579.661 249.131 579.376 250.114 579.079 251.036C578.783 251.96 578.537 252.693 578.345 253.239H576.179C576.283 252.726 576.419 252.047 576.587 251.205C576.756 250.363 576.925 249.42 577.093 248.377C577.27 247.341 577.414 246.282 577.526 245.199L577.671 243.851H580.752ZM601.364 225.219V222.571H619.851V225.219H612.1V247.221H609.115V225.219H601.364ZM627.847 247.221V222.571H636.175C638.101 222.571 639.682 222.9 640.918 223.558C642.153 224.208 643.068 225.103 643.662 226.242C644.256 227.382 644.553 228.677 644.553 230.13C644.553 231.582 644.256 232.87 643.662 233.993C643.068 235.117 642.157 236 640.93 236.642C639.702 237.275 638.133 237.592 636.224 237.592H629.484V234.897H636.128C637.443 234.897 638.503 234.704 639.305 234.318C640.116 233.934 640.701 233.388 641.062 232.682C641.432 231.968 641.616 231.117 641.616 230.13C641.616 229.143 641.432 228.281 641.062 227.542C640.693 226.804 640.104 226.234 639.293 225.833C638.483 225.424 637.412 225.219 636.08 225.219H630.832V247.221H627.847ZM639.45 236.148L645.515 247.221H642.049L636.08 236.148H639.45ZM653.927 247.221H650.797L659.849 222.571H662.93L671.981 247.221H668.851L661.486 226.471H661.293L653.927 247.221ZM655.083 237.592H667.694V240.24H655.083V237.592ZM698.757 222.571V247.221H695.866L682.435 227.867H682.195V247.221H679.211V222.571H682.096L695.58 241.974H695.819V222.571H698.757ZM721.598 228.734C721.452 227.514 720.867 226.567 719.844 225.894C718.814 225.219 717.557 224.882 716.062 224.882C714.972 224.882 714.015 225.059 713.198 225.412C712.387 225.765 711.756 226.25 711.297 226.868C710.845 227.486 710.619 228.188 710.619 228.975C710.619 229.632 710.779 230.198 711.091 230.672C711.41 231.137 711.822 231.526 712.321 231.839C712.819 232.144 713.337 232.397 713.882 232.597C714.427 232.79 714.932 232.947 715.391 233.067L717.89 233.741C718.534 233.909 719.245 234.142 720.036 234.439C720.827 234.736 721.585 235.141 722.309 235.655C723.04 236.16 723.638 236.81 724.117 237.604C724.589 238.399 724.821 239.374 724.821 240.529C724.821 241.861 724.476 243.065 723.778 244.14C723.087 245.215 722.077 246.069 720.747 246.703C719.418 247.337 717.81 247.654 715.916 247.654C714.155 247.654 712.626 247.369 711.33 246.8C710.048 246.23 709.038 245.436 708.3 244.417C707.569 243.398 707.157 242.214 707.057 240.866H710.141C710.221 241.797 710.533 242.567 711.078 243.177C711.636 243.779 712.334 244.228 713.171 244.525C714.022 244.814 714.939 244.958 715.916 244.958C717.059 244.958 718.083 244.773 718.986 244.405C719.897 244.028 720.615 243.506 721.14 242.84C721.671 242.166 721.937 241.379 721.937 240.481C721.937 239.662 721.704 238.996 721.253 238.483C720.794 237.97 720.189 237.552 719.445 237.231C718.701 236.91 717.89 236.629 717.026 236.389L713.995 235.522C712.068 234.968 710.54 234.178 709.416 233.151C708.293 232.124 707.735 230.78 707.735 229.119C707.735 227.739 708.107 226.536 708.852 225.508C709.609 224.473 710.619 223.671 711.889 223.101C713.165 222.523 714.587 222.234 716.162 222.234C717.75 222.234 719.159 222.519 720.395 223.089C721.631 223.651 722.608 224.421 723.333 225.4C724.064 226.379 724.449 227.49 724.489 228.734H721.598ZM752.96 230.274H749.969C749.796 229.416 749.484 228.661 749.045 228.012C748.613 227.362 748.081 226.816 747.457 226.375C746.839 225.925 746.154 225.588 745.397 225.364C744.646 225.139 743.855 225.027 743.037 225.027C741.549 225.027 740.193 225.404 738.983 226.158C737.781 226.912 736.824 228.023 736.106 229.492C735.401 230.96 735.049 232.762 735.049 234.897C735.049 237.03 735.401 238.832 736.106 240.3C736.824 241.769 737.781 242.88 738.983 243.634C740.193 244.389 741.549 244.766 743.037 244.766C743.855 244.766 744.646 244.653 745.397 244.429C746.154 244.204 746.839 243.871 747.457 243.43C748.081 242.98 748.613 242.431 749.045 241.781C749.484 241.123 749.796 240.369 749.969 239.518H752.96C752.734 240.778 752.322 241.905 751.73 242.9C751.139 243.895 750.394 244.742 749.517 245.44C748.633 246.13 747.643 246.656 746.54 247.016C745.45 247.377 744.28 247.558 743.037 247.558C740.937 247.558 739.07 247.044 737.428 246.018C735.794 244.99 734.504 243.53 733.567 241.637C732.63 239.743 732.158 237.496 732.158 234.897C732.158 232.297 732.63 230.05 733.567 228.156C734.504 226.262 735.794 224.802 737.428 223.775C739.07 222.748 740.937 222.234 743.037 222.234C744.28 222.234 745.45 222.415 746.54 222.776C747.643 223.137 748.633 223.667 749.517 224.365C750.394 225.055 751.139 225.898 751.73 226.892C752.322 227.879 752.734 229.006 752.96 230.274ZM761.167 247.221V222.571H776.047V225.219H764.158V233.548H775.276V236.196H764.158V244.573H776.24V247.221H761.167ZM804.365 222.571V247.221H801.474L788.043 227.867H787.803V247.221H784.813V222.571H787.704L801.188 241.974H801.427V222.571H804.365ZM821.331 247.221H813.722V222.571H821.67C824.063 222.571 826.103 223.065 827.804 224.052C829.505 225.031 830.815 226.439 831.719 228.277C832.622 230.106 833.081 232.297 833.081 234.848C833.081 237.416 832.622 239.626 831.705 241.48C830.795 243.325 829.459 244.746 827.711 245.74C825.963 246.727 823.837 247.221 821.331 247.221ZM816.712 244.573H821.138C823.179 244.573 824.867 244.18 826.203 243.394C827.545 242.608 828.542 241.488 829.2 240.036C829.858 238.583 830.19 236.854 830.19 234.848C830.19 232.858 829.864 231.145 829.213 229.709C828.562 228.264 827.591 227.157 826.302 226.387C825.013 225.608 823.405 225.219 821.477 225.219H816.712V244.573ZM852.281 222.571H855.696L862.535 234.078H862.821L869.659 222.571H873.075L864.17 237.062V247.221H861.186V237.062L852.281 222.571ZM899.964 234.897C899.964 237.496 899.499 239.743 898.555 241.637C897.618 243.53 896.329 244.99 894.694 246.018C893.059 247.044 891.185 247.558 889.085 247.558C886.985 247.558 885.111 247.044 883.476 246.018C881.841 244.99 880.552 243.53 879.615 241.637C878.677 239.743 878.206 237.496 878.206 234.897C878.206 232.297 878.677 230.05 879.615 228.156C880.552 226.262 881.841 224.802 883.476 223.775C885.111 222.748 886.985 222.234 889.085 222.234C891.185 222.234 893.059 222.748 894.694 223.775C896.329 224.802 897.618 226.262 898.555 228.156C899.499 230.05 899.964 232.297 899.964 234.897ZM897.08 234.897C897.08 232.762 896.721 230.96 896.003 229.492C895.299 228.023 894.342 226.912 893.132 226.158C891.929 225.404 890.58 225.027 889.085 225.027C887.596 225.027 886.24 225.404 885.031 226.158C883.828 226.912 882.864 228.023 882.153 229.492C881.449 230.96 881.097 232.762 881.097 234.897C881.097 237.03 881.449 238.832 882.153 240.3C882.864 241.769 883.828 242.88 885.031 243.634C886.24 244.389 887.596 244.766 889.085 244.766C890.58 244.766 891.929 244.389 893.132 243.634C894.342 242.88 895.299 241.769 896.003 240.3C896.721 238.832 897.08 237.03 897.08 234.897ZM924.553 222.571H927.537V238.892C927.537 240.577 927.138 242.082 926.341 243.406C925.557 244.722 924.447 245.761 923.011 246.523C921.576 247.277 919.888 247.654 917.954 247.654C916.02 247.654 914.339 247.277 912.903 246.523C911.461 245.761 910.351 244.722 909.554 243.406C908.77 242.082 908.377 240.577 908.377 238.892V222.571H911.361V238.651C911.361 239.855 911.627 240.926 912.152 241.865C912.684 242.796 913.435 243.53 914.418 244.068C915.402 244.597 916.585 244.862 917.954 244.862C919.33 244.862 920.506 244.597 921.496 244.068C922.48 243.53 923.237 242.796 923.756 241.865C924.287 240.926 924.553 239.855 924.553 238.651V222.571ZM936.888 247.221V222.571H945.215C947.142 222.571 948.724 222.9 949.96 223.558C951.19 224.208 952.107 225.103 952.698 226.242C953.296 227.382 953.595 228.677 953.595 230.13C953.595 231.582 953.296 232.87 952.698 233.993C952.107 235.117 951.196 236 949.967 236.642C948.744 237.275 947.175 237.592 945.261 237.592H938.523V234.897H945.168C946.484 234.897 947.541 234.704 948.345 234.318C949.156 233.934 949.741 233.388 950.1 232.682C950.472 231.968 950.658 231.117 950.658 230.13C950.658 229.143 950.472 228.281 950.1 227.542C949.734 226.804 949.143 226.234 948.332 225.833C947.521 225.424 946.451 225.219 945.115 225.219H939.872V247.221H936.888ZM948.491 236.148L954.552 247.221H951.09L945.115 236.148H948.491ZM975.433 228.734C975.294 227.514 974.702 226.567 973.679 225.894C972.649 225.219 971.393 224.882 969.897 224.882C968.807 224.882 967.85 225.059 967.033 225.412C966.222 225.765 965.591 226.25 965.132 226.868C964.68 227.486 964.461 228.188 964.461 228.975C964.461 229.632 964.614 230.198 964.926 230.672C965.252 231.137 965.657 231.526 966.156 231.839C966.654 232.144 967.173 232.397 967.718 232.597C968.269 232.79 968.768 232.947 969.226 233.067L971.732 233.741C972.37 233.909 973.087 234.142 973.872 234.439C974.662 234.736 975.427 235.141 976.144 235.655C976.875 236.16 977.48 236.81 977.952 237.604C978.424 238.399 978.663 239.374 978.663 240.529C978.663 241.861 978.311 243.065 977.613 244.14C976.922 245.215 975.912 246.069 974.583 246.703C973.26 247.337 971.645 247.654 969.758 247.654C967.99 247.654 966.462 247.369 965.166 246.8C963.883 246.23 962.873 245.436 962.135 244.417C961.404 243.398 960.992 242.214 960.899 240.866H963.976C964.056 241.797 964.368 242.567 964.913 243.177C965.471 243.779 966.169 244.228 967.013 244.525C967.864 244.814 968.774 244.958 969.758 244.958C970.894 244.958 971.918 244.773 972.821 244.405C973.732 244.028 974.45 243.506 974.981 242.84C975.506 242.166 975.772 241.379 975.772 240.481C975.772 239.662 975.546 238.996 975.088 238.483C974.629 237.97 974.024 237.552 973.28 237.231C972.536 236.91 971.732 236.629 970.861 236.389L967.831 235.522C965.903 234.968 964.381 234.178 963.258 233.151C962.128 232.124 961.57 230.78 961.57 229.119C961.57 227.739 961.942 226.536 962.687 225.508C963.444 224.473 964.454 223.671 965.724 223.101C967 222.523 968.422 222.234 969.997 222.234C971.585 222.234 972.994 222.519 974.23 223.089C975.466 223.651 976.443 224.421 977.168 225.4C977.899 226.379 978.284 227.49 978.324 228.734H975.433ZM986.957 247.221V222.571H1001.84V225.219H989.941V233.548H1001.07V236.196H989.941V244.573H1002.03V247.221H986.957ZM1010.6 247.221V222.571H1013.59V244.573H1025.05V247.221H1010.6ZM1033.06 247.221V222.571H1047.84V225.219H1036.04V233.548H1046.73V236.196H1036.04V247.221H1033.06Z"
+                  fill="white"
+                />
+                <path
+                  d="M411.327 2.47663H448.32V116.101C448.32 128.859 445.273 140.023 439.178 149.59C433.141 159.159 424.683 166.62 413.805 171.974C402.926 177.271 390.254 179.919 375.788 179.919C361.264 179.919 348.563 177.271 337.685 171.974C326.806 166.62 318.348 159.159 312.311 149.59C306.274 140.023 303.256 128.859 303.256 116.101V2.47663H340.248V112.94C340.248 119.604 341.7 125.527 344.605 130.711C347.567 135.893 351.724 139.965 357.078 142.927C362.432 145.889 368.668 147.369 375.788 147.369C382.964 147.369 389.2 145.889 394.497 142.927C399.851 139.965 403.98 135.893 406.885 130.711C409.847 125.527 411.327 119.604 411.327 112.94V2.47663ZM469.132 177.442V2.47663H506.124V146.942H581.133V177.442H469.132ZM567.495 32.9759V2.47663L711.194 2.47656V32.9759H657.626V177.442H621.06V32.9759H567.495ZM725.23 177.442V2.47656H794.26C807.478 2.47656 818.75 4.8402 828.094 9.56746C837.491 14.2378 844.641 20.873 849.539 29.4731C854.49 38.0163 856.969 48.0689 856.969 59.6307C856.969 71.2495 854.464 81.2447 849.453 89.6171C844.442 97.9329 837.178 104.312 827.668 108.754C818.211 113.197 806.761 115.418 793.323 115.418H747.102V85.6874H787.342C794.406 85.6874 800.268 84.7191 804.94 82.7826C809.612 80.846 813.087 77.9418 815.367 74.0686C817.699 70.1955 818.869 65.3833 818.869 59.6307C818.869 53.821 817.699 48.9232 815.367 44.9364C813.087 40.9495 809.585 37.9309 804.853 35.8805C800.188 33.7732 794.293 32.7196 787.169 32.7196H762.227V177.442H725.23ZM819.72 97.8186L863.203 177.442H822.371L779.825 97.8186H819.72ZM903.649 177.442H864.007L924.404 2.47656H972.074L1032.39 177.442H992.749L948.927 42.4588H947.558L903.649 177.442ZM901.17 108.668H994.803V137.545H901.17V108.668Z"
+                  fill="#EEEEEE"
+                />
+                <mask
+                  id="mask0_19643_241"
+                  style={{
+                    maskType: "luminance",
+                  }}
+                  maskUnits="userSpaceOnUse"
+                  x={300}
+                  y={0}
+                  width={736}
+                  height={183}
                 >
-                    <div
-                        ref={bgRef}
-                        className="absolute top-0 left-0 bg-white rounded-full z-0"
-                    />
+                  <path
+                    d="M1035.64 0H300.621V182.094H1035.64V0Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M411.329 2.47663H448.322V116.101C448.322 128.859 445.275 140.023 439.18 149.59C433.143 159.159 424.685 166.62 413.807 171.974C402.928 177.271 390.256 179.919 375.79 179.919C361.266 179.919 348.565 177.271 337.687 171.974C326.808 166.62 318.35 159.159 312.313 149.59C306.276 140.023 303.258 128.859 303.258 116.101V2.47663H340.25V112.94C340.25 119.604 341.702 125.527 344.606 130.711C347.568 135.893 351.726 139.965 357.08 142.927C362.434 145.889 368.67 147.369 375.79 147.369C382.966 147.369 389.202 145.889 394.499 142.927C399.853 139.965 403.982 135.893 406.887 130.711C409.849 125.527 411.329 119.604 411.329 112.94V2.47663ZM469.134 177.442V2.47663H506.126V146.942H581.135V177.442H469.134ZM567.497 32.9759V2.47663L711.196 2.47656V32.9759H657.627V177.442H621.062V32.9759H567.497ZM725.232 177.442V2.47656H794.262C807.48 2.47656 818.751 4.8402 828.095 9.56746C837.493 14.2378 844.643 20.873 849.541 29.4731C854.492 38.0163 856.971 48.0689 856.971 59.6307C856.971 71.2495 854.466 81.2447 849.455 89.6171C844.444 97.9329 837.18 104.312 827.67 108.754C818.213 113.197 806.762 115.418 793.325 115.418H747.103V85.6874H787.344C794.408 85.6874 800.27 84.7191 804.942 82.7826C809.613 80.846 813.089 77.9418 815.369 74.0686C817.701 70.1955 818.871 65.3833 818.871 59.6307C818.871 53.821 817.701 48.9232 815.369 44.9364C813.089 40.9495 809.587 37.9309 804.855 35.8805C800.19 33.7732 794.295 32.7196 787.171 32.7196H762.229V177.442H725.232ZM819.722 97.8186L863.205 177.442H822.373L779.827 97.8186H819.722ZM903.651 177.442H864.009L924.406 2.47656H972.076L1032.39 177.442H992.751L948.929 42.4588H947.56L903.651 177.442ZM901.172 108.668H994.805V137.545H901.172V108.668Z"
+                    fill="black"
+                  />
+                </mask>
+                <g mask="url(#mask0_19643_241)">
+                  <path
+                    d="M411.331 2.47622V0.482489H409.337V2.47622H411.331ZM448.323 2.47622H450.317V0.482489H448.323V2.47622ZM439.182 149.59L437.5 148.519L437.495 148.526L439.182 149.59ZM413.808 171.974L414.681 173.766L414.689 173.762L413.808 171.974ZM337.688 171.974L336.808 173.762L336.815 173.766L337.688 171.974ZM303.259 2.47622V0.482489H301.266V2.47622H303.259ZM340.251 2.47622H342.245V0.482489H340.251V2.47622ZM344.608 130.71L342.869 131.684L342.873 131.692L342.877 131.699L344.608 130.71ZM394.5 142.926L393.535 141.182L393.527 141.186L394.5 142.926ZM406.888 130.71L405.158 129.721L405.153 129.728L405.149 129.735L406.888 130.71ZM411.331 2.47622V4.46995H448.323V2.47622V0.482489H411.331V2.47622ZM448.323 2.47622H446.329V116.101H448.323H450.317V2.47622H448.323ZM448.323 116.101H446.329C446.329 128.528 443.365 139.31 437.5 148.519L439.182 149.59L440.863 150.661C447.186 140.734 450.317 129.19 450.317 116.101H448.323ZM439.182 149.59L437.495 148.526C431.669 157.761 423.501 164.982 412.928 170.185L413.808 171.974L414.689 173.762C425.872 168.258 434.62 160.556 440.868 150.654L439.182 149.59ZM413.808 171.974L412.936 170.181C402.377 175.322 390.014 177.925 375.791 177.925V179.919V181.912C390.502 181.912 403.483 179.219 414.681 173.766L413.808 171.974ZM375.791 179.919V177.925C361.51 177.925 349.118 175.321 338.561 170.181L337.688 171.974L336.815 173.766C348.015 179.219 361.025 181.912 375.791 181.912V179.919ZM337.688 171.974L338.569 170.185C327.996 164.982 319.828 157.761 314.001 148.526L312.315 149.59L310.629 150.654C316.877 160.556 325.624 168.258 336.808 173.762L337.688 171.974ZM312.315 149.59L314.001 148.526C308.19 139.316 305.253 128.532 305.253 116.101H303.259H301.266C301.266 129.186 304.366 140.728 310.629 150.654L312.315 149.59ZM303.259 116.101H305.253V2.47622H303.259H301.266V116.101H303.259ZM303.259 2.47622V4.46995H340.251V2.47622V0.482489H303.259V2.47622ZM340.251 2.47622H338.257V112.94H340.251H342.245V2.47622H340.251ZM340.251 112.94H338.257C338.257 119.903 339.778 126.169 342.869 131.684L344.608 130.71L346.347 129.735C343.629 124.885 342.245 119.305 342.245 112.94H340.251ZM344.608 130.71L342.877 131.699C346.025 137.207 350.451 141.537 356.116 144.671L357.081 142.926L358.046 141.182C353.004 138.393 349.115 134.578 346.339 129.721L344.608 130.71ZM357.081 142.926L356.116 144.671C361.811 147.821 368.39 149.363 375.791 149.363V147.369V145.375C368.953 145.375 363.06 143.955 358.046 141.182L357.081 142.926ZM375.791 147.369V149.363C383.246 149.363 389.829 147.823 395.473 144.667L394.5 142.926L393.527 141.186C388.578 143.954 382.689 145.375 375.791 145.375V147.369ZM394.5 142.926L395.466 144.671C401.134 141.535 405.536 137.201 408.627 131.684L406.888 130.71L405.149 129.735C402.431 134.585 398.575 138.395 393.535 141.182L394.5 142.926ZM406.888 130.71L408.619 131.699C411.773 126.181 413.325 119.909 413.325 112.94H411.331H409.337C409.337 119.298 407.928 124.873 405.158 129.721L406.888 130.71ZM411.331 112.94H413.325V2.47622H411.331H409.337V112.94H411.331ZM469.135 177.441H467.141V179.435H469.135V177.441ZM469.135 2.47622V0.482489H467.141V2.47622H469.135ZM506.127 2.47622H508.121V0.482489H506.127V2.47622ZM506.127 146.942H504.134V148.935H506.127V146.942ZM581.136 146.942H583.13V144.948H581.136V146.942ZM581.136 177.441V179.435H583.13V177.441H581.136ZM469.135 177.441H471.129V2.47622H469.135H467.141V177.441H469.135ZM469.135 2.47622V4.46995H506.127V2.47622V0.482489H469.135V2.47622ZM506.127 2.47622H504.134V146.942H506.127H508.121V2.47622H506.127ZM506.127 146.942V148.935H581.136V146.942V144.948H506.127V146.942ZM581.136 146.942H579.142V177.441H581.136H583.13V146.942H581.136ZM581.136 177.441V175.447H469.135V177.441V179.435H581.136V177.441ZM567.498 32.9754H565.505V34.9692H567.498V32.9754ZM567.498 2.47622V0.482489H565.505V2.47622H567.498ZM711.198 2.47615H713.192V0.482422H711.198V2.47615ZM711.198 32.9754V34.9692H713.192V32.9754H711.198ZM657.629 32.9754V30.9817H655.635V32.9754H657.629ZM657.629 177.441V179.435H659.623V177.441H657.629ZM621.064 177.441H619.07V179.435H621.064V177.441ZM621.064 32.9754H623.058V30.9817H621.064V32.9754ZM567.498 32.9754H569.492V2.47622H567.498H565.505V32.9754H567.498ZM567.498 2.47622V4.46995L711.198 4.46988V2.47615V0.482422L567.498 0.482489V2.47622ZM711.198 2.47615H709.204V32.9754H711.198H713.192V2.47615H711.198ZM711.198 32.9754V30.9817H657.629V32.9754V34.9692H711.198V32.9754ZM657.629 32.9754H655.635V177.441H657.629H659.623V32.9754H657.629ZM657.629 177.441V175.447H621.064V177.441V179.435H657.629V177.441ZM621.064 177.441H623.058V32.9754H621.064H619.07V177.441H621.064ZM621.064 32.9754V30.9817H567.498V32.9754V34.9692H621.064V32.9754ZM725.234 177.441H723.24V179.435H725.234V177.441ZM725.234 2.47615V0.482422H723.24V2.47615H725.234ZM828.097 9.56705L827.2 11.3459V11.3492L827.206 11.3524L828.097 9.56705ZM849.543 29.4727L847.808 30.4594L847.815 30.4663V30.473L849.543 29.4727ZM849.456 89.6167L851.164 90.6461V90.6408L849.456 89.6167ZM827.672 108.754L826.828 106.947L826.821 106.949L827.672 108.754ZM747.105 115.418H745.111V117.411H747.105V115.418ZM747.105 85.687V83.6933H745.111V85.687H747.105ZM815.37 74.0682L813.662 73.0388L813.656 73.0481L813.649 73.0574L815.37 74.0682ZM815.37 44.936L813.636 45.9251L813.642 45.9344L813.649 45.9436L815.37 44.936ZM804.857 35.8801L804.039 37.6975L804.053 37.7034L804.066 37.7092L804.857 35.8801ZM762.231 32.7192V30.7254H760.237V32.7192H762.231ZM762.231 177.441V179.435H764.224V177.441H762.231ZM819.723 97.8182L821.471 96.8625L820.906 95.8245H819.723V97.8182ZM863.207 177.441V179.435H866.569L864.961 176.485L863.207 177.441ZM822.375 177.441L820.614 178.381L821.179 179.435H822.375V177.441ZM779.829 97.8182V95.8245H776.499L778.068 98.7579L779.829 97.8182ZM725.234 177.441H727.227V2.47615H725.234H723.24V177.441H725.234ZM725.234 2.47615V4.46988H794.263V2.47615V0.482422H725.234V2.47615ZM794.263 2.47615V4.46988C807.249 4.46988 818.201 6.79205 827.2 11.3459L828.097 9.56705L828.994 7.78818C819.311 2.88752 807.714 0.482422 794.263 0.482422V2.47615ZM828.097 9.56705L827.206 11.3524C836.278 15.8576 843.116 22.2248 847.808 30.4594L849.543 29.4727L851.271 28.486C846.167 19.5204 838.717 12.6171 828.981 7.78167L828.097 9.56705ZM849.543 29.4727L847.815 30.473C852.567 38.664 854.979 48.3593 854.979 59.6303H856.973H858.967C858.967 47.7776 856.421 37.3679 851.264 28.4725L849.543 29.4727ZM856.973 59.6303H854.979C854.979 70.9573 852.54 80.5844 847.742 88.5925L849.456 89.6167L851.164 90.6408C856.395 81.9049 858.967 71.5402 858.967 59.6303H856.973ZM849.456 89.6167L847.748 88.5879C842.957 96.5362 836.012 102.658 826.828 106.947L827.672 108.754L828.516 110.56C838.351 105.965 845.928 99.3281 851.164 90.6461L849.456 89.6167ZM827.672 108.754L826.821 106.949C817.696 111.237 806.558 113.424 793.326 113.424V115.418V117.411C806.977 117.411 818.733 115.156 828.516 110.558L827.672 108.754ZM793.326 115.418V113.424H747.105V115.418V117.411H793.326V115.418ZM747.105 115.418H749.099V85.687H747.105H745.111V115.418H747.105ZM747.105 85.687V87.6807H787.345V85.687V83.6933H747.105V85.687ZM787.345 85.687V87.6807C794.576 87.6807 800.723 86.6925 805.707 84.6244L804.943 82.7821L804.179 80.9406C799.826 82.7456 794.243 83.6933 787.345 83.6933V85.687ZM804.943 82.7821L805.707 84.6244C810.725 82.5436 814.56 79.3715 817.085 75.079L815.37 74.0682L813.649 73.0574C811.615 76.5105 808.505 79.1482 804.179 80.9406L804.943 82.7821ZM815.37 74.0682L817.072 75.0976C819.643 70.8404 820.866 65.648 820.866 59.6303H818.873H816.879C816.879 65.117 815.762 69.5504 813.662 73.0388L815.37 74.0682ZM818.873 59.6303H820.866C820.866 53.5567 819.643 48.2901 817.085 43.9283L815.37 44.936L813.649 45.9436C815.762 49.5555 816.879 54.0851 816.879 59.6303H818.873ZM815.37 44.936L817.098 43.9468C814.579 39.5408 810.725 36.2508 805.654 34.0511L804.857 35.8801L804.066 37.7092C808.445 39.6102 811.596 42.3574 813.636 45.9251L815.37 44.936ZM804.857 35.8801L805.681 34.0628C800.67 31.8032 794.476 30.7254 787.172 30.7254V32.7192V34.7129C794.117 34.7129 799.706 35.7424 804.039 37.6975L804.857 35.8801ZM787.172 32.7192V30.7254H762.231V32.7192V34.7129H787.172V32.7192ZM762.231 32.7192H760.237V177.441H762.231H764.224V32.7192H762.231ZM762.231 177.441V175.447H725.234V177.441V179.435H762.231V177.441ZM819.723 97.8182L817.975 98.7739L861.459 178.397L863.207 177.441L864.961 176.485L821.471 96.8625L819.723 97.8182ZM863.207 177.441V175.447H822.375V177.441V179.435H863.207V177.441ZM822.375 177.441L824.129 176.501L781.583 96.8791L779.829 97.8182L778.068 98.7579L820.614 178.381L822.375 177.441ZM779.829 97.8182V99.8119H819.723V97.8182V95.8245H779.829V97.8182ZM903.653 177.441V179.435H905.095L905.547 178.058L903.653 177.441ZM864.011 177.441L862.123 176.791L861.213 179.435H864.011V177.441ZM924.407 2.47615V0.482422H922.992L922.527 1.8256L924.407 2.47615ZM972.078 2.47615L973.965 1.8264L973.5 0.482422H972.078V2.47615ZM1032.39 177.441V179.435H1035.19L1034.28 176.791L1032.39 177.441ZM992.753 177.441L990.858 178.057L991.304 179.435H992.753V177.441ZM948.93 42.4584L950.824 41.8427L950.379 40.4647H948.93V42.4584ZM947.561 42.4584V40.4647H946.112L945.667 41.8416L947.561 42.4584ZM901.174 108.668V106.674H899.18V108.668H901.174ZM994.806 108.668H996.8V106.674H994.806V108.668ZM994.806 137.545V139.538H996.8V137.545H994.806ZM901.174 137.545H899.18V139.538H901.174V137.545ZM903.653 177.441V175.447H864.011V177.441V179.435H903.653V177.441ZM864.011 177.441L865.891 178.092L926.295 3.12677L924.407 2.47615L922.527 1.8256L862.123 176.791L864.011 177.441ZM924.407 2.47615V4.46988H972.078V2.47615V0.482422H924.407V2.47615ZM972.078 2.47615L970.197 3.12598L1030.51 178.091L1032.39 177.441L1034.28 176.791L973.965 1.8264L972.078 2.47615ZM1032.39 177.441V175.447H992.753V177.441V179.435H1032.39V177.441ZM992.753 177.441L994.653 176.826L950.824 41.8427L948.93 42.4584L947.03 43.0741L990.858 178.057L992.753 177.441ZM948.93 42.4584V40.4647H947.561V42.4584V44.4522H948.93V42.4584ZM947.561 42.4584L945.667 41.8416L901.752 176.824L903.653 177.441L905.547 178.058L949.455 43.0752L947.561 42.4584ZM901.174 108.668V110.662H994.806V108.668V106.674H901.174V108.668ZM994.806 108.668H992.812V137.545H994.806H996.8V108.668H994.806ZM994.806 137.545V135.551H901.174V137.545V139.538H994.806V137.545ZM901.174 137.545H903.168V108.668H901.174H899.18V137.545H901.174Z"
+                    fill="#EEEEEE"
+                  />
+                </g>
+                <path
+                  d="M68.5648 178.774H20.8359L109.432 1.99609H152.129L125.138 68.0969H191.166L225.17 1.99609H287.996V178.774H249.569V146.716H202.45L186.743 178.774H136.422L171.647 108.398H103.789L68.5648 178.774Z"
+                  stroke="white"
+                  strokeWidth={2.65831}
+                />
+                <path
+                  d="M216.5 108.551H248.5V39.5508H247L216.5 108.551Z"
+                  stroke="white"
+                  strokeWidth={2.66}
+                />
+              </g>
+              <defs>
+                <filter
+                  id="filter0_d_19643_241"
+                  x={-0.00355148}
+                  y={0.482422}
+                  width={1060.01}
+                  height={277.545}
+                  filterUnits="userSpaceOnUse"
+                  colorInterpolationFilters="sRGB"
+                >
+                  <feFlood floodOpacity={0} result="BackgroundImageFix" />
+                  <feColorMatrix
+                    in="SourceAlpha"
+                    type="matrix"
+                    values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                    result="hardAlpha"
+                  />
+                  <feOffset dy={12.627} />
+                  <feGaussianBlur stdDeviation={6.08088} />
+                  <feComposite in2="hardAlpha" operator="out" />
+                  <feColorMatrix
+                    type="matrix"
+                    values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                  />
+                  <feBlend
+                    mode="normal"
+                    in2="BackgroundImageFix"
+                    result="effect1_dropShadow_19643_241"
+                  />
+                  <feBlend
+                    mode="normal"
+                    in="SourceGraphic"
+                    in2="effect1_dropShadow_19643_241"
+                    result="shape"
+                  />
+                </filter>
+              </defs>
+            </svg>
+          </div>
+          {/* Main div images */}
+          <div className="relative flex max-w-[100vw]">
+            {/* image box one */}
+            <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_04-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 600"
+                style={{ width: "100%", height: "auto" }}
+                className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
+              />
+            </div>
 
-                    <div ref={trackRef} className="flex">
-                        {tabs.map((tab, index) => (
-                            <button
-                                key={tab}
-                                ref={(el) => (btnRefs.current[index] = el)}
-                                onClick={() => setActiveTab(index)}
-                                className={`cursor-pointer relative z-10 px-[14px] py-3 rounded-full whitespace-nowrap text-sm md:text-4 font-semibold uppercase transition-colors ${activeTab === index ? "text-[#111111]" : "text-white"
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
+            {/* image box two */}
+            <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_04-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 750"
+                style={{ width: "100%", height: "auto" }}
+                className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
+              />
+            </div>
 
-                    {showPaddles && activeTab > 0 && (
-                        <button
-                            onClick={goPrev}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-[#1F1F1F] w-12 h-8 flex items-center justify-center text-white"
-                        >
-                            <ArrowLeft size={16} />
-                        </button>
-                    )}
+            {/* image box three */}
+            <div className="relative max-w-[30vw] flex items-center justify-center mx-auto ">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_04-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 900"
+                style={{ width: "100%", height: "auto" }}
+                className="hero_img smooth min-w-[50vw] rotate-[-60deg] md:scale-[1] scale-[2]"
+              />
+            </div>
+          </div>
+          {/* bottom black */}
+          <div className="absolute bottom-0 left-0 w-[100%] h-[200px] bg-[linear-gradient(0deg,#000000_10%,rgba(0,0,0,0)_100%)] z-10" />
+        </section>
 
-                    {showPaddles && activeTab < tabs.length - 1 && (
-                        <button
-                            onClick={goNext}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-[#1F1F1F] w-12 h-8 flex items-center justify-center text-white"
-                        >
-                            <ArrowRight size={16} />
-                        </button>
-                    )}
+        {/*about sec*/}
+        <section className="z-1 about relative smooth relative bg-[#CCCCCC] min-h-[860px] overflow-hidden z-0">
+          {/*inner sec*/}
+          <div className="global-padding max-w-[1920px] mx-auto after:content-[''] after:absolute after:top-0 after:left-0 after:w-[0%] after:h-full after:bg-[linear-gradient(270deg,rgba(204,204,204,0)_0%,#CCCCCC_100%)]">
+            <div className="relative overflow-hidden my-[60px]">
+              <h2 className="about_h2 smooth relative z-1 text-[42px] text-white font-bold w-[920px] md:max-w-[60vw] max-w-[100%] leading-[1.1]">
+                {t("about_h")}
+              </h2>
+            </div>
+            {/* image div */}
+            <div className="min-w-[80vw] md:absolute md:-right-[10%] md:-top-[10%] relative right-0 mb-[80px]">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_01-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 600"
+                style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
+                className="about_img_one smooth top-0 md:absolute relative lg:mb-0 -mb-[100px] scale-[1.2]"
+              />
+
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_01-1.png`}
+                width={800}
+                height={600}
+                alt="AFS Ultra Front Wing 750"
+                style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
+                className="about_img_two smooth md:absolute relative md:top-[200px] top-unset lg:mb-0 -mb-[100px]  scale-[1.2]"
+              />
+
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_01-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 900"
+                style={{ width: "100%", height: "auto", maxWidth: "1920px" }}
+                className="about_img_three smooth md:absolute relative md:top-[400px] top-auto  scale-[1.2]"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/*tube sec*/}
+        <section className="about_II relative lg:mb-0 mb-20 overflow-hidden z-[1] bg-[#000]">
+          <p className="about_II_p_I max-w-[520px] lg:right-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] right-auto lg:absolute relative lg:top-[10%] z-2 text-white leading-[1.3] font-semibold text-[22px] after:content-[''] after:absolute after:w-[100%] after:h-[120%] after:bg-[#0059B8] after:blur-[80px] after:-z-10 after:opacity-[0.6] after:rounded-[20%] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 mx-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] py-[60px]">
+            {t("tube_h_i")}{" "}
+            <span className="text-[#D44841]">{t("tube_h_ii")}</span>{" "}
+            {t("tube_h_iii")}
+          </p>
+
+          <div className="relative z-2">
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_03-1.png`}
+              width={800}
+              height={600}
+              onLoad={(e) => handleImageLoad(e.target)}
+              alt="AFS Ultra Front Wing 600"
+              style={{ width: "100%", height: "auto" }}
+              className="smooth"
+            />
+
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/line-1.png`}
+              width={800}
+              height={600}
+              onLoad={(e) => handleImageLoad(e.target)}
+              alt="AFS Ultra Front Wing 600 line"
+              style={{ width: "100%", height: "auto" }}
+              className="about_II_line smooth absolute z-1 top-[7.5%]"
+            />
+          </div>
+        </section>
+
+        {/*winglets sec*/}
+        <section className="relative about_III relative flex gap-[20px] min-w-[100vw] justify-end items-center lg:pr-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] pr-0 global-margin flex-col md:flex-row z-[2]">
+          {/* Left column - images */}
+          <div className="relative about_III_img_div smooth relative flex-1 flex flex-col gap-16 items-start after:content-[''] after:absolute after:-top-1/2 after:left-[0%] lg:after:w-[50%] after:w-[100%] after:h-[300%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] order-2 md:order-0">
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA600_3D_06-1-1.png`}
+              width={800}
+              height={600}
+              onLoad={(e) => handleImageLoad(e.target)}
+              alt="AFS Ultra Front Wing 600"
+              style={{ width: "90%", height: "auto" }}
+              className="about_III_img_one smooth relative z-1"
+            />
+
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA750_3D_06-1-1.png`}
+              width={800}
+              height={600}
+              onLoad={(e) => handleImageLoad(e.target)}
+              alt="AFS Ultra Front Wing 750"
+              style={{ width: "95%", height: "auto" }}
+              className="about_III_img_two smooth relative z-1"
+            />
+
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_07-1-1.png`}
+              width={800}
+              height={600}
+              onLoad={(e) => handleImageLoad(e.target)}
+              alt="AFS Ultra Front Wing 900"
+              style={{ width: "100%", height: "auto" }}
+              className="about_III_img_three smooth relative z-1"
+            />
+          </div>
+
+          {/* Right column - fixed width */}
+          <div className="lg:w-[520px] lg:max-w-[30vw] md:w-[40vw] order-0 md:px-[0px] md:pb-[0px] px-[20px] pb-[40px] z-1 relative">
+            <div className="relative overflow-hidden">
+              <p className="about_III_p text-white leading-[1.3] font-semibold text-[22px] right-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)]">
+                <span className="text-[#D44841]">{t("winglets_h_i")}</span>{" "}
+                {t("winglets_h_ii")}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/*profile sec*/}
+        <section className="relative about_IIII flex flex-col bg-[#111] relative z-1 global-margin relative z-[10]">
+          {/* div one */}
+          <div className="flex min-h-[620px] md:flex-row flex-col">
+            {/* div one content left*/}
+            <div className="relative overflow-hidden py-16 flex-1 flex after:content-[''] after:absolute after:w-[100%] after:h-[70%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] after:-bottom-[35%] after:left-1/2 after:-translate-x-1/2 md:order-1 order-2">
+              <div className="flex global-padding flex-col justify-between gap-20 relative z-2">
+                {/* div one content top*/}
+                <div className="space-y-[25px] relative overflow-hidden">
+                  <h2 className="about_IIII_p global-h2 text-white">
+                    {t("profile_h")}
+                  </h2>
+                  <p className="about_IIII_p text-white font-medium leading-[1.3] text-[20px] max-w-[80%] max-w-[522px]">
+                    {t("profile_P")}
+                  </p>
                 </div>
-            </section>
-        </div>
-    );
+                {/* div one content bottom*/}
+                <div className="flex gap-[40px] flex-col lg:flex-row oveflow-hidden">
+                  <p className="about_IIII_p_II text-[18px] leading-[1.3] text-[#FFFFFFCC] font-medium pl-[20px] border-l-2 border-[#D44841]">
+                    {t("profile_P_i")}
+                  </p>
+
+                  <p className="about_IIII_p_II text-[18px] leading-[1.3] text-[#FFFFFFCC] font-medium pl-[20px] border-l-2 border-[#D44841]">
+                    {t("profile_P_ii")}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative flex-1 overflow-hidden md:max-w-1/2 max-w-[100%] md:order-2 order-0 flex">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/DSC01362-Recupere-4.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS whiteBird and Ultra Front Wing 600"
+                style={{ width: "100%", height: "auto" }}
+                className="about_IIII_img smooth object-cover aspect-[96/62] lg:aspect-auto"
+              />
+            </div>
+          </div>
+
+          {/* div two */}
+          <div className="about_IIII_div_inner flex min-h-[620px] md:flex-row flex-col">
+            {/* div one content left*/}
+            <div className="aspect-[96/62] relative flex-1 bg-[#CCCCCC] flex items-center overflow-hidden min-h-[320px]">
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ULTRA900_3D_04-1-1.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS Ultra Front Wing 900"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  filter: `drop-shadow(0px 0px 0px #00000026) drop-shadow(0px 18px 39px #00000026)drop-shadow(0px 72px 72px #00000021)`,
+                }}
+                className="smooth scale-[2] about_IIII_img_I"
+              />
+
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/UGlide_0002-3.png`}
+                width={800}
+                height={600}
+                onLoad={(e) => handleImageLoad(e.target)}
+                alt="AFS UGlide 41"
+                style={{
+                  width: "80%",
+                  height: "auto",
+                  filter: `drop-shadow(0px 18px 39px #00000026) drop-shadow(0px 72px 72px #00000021)drop-shadow(0px 162px 97px #00000014)`,
+                }}
+                className="smooth absolute -right-[10%] bottom-[25%] about_IIII_img_II"
+              />
+            </div>
+            {/* div one content right*/}
+            <div className="relative py-20 flex-1 flex text-center justify-center items-center overflow-hidden after:content-[''] after:absolute lg:after:w-[50%] after:w-[100%] after:h-[120%] after:bg-[#0059B8] after:opacity-[0.6] after:rounded-[50%] after:blur-[200px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2">
+              <div className="relative flex flex-col justify-between gap-20 relative z-2 mb-10">
+                {/* div two content*/}
+                <div className="relative overflow-hidden global-padding flex flex-col gap-[25px] justofy-center items-center">
+                  <h2 className="about_IIII_p_III global-h2 text-white">
+                    {t("profile_h_i")}
+                  </h2>
+                  <p className="about_IIII_p_III text-white font-medium leading-[1.3] text-[20px] max-w-[80%] max-w-[522px]">
+                    {t("profile_P_iii")}
+                  </p>
+                </div>
+              </div>
+
+              {/* tracker*/}
+              <div className="tracker absolute ticker overflow-hidden bg-[#D44841] py-[8px] text-white font-bold uppercase -left-[40px] bottom-20 -rotate-[2deg] z-2">
+                <div className="ticker-content flex gap-10 whitespace-nowrap">
+                  {Array(3)
+                    .fill(
+                      <>
+                        <span className="dot w-2 h-2 bg-[#FFFFFF99] rounded-full"></span>
+                        <span>{t("tracker")}</span>
+                      </>
+                    )
+                    .map((item, i) => (
+                      <span key={i} className="flex items-center gap-2">
+                        {item}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/*Technical information section*/}
+        <section className="relative global-padding max-w-[1380px] mx-auto mb-30">
+          <h2 className="global-h2 text-center text-white mb-15">
+            Technical information
+          </h2>
+
+          {/* Content */}
+          <div className="text-white">
+            <div className="relative flex flex-col">
+              {/* Specs Card */}
+              <div className="bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] w-[520px] max-w-full flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 lg:absolute">
+                <h3 className="text-[28px] leading-[100%] font-bold">
+                  {title}
+                </h3>
+
+                <SpecsTable data={specsData} />
+              </div>
+
+              {/* Slider */}
+              <div className="relative w-full">
+                <Swiper
+                  onSwiper={(swiper) => (swiperRef.current = swiper)}
+                  onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+                  slidesPerView={1}
+                  className="rounded-lg overflow-hidden [&_.swiper-wrapper]:flex [&_.swiper-wrapper]:items-center"
+                >
+                  {images.map((img, i) => (
+                    <SwiperSlide
+                      key={i}
+                      className="!flex items-center justify-end"
+                    >
+                      <Image
+                        src={img}
+                        alt={`slide-${i}`}
+                        width={1200}
+                        height={800}
+                        priority={i === 0}
+                        className="lg:max-w-[50vw] max-w-full lg:max-h-[520px] max-h-[300px] lg:min-h-[520px] min-h-[300px] object-contain"
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+
+                {/* Thumbnails */}
+                <div className="mt-6 flex flex-wrap gap-5 justify-center">
+                  {images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        swiperRef.current?.slideTo(i);
+                        setActiveIndex(i);
+                      }}
+                      className={`cursor-pointer relative w-[60px] h-[60px] flex items-center justify-center ${
+                        activeIndex === i ? "border-b-2 border-[#D44841]" : ""
+                      }`}
+                    >
+                      {activeIndex === i && (
+                        <span className="absolute inset-0 mx-auto w-[36px] h-full rounded-[30%] bg-[#0059B8] blur-[20px]" />
+                      )}
+
+                      <img
+                        src={img}
+                        alt={`thumb-${i}`}
+                        className="relative z-10 w-full h-full object-contain"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div
+            ref={navRef}
+            className="relative overflow-hidden rounded-full bg-[#1F1F1F] max-w-fit mx-auto mt-[30px]"
+          >
+            <div
+              ref={bgRef}
+              className="absolute top-0 left-0 bg-white rounded-full z-0"
+            />
+
+            <div ref={trackRef} className="flex">
+              {tabs.map((tab, index) => (
+                <button
+                  key={tab}
+                  ref={(el) => (btnRefs.current[index] = el)}
+                  onClick={() => setActiveTab(index)}
+                  className={`cursor-pointer relative z-10 px-[14px] py-3 rounded-full whitespace-nowrap text-sm md:text-4 font-semibold uppercase transition-colors ${
+                    activeTab === index ? "text-[#111111]" : "text-white"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {showPaddles && activeTab > 0 && (
+              <button
+                onClick={goPrev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-[#1F1F1F] w-12 h-8 flex items-center justify-center text-white"
+              >
+                <ArrowLeft size={16} />
+              </button>
+            )}
+
+            {showPaddles && activeTab < tabs.length - 1 && (
+              <button
+                onClick={goNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-[#1F1F1F] w-12 h-8 flex items-center justify-center text-white"
+              >
+                <ArrowRight size={16} />
+              </button>
+            )}
+          </div>
+        </section>
+      </div>
+    </ReactLenis>
+  );
 };
 
 export default UltraHA;

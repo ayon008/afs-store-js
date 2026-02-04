@@ -102,8 +102,41 @@
     "team": "team"
   },
   "blackBird": {
+    "about_afs_colors": "Fresh AFS design + <highlight>two color options: Red or Blue</highlight>",
+    "about_blackbird_midlength": "The <highlight>Blackbird Mid Length</highlight> transfers the proven hydrodynamics of the AFS Advanced Blackbird into a more accessible construction.",
+    "about_built": "Built in <highlight>PVC Sandwich Glass</highlight>, it retains the original’s mid-length outline for early takeoff, linear acceleration, optimized pitch balance, and efficient pumping.<br/><br/>The hybrid design makes it suitable for <highlight>wingfoil, parawing, SUP foil and surf foil</highlight> with volumes from 80L to 100L and sizes from 5'6 to 6'3.",
+    "about_color_options": "A modern redesign and <highlight>two color</highlight> options complete a board engineered for intuitive performance and multi-discipline efficiency.",
     "about_h": "With new hybrid and uncompromising design, every session becomes a unique experience where performance, glide, and enjoyment come together to redefine foiling.",
-    "Hero_t": "Hybrid / Mid-length experience - By AFS Advanced"
+    "about_hybrid_board": "Hybrid board designed for <highlight>Wingfoil / Parawing / SUP Foil / Surf Foil</highlight>",
+    "about_iconic_shape": "Same iconic <highlight>mid-length Blackbird shape</highlight>",
+    "about_intro": "Born from expertise developed in the world of downwind, the BlackBird Mid-Length pushes the boundaries of board design.",
+    "about_p": "By reinterpreting the principles of downwind boards to meet the demands of wingfoiling, we have created a board capable of combining quick take-off in light winds, exceptional glide, and maneuverability.",
+    "about_p_i": "Inspired by the BlackBird, a true innovation in the downwind world, its optimized length-to-width ratio allows it to excel in light conditions or small swells, offering precise control and rapid take-off even with smaller foils.",
+    "about_pvc_construction": "<highlight>PVC Sandwich Glass Construction</highlight> for durability & lightweight performance",
+    "about_smooth_takeoff": "<smooth>Smooth</smooth> takeoff, <balanced>balanced</balanced> stance, and <natural>natural</natural> carving feel",
+    "accessible": "The <highlight>Blackbird Mid Length<highlight> transfers the proven hydrodynamics of the AFS Advanced Blackbird into a more accessible construction.",
+    "Although": "Although designed for advanced performance, the BlackBird Mid-Length remains intuitive and accessible. Whether you are passionate about downwind, a fan of high-performance SUP foiling, or seeking thrills in wing foiling, parawing, or even surf foiling in certain conditions, this board is designed to adapt to all spots and conditions without compromise.",
+    "Continuing": "Continuing the legacy of our iconic BlackBird, the BlackBird Mid-Length embodies the essence of AFS Advanced expertise.",
+    "Enhanced": "Enhanced pumping for immediate and efficient handling.",
+    "Featuring": "Featuring premium carbon construction and an innovative\n                      shape, this board pushes the limits of performance and\n                      innovation. Its design includes a highly optimized hull,\n                      the result of years of research and refinement on\n                      BlackBird shapes.",
+    "Hero_t": "Hybrid / Mid-length experience - By AFS Advanced",
+    "High": "High-end construction synonymous with durability,\n                      stiffness and lightness.",
+    "horiziontal_P": "With the BlackBird Mid-Length, we aim to redefine the\n                    foiling experience by offering a compact yet ultra-efficient\n                    hybrid board.",
+    "horiziontal_P_i": "A true crossover, it adapts to each of your sessions and\n                    disciplines with remarkable optimization. Every detail has\n                    been meticulously crafted to deliver maximum performance.",
+    "hybrid": "This hybrid board opens up new possibilities with its\n                  exceptional performance in light winds and its ability to take\n                  off quickly and smoothly in mild conditions. Yet it's\n                  aerodynamic design and optimized volume distribution also make\n                  it a perfect supportive board in rougher weather.",
+    "Hybrid": "A Hybrid Experience Without Compromise",
+    "Inspired": "Inspired by the first generation of BlackBird (6'2 and\n                      6'4), ahead of their time in their own right, true\n                      benchmarks in the Mid-Length board market.",
+    "Key features": "Key features",
+    "Long_version": "Long version",
+    "Manufactured": "Manufactured in our French factory using cutting-edge\n                      technologies, the BlackBird Mid-Length achieves an\n                      unprecedented level of optimization, ensuring easy\n                      take-offs, excellent stability, and ultra-efficient glide.",
+    "pvc": "This year, we wanted to bring that same magic to more riders. So we took the iconic mid-length shape and re-engineered it using our trusted  PVC Sandwich Glass Construction creating a more accessible, more versatile version: the Blackbird Mid Length by AFS",
+    "Refined": "Refined deck plans for ergonomics and comfort that meet\n                      the expectations of the most demanding riders.",
+    "Refreshed": "Refreshed with a modern design and available in two\n                    colorways, it delivers the legendary Blackbird sensation\n                    across wingfoil, downwind, and SUP foil.",
+    "Smooth": "Smooth, stable, and endlessly enjoyable",
+    "standout": "The Blackbird has long been one of the standout innovations\n                    from our AFS Advanced Lab : a board loved for its glide,\n                    balance, and unmistakable feel.",
+    "Technical Info": "Technical Info",
+    "The performance": "The performance,\nmade accessible by AFS",
+    "Ultra": " Ultra-Premium Carbon Construction"
   },
   "blog": {
     "blog": "Blog",
@@ -543,6 +576,15 @@
     "watch": "Watch the review",
     "we": "We are here to provide you with comprehensive answers and advice to help you make the right choice."
   },
+  "productDimension": {
+    "Carbone": "Carbon",
+    "Corde maximum": "Chord max.",
+    "Envergure": "span",
+    "Epaisseur maximum": "Thickness max.",
+    "et": "and",
+    "Monolithiqu": "Monolithic",
+    "Taille des vis": "Screw size"
+  },
   "profile": {
     "account": "Log Out of Your Account",
     "billing": "Billing Address",
@@ -640,6 +682,12 @@
   "service-request": {
     "title": "Service request"
   },
+  "singleProductNav": {
+    "btn": "Learn More",
+    "btn_i": "Buy Now",
+    "Characteristics": "Characteristics",
+    "Reviews": "Reviews"
+  },
   "support": {
     "afs-support": "AFS Support\n",
     "ahd": "The AHD blue on our boards (Thunderbolt, Topaz, Compact) is\n                RAL5012.",
@@ -699,10 +747,34 @@
     "hero_p": "designed to feel the wave.",
     "hero_p_II": "This range is designed to elevate three essential on-water\n              sensations: glide, precision, and pure carving feel.",
     "hero_row_p_I": "Its reduced span and refined tips concentrate the lift, freeing\n                the roll completely for a more surfy, playful behavior and\n                ultra-natural carving.",
-    "hero_row_p_II": "Its reduced span and refined tips concentrate the lift, freeing\n                the roll completely for a more surfy, playful behavior and\n                ultra-natural carving.",
-    "hero_row_p_III": "Despite this compact format, every detail of the profile -\n                thickness, camber, transitions - has been refined to minimize\n                drag and maximize glide and efficiency.",
+    "hero_row_p_II": "Despite this compact format, every detail of the profile - thickness, camber, transitions - has been refined to minimize drag and maximize glide and efficiency. ",
+    "hero_row_p_III": "The result: a reactive, incisive, and fluid stabilizer that releases effortlessly while maintaining continuous, progressive support.",
+    "information": "Technical information",
+    "short_h": "In short, the U Carve is a fusion of performance, glide, and feel - a natural, precise, intuitive behavior that offers as much freedom as stability.",
+    "short_p": "A design dedicated to pure surf carving, designed to feel\n                the wave, not fight it.",
+    "size_h": "Available sizes",
+    "size_p_i": "The U Carve range comes in 130, 140, 150, and 160,",
+    "size_p_ii": "each with specific outlines. The sweep angle evolves according to the level of pivot you want:",
+    "size_p_iii": "The 160, with a straighter outline, delivers tighter turns and excellent maneuverability in small conditions, while the smaller sizes, with increased sweep, offer more drive and stability in faster, more open lines.",
+    "size_p_iiii": "Each rider can choose the exact model that best suits their weight, style, and preferred conditions.",
     "whole_h": "That was the whole challenge",
     "whole_p": "Achieving a foil that’s fully freed in roll, highly surfy, yet still efficient and reliable in the slowest sections."
+  },
+  "UltraHA": {
+    "about_h": "These wings were designed to deliver glide, precision,\n              and efficiency while maintaining a high average speed — a key\n              requirement of modern downwind riding.",
+    "profile_h": "A profile designed for ultra-efficient pumping",
+    "profile_h_i": " HA ULTRA + U-GLIDE: the downwind signature",
+    "profile_P": "A core element of the ULTRA range lies in its profile design,\n                  optimized to reduce the energy required for pumping.",
+    "profile_P_i": "The goal is not explosive pumping, but rather a smooth,\n                  efficient pumping style that maintains average speed with\n                  minimal effort.",
+    "profile_P_ii": "An effective, fluid, low-energy pumping motion that allows\n                  riders to connect bump after bump while expending as little\n                  energy as possible.",
+    "profile_P_iii": "A setup designed to glide far, sustain average speed, connect\n                  efficiently, and follow the most direct line — with minimal\n                  yet effective pumping.",
+    "technical": "Technical information",
+    "tracker": "A platform built for modern downwind riding: fast,\n                          precise, and energy-efficient.",
+    "tube_h_i": "We integrated",
+    "tube_h_ii": "tubercules",
+    "tube_h_iii": "along the\n          leading edge to achieve a more progressive stall and improved ability\n          to lock into bumps, even when the sea becomes irregular.",
+    "winglets_h_i": "The mini winglets at the wingtips",
+    "winglets_h_ii": "help\n              stabilize airflow, reduce vortices, and increase directional\n              stability."
   },
   "visit": {
     "play": " PLAY VIDEO",
