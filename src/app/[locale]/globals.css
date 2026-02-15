@@ -109,11 +109,17 @@ body {
 }
 .global-border-top {
   border-top: 2px dashed #808080;
-    border-image: repeating-linear-gradient(to right, #808080 0, #808080 10px, transparent 10px, transparent 20px) 100%;
-    border-image-slice: 1;
-    border-width: 2px 0 0 0;
+  border-image: repeating-linear-gradient(
+      to right,
+      #808080 0,
+      #808080 10px,
+      transparent 10px,
+      transparent 20px
+    )
+    100%;
+  border-image-slice: 1;
+  border-width: 2px 0 0 0;
 }
-
 
 .global-b-bottom-d {
   border-bottom: 2px solid;
@@ -144,7 +150,7 @@ body {
 }
 
 .global-margin {
-  @apply mb-[80px] lg:mb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
+  @apply mb-[80px] md:mb-[120px] lg:mb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
 }
 .global-padding-bottom {
   @apply pb-[80px] lg:pb-[clamp(7.5rem,-1.3889rem+13.8889vw,12.5rem)];
@@ -154,16 +160,13 @@ body {
   @apply pt-[80px] lg:pt-[clamp(7.5rem,-12.5rem+25vw,12.5rem)];
 }
 
-
 .prose h2 {
   @apply font-bold text-[36px] md:text-[clamp(2.25rem,1.5078rem+1.5504vw,2.5rem)] lg:text-[clamp(2.5rem,1.3889rem+1.7361vw,3.125rem)] leading-[110%] tracking-[-0.01em] mb-10 mt-[clamp(3.75rem,0.2971rem+7.2029vw,7.5rem)];
 }
 
-
 .prose h3 {
   @apply lg:text-[28px]! font-semibold! leading-[100%]! text-[#111]! md:text-[24px]! text-[20px]! mb-5!;
 }
-
 
 .prose p {
   @apply lg:text-[22px]! leading-[130%]! font-medium! text-[#111]/75! md:text-[19.6px]! text-base! mb-5!;
@@ -182,7 +185,7 @@ body {
 }
 
 .prose img {
-  @apply mb-10!
+  @apply mb-10!;
 }
 
 .prose ul {
@@ -206,9 +209,8 @@ body {
   @apply border-b! border-[#111]/10!;
 }
 
-
 .faq table th {
-  @apply bg-transparent!
+  @apply bg-transparent!;
 }
 
 .faq table th {
@@ -216,10 +218,10 @@ body {
 }
 
 .my-dashed-slider {
-  position: relative;      /* needed for the ::before dashed line */
+  position: relative; /* needed for the ::before dashed line */
   box-sizing: border-box;
 }
-.range-slider{
+.range-slider {
   background: transparent !important;
 }
 
@@ -231,7 +233,6 @@ font-weight: 600;
 line-height: 100%; 
 } */
 
-
 .product_dimantion {
   display: flex;
   flex-direction: column;
@@ -239,29 +240,26 @@ line-height: 100%;
   flex-wrap: wrap;
 }
 
-
-
-
 /* Dimensions*/
 .specs-wrapper {
-width: 100%;
-height: 100%;
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-gap: 4px;
-font-family: 'Alliance No.2', sans-serif;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-family: "Alliance No.2", sans-serif;
 }
 
 .specs-header {
-align-self: stretch;
-padding: 10px 0 16px clamp(11.875rem, 9.7685rem + 6.4815vw, 16.25rem);
-border-bottom: 1px solid #333333;
-display: inline-flex;
-gap: 20px;
-justify-content: flex-start;
-align-items: flex-end;
-flex-wrap: nowrap;
+  align-self: stretch;
+  padding: 10px 0 16px clamp(11.875rem, 9.7685rem + 6.4815vw, 16.25rem);
+  border-bottom: 1px solid #333333;
+  display: inline-flex;
+  gap: 20px;
+  justify-content: flex-start;
+  align-items: flex-end;
+  flex-wrap: nowrap;
 }
 
 .specs-header .cell {
@@ -313,50 +311,42 @@ flex-wrap: nowrap;
   word-wrap: break-word;
 }
 
-
-
-
-.subtext, .sub-label{
-color: #B3B3B3;
- font-size: 12px;
- font-family: Alliance No.2;
- font-weight: 600;
- line-height: 12px;
- word-wrap: break-word
-    
+.subtext,
+.sub-label {
+  color: #b3b3b3;
+  font-size: 12px;
+  font-family: Alliance No.2;
+  font-weight: 600;
+  line-height: 12px;
+  word-wrap: break-word;
 }
 
-
 .table-container {
-    overflow-y: auto;
-    cursor: grab;
-    user-select: none;
-    -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-container:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 @media only screen and (max-width: 767px) {
+  .table-container:not(:last-of-type) {
+    margin-bottom: 20px;
+  }
 
-.table-container:not(:last-of-type) {
-    margin-bottom: 20px
-}
-
-.product_name{
+  .product_name {
     font-size: 22px;
-    
+  }
 }
-}
-
-
 
 /* draw a single dashed line across the container */
 .my-dashed-slider::before {
   content: "";
   position: absolute;
-left: 8px;             /* leave room for thumb radius */
+  left: 8px; /* leave room for thumb radius */
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
@@ -365,10 +355,10 @@ left: 8px;             /* leave room for thumb radius */
     to right,
     #222,
     #222 6px,
-    rgba(0,0,0,0) 6px,
-    rgba(0,0,0,0) 12px
+    rgba(0, 0, 0, 0) 6px,
+    rgba(0, 0, 0, 0) 12px
   );
-  pointer-events: none;    /* don't block interaction */
+  pointer-events: none; /* don't block interaction */
   z-index: 1;
 }
 
@@ -390,7 +380,7 @@ left: 8px;             /* leave room for thumb radius */
   border-radius: 50% !important;
   background: #000 !important;
   box-shadow: none !important;
-  position: relative;      /* so it paints above ::before */
+  position: relative; /* so it paints above ::before */
   z-index: 2;
   /* center the thumb exactly on the 1px line */
   transform: translateY(-50%) !important;
@@ -408,8 +398,6 @@ left: 8px;             /* leave room for thumb radius */
   background: transparent !important;
   height: 0 !important;
 }
-
-
 
 /* Hide vertical scrollbar while keeping scrolling functionality */
 .hide-scrollbar-y {
@@ -560,7 +548,6 @@ td {
   margin-bottom: 20px;
 }
 
-
 .table-container {
   overflow-y: auto;
   cursor: grab;
@@ -609,10 +596,9 @@ td {
   align-items: flex-start;
 }
 
-
 .specs-row .title {
   width: clamp(10.625rem, 8.5185rem + 6.4815vw, 15rem);
-  font-size: clamp(1.125rem, .9028rem + .3472vw, 1.25rem);
+  font-size: clamp(1.125rem, 0.9028rem + 0.3472vw, 1.25rem);
   font-weight: 600;
   text-transform: uppercase;
   color: #111;
@@ -631,13 +617,12 @@ td {
 
 .row-data .cell {
   flex: 1 1 0;
-  font-size: clamp(1rem, .7778rem + .3472vw, 1.125rem);
+  font-size: clamp(1rem, 0.7778rem + 0.3472vw, 1.125rem);
   font-weight: 500;
   color: #111;
   line-height: 100%;
   word-wrap: break-word;
 }
-
 
 #configurateur {
   max-width: 600px;
@@ -647,7 +632,8 @@ td {
   font-family: "alliance no.2", sans-serif, Inter, sans-serif;
 }
 
-#configurateur h3, #configurateur label {
+#configurateur h3,
+#configurateur label {
   font-family: "alliance no.2", sans-serif, Inter, sans-serif;
 }
 
@@ -721,7 +707,7 @@ td {
 .resultat {
   text-align: center;
   animation: fadeInUp 1s ease-in-out forwards;
-  opacity:0;
+  opacity: 0;
   transform: translateY(20px);
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -748,12 +734,12 @@ td {
 
 @keyframes fadeInUp {
   from {
-      opacity:0;
-      transform: translateY(20px);
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-      opacity:1;
-      transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -775,18 +761,17 @@ td {
 
 /* Si moins de 3 résultats */
 .only-one {
-  order:2;
+  order: 2;
   margin-bottom: 30px;
 }
 .only-two-1 {
-  order:1;
+  order: 1;
   margin-bottom: 30px;
 }
 .only-two-2 {
-  order:3;
+  order: 3;
   margin-bottom: 10px;
 }
-
 
 /* For Faq Table */
 
@@ -798,8 +783,6 @@ td {
   line-height: 120%;
   text-align: left;
 }
-
-
 
 .criteria-title {
   font-family: "alliance no.2", sans-serif;
@@ -820,12 +803,14 @@ td {
 .criteria {
   margin-bottom: 20px;
 }
-.practice-option, .subpractice-option {
+.practice-option,
+.subpractice-option {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
 }
-.practice-option img, .subpractice-option img {
+.practice-option img,
+.subpractice-option img {
   width: 70px;
   height: 70px;
   object-fit: cover;
@@ -834,7 +819,7 @@ td {
 }
 
 .smooth {
-  transition: cubic-bezier(.17,.67,.83,.67) !important;
+  transition: cubic-bezier(0.17, 0.67, 0.83, 0.67) !important;
   overflow-x: clip;
 }
 /* input[type="range"] {
@@ -892,7 +877,7 @@ table tbody > tr:nth-child(odd) > th {
 }
 
 .faq table th {
-  font-family: 'alliance' !important;
+  font-family: "alliance" !important;
   font-weight: 700 !important;
 }
 
@@ -941,12 +926,12 @@ td {
   opacity: 0.8 !important;
 }
 
-.mobile-banner .swiper-pagination{
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 12px;
-    align-items: center;
-    justify-content: center;
+.mobile-banner .swiper-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 12px;
+  align-items: center;
+  justify-content: center;
 }
 
 .aside-nav li:hover svg {
@@ -980,8 +965,6 @@ td {
 /* .step-2{
 position: relative;
 } */
-
-
 
 .step-2::before {
   content: "";
@@ -1097,7 +1080,8 @@ position: relative;
 }
 
 @keyframes pulse-soft {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1106,7 +1090,8 @@ position: relative;
 }
 
 @keyframes stepPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(29, 152, 255, 0.4);
   }
   50% {
@@ -1219,9 +1204,9 @@ position: relative;
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1231,4 +1216,16 @@ position: relative;
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* enduro hero after */
+.endruo_hero:after {
+  background-image: linear-gradient(212deg, #ffffff00 47%, #000000 54.8%);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+  z-index: 5;
 }

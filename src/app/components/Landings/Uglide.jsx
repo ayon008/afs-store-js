@@ -1,7 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useLayoutEffect, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import SmoothScroll from "@/app/components/SmoothScroll";
 import { useGSAP } from "@gsap/react";
@@ -18,7 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Uglide = () => {
   //define i18n
-  const t = useTranslations("Ucarve");
+  const t = useTranslations("Uglide");
   const g = useTranslations("productDimension");
   const container = useRef(null);
 
@@ -82,7 +81,7 @@ const Uglide = () => {
     },
   ];
 
-  const tabs = ["U carve 130", "U carve 140", "U carve 150", "U carve 160"];
+  const tabs = ["U-Glide-39", "U-Glide-41", "U-Glide-43"];
 
   const [activeTab, setActiveTab] = useState(0);
   const [showPaddles, setShowPaddles] = useState(false);
@@ -93,57 +92,40 @@ const Uglide = () => {
   const btnRefs = useRef([]);
   const xRef = useRef(0);
 
-  const Uglide130Specs = [
-    { label: "Surface", value: "130 cm2" },
-    { label: g("Envergure"), value: "360 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: g("Corde maximum"), value: "68" },
-    { label: g("Epaisseur maximum"), value: "5" },
+  const goPrev = () => setActiveTab((i) => Math.max(0, i - 1));
+  const goNext = () => setActiveTab((i) => Math.min(tabs.length - 1, i + 1));
+
+  const UGlide39 = [
+    { label: g("Surface"), value: "113 cm²" },
+    { label: "Aspect Ratio", value: "13.9" },
+    { label: g("Thickness"), value: "4.5 mm" },
     {
-      label: "Construction",
-      value: `HR ${g("Carbone")} + HM ${g("Carbone")} / ${g("Monolithiqu")}`,
+      label: g("Materials"),
+      value: g("modulus"),
     },
-    { label: g("Taille des vis"), value: "12mm Torx 30" },
+    { label: g("Best"), value: "Downwind, glide" },
   ];
 
-  const Uglide140Specs = [
-    { label: "Surface", value: "140 cm2" },
-    { label: g("Envergure"), value: "375 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: g("Corde maximum"), value: "72" },
-    { label: g("Epaisseur maximum"), value: "5" },
+  const UGlide41 = [
+    { label: g("Surface"), value: "123 cm²" },
+    { label: "Aspect Ratio", value: "13.8" },
+    { label: g("Thickness"), value: "5 mm" },
     {
-      label: "Construction",
-      value: `HR ${g("Carbone")} + HM ${g("Carbone")} / ${g("Monolithiqu")}`,
+      label: g("Materials"),
+      value: g("modulus"),
     },
-    { label: g("Taille des vis"), value: "12mm Torx 30" },
+    { label: g("Best"), value: "Downwind, glide" },
   ];
 
-  const Uglide150Specs = [
-    { label: "Surface", value: "150 cm2" },
-    { label: g("Envergure"), value: "390 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: g("Corde maximum"), value: "76" },
-    { label: g("Epaisseur maximum"), value: "5" },
+  const UGlide43 = [
+    { label: g("Surface"), value: "133 cm²" },
+    { label: "Aspect Ratio", value: "13.7" },
+    { label: g("Thickness"), value: "5 mm" },
     {
-      label: "Construction",
-      value: `HR ${g("Carbone")} + HM ${g("Carbone")} / ${g("Monolithiqu")}`,
+      label: g("Materials"),
+      value: g("modulus"),
     },
-
-    { label: g("Taille des vis"), value: "12mm Torx 30" },
-  ];
-
-  const Uglide160Specs = [
-    { label: "Surface", value: "160 cm2" },
-    { label: g("Envergure"), value: "400 mm" },
-    { label: "Aspect ratio", value: "10" },
-    { label: g("Corde maximum"), value: "80" },
-    { label: g("Epaisseur maximum"), value: "5" },
-    {
-      label: "Construction",
-      value: `HR ${g("Carbone")} + HM ${g("Carbone")} / ${g("Monolithiqu")}`,
-    },
-    { label: g("Taille des vis"), value: "12mm Torx 30" },
+    { label: g("Best"), value: "Downwind, glide" },
   ];
 
   /* ----------------------------------------
@@ -152,7 +134,7 @@ const Uglide = () => {
   function SpecsTable({ data }) {
     return (
       <table>
-        <tbody className="text-4 lg:text-[18px] font-bold leading-[110%] flex flex-col gap-2">
+        <tbody className="text-4 lg:text-[16px] font-bold leading-[110%] flex flex-col gap-4 leading-[1.3]">
           {data.map((row, index) => (
             <tr
               key={index}
@@ -160,14 +142,14 @@ const Uglide = () => {
             >
               <th
                 style={{ padding: 0, backgroundColor: "transparent" }}
-                className="text-left text-[#FFFFFFCC] !whitespace-break-spaces"
+                className="font-bold text-left text-white !whitespace-break-spaces"
               >
                 {row.label}
               </th>
 
               <td
                 style={{ textAlign: "right" }}
-                className="font-semibold !whitespace-break-spaces"
+                className="font-smibold text-[#FFFFFF99] !whitespace-break-spaces max-w-[225px]"
               >
                 {row.value}
               </td>
@@ -234,6 +216,38 @@ const Uglide = () => {
     moveIndicator();
     centerActiveTab();
   }, [activeTab]);
+
+  // Check if paddles should be shown (when content overflows)
+  useEffect(() => {
+    const checkPaddles = () => {
+      const nav = navRef.current;
+      const track = trackRef.current;
+      if (nav && track) {
+        const navWidth = nav.offsetWidth;
+        const trackWidth = track.scrollWidth;
+        setShowPaddles(trackWidth > navWidth);
+      }
+    };
+
+    // Check after initial render and after tab changes
+    const timeoutId = setTimeout(() => {
+      checkPaddles();
+    }, 100);
+
+    window.addEventListener("resize", checkPaddles);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", checkPaddles);
+    };
+  }, [activeTab]);
+
+  /* ----------------------------------------
+   Handle image load
+---------------------------------------- */
+  const handleImageLoad = () => {
+    // Invalidate ScrollTriggers to recalculate positions after image load
+    ScrollTrigger.refresh();
+  };
 
   /* ----------------------------------------
    GSAP animations
@@ -334,147 +348,183 @@ const Uglide = () => {
               0
             );
 
-          if (!aboutImg || !aboutTarget) return;
+          // Wait until the image has loaded to calculate y properly
+          if (aboutImg.complete) {
+            initAnimation();
+          } else {
+            aboutImg.onload = initAnimation;
+          }
 
-          /* --------------------------------
-     CALCULATE initial uGlide position
-  ---------------------------------- */
-          let initialY = 0; // Stocker la valeur initiale de y
+          function initAnimation() {
+            gsap.from(aboutImg, {
+              y: () => {
+                const imgBox = aboutImg.getBoundingClientRect();
+                const targetBox = aboutTarget.getBoundingClientRect();
+                if (imgBox.height === 0 || targetBox.height === 0) return 0;
 
-          const setInitialPosition = () => {
-            if (!aboutImg || !aboutTarget) return;
+                const imgCenterY =
+                  imgBox.top + window.scrollY + imgBox.height / 2;
+                const targetCenterY =
+                  targetBox.top + window.scrollY + targetBox.height / 2;
+                const offset = targetBox.height * r(0.7, 0.7, 1.2);
 
-            const imgBox = aboutImg.getBoundingClientRect();
-            const targetBox = aboutTarget.getBoundingClientRect();
-
-            // Vérifier que les éléments ont des dimensions valides
-            if (
-              imgBox.width === 0 ||
-              imgBox.height === 0 ||
-              targetBox.width === 0 ||
-              targetBox.height === 0
-            ) {
-              return false;
-            }
-
-            const imgCenterY = imgBox.top + window.scrollY + imgBox.height / 2;
-            const targetCenterY =
-              targetBox.top + window.scrollY + targetBox.height / 2;
-
-            const offset = targetBox.height * r(0.7, 0.7, 1.2);
-
-            initialY = targetCenterY - offset - imgCenterY;
-
-            gsap.set(aboutImg, {
-              y: initialY,
-              x: 0,
+                return targetCenterY - offset - imgCenterY;
+              },
+              scale: r(1.3, 1.75, 1.75),
+              ease: "none",
+              scrollTrigger: {
+                trigger: heroSection,
+                start: "top+=50 top",
+                endTrigger: aboutSection,
+                end: "center center",
+                scrub: true,
+                markers: false,
+              },
             });
+          }
 
-            return true;
-          };
+          /* ------------------------------ HERO → ABOUT SCROLL ------------------------------ */ gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about",
+                start: "top 80%",
+                end: "center center",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".about_h",
+              { x: r("100%", 0, 0), y: "-100%" },
+              { x: 0, y: 0, ease: "none" },
+              "0"
+            )
 
-          // Fonction pour créer l'animation ScrollTrigger après que la position initiale soit définie
-          const createScrollAnimation = () => {
-            if (!aboutImg || !heroSection || !aboutSection) return;
-
-            /* ----- Move the uGlide to final position ---- */
-            gsap.fromTo(
-              aboutImg,
+            .fromTo(
+              ".abou_p",
               {
-                y: initialY,
+                y: (i) => `${100 + i * 50}%`,
+              },
+              {
+                y: "0%",
+                ease: "none",
+              },
+              "0"
+            );
+
+          /* ------------------------------ about → Slider SCROLL ------------------------------ */ gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".about",
+                start: "center center",
+                end: "bottom top",
+                scrub: true,
+                markers: false,
+              },
+            })
+
+            .fromTo(".slider_div", { y: 120 }, { y: 0, ease: "none" }, "0")
+            .fromTo(
+              ".slider_div_h",
+              {
+                y: (i) => (i + 1) * 20,
               },
               {
                 y: 0,
-                scale: r(0.85, 0.9, 1),
                 ease: "none",
-                scrollTrigger: {
-                  trigger: heroSection,
-                  start: "top+=50 top",
-                  endTrigger: aboutSection,
-                  end: "center center",
-                  scrub: true,
-                  markers: true,
-                  invalidateOnRefresh: true,
-                },
-              }
+              },
+              "0"
+            )
+
+            .to(
+              ".glide_39",
+              {
+                y: -120,
+                ease: "none",
+              },
+              "0"
             );
-          };
 
-          // Fonction pour essayer de définir la position avec retry
-          const trySetInitialPosition = (retries = 10, delay = 100) => {
-            requestAnimationFrame(() => {
-              if (setInitialPosition()) {
-                // Position initiale définie avec succès, créer l'animation
-                createScrollAnimation();
-                return;
-              }
+          /* ------------------------------ Slider → performance SCROLL ------------------------------ */ gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".slider_div",
+                start: "center center",
+                end: "center top",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(".performance", { y: 80 }, { y: 0, ease: "none" }, "0")
+            .fromTo(
+              ".performance_div",
+              { y: (i) => 40 * 2 ** i },
+              { y: 0, ease: "none" },
+              "0"
+            );
 
-              if (retries > 0) {
-                setTimeout(() => {
-                  trySetInitialPosition(retries - 1, delay);
-                }, delay);
-              }
-            });
-          };
+          /* ------------------------------ Slider → performance SCROLL ------------------------------ */ gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".performance",
+                start: "center center",
+                end: "center top",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .fromTo(
+              ".achieve_h",
+              { y: (i) => 80 * 2 ** i },
+              { y: 0, ease: "none" },
+              "0"
+            );
 
-          // Wait for images to load
-          const images = container.current.querySelectorAll("img");
-          let loadedImages = 0;
-          const totalImages = images.length;
+          /* ------------------------------ achieve → twist SCROLL ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".twist",
+                start: "top bottom",
+                end: "center center",
+                scrub: true,
+                markers: false,
+              },
+            })
 
-          if (totalImages === 0) {
-            // No images, try immediately
-            trySetInitialPosition();
-          } else {
-            const checkAndSetPosition = () => {
-              loadedImages++;
-              if (loadedImages >= totalImages) {
-                // All images are loaded, wait one frame for layout
-                trySetInitialPosition();
-              }
-            };
+            .from(".twist_img", { y: "0%", rotate: 45, ease: "none" }, "0")
+            .from(".twist_img_ii", { y: "50%", rotate: 45, ease: "none" }, "0")
+            .from(".twist_img_i", { rotate: 45, ease: "none" }, "0")
+            .from(".twist_h", { y: (i) => -160 + i * 40, ease: "none" }, "0");
 
-            images.forEach((img) => {
-              if (img.complete) {
-                checkAndSetPosition();
-              } else {
-                img.addEventListener("load", checkAndSetPosition, {
-                  once: true,
-                });
-                img.addEventListener("error", checkAndSetPosition, {
-                  once: true,
-                });
-              }
-            });
-          }
+          /* ------------------------------ twist → information SCROLL ------------------------------ */
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: ".information",
+                start: "top bottom",
+                end: "bottom bottom",
+                scrub: true,
+                markers: false,
+              },
+            })
+            .to(".twist_h", { y: (i) => -160 + i * 40, ease: "none" }, "0")
+            .to(".twist_img_i", { y: 80, ease: "none" }, "0")
+            .to(".twist_img_ii", { y: 160, ease: "none" }, "0")
+            .fromTo(
+              ".information_div",
+              { y: (i) => 80 * 2 ** i },
+              { y: 0, ease: "none" },
+              "0"
+            );
         }
       );
-
-      /* ------------------------------ HERO → ABOUT SCROLL ------------------------------ */ gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: ".about",
-            start: "top 80%",
-            end: "center center",
-            scrub: true,
-            markers: false,
-          },
-        })
-        .fromTo(
-          ".about_h",
-          { x: "100%", y: "-100%" },
-          { x: 0, y: 0, ease: "none" },
-          "0"
-        )
-        .fromTo(".abou_p", { y: "100%" }, { y: 0, ease: "none" }, "0")
-        .fromTo(".abou_p_i", { y: "125%" }, { y: 0, ease: "none" }, "0")
-        .fromTo(".abou_p_ii", { y: "200%" }, { y: 0, ease: "none" }, "0")
-        .fromTo(".abou_p_iii", { y: "300%" }, { y: 0, ease: "none" }, "0");
 
       return () => mm.revert();
     },
     { scope: container }
   );
+
   return (
     <SmoothScroll>
       <div ref={container} className="main overflow-hidden bg-[#000] mx-auto">
@@ -487,13 +537,13 @@ const Uglide = () => {
             {/* GLIDE 43 */}
             <img
               src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide43_0003-2.png`}
-              alt="AFS U Carve Stabilizer 160"
+              alt="AFS U GLide 43"
               className="max-w-[1920px] w-full h-auto lg:scale-[1.3] scale-[1.75] relative glide_43"
             />
             {/* GLIDE 41 */}
             <img
               src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/UGlide_0002-4.png`}
-              alt="AFS U Carve Stabilizer 160"
+              alt="AFS U GLide 41"
               className="hero_img max-w-[1920px] w-full h-auto lg:scale-[1.3] scale-[1.75] absolute z-0 md:-top-[35%]  -top-[60%] right-[0] z-1 glide_41"
             />
           </div>
@@ -555,19 +605,9 @@ const Uglide = () => {
             </div>
             <div className="max-w-[520px] flex-1 overflow-hidden">
               <p className="hero_b_p text-[#FFFFFFCC] text-[20px] leading-[1.3] font-semibold">
-                <b className="text-white">
-                  A high-aspect-ratio stabilizer (high AR)
-                </b>{" "}
-                features an <b className="text-white">extended span</b> combined
-                with a very narrow chord. This geometry significantly{" "}
-                <b className="text-white">reduces induced drag</b>, maximizes{" "}
-                <b className="text-white">hydrodynamic efficiency</b>, and
-                delivers{" "}
-                <b className="text-white">sustained lift at low speeds</b>,
-                while maintaining{" "}
-                <b className="text-white">
-                  rock-solid control and trim at high speeds.
-                </b>
+                {t.rich("hero", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </p>
             </div>
           </div>
@@ -579,8 +619,8 @@ const Uglide = () => {
           <div className="about_img_i max-w-[1920px] mx-auto relative">
             <img
               src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide39_0003-2.png`}
-              alt="AFS U Carve Stabilizer 160"
-              className="about_img max-w-[1920px] w-full h-auto rlative z-1 mx-auto lg:scale-[1.3] scale-[1.75] glide_39"
+              alt="AFS U GLide 39"
+              className="about_img max-w-[1920px] w-full h-auto rlative z-1 mx-auto scale-[1] glide_39"
             />
           </div>
 
@@ -588,41 +628,44 @@ const Uglide = () => {
           <div className="flex flex-col gap-10 max-w-[1920px] mx-auto">
             <div className="relative overflow-hidden w-fit">
               <h2 className="about_h text-white text-[22px] font-bold leadin-1 uppercase">
-                On the water, this translates into
+                {t("water")}
               </h2>
             </div>
             <div className="text-[#FFFFFFCC] text-[18px] leading-[1.3] grid grid-cols-1 min-[540px]:grid-cols-2 min-[1220px]:grid-cols-2 lg:grid-cols-4 gap-5 font-semibold">
               <div className="overflow-hidden flex items-center font-semibold">
                 <p className="abou_p border-l-2 border-white px-5">
-                  <b className="text-white font-bold">
-                    Highly efficient pumping
-                  </b>
-                  : each input generates forward drive with minimal energy loss
+                  {t.rich("pumping", {
+                    bold: (chunks) => (
+                      <b className="text-white font-bold">{chunks}</b>
+                    ),
+                  })}
                 </p>
               </div>
               <div className="overflow-hidden flex items-center">
-                <p className="abou_p_i border-l-2 border-white px-5">
-                  <b className="text-white font-bold">
-                    A clean, extended glide
-                  </b>
-                  , perfectly suited to linking bumps, transitions, and long,
-                  drawn-out lines
+                <p className="abou_p border-l-2 border-white px-5">
+                  {t.rich("glide", {
+                    bold: (chunks) => (
+                      <b className="text-white font-bold">{chunks}</b>
+                    ),
+                  })}
                 </p>
               </div>
               <div className="overflow-hidden flex items-center">
-                <p className="abou_p_ii border-l-2 border-white px-5 px-5">
-                  <b className="text-white font-bold">
-                    A smooth, friction-free flight feel
-                  </b>
-                  , with no dead spots or hydrodynamic braking
+                <p className="abou_p border-l-2 border-white px-5">
+                  {t.rich("flight", {
+                    bold: (chunks) => (
+                      <b className="text-white font-bold">{chunks}</b>
+                    ),
+                  })}
                 </p>
               </div>
               <div className="overflow-hidden flex items-center">
-                <p className="abou_p_iii border-l-2 border-white px-5">
-                  <b className="text-white font-bold">
-                    Enhanced directional stability
-                  </b>
-                  , while preserving precise yaw and pitch control
+                <p className="abou_p border-l-2 border-white px-5">
+                  {t.rich("stability", {
+                    bold: (chunks) => (
+                      <b className="text-white font-bold">{chunks}</b>
+                    ),
+                  })}
                 </p>
               </div>
             </div>
@@ -630,39 +673,46 @@ const Uglide = () => {
         </section>
 
         {/*slider section*/}
-        <section className="relative max-w-[100%] mx-auto flex flex-col items-center md:mb-0 mb-10">
+        <section className="slider_div relative max-w-[100%] mx-auto flex flex-col items-center md:mb-0 mb-10">
           {/* top content */}
           <div className="global-padding relative">
             <div className="max-w-[791px] text-white flex flex-col gap-[25px] items-center text-center">
-              <h2 className="global-h2">
-                The U-Glide stabilizer range is available in three sizes
-              </h2>
+              <h2 className="global-h2 slider_div_h">{t("sizes")}</h2>
 
               <ul className="flex lg:gap-[20px] gap-3 md:flex-row flex-col text-[18px] md:text-[20px] leading-[1.3] font-semibold text-[#FFFFFFCC]">
-                <li className="relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full md:before:hidden">
-                  <span className="text-white font-bold">39</span> cm span for
-                  111 cm²
-                </li>
-                <li className="relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full">
-                  <span className="text-white font-bold">41</span> cm span for
-                  122 cm²
+                <li className="slider_div_h relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full md:before:hidden">
+                  {t.rich("span39", {
+                    bold: (chunks) => (
+                      <span className="text-white font-bold">{chunks}</span>
+                    ),
+                  })}
                 </li>
 
-                <li className="relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full">
-                  <span className="text-white font-bold">43</span> cm span for
-                  134 cm²
+                <li className="slider_div_h relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full">
+                  {t.rich("span41", {
+                    bold: (chunks) => (
+                      <span className="text-white font-bold">{chunks}</span>
+                    ),
+                  })}
+                </li>
+
+                <li className="slider_div_h relative pl-[28px] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[8px] before:h-[8px] before:bg-[#FFFFFF66] before:rounded-full">
+                  {t.rich("span43", {
+                    bold: (chunks) => (
+                      <span className="text-white font-bold">{chunks}</span>
+                    ),
+                  })}
                 </li>
               </ul>
 
-              <p className="max-w-[520px] text-[20px] leading-[1.3] text-[#FFFFFFCC] font-semibold">
-                A range entirely dedicated to downwind foiling, engineered to
-                deliver maximum glide with the lowest possible energy input.
+              <p className="slider_div_h max-w-[520px] text-[20px] leading-[1.3] text-[#FFFFFFCC] font-semibold">
+                {t("size_p")}
               </p>
             </div>
           </div>
 
           {/* slider */}
-          <div className="relative w-full mt-10 py-10">
+          <div className="slider_div_h relative w-full mt-10 py-10">
             <button
               className="swiper-prev absolute left-[clamp(1.25rem,-5.4167rem+10.4167vw,5rem)] top-[50%] -translate-y-1/2 z-10
                        w-12 h-12 backdrop-blur flex items-center justify-center text-white cursor-pointer"
@@ -712,7 +762,7 @@ const Uglide = () => {
 
                       <img
                         src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/UGlide_0002-4.png`}
-                        alt="AFS U Carve Stabilizer 160"
+                        alt="AFS U GLide 41"
                         className={`max-w-full h-auto absolute md:w-[228px] w-[30vw] md:bottom-[20px] bottom-[20px] left-1/2 -translate-x-1/2 ${
                           i === activeIndex ? "opacity-100" : "opacity-0"
                         }`}
@@ -729,14 +779,14 @@ const Uglide = () => {
         </section>
 
         {/*The performance section*/}
-        <section className="relative max-w-[1920px] mx-auto flex flex-col items-center global-padding global-margin gap-[60px]">
-          <h2 className="max-w-[690px] text-white global-h2 text-center">
-            The performance goals of these stabilizers are clear
+        <section className="performance relative max-w-[1920px] mx-auto flex flex-col items-center global-padding global-margin gap-[60px]">
+          <h2 className="performance_h max-w-[690px] text-white global-h2 text-center">
+            {t("performance")}
           </h2>
           {/*The performance content*/}
           <div className="text-[#FFFFFF99] text-[20px] leading-[1.3] grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 font-semibold">
             {/*box one*/}
-            <div className="bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between flex">
+            <div className="performance_div bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between flex">
               <svg
                 width="32"
                 height="32"
@@ -760,13 +810,14 @@ const Uglide = () => {
               </svg>
 
               <p>
-                <b className="text-white">increased glide efficiency</b> for
-                sustained speed and distance
+                {t.rich("glideEfficiency", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </p>
             </div>
 
             {/*box two*/}
-            <div className="bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between">
+            <div className="performance_div bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between">
               <svg
                 width="32"
                 height="32"
@@ -789,13 +840,14 @@ const Uglide = () => {
                 />
               </svg>
               <p>
-                <b className="text-white">A lighter back-foot load</b>, allowing
-                riders to chain long, low-effort pumping sections,
+                {t.rich("backFootLoad", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </p>
             </div>
 
             {/*box three*/}
-            <div className="bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between">
+            <div className="performance_div bg-[#1F1F1F] p-[20px] rounded-[4px] flex flex-col min-h-[220px] justify-between">
               <svg
                 width="32"
                 height="32"
@@ -817,66 +869,60 @@ const Uglide = () => {
                   strokeLinecap="square"
                 />
               </svg>
-
               <p>
-                ability to
-                <b className="text-white">
-                  {" "}
-                  connect, drop, and stay locked on line
-                </b>{" "}
-                for as long as possible.
+                {t.rich("connectLine", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </p>
             </div>
           </div>
         </section>
 
         {/*To achieve section*/}
-        <section className="max-w-[1920px] mx-auto relative global-padding flex flex-col items-end gap-10 mb-[120px]">
-          <h2 className="text-[42px] md:text-[clamp(2.625rem,1.1328rem+3.1128vw,3.125rem)] lg:text-[clamp(3.125rem,0.9028rem+3.4722vw,4.375rem)] font-semibold text-[#FFFFFF99] leading-[1.1]">
-            To achieve this level of performance, we developed{" "}
-            <span className="text-white">ultra-thin profiles</span>, ranging
-            from <span className="text-white">4.5 to 5 mm</span>, and
-            implemented{" "}
-            <span className="text-white">
-              high-modulus carbon reinforcements in key load zones.
-            </span>
+        <section className="achieve max-w-[1920px] mx-auto relative global-padding flex flex-col items-end gap-10 mb-[120px]">
+          <h2 className="achieve_h text-[42px] md:text-[clamp(2.625rem,1.1328rem+3.1128vw,3.125rem)] lg:text-[clamp(3.125rem,0.9028rem+3.4722vw,4.375rem)] font-semibold text-[#FFFFFF99] leading-[1.1]">
+            {t.rich("performance_achieve", {
+              highlight: (chunks) => (
+                <span className="text-white">{chunks}</span>
+              ),
+            })}
           </h2>
+
           <div className="text-[#FFFFFFCC] overflow-hidden flex items-center text-[20px] max-w-[520px] font-semibold leading-[1.3]">
-            <p className="border-l-2 border-white px-5">
-              This construction tightly controls flex, ensuring a responsive yet
-              predictable ride under power and at speed.
+            <p className="achieve_h border-l-2 border-white px-5">
+              {t("construction")}
             </p>
           </div>
         </section>
 
-        {/*The performance section*/}
-        <section className="relative max-w-[2700px] mx-auto flex items-end gap-[20px] global-margin global-padding md:flex-row flex-col">
+        {/*The twist section*/}
+        <section className="twist relative max-w-[2700px] mx-auto flex items-end gap-[20px] global-margin global-padding md:flex-row flex-col">
           {/*image div*/}
           <div className="relative flex-[60%] overflow-hidden bg-[#111111] rounded-[4px] aspect-[1/1]">
             <img
-              src="https://api.afs-foiling.com/wp-content/uploads/2026/02/uglide43_0001.png"
-              alt="AFS U Carve Stabilizer 160"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide39_0001.png`}
+              alt="AFS U GLide 39"
               onLoad={(e) => handleImageLoad(e.target)}
-              className="relative min-w-[120%] -translate-x-[50%] translate-y-[40%] z-2"
+              className="twist_img min-w-[120%] -translate-x-[50%] translate-y-[40%] z-2 rotate-0"
               style={{
                 filter: `drop-shadow(0px 162px 126px rgba(0, 0, 0, 0.15))`,
               }}
             />
             <img
-              src="https://api.afs-foiling.com/wp-content/uploads/2026/02/uglide43_0001.png"
-              alt="AFS U Carve Stabilizer 160"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/UGlide_0003.png`}
+              alt="AFS U GLide 41"
               onLoad={(e) => handleImageLoad(e.target)}
-              className="absolute top-[30%] right-[27.5%] min-w-[120%] z-1"
+              className="twist_img_i absolute top-[30%] right-[27.5%] min-w-[120%] z-1 rotate-0"
               style={{
                 filter: `drop-shadow(0px 162px 126px rgba(0, 0, 0, 0.15))`,
               }}
             />
 
             <img
-              src="https://api.afs-foiling.com/wp-content/uploads/2026/02/uglide43_0001.png"
-              alt="AFS U Carve Stabilizer 160"
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide43_0001.png`}
+              alt="AFS U GLide 43"
               onLoad={(e) => handleImageLoad(e.target)}
-              className="absolute top-[35%] right-[15%] min-w-[120%]"
+              className="twist_img_ii absolute top-[35%] right-[15%] min-w-[120%] rotate-0"
               style={{
                 filter: `drop-shadow(0px 162px 126px rgba(0, 0, 0, 0.15))`,
               }}
@@ -885,127 +931,83 @@ const Uglide = () => {
 
           {/*content div*/}
           <div className="text-white flex-[60%] flex flex-col gap-[20px]">
-            <h2 className="global-h2">
-              The twist that unlocks your downwind performance
-            </h2>
+            <h2 className="twist_h global-h2">{t("twist")}</h2>
             <p className="relative max-w-[520px] text-[20px] text-[#FFFFFFCC] leading-[1.3] font-semibold flex flex-col gap-[20px]">
-              <span>
-                Although their DNA is clearly oriented toward pure{" "}
-                <b className="text-white">downwind performance</b>, their
-                reduced surface areas also make them highly effective in
-                carving. They remain{" "}
-                <b className="text-white">lively, easy to counter-steer</b>, and
-                maintain{" "}
-                <b className="text-white">continuous glide through the arc</b>,
-                without stalling or scrubbing speed.
+              <span className="twist_h">
+                {t.rich("twist_p", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </span>
-              <span>
-                This balance also makes them fully compatible with the{" "}
-                <b className="text-white">Enduro range</b>, for riders seeking a{" "}
-                <b className="text-white">more gliding, more dynamic feel</b>,
-                while retaining{" "}
-                <b className="text-white">
-                  precision, control, and top-end speed
-                </b>
-                .
+              <span className="twist_h">
+                {t.rich("twist_p_i", {
+                  bold: (chunks) => <b className="text-white">{chunks}</b>,
+                })}
               </span>
             </p>
           </div>
         </section>
 
         {/*Technical information section*/}
-        <section className="max-w-[1920px] relative global-padding max-w-[1440px] mx-auto global-margin">
-          <h2 className="global-h2 text-center text-white mb-20">
-            {t("information")}
-          </h2>
-
+        <section className="information max-w-[1920px] relative global-padding max-w-[1440px] mx-auto global-margin flex flex-col">
           {/* Content */}
           <div className="text-white">
             {activeTab === 0 && (
-              <div className="relative flex flex-col">
-                <div className="bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                  <h3 className="text-[28px] leading-[100%] font-bold">
-                    U carve 130
-                  </h3>
-
-                  <SpecsTable data={Uglide130Specs} />
+              <div className="relative flex flex-col items-center justify-center">
+                {/* content */}
+                <div className="information_div bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
+                  <h2 className="information global-h2 text-center text-white mb-20">
+                    {g("Technical_s")}
+                  </h2>
+                  <SpecsTable data={UGlide39} />
                 </div>
 
-                <div className="relative lg:absolute md:top-1/3 right-0  pb-[40px] md:pb-0">
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ucrave130_0001-2.png`}
-                    alt="AFS U Carve Stabilizer 130"
-                    style={{ height: "auto", width: "100%" }}
-                    onLoad={(e) => handleImageLoad(e.target)}
-                    className="lg:max-w-[50vw] max-w-[100%] lg:min-w-[50vw] min-w-[100%]"
-                  />
-                </div>
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide39_0002.png`}
+                  alt="AFS U GLide 39"
+                  style={{ height: "auto", width: "100%" }}
+                  onLoad={(e) => handleImageLoad(e.target)}
+                  className="md:absolute relative max-w-[1180px]"
+                />
               </div>
             )}
 
             {activeTab === 1 && (
-              <div className="relative">
-                <div className="bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                  <h3 className="text-[28px] leading-[100%] font-semibold">
-                    U carve 140
-                  </h3>
-
-                  <SpecsTable data={Uglide140Specs} />
+              <div className="relative flex flex-col items-center justify-center">
+                {/* content */}
+                <div className="information_div bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
+                  <h2 className="information global-h2 text-center text-white mb-20">
+                    {g("Technical_s")}
+                  </h2>
+                  <SpecsTable data={UGlide41} />
                 </div>
 
-                <div className="relative lg:absolute md:top-1/3 right-0  pb-[40px] md:pb-0">
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ucrave140_0001-2.png`}
-                    alt="AFS U Carve Stabilizer 140"
-                    style={{ height: "auto", width: "100%" }}
-                    onLoad={(e) => handleImageLoad(e.target)}
-                    className="lg:max-w-[50vw] max-w-[100%] lg:min-w-[50vw] min-w-[100%]"
-                  />
-                </div>
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/UGlide_0001-1.png`}
+                  alt="AFS U GLide 41"
+                  style={{ height: "auto", width: "100%" }}
+                  onLoad={(e) => handleImageLoad(e.target)}
+                  className="md:absolute relative max-w-[1180px]"
+                />
               </div>
             )}
 
             {activeTab === 2 && (
-              <div className="relative">
-                <div className="bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                  <h3 className="text-[28px] leading-[100%] font-semibold">
-                    U carve 150
-                  </h3>
-
-                  <SpecsTable data={Uglide150Specs} />
+              <div className="relative flex flex-col items-center justify-center">
+                {/* content */}
+                <div className="information_div bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
+                  <h2 className="information global-h2 text-center text-white mb-20">
+                    {g("Technical_s")}
+                  </h2>
+                  <SpecsTable data={UGlide43} />
                 </div>
 
-                <div className="relative lg:absolute md:top-1/3 right-0  pb-[40px] md:pb-0">
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ucrave150_0001-3.png`}
-                    alt="AFS U Carve Stabilizer 150"
-                    style={{ height: "auto", width: "100%" }}
-                    onLoad={(e) => handleImageLoad(e.target)}
-                    className="lg:max-w-[50vw] max-w-[100%] lg:min-w-[50vw] min-w-[100%]"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 3 && (
-              <div className="relative">
-                <div className="bg-[#00000033] backdrop-blur-[20px] p-4 md:p-[30px] max-w-[520px] flex flex-col gap-5 md:gap-[25px] rounded-sm z-10 relative">
-                  <h3 className="text-[28px] leading-[100%] font-semibold">
-                    U carve 160
-                  </h3>
-
-                  <SpecsTable data={Uglide160Specs} />
-                </div>
-
-                <div className="relative lg:absolute md:top-1/3 right-0  pb-[40px] md:pb-0">
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/ucrave160_0001-2-1.png`}
-                    alt="AFS U Carve Stabilizer 160"
-                    style={{ height: "auto", width: "100%" }}
-                    onLoad={(e) => handleImageLoad(e.target)}
-                    className="lg:max-w-[50vw] max-w-[100%] lg:min-w-[50vw] min-w-[100%]"
-                  />
-                </div>
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BASE_URL}/wp-content/uploads/2026/02/uglide43_0002.png`}
+                  alt="AFS U GLide 43"
+                  style={{ height: "auto", width: "100%" }}
+                  onLoad={(e) => handleImageLoad(e.target)}
+                  className="md:absolute relative max-w-[1180px]"
+                />
               </div>
             )}
           </div>
@@ -1013,7 +1015,7 @@ const Uglide = () => {
           {/* Tab Navigation */}
           <div
             ref={navRef}
-            className="relative overflow-hidden rounded-full bg-[#1F1F1F] max-w-fit mx-auto mt-20"
+            className="information_div relative overflow-hidden rounded-full bg-[#1F1F1F] max-w-fit mx-auto mt-20"
           >
             <div
               ref={bgRef}
@@ -1026,7 +1028,7 @@ const Uglide = () => {
                   key={tab}
                   ref={(el) => (btnRefs.current[index] = el)}
                   onClick={() => setActiveTab(index)}
-                  className={`cursor-pointer relative z-10 px-[14px] py-3 rounded-full whitespace-nowrap text-sm md:text-4 font-semibold uppercase transition-colors ${
+                  className={`uppercase cursor-pointer relative z-10 px-[14px] py-3 rounded-full whitespace-nowrap text-sm md:text-4 font-semibold uppercase transition-colors ${
                     activeTab === index ? "text-[#111111]" : "text-white"
                   }`}
                 >
@@ -1053,6 +1055,14 @@ const Uglide = () => {
               </button>
             )}
           </div>
+
+          <p className="information_div max-w-[420px] relative text-[#FFFFFFCC] text-center mx-auto mt-[30px] text-4 leading-[1.3] font-semibold">
+            {t.rich("info", {
+              bold: (chunks) => (
+                <span className="text-white font-bold">{chunks}</span>
+              ),
+            })}
+          </p>
         </section>
       </div>
     </SmoothScroll>

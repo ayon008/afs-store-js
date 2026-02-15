@@ -8,7 +8,7 @@ import { useGSAP } from "@gsap/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useTranslations } from "next-intl";
-import { ReactLenis } from "lenis/react";
+import SmoothScroll from "@/app/components/SmoothScroll";
 
 import "swiper/css";
 import "swiper/css/thumbs";
@@ -510,7 +510,7 @@ const UltraHA = () => {
   };
 
   return (
-    <ReactLenis root options={{ autoRef: false }} ref={lenisRef}>
+    <SmoothScroll>
       <div
         ref={container}
         className="relative overflow-hidden bg-[#000] mx-auto"
@@ -1009,7 +1009,7 @@ const UltraHA = () => {
           </div>
         </section>
       </div>
-    </ReactLenis>
+    </SmoothScroll>
   );
 };
 

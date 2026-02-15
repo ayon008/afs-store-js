@@ -242,6 +242,24 @@
     "The Direct Sailing ": "The Direct Sailing store has been in existence for over 20 years.\n              Originally, the shop offered Hobie Cat catamarans, dinghies, and\n              kayaks to equip clubs. Over time, they have followed the evolution\n              of water sports and expanded their product ranges with SUP,\n              windsurfing, land sailing, and wing, thus targeting private\n              individuals.",
     "title": "AFS products are available at the"
   },
+  "Enduro": {
+    "about": "Outstanding lift and glide at low speeds, ensuring comfort and intuitive maneuverability worthy of a bump wing designed by Laurent Borgna. Pumping has never been so efficient.",
+    "about_p": "<highlight>With four available sizes – 700, 900, 1100, 1300 cm² – you have a full range of options.</highlight> Fully detachable, these new front wings are compatible with all our Fuselink fuselages.",
+    "all-terrain": "This is the all-terrain wing of the range. It is perfectly suited for a multitude of practices: downwind carving, wingfoil freefly carving, small wave surffoil, experienced dockstart.",
+    "compare": "We like to compare it to the SILK 1050 known for its radical curve triggers in powerful waves, comparable to a shortboard. The Enduro 900 is smoother in carving, comparable to a longboard.",
+    "enduro_L_i": "The moderate surface area of 1300 cm², coupled with an aspect ratio of 11 (wingspan 1190 mm), makes this an ultra-efficient light wing that optimizes lift and glides at low speeds.",
+    "enduro_L_ii": "It is ideal for downwind or freefly in marginal conditions\n                    and/or for dockstart/pumping practices.",
+    "enduro_L_iii": "Paired with the new short Fuselink and our range of UHM masts, you will be surprised by the maneuverability possibilities of this wing.",
+    "glide": "We recommend it with the short Fuselink fuselage for\n                  maneuverability and the standard Fuselink fuselage for glide.",
+    "hero": "Discover the all-new Enduro range with <bold>an aspect ratio of 11</bold>, which exceptionally combines two qualities that are usually opposed: maneuverability and glide.",
+    "like": "Like its big sister, the Enduro 1100 meets the same expectations for smaller builds. This wing combines lift at low speeds, ease of use, and the ability to carve in small conditions.",
+    "maneuverability": "We recommend it with the short Fuselink fuselage for maneuverability and the standard Fuselink fuselage for glide.",
+    "monolithic": "The ENDURO 600 features a monolithic carbon construction, molded in a single piece. This ensures increased rigidity and uncompromising precision in all conditions. The result: direct energy transfer for pure, controlled, and effortless gliding.",
+    "pleasure": "The ENDURO 600 offers faster and more incisive maneuvers, as well as a higher top speed, while retaining the legendary glide of the range. A radical, playful, and ultra-versatile wing—pure gliding pleasure concentrated in 600 cm².",
+    "radical": "The radical and versatile front wing A direct descendant of\n                    the ENDURO 600, this is the perfect wing for riders looking\n                    for a fast, precise, and ultra-responsive foil.",
+    "unprecedented": "An unprecedented mix of glide and carve in downwind. It provides a level of performance suitable for intermediate to expert levels in various disciplines.",
+    "wing": "This wing has a slightly larger span than a SILK 850 but a\n                    much larger aspect ratio, giving it versatile performance."
+  },
   "equipment": {
     "AFS": "AFS product specialists – Antonin & Elouann",
     "After": "After validating the trade-in offer, I drop off my equipment\n                    at the post office for delivery to :",
@@ -577,13 +595,19 @@
     "we": "We are here to provide you with comprehensive answers and advice to help you make the right choice."
   },
   "productDimension": {
+    "Best": "Best for",
     "Carbone": "Carbon",
     "Corde maximum": "Chord max.",
     "Envergure": "span",
     "Epaisseur maximum": "Thickness max.",
     "et": "and",
+    "Materials": "Materials",
+    "modulus": "High-modulus carbon + high-modulus carbon core",
     "Monolithiqu": "Monolithic",
-    "Taille des vis": "Screw size"
+    "Surface": "Surface Area",
+    "Taille des vis": "Screw size",
+    "Technical_s": "Technical Specifications",
+    "Thickness": "Maximum Thickness"
   },
   "profile": {
     "account": "Log Out of Your Account",
@@ -688,6 +712,26 @@
     "Characteristics": "Characteristics",
     "Reviews": "Reviews"
   },
+  "skinny": {
+    "btn": "Learn more",
+    "hero_b": "Building on the expertise of our Performer UHM masts, the goal of\n            this new design was to push all boundaries and provide even more\n            sensations while gliding. Each size has been uniquely designed.",
+    "hero_p": "Boosted performance. Heightened sensations. Total control",
+    "New": "New",
+    "Old": "Old",
+    "shape_b": "The chord of these masts has been reduced compared to the Performer UHM masts.",
+    "shape_b_i": "In comparison, an aluminum mast with equivalent rigidity measures\n              approximately 19 mm and weighs twice as much. This results in a\n              reactive, smooth, and playful foil.",
+    "shape_b_ii": "Their shape is the result of a perfect equation between minimal\n              thickness, reduced chord, and lightweight yet rigid construction.",
+    "shape_p": "The UHM masts are designed with an ultra-thin profile and reduced chord, which allows for pure gliding and optimal rigidity.\n",
+    "shape_p_i": "Despite their thinness, these masts offer perfect control of flex and twist. This rigidity ensures precise steering and flawless control of the foil for maximum sensations.",
+    "size_p": "Available in 75 cm, 80 cm, 85 cm, and 95 cm, the UHM carbon mast is ready for all disciplines: surfing, downwing, wing, kite, and SUP.\n",
+    "size_p_i": "The plate is directly integrated into the mast. It can be\n                  connected to virtually any board on the market equipped with\n                  the double US rail system.",
+    "super": "Our UHM masts are made with a high-end multi-layer UHM carbon construction, which gives them exceptional lightness and rigidity.\n",
+    "super_i": "In fact, UHM carbon fiber is up to twice as rigid as standard\n                carbon fiber. Thanks to these characteristics, we can use less\n                fiber to achieve superior rigidity, resulting in a lighter end\n                product.",
+    "system": "This system is based on a tapered assembly for a connection of the mast around the fuselage, preserving the inertia of the latter.",
+    "tag": "Lightweight and maintenance–free\n",
+    "th": "thickness",
+    "ticker": "The full carbon UHM construction provides rigidity and lightness to the foil."
+  },
   "support": {
     "afs-support": "AFS Support\n",
     "ahd": "The AHD blue on our boards (Thunderbolt, Topaz, Compact) is\n                RAL5012.",
@@ -759,6 +803,29 @@
     "size_p_iiii": "Each rider can choose the exact model that best suits their weight, style, and preferred conditions.",
     "whole_h": "That was the whole challenge",
     "whole_p": "Achieving a foil that’s fully freed in roll, highly surfy, yet still efficient and reliable in the slowest sections."
+  },
+  "Uglide": {
+    "backFootLoad": "<bold>A lighter back-foot load</bold>, allowing riders to chain long, low-effort pumping sections",
+    "connectLine": "ability to<bold> connect, drop, and stay locked on line</bold> for as long as possible",
+    "construction": "This construction tightly controls flex, ensuring a responsive yet\n              predictable ride under power and at speed.",
+    "flight": "<bold>A smooth, friction-free flight feel</bold>, with no dead spots or hydrodynamic braking",
+    "glide": "<bold>A clean, extended glide</bold>, perfectly suited to linking bumps, transitions, and long, drawn-out lines",
+    "glideEfficiency": "<bold>increased glide efficiency</bold> for sustained speed and distance",
+    "hero": "<bold>A high-aspect-ratio stabilizer (high AR) </bold>features an <bold>extended span</bold> combined with a very narrow chord. This geometry significantly <bold>reduces induced drag</bold>, maximizes <bold>hydrodynamic efficiency</bold>, and delivers <bold>sustained lift at low speeds</bold>, while maintaining <bold>rock-solid control and trim at high speeds</bold>.",
+    "info": "<bold>U-GLIDE Range</bold> pure glide, efficiency, and line control — with a touch of carving when you choose to push it.",
+    "performance": "The performance goals of these stabilizers are clear\n",
+    "performance_achieve": "To achieve this level of performance, we developed <highlight>ultra-thin profiles</highlight>, ranging from <highlight>4.5 to 5 mm</highlight>, and implemented <highlight>high-modulus carbon reinforcements in key load zones</highlight>.",
+    "pumping": "<bold>Highly efficient pumping</bold>: each input generates forward drive with minimal energy loss",
+    "size_p": "A range entirely dedicated to downwind foiling, engineered to\n                deliver maximum glide with the lowest possible energy input.",
+    "sizes": "The U-Glide stabilizer range is available in three sizes",
+    "span39": "<bold>39</bold> cm span for 111 cm²",
+    "span41": "<bold>41</bold> cm span for 122 cm²",
+    "span43": "<bold>43</bold> cm span for 134 cm²",
+    "stability": "<bold>Enhanced directional stability</bold>, while preserving precise yaw and pitch control",
+    "twist": "The twist that unlocks your downwind performance",
+    "twist_p": "Although their DNA is clearly oriented toward pure <bold>downwind performance</bold>, their reduced surface areas also make them highly effective in carving. They remain <bold>lively, easy to counter-steer</bold>, and maintain <bold>continuous glide through the arc</bold>, without stalling or scrubbing speed.",
+    "twist_p_i": "This balance also makes them fully compatible with the <bold>Enduro range</bold>, for riders seeking a <bold>more gliding, more dynamic feel</bold>, while retaining <bold>precision, control, and top-end speed</bold>.",
+    "water": "On the water, this translates into"
   },
   "UltraHA": {
     "about_h": "These wings were designed to deliver glide, precision,\n              and efficiency while maintaining a high average speed — a key\n              requirement of modern downwind riding.",

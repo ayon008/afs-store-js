@@ -1,12 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ReactLenis } from "lenis/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import Image from "next/image";
+
 import { useTranslations } from "next-intl";
-import { ReactLenis } from "lenis/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -547,7 +548,7 @@ const Bbmid = () => {
   };
 
   return (
-    <ReactLenis root options={{ autoRef: false }} ref={lenisRef}>
+    <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothTouch: true }}>
       <div ref={container} className="hero_div_m overflow-hidden bg-[#000]">
         {/* ======================
           PAGE CONTENT
@@ -556,12 +557,13 @@ const Bbmid = () => {
           /* ======================
                   carbon version
               ====================== */
-          <div className="smooth relative max-w-[1920px] mx-auto">
+          <div className="smooth relative mx-auto">
             {/* Hero */}
             <section className="smooth min-h-[100vh] hero relative">
-              <h2 className="text-[70px] md:text-[clamp(4.375rem,1.4647rem+6.0711vw,8.75rem)] text-white leading-[1] absolute top-20 global-padding z-1 hero-text">
+              <h2 className="text-[70px] md:text-[clamp(4.375rem,1.4647rem+6.0711vw,8.75rem)] text-white leading-[1] absolute top-20 global-padding z-1 hero-text max-w-[1600px]">
                 {heroContent.title}
               </h2>
+
               <Image
                 src={heroContent.image.src}
                 width={heroContent.image.width}
@@ -575,7 +577,7 @@ const Bbmid = () => {
             </section>
 
             {/* about */}
-            <section className="smooth about z-1 relative -mt-[20px] md:-mt-[20%] global-margin max-w-[1920px] global-padding mx-auto flex flex-col md:flex-row gap-[50px]">
+            <section className="smooth about z-1 relative -mt-[20px] md:-mt-[200px] global-margin global-padding mx-auto flex flex-col md:flex-row gap-[50px]">
               {/* about left */}
               <div className="about_red_p text-[#D44841] text-4 leading-[1.3] flex items-end w-full md:w-1/2 order-2 md:order-0">
                 <span className="max-w-[293px]">{aboutContent.left}</span>
@@ -629,16 +631,18 @@ const Bbmid = () => {
             <section className="horizontal-section relative overflow-hidden h-screen flex-nowrap ">
               <div className="horizontal-wrapper flex h-full">
                 {/* horiziontal panel one */}
-                <div className="smooth panel panel_one flex-shrink-0 w-[100%] flex lg:justify-end justify-center flex flex-col gap-[50px] text-white text-left py-16 global-padding">
-                  <h2 className="smooth hori_h2 uppercase text-4 font-bold leading-[1]">
-                    {t("Hybrid")}
-                  </h2>
-                  <p className="smooth  hori_h2 global-h1">
-                    {t("horiziontal_P")}
-                  </p>
-                  <p className="smooth hori_h2 hori_last_p max-w-[655px] text-[20px] leading-[1.3] font-medium">
-                    {t("horiziontal_P_i")}
-                  </p>
+                <div className="smooth panel panel_one flex-shrink-0 w-[100%] flex text-white text-left py-16 global-padding">
+                  <div className="flex flex-col gap-[50px] lg:justify-end justify-center max-w-[1920px]">
+                    <h2 className="smooth hori_h2 uppercase text-4 font-bold leading-[1]">
+                      {t("Hybrid")}
+                    </h2>
+                    <p className="smooth  hori_h2 global-h1">
+                      {t("horiziontal_P")}
+                    </p>
+                    <p className="smooth hori_h2 hori_last_p max-w-[655px] text-[20px] leading-[1.3] font-medium">
+                      {t("horiziontal_P_i")}
+                    </p>
+                  </div>
                 </div>
                 {/* horiziontal panel two */}
                 <div className="smooth panel panel_two flex-shrink-0 lg:w-[200%] w-[1800px] flex items-center justify-center text-white text-4xl flex flex-nowrap py-10">
